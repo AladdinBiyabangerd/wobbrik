@@ -1,5 +1,7 @@
 # Planşet dizaynları — 4 noyabr 2026
 
+Aktiv oyun və fasilə üçün son mənbə [game-tap-v2](../game-tap-v2/README.md)-dir. Bu iki vəziyyətdə aşağıdakı köhnə rail, sağ panel, alt rəf və Burax düyməsi tətbiq edilmir: səhnəyə toxunaraq buraxılır, yalnız pauza düyməsi qalır. Digər ekranlar bu dəstdə qalır.
+
 Mobil konseptlərin planşet üçün ayrıca kompozisiyaları. Built-in imagegen istifadə olunur; Android/Compose implementasiyası deyil. Palitra, spacing, radius və mətn ölçüləri üçün vahid mənbə [mobil tokens.css](../mobile-v1/tokens.css)-dir; yeni palitra yaradılmır. Şəhərin bədii mənbəyi təsdiqlənmiş city-plan/view və mobile-primary-v2-dir.
 
 ## Cari lövhələr
@@ -18,11 +20,11 @@ Cihaz modeli və orientasiya adı ilə deyil, mövcud pəncərənin eni/hündür
 
 - Compact: mövcud mobil bir sütun; detal ayrıca səhifə/sheet, mobil naviqasiya. Split-screen planşet də bu rejimə keçə bilər.
 - Medium: səhnə yuxarıda, idarəetmə rəfi aşağıda; inventar iki sütun, seçimin detalı aşağıda. Nəticə/fasilə qısa pəncərədə scroll-a keçir. Portret lövhəsi bu istiqaməti göstərir.
-- Expanded: sol naviqasiya rail-i, əsas səhnə/grid və sağ detal/idarəetmə paneli. Təxminən 2:1 məzmun bölgüsü; oyun paneli oyun sahəsini sıxmamalıdır. İnventar/bazar grid sütunları mövcud enə görə artır.
+- Expanded: oyun/fasilə xaricində sol naviqasiya rail-i, əsas səhnə/grid və sağ detal/idarəetmə paneli. Təxminən 2:1 məzmun bölgüsü; inventar/bazar grid sütunları mövcud enə görə artır. Aktiv oyun tək bütöv səhnədir, yan panel yoxdur.
 - Hündürlük azaldıqda köməkçi məzmun scroll olur; əsas əməl görünən idarəetmə sahəsində qalır. Safe inset, klaviatura, böyük şrift və minimum 48dp hədəflər implementasiyada ölçülməlidir.
 - Seçim, scroll, oyun fasiləsi və kamera vəziyyəti pəncərə dəyişəndə saxlanır. Şəhər planı və görünüş eyni server şəhər vəziyyətinin iki təqdimatıdır.
 
-Naviqasiya üçün əsas expanded qayda primary-landscape-dəki sol rail-dir. Digər generativ lövhələrdə logo, ikon dəsti, seçilmiş tab və termin fərqləri var; bunlar yeni naviqasiya müqaviləsi deyil. İnventar/bina detalında İnventar, bazarda Bazar, kolleksiyada Kolleksiya aktiv olur; eyni anda iki bölmə aktiv göstərilmir. Oyun/fasilə/nəticə zamanı əsas naviqasiya ilə çıxış təsdiqli çıxış axınına bağlanmalıdır. Parametrlər vahid termindir (bəzi PNG-lərdə Ayarlar yazılıb).
+Oyun/fasilə xaricində naviqasiya üçün əsas expanded qayda primary-landscape-dəki sol rail-dir. Digər generativ lövhələrdə logo, ikon dəsti, seçilmiş tab və termin fərqləri var; bunlar yeni naviqasiya müqaviləsi deyil. İnventar/bina detalında İnventar, bazarda Bazar, kolleksiyada Kolleksiya aktiv olur; eyni anda iki bölmə aktiv göstərilmir. Aktiv oyundan çıxış pauzadakı Menyuya qayıt vasitəsilədir; oyun/fasilədə naviqasiya rail-i yoxdur. Parametrlər vahid termindir (bəzi PNG-lərdə Ayarlar yazılıb).
 
 ## Qaydalar və yoxlama sərhədi
 

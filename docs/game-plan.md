@@ -18,6 +18,7 @@ Oyun nə həddən artıq rahat, nə də bezdirəcək qədər çətin olmalıdır
 
 - Mobil, portret ekran, bir əllə oyun. Təsdiqlənmiş platforma: yalnız Android; iOS versiyası olmayacaq. Bu qərar konkret mühərrik seçmir.
 - Bir toxunuş bir mərtəbə buraxır. Kompüterdə klik və boşluq düyməsi eyni işi görür.
+- 4 noyabr 2026 təsdiqi: telefon və planşetdə ayrıca Burax düyməsi yoxdur; oyun sahəsinə toxunulur. Aktiv oyunda yeganə düymə pauzadır; yan/alt menyular göstərilmir. Mərtəbə sayı və rekord interaktiv olmayan göstəricilərdir. Pauzada yalnız Davam et, Yenidən başla, Menyuya qayıt görünür. Pauza/panel toxunuşu mərtəbə buraxmır; Davam et toxunuşu da səhnəyə ötürülmür. Cari vizual mənbə: docs/design/game-tap-v2/README.md.
 - Mərtəbə düşərkən əlavə toxunuşlar nəzərə alınmır.
 - Sürüşdürmə və telefonu əymə ilə tikinti idarəetməsi yoxdur. Şəhərdə yerləşdirmə idarəetməsi ayrıca prototiplənəcək.
 - Tətbiq arxa plana keçəndə oyun fasiləyə düşür.
