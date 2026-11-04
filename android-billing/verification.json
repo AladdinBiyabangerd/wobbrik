@@ -1,0 +1,29 @@
+{
+  "date": "2026-11-03",
+  "scope": "Wobbrik durable/consumable billing adapter; configuration and Console deferred",
+  "backend_race_tests": 21,
+  "postgres_integration_tests": 10,
+  "kotlin_core_tests": 19,
+  "aar_build": "passed",
+  "android_lint_errors": 0,
+  "android_lint_warnings": [
+    "NewerVersionAvailable",
+    "UseKtx",
+    "UseKtx"
+  ],
+  "go_vet": "passed",
+  "native_build": "passed",
+  "linux_amd64_build": "passed",
+  "native_sha256": "0a10eaa54c3a581621a2b6c714f0153542dbb6ce68a7a4b175c21a9a068d697e",
+  "aar_sha256": "3dbe449de592c810aa0f2a5be562367e1c5f75a28955858e2d39b298998332f4",
+  "live_provider_device_deployment_tested": false,
+  "scenarios": [
+    "20 concurrent HTTP retries produce one credit",
+    "Consumed token replay and historical receipt do not recredit",
+    "Wrong UID/product/unknown receipt rejected",
+    "Consume response loss and worker retry preserve one credit",
+    "New mobile process restores absolute server wallet without owned coin token",
+    "Cosmetic restore never credits coins",
+    "Account/logout/epoch isolation and pending/retry tested"
+  ]
+}
