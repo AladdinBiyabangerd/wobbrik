@@ -1,36 +1,33 @@
-# Oyun ekranının sadələşdirilməsi — 4 noyabr 2026
+# Game engine foundation — 4 November 2026
 
 ## Completed
-- İstifadəçi telefon və planşetdə aktiv oyun üçün yalnız pauza düyməsi, səhnəyə toxunaraq buraxma istədi.
-- game-tap-v2: telefon portret, planşet portret/landşaft üçün aktiv oyun və fasilə konseptləri; promptlar/spec saxlanır.
-- Mobil/planşet indeksləri və game-plan/Kotlin planında mənbə/idarəetmə qaydası uyğunlaşdırıldı.
+- Pure Kotlin engine: bounded 60 Hz stepping, crane, drop/fall, support overlap, miss, pause/resume and restart.
+- Five regression tests and local CI integration. Existing billing preserved.
 
 ## Current state
-- PNG dizayn düzəlişidir; işlək Android UI/engine/input implementasiyası yoxdur.
-- Branch fix/game-tap-design. Commit/merge/CI nəticəsi docs/reviews/2026-11-04-game-tap-design.md-dədir.
-- Əvvəldən untracked responsive-ui.mdc və responsive-rule review fayllarına toxunulmur.
+- Branch feat/game-engine-foundation; final review/commit/merge gate in progress.
+- No Android game host or playable APK. Pre-existing untracked responsive rule files excluded.
 
 ## Decisions
-- Aktiv oyunda tək pauza, kiçik interaktiv olmayan say/rekord; Burax düyməsi, rail, yan panel, alt rəf, wallet və geri düyməsi yoxdur.
-- Pauzada yalnız Davam et / Yenidən başla / Menyuya qayıt. Pauza/modal/resume toxunuşları səhnəyə ötürülmür.
-- Aktiv/fasilədə dam yoxdur, mərtəbələr eyni ölçüdədir; şəkillər dəqiq geometry deyil.
-- Köhnə mobil/planşet lövhələrinin yalnız oyun və fasilə hissəsi əvəz olunur; qalan ekranlar qüvvədədir. Palitra mobile-v1/tokens.css-dir.
-- Domain/API/schema/wallet/reward dəyişmir, AppBackend dəyişikliyi lazım deyil. İmplementasiya avtomatik başlanmır.
+- Offline engine has no wallet/reward/progression/ownership effects; no backend changes required.
+- PracticeRulesV1 uses provisional simulation units, not server geometry.
+- Verified Play phone-app targetSdk requirement is API 36; product minSdk remains undecided. Existing billing library minSdk is 23.
 
 ## Remaining work
-- İstifadəçi rəyi üzrə dar dizayn düzəlişləri; gələcək Android input, pause/lifecycle, restart/exit server uyğunluğu və responsiv runtime yoxlamaları.
-- Telefon landşaftı, real cihaz, dp/touch, böyük şrift, TalkBack və resize yoxlanmayıb.
-- Əvvəlki mobil alış/elan/yüklənmə axınları və əlavə ekranların portret variantları ayrıca qalır.
+- Balance/sway/rescue, first-five forgiveness, capped difficulty.
+- Compose host, scene tap, pause/lifecycle, camera and adaptive renders.
+- Online checkpoint integration/persistence later; real SKU/deploy excluded.
 
 ## Relevant files
-- docs/design/game-tap-v2/README.md, üç PNG və promptlar
-- docs/reviews/2026-11-04-game-tap-design.md
-- docs/game-plan.md §2; docs/kotlin-compose-plan.md §4
-- docs/design/mobile-v1 və tablet-v1 indeksləri, mobile-v1/tokens.css
+- android-billing/engine/README.md and src/main/kotlin/az/wobbrik/engine/PracticeEngine.kt
+- android-billing/engine/src/test/kotlin/az/wobbrik/engine/PracticeEngineTest.kt
+- docs/reviews/2026-11-04-game-engine-foundation.md
+- docs/kotlin-compose-plan.md; docs/game-plan.md sections 2–4
+- docs/design/game-tap-v2/README.md; docs/design/mobile-v1/tokens.css
 
 ## Checks performed
-- Konseptlərə vizual baxış; ölçülər/tapıntı və CI nəticələri review-dədir.
-- Altı token kontrastı keçdi (8.22–16.57). Runtime/backend testi yoxdur.
+- Local CI passed: five engine tests, billing core tests, billing Android debug assembly/lint.
+- No game UI render/device check: game UI does not exist yet.
 
 ## Exact next step
-- game-tap-v2/README.md və uyğun PNG-ni oxu; istifadəçinin növbəti konkret rəyini tətbiq et. İmplementasiya yalnız ayrıca tələb ediləndə başlanır.
+- Complete foundation final CI/commit/merge record, then implement bounded engine balance/rescue against game-plan sections 3–4 before the Compose host.

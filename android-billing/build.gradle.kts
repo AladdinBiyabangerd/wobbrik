@@ -6,6 +6,6 @@ plugins {
 
 tasks.register("ci") {
     group = "verification"
-    description = "Local billing regression gate; extend when the game host is added"
-    dependsOn(":core:test", ":android:assembleDebug", ":android:lintDebug")
+    description = "Local game engine and billing regression gate"
+    dependsOn(":engine:test", ":core:test", ":android:assembleDebug", ":android:lintDebug")
 }
