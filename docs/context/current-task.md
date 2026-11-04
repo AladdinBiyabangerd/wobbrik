@@ -1,5 +1,14 @@
 # Yekun Android oyunu — icra başlanğıcı, 4 noyabr 2026
 
+## Son tamamlanan vahid — qalan mobil PNG-lər
+- Completed: 12 görünüş üç PNG-də: docs/design/mobile-v1/{inventory-market-v2,play-progress-v2,account-states}.png. Built-in imagegen; hamısına baxılıb. Mərtəbə həddi və nəticə mükafatı düzəldilib, icazəsiz enerji pill-i silinib.
+- Current state: yalnız mobil portret konseptləri; tətbiq/backend dəyişməyib. Branch feat/mobile-remaining-png. Əvvəlki Android işi aşağıda tarixi kontekstdir.
+- Decisions: v2 primary və tokens.css mənbədir; rəqəmlər/kataloq illüstrativdir, game-plan qaydalarını dəyişmir. Server placement bağlı qalır.
+- Remaining work: alış/elan əməliyyatları, tam əldəetmə şərtləri və yüklənmə; ana ekranda şəhər girişi; ayrıca planşet/landşaft və responsiv runtime yoxlaması.
+- Relevant files: docs/design/mobile-v1/remaining-screens.md və üç cari PNG; docs/reviews/2026-11-04-mobile-remaining.md.
+- Checks performed: üç son renderə vizual baxış; altı token kontrastı keçdi; ilkin lokal CI uğurlu. Son CI/merge nəticəsi review qeydindədir.
+- Exact next step: remaining-screens.md və üç cari PNG-ni oxu; istifadəçinin seçdiyi növbəti kiçik dizayn vahidini hazırla. Android implementasiyasına avtomatik keçmə.
+
 ## Completed
 - AGENTS.md, əvvəlki handoff, kotlin-compose-plan və game-plan oxundu; billing strukturu və AppBackend attempts/city/billing müqaviləsi yoxlandı.
 - Wobbrik-də Git repository və mövcud sənəd/billing baseline commit-i yaradıldı: b61a6ef. Əvvəl repository yox idi. Köhnə output konseptləri silinib; qüvvədə olan iki referans docs/design/ altında Git-də saxlanılır.
