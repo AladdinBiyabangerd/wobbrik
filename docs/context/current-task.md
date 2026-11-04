@@ -2,7 +2,7 @@
 
 ## Completed
 - AGENTS.md, əvvəlki handoff, kotlin-compose-plan və game-plan oxundu; billing strukturu və AppBackend attempts/city/billing müqaviləsi yoxlandı.
-- Wobbrik-də Git repository və mövcud sənəd/billing baseline commit-i yaradıldı: b61a6ef. Əvvəl repository yox idi. Output konseptləri yerindədir, Git-ə daxil deyil.
+- Wobbrik-də Git repository və mövcud sənəd/billing baseline commit-i yaradıldı: b61a6ef. Əvvəl repository yox idi. Köhnə output konseptləri silinib; qüvvədə olan iki referans docs/design/ altında Git-də saxlanılır.
 - chore/local-ci-workflow branch-ində always-apply rule və AGENTS qaydası: uyğun branch/commit, lokal review, lokal CI, failure → fix → rerun, uğurdan sonra merge. GitHub CI yoxdur.
 - scripts/local-ci.sh və billing Gradle ci task: whitespace, core test, Android AAR build/lint. Arrowz root ci task yanaşması nümunə götürüldü.
 
@@ -14,6 +14,7 @@
 - UI/token faylı tapılmadı. Vizual dəyişiklik və render yoxdur; ui-craft oxunub.
 
 ## Decisions
+- Şəhərin yeganə vizual mənbəyi docs/design/README.md və city-plan.png / city-view.png-dir: yuxarıdan yerləşdirmə + eyni şəhərin həcmli görünüşü. Köhnə output/ui-concepts dəsti, prompt və tokenləri silinib; onlardan kod yazılmır.
 - Son göstəriş: ayrıca atılacaq prototip deyil, yekun Kotlin + Compose Android oyunu. İlk oyun vahidi yekun struktur + əsas oynanan tikinti dövrüdür.
 - Ölçüləri versiyalı oyun dizaynı parametrləri kimi seçmək artıq İCAZƏLİDİR; əvvəlki ölçü mənbəyi gözləmə qərarı əvəz olunub. Geometry həmin modeldən çıxarılır; rəqəmlər real bina ölçməsi deyil. Konkret rəqəmlər hələ seçilməyib.
 - Pure Kotlin engine; Compose Canvas/HUD; fizika draw callback-də deyil. Yeni mərkəzi token faylı yaratmaq bu işin hissəsidir. Billing modulu qorunur, ikinci wallet yoxdur.

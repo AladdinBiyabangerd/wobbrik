@@ -1,5 +1,7 @@
 # Wobbrik oyun planı
 
+Şəhərin qüvvədə olan vizual mənbəyi: [təsdiqlənmiş iki görünüş](design/README.md). Plan və həcmli şəhər görünüşü birlikdə tətbiq edilir; köhnə konseptlər istifadə edilmir.
+
 Tarix: 3 noyabr 2026. Status: əsas qərarları təsdiqlənmiş, ilkin iqtisadi balansı tamamlanmış plan. Kod yazılmasına başlanmayıb.
 
 Bu plan bir toxunuşla bina qurma oyununu şəxsi şəhər, görünüş kolleksiyası və oyunçulararası sikkə bazarı ilə birləşdirir. İstifadəçinin müəyyən etdiyi tələblər əsas götürülür. “Təklif” kimi göstərilən qaydalar və bütün sınaq rəqəmləri təsdiqə açıqdır.
@@ -587,4 +589,4 @@ Android-only Kotlin + Compose seçimi üçün mərhələlər, Arrowz təkrar ist
 
 3 noyabr 2026: istifadəçi PostgreSQL-in oyun iqtisadiyyatı, progression, mülkiyyət, inventar, şəhər və bazar üçün vahid əsas mənbə olmasını təsdiqləyib. Firebase Auth kimlik üçün qalır, Room keş/outbox-dur. Həftə, bərabərlikdə sıralama və ilk reklamsız gün üçün AppBackend-in PostgreSQL-də qəbul vaxtı əsas götürülür; bu, əvvəlki Firebase qəbul vaxtı mənbəyini əvəz edir. Bakı həftəsi və məhsul balansı dəyişmir. Dəqiq qəbul/retry/həftə sərhədi müqaviləsi docs/kotlin-compose-plan.md bölmə 5-dədir. Hesab konflikti, refund, retention və transfer siyasətləri açıqdır. Bu təsdiq kod yazmaq tapşırığı deyil; implementasiya aparılmayıb.
 
-4 noyabr 2026: istifadəçi şəhərin yuxarıdan ikiölçülü x/y planını seçib. Dəqiq koordinat/sahə, təhlükəsiz boşluq və 12 dekorasiyanın ölçüləri açıq saxlanılır; bu mərhələdə yalnız həmin rəqəmlərdən asılı olmayan server hissəsi hazırlanır. Başlanğıc 8 və genişlənmələrin +4/+5/+6/+7/+8 standart düz bina ekvivalenti dəyişmir; bunlar sərt bina sayı limiti deyil. Əyri tikinti formasının şəhər footprint-inə çevrilməsi ayrıca müqavilə tələb edir.
+4 noyabr 2026: istifadəçi şəhərin yuxarıdan ikiölçülü x/y planını və eyni şəhərin həcmli görünüşünü seçib. Dəqiq koordinat/sahə, təhlükəsiz boşluq və 12 dekorasiyanın ölçüləri açıq saxlanılır; bu mərhələdə yalnız həmin rəqəmlərdən asılı olmayan server hissəsi hazırlanır. Başlanğıc 8 və genişlənmələrin +4/+5/+6/+7/+8 standart düz bina ekvivalenti dəyişmir; bunlar sərt bina sayı limiti deyil. Əyri tikinti formasının şəhər footprint-inə çevrilməsi ayrıca müqavilə tələb edir.
