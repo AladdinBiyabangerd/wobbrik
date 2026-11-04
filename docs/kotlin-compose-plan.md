@@ -12,6 +12,10 @@ Hazırkı ilk kiçik vahid lokal Git/CI iş axınıdır. Oyun hostu, engine və 
 
 Tarix: 3 noyabr 2026. Status: koddan əvvəl baxış üçün texniki plan. Android-only, Kotlin + Compose, Spark, ayrıca Wobbrik adapteri və game-plan bölmə 23 kataloqu təsdiqlənib. Aşağıdakı yeni modul/data/API bölgüsü implementasiya təklifidir; istifadəçinin əvvəlki məhsul qaydalarını avtomatik dəyişmir. PostgreSQL authority və AppBackend DB qəbul vaxtı 3 noyabr 2026-da təsdiqlənib. Bu tapşırıqda tətbiq/backend kodu yazılmayıb.
 
+## Android versiya qərarı — 4 noyabr 2026
+
+Minimum Android 7.0 (`minSdk 24`), hədəf Android 16 (`targetSdk 36`), `compileSdk 36`. İstifadəçi tərəfindən təsdiqlənib; gələcək application host da bu konfiqurasiyanı istifadə etməlidir.
+
 ## 1. Əsas yanaşma
 
 - Compose ekranlar və HUD, Canvas oyun səhnəsi və şəhərin çəkilməsi üçün. Android-dən asılı olmayan Kotlin modulu tarazlıq, eniş, xilasetmə, çətinlik və cəhd vəziyyətini idarə edir.
