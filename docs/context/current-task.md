@@ -1,36 +1,36 @@
-# Planşet dizayn konseptləri — 4 noyabr 2026
+# Oyun ekranının sadələşdirilməsi — 4 noyabr 2026
 
 ## Completed
-- Mövcud dörd mobil referans oxundu; ui-craft və imagegen tətbiq edildi.
-- Planşet landşaft üçün 16 mövcud mobil görünüşün ayrıca kompozisiyası, portret üçün dörd əsas görünüş hazırlandı. Promptlar və PNG-lər docs/design/tablet-v1 altındadır.
-- Ana ekranda birbaşa Şəhərim; səhnə + sağ panel; inventar/bazar üçün grid + seçilmiş detal; portretdə aşağı idarəetmə rəfi.
+- İstifadəçi telefon və planşetdə aktiv oyun üçün yalnız pauza düyməsi, səhnəyə toxunaraq buraxma istədi.
+- game-tap-v2: telefon portret, planşet portret/landşaft üçün aktiv oyun və fasilə konseptləri; promptlar/spec saxlanır.
+- Mobil/planşet indeksləri və game-plan/Kotlin planında mənbə/idarəetmə qaydası uyğunlaşdırıldı.
 
 ## Current state
-- Bu iş yalnız PNG konseptləridir; Android host/engine və responsiv Compose implementasiyası yoxdur.
-- Branch feat/tablet-design-png; commit/merge və son CI statusu docs/reviews/2026-11-04-tablet-design.md-də saxlanır.
-- Əvvəldən untracked .cursor/rules/responsive-ui.mdc və docs/reviews/2026-11-04-responsive-rule.md fayllarına toxunulmur.
+- PNG dizayn düzəlişidir; işlək Android UI/engine/input implementasiyası yoxdur.
+- Branch fix/game-tap-design. Commit/merge/CI nəticəsi docs/reviews/2026-11-04-game-tap-design.md-dədir.
+- Əvvəldən untracked responsive-ui.mdc və responsive-rule review fayllarına toxunulmur.
 
 ## Decisions
-- Palitra/spacing/radius/type mənbəyi mobile-v1/tokens.css; şəhər city-plan/view istiqamətində qalır.
-- Pəncərə əsaslı compact/medium/expanded davranış tablet-v1/README.md-dədir; generativ naviqasiya fərqlərində mətn qaydası əsasdır.
-- Aktiv oyun damsız, eyni ölçülü mərtəbələr; dam uduzduqdan sonra. 12 mərtəbə adi nümunəsi +12 sikkə/+12 XP. Rəsmdə modul sayı dəqiq deyil.
-- Domain/API/schema/wallet dəyişmədiyindən backend dəyişikliyi lazım deyil; server placement bağlıdır. Android implementasiyasına avtomatik keçilmir.
+- Aktiv oyunda tək pauza, kiçik interaktiv olmayan say/rekord; Burax düyməsi, rail, yan panel, alt rəf, wallet və geri düyməsi yoxdur.
+- Pauzada yalnız Davam et / Yenidən başla / Menyuya qayıt. Pauza/modal/resume toxunuşları səhnəyə ötürülmür.
+- Aktiv/fasilədə dam yoxdur, mərtəbələr eyni ölçüdədir; şəkillər dəqiq geometry deyil.
+- Köhnə mobil/planşet lövhələrinin yalnız oyun və fasilə hissəsi əvəz olunur; qalan ekranlar qüvvədədir. Palitra mobile-v1/tokens.css-dir.
+- Domain/API/schema/wallet/reward dəyişmir, AppBackend dəyişikliyi lazım deyil. İmplementasiya avtomatik başlanmır.
 
 ## Remaining work
-- İstifadəçi rəyi əsasında konsept düzəlişləri; bütün əlavə ekranların portret variantları.
-- Mobil sənəddə açıq qalan alış təsdiqi, elan yaratma/geri götürmə, əldəetmə şərtləri, yüklənmə axınları.
-- Gələcək implementasiyada real telefon/planşet, resize, böyük şrift, safe inset, touch target və accessibility yoxlaması. PNG-lər bunları təsdiqləmir.
+- İstifadəçi rəyi üzrə dar dizayn düzəlişləri; gələcək Android input, pause/lifecycle, restart/exit server uyğunluğu və responsiv runtime yoxlamaları.
+- Telefon landşaftı, real cihaz, dp/touch, böyük şrift, TalkBack və resize yoxlanmayıb.
+- Əvvəlki mobil alış/elan/yüklənmə axınları və əlavə ekranların portret variantları ayrıca qalır.
 
 ## Relevant files
-- docs/design/tablet-v1/README.md və beş cari PNG; *-prompt.txt
-- docs/design/mobile-v1/{README.md,remaining-screens.md,tokens.css,mobile-primary-v2.png,inventory-market-v2.png,play-progress-v2.png,account-states.png}
-- docs/reviews/2026-11-04-tablet-design.md
-- Implementasiya istənərsə docs/kotlin-compose-plan.md, docs/game-plan.md və AppBackend AGENTS/müqavilələri ayrıca oxunmalıdır.
+- docs/design/game-tap-v2/README.md, üç PNG və promptlar
+- docs/reviews/2026-11-04-game-tap-design.md
+- docs/game-plan.md §2; docs/kotlin-compose-plan.md §4
+- docs/design/mobile-v1 və tablet-v1 indeksləri, mobile-v1/tokens.css
 
 ## Checks performed
-- Mobil referansları və planşet son PNG-lərinə vizual baxış; dəqiq ölçülər review qeydindədir.
-- Altı token kontrastı keçdi (8.22–16.57). İlkin icazəli lokal CI BUILD SUCCESSFUL; son fayl dəsti/merge nəticəsi review-dədir.
-- Runtime/device və backend testləri bu konsept işində aparılmayıb.
+- Konseptlərə vizual baxış; ölçülər/tapıntı və CI nəticələri review-dədir.
+- Altı token kontrastı keçdi (8.22–16.57). Runtime/backend testi yoxdur.
 
 ## Exact next step
-- tablet-v1/README.md və seçilmiş PNG-ni oxu; istifadəçi rəyinə əsaslanan bir kiçik dizayn vahidini hazırla. İmplementasiya yalnız ayrıca tələb ediləndə başlanır.
+- game-tap-v2/README.md və uyğun PNG-ni oxu; istifadəçinin növbəti konkret rəyini tətbiq et. İmplementasiya yalnız ayrıca tələb ediləndə başlanır.

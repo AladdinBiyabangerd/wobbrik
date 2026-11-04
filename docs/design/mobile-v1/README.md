@@ -1,5 +1,7 @@
 # Mobil dizayn — ilk dəst, 4 noyabr 2026
 
+Son düzəliş: aktiv oyun və fasilə üçün cari mənbə [game-tap-v2](../game-tap-v2/README.md)-dir. Aşağıdakı köhnə oyun PNG-sindəki Burax/geri düymələri və idarəetmə paneli artıq istifadə edilmir. Aktiv oyunda yalnız pauza qalır; səhnəyə toxunmaq mərtəbəni buraxır. Aşağıdakı oyun/adaptiv qeydlər həmin iki görünüş üçün tarixi qeyddir.
+
 Qalan 12 mobil görünüşün cari PNG-ləri və yoxlama sərhədləri: [remaining-screens.md](remaining-screens.md). Cari əlavə dəstlər: `inventory-market-v2.png`, `play-progress-v2.png`, `account-states.png`.
 
 İstifadəçi şəhər referanslarından yeni mərkəzi token dəstinin yaradılmasına icazə verib. `tokens.css` konsept üçün mənbədir; Android theme implementasiyası deyil. Mövcud şəhər referansları əvəz edilmir.

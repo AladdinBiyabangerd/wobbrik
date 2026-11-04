@@ -1,5 +1,7 @@
 # Qalan mobil ekranlar — 4 noyabr 2026
 
+Fasilənin son dizaynı [game-tap-v2](../game-tap-v2/README.md)-dədir: yalnız Davam et / Yenidən başla / Menyuya qayıt. play-progress-v2-dəki əvvəlki fasilə görünüşü arxivdir; nəticə, nailiyyət və rekord görünüşləri dəyişmir.
+
 Built-in imagegen ilə yaradılıb. Üslub mənbəyi `mobile-primary-v2.png`, palitra mənbəyi `tokens.css`-dir. Hər PNG dörd portret ekranı yan-yana göstərən konsept lövhəsidir; ayrıca cihaz screenshot-u deyil.
 
 - `inventory-market-v2.png`: inventar, bina detalları, bazar, kolleksiya. İlkin `inventory-market.png` arxivdir. Mərtəbə mətnləri minimum 10 saxlama/satış həddinə düzəldilib.
