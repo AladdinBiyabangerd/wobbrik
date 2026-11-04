@@ -5,7 +5,7 @@ import kotlin.math.min
 
 /** Versioned, provisional game units; not measured building dimensions or server geometry. */
 object PracticeRulesV1 {
-    const val VERSION = "practice-foundation-v1"
+    const val VERSION = "practice-balance-v1"
     const val TICKS_PER_SECOND = 60
     const val MAX_CATCH_UP_TICKS = 8
     const val FLOOR_WIDTH = 100.0
@@ -24,6 +24,9 @@ data class PracticeState(
     val craneX: Double = 0.0,
     val falling: Floor? = null,
     val floors: List<Floor> = emptyList(),
+    val balance: Balance = Balance(),
+    val sway: Double = 0.0,
+    val perfectLandings: Int = 0,
 )
 
 /** Offline practice only: no wallet, rewards, progression, ownership or API writes. */
@@ -33,6 +36,7 @@ class PracticeEngine {
     private var direction = 1
     private var fallVelocity = 0.0
     private var accumulatedTickUnits = 0L
+    private var swayVelocity = 0.0
 
     fun drop(): Boolean {
         if (state.paused || state.phase != Phase.SWINGING) return false
@@ -59,6 +63,7 @@ class PracticeEngine {
         direction = 1
         fallVelocity = 0.0
         accumulatedTickUnits = 0
+        swayVelocity = 0.0
     }
 
     /** Host supplies elapsed monotonic time; background time must never be passed on resume. */
@@ -76,9 +81,13 @@ class PracticeEngine {
     private fun landingY() = state.floors.size * PracticeRulesV1.FLOOR_HEIGHT
 
     private fun tick() {
+        if (state.phase == Phase.FINISHED) return
+        swayVelocity = (swayVelocity - state.sway * BalanceRulesV1.SWAY_SPRING) * BalanceRulesV1.SWAY_DAMPING
+        state = state.copy(sway = state.sway + swayVelocity)
         when (state.phase) {
             Phase.SWINGING -> {
-                val next = state.craneX + direction * PracticeRulesV1.CRANE_SPEED
+                val speed = PracticeRulesV1.CRANE_SPEED * BalanceRulesV1.difficulty(state.floors.size + 1)
+                val next = state.craneX + direction * speed
                 state = state.copy(craneX = next.coerceIn(-PracticeRulesV1.CRANE_RANGE, PracticeRulesV1.CRANE_RANGE))
                 if (abs(next) >= PracticeRulesV1.CRANE_RANGE) direction = -direction
             }
@@ -93,10 +102,15 @@ class PracticeEngine {
                     if (abs(floor.centerX - supportX) >= PracticeRulesV1.FLOOR_WIDTH) {
                         state = state.copy(phase = Phase.FINISHED, falling = null)
                     } else {
+                        val offset = floor.centerX - supportX
+                        val balance = BalanceRulesV1.land(state.balance, offset, state.floors.size + 1)
+                        swayVelocity += offset / PracticeRulesV1.FLOOR_WIDTH * BalanceRulesV1.IMPACT
                         state = state.copy(
-                            phase = Phase.SWINGING,
+                            phase = if (abs(balance.lean) >= BalanceRulesV1.TOPPLE) Phase.FINISHED else Phase.SWINGING,
                             falling = null,
                             floors = state.floors + floor.copy(baseY = landingY()),
+                            balance = balance,
+                            perfectLandings = state.perfectLandings + if (abs(offset) <= BalanceRulesV1.PERFECT_OFFSET) 1 else 0,
                         )
                     }
                 }

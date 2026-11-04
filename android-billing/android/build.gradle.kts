@@ -3,8 +3,9 @@ android {
     namespace = "appbackend.wobbrik.billing"
     compileSdk = 36
     defaultConfig {
-        // Library/SDK lower bound only. Barterune's product minSdk remains undecided (DT09).
-        minSdk = 23
+        // Product baseline: Android 7.0; Android 16 target.
+        minSdk = 24
+        targetSdk = 36
         consumerProguardFiles("consumer-rules.pro")
     }
     compileOptions { sourceCompatibility = JavaVersion.VERSION_21; targetCompatibility = JavaVersion.VERSION_21 }

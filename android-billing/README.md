@@ -48,7 +48,7 @@ Hesab silmə server baryeri təsdiqlənəndən sonra `clearDeletedAccount(uid)` 
 
 Hostun mövcud backup qaydalarına `wobbrik_billing_backup_rules.xml` və API31+ `wobbrik_billing_data_extraction_rules.xml` istisnalarını birləşdir. Kitabxana hostun digər backup qaydalarını overwrite etmir. KeyStore/ciphertext xətası səssiz reset edilmir.
 
-Kotlin 2.1.10, Gradle 8.13, AGP 8.13.0, Play Billing 9.1.0, compileSdk36. Library minSdk23 texniki aşağı həddir; oyunun minimum cihaz/OS siyasətini seçmir. Oyun üçün target və minimum versiya ayrıca host qərarıdır.
+Kotlin 2.1.10, Gradle 8.13, AGP 8.13.0, Play Billing 9.1.0, compileSdk36. 4 noyabr 2026 məhsul qərarı: minimum Android 7.0 (minSdk24), hədəf Android 16 (targetSdk36). Billing modulunda tətbiq edilib; gələcək application host eyni hədləri saxlamalıdır.
 
 ## Yoxlama
 

@@ -1,33 +1,35 @@
-# Game engine foundation — 4 November 2026
+# Balance/rescue — 4 November 2026
 
 ## Completed
-- Pure Kotlin engine: bounded 60 Hz stepping, crane, drop/fall, support overlap, miss, pause/resume and restart.
-- Five regression tests and local CI integration. Existing billing preserved.
+- Engine foundation plus persistent lean, danger hysteresis, one rescue per danger episode, perfect-landing count, damped shared sway signal, first-five forgiveness and capped speed/sensitivity.
+- Product OS decision: minimum Android 7.0 / API24, target Android16 / API36, compileSdk36; billing module updated.
 
 ## Current state
-- Implementation 240727f merged to main as 8c9b18a; branch history retained. Post-merge local CI passed.
-- No Android game host or playable APK. Pre-existing untracked responsive rule files excluded.
+- Prepared on feat/game-balance-rescue. Review and verification: docs/reviews/2026-11-04-game-balance-rescue.md; final merge outcome in chat/Git history.
+- No Android game host or playable APK. Existing billing preserved; pre-existing untracked responsive rule/review excluded.
 
 ## Decisions
-- Offline engine has no wallet/reward/progression/ownership effects; no backend changes required.
-- PracticeRulesV1 uses provisional simulation units, not server geometry.
-- Verified Play phone-app targetSdk requirement is API 36; product minSdk remains undecided. Existing billing library minSdk is 23.
+- practice-balance-v1 parameters are provisional arcade units, not server geometry.
+- Only a landing changes persistent balance, rescue or loss. Waiting merely damps cosmetic sway.
+- Offline counters confer no XP/coins/achievements/buildings. No backend changes needed for this unit; online compatibility not claimed.
 
 ## Remaining work
-- Balance/sway/rescue, first-five forgiveness, capped difficulty.
-- Compose host, scene tap, pause/lifecycle, camera and adaptive renders.
-- Online checkpoint integration/persistence later; real SKU/deploy excluded.
+- Compose application host, adaptive scene, camera, tap/drop and pause/lifecycle routing.
+- Process restore and online checkpoint adapter; real SKU/Console/deploy excluded.
+- Device gameplay feel, performance and balance measurements still pending.
 
 ## Relevant files
-- android-billing/engine/README.md and src/main/kotlin/az/wobbrik/engine/PracticeEngine.kt
-- android-billing/engine/src/test/kotlin/az/wobbrik/engine/PracticeEngineTest.kt
-- docs/reviews/2026-11-04-game-engine-foundation.md
-- docs/kotlin-compose-plan.md; docs/game-plan.md sections 2–4
+- android-billing/engine/src/main/kotlin/az/wobbrik/engine/{PracticeEngine,Balance}.kt
+- android-billing/engine/src/test/kotlin/az/wobbrik/engine/{PracticeEngineTest,BalanceTest}.kt
+- android-billing/android/build.gradle.kts; docs/kotlin-compose-plan.md; docs/game-plan.md sections 2–4
 - docs/design/game-tap-v2/README.md; docs/design/mobile-v1/tokens.css
+- docs/reviews/2026-11-04-game-balance-rescue.md
 
 ## Checks performed
-- Local CI passed: five engine tests, billing core tests, billing Android debug assembly/lint.
-- No game UI render/device check: game UI does not exist yet.
+- Initial local CI caught incorrect danger-test setup; corrected and CI passed with ten engine tests.
+- Local CI passed with SDK target and 11 engine tests including pause/restart. Final docs/post-merge CI results in chat.
+- No game UI render/device test; no game UI exists yet.
 
 ## Exact next step
-- Implement bounded engine balance/rescue against game-plan sections 3–4 before the Compose host.
+- After current gate, create Android Compose application host using minSdk24 / targetSdk36.
+- Read ui-craft, tap-v2 design and palette first; implement an offline practice scene wired to this engine, then render/view phone and tablet sizes. Keep reward/economy absent until server adapter integration.
