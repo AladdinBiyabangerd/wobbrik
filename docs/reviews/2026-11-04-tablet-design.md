@@ -1,0 +1,12 @@
+# Planşet konseptlərinin lokal review-u
+
+- Branch: feat/tablet-design-png. Diff scope: docs/design/tablet-v1, docs/context/current-task.md və bu review. Əvvəldən untracked responsive-ui.mdc və responsive-rule review scope-a daxil deyil.
+- Mənbələr: dörd cari mobil PNG, mobile-v1/tokens.css, təsdiqlənmiş şəhər istiqaməti. ui-craft və imagegen skill-ləri, built-in imagegen. App/backend kodu dəyişmir.
+- Kompozisiyalar: əsas dörd ekran, inventar/bina/bazar/kolleksiya, fasilə/nəticə/nailiyyət/rekord, hesab/parametr/boş/xəta; əlavə dörd portret adaptasiyası. Ekranların siyahısı və qaydaları tablet-v1/README.md-dədir.
+- Tapıntı/düzəliş: ilk progress generasiyası telefon formatını saxladı; yekun tablet referansı ilə 2×2 geniş ekran olaraq yenidən yaradıldı. İlkin account geniş variantında alt naviqasiya vardı; yekun sol rail versiyası yaradıldı və baxıldı. İlkin account ayrıca arxivdir. Telefon formatlı uğursuz progress variantı layihəyə daxil edilmir.
+- Generativ naviqasiya/termin fərqləri README-də açıq göstərilir: tək aktiv bölmə, vahid Parametrlər termini və oyun çıxış davranışı implementasiyada tətbiq edilməlidir. PNG-lər dəqiq naviqasiya və geometry spesifikasiyası deyil.
+- Token kontrastı: text/background16.57; muted/surface8.22; text/surface-raised10.24; on-accent/accent11.45; success/surface9.28; danger/surface8.37. Altı cüt4.5 həddini keçir. Tokenlər dəyişməyib.
+- Telefon referanslarına və beş cari planşet renderinə baxılıb. Əsas düymələr görünür, aktiv oyun damsızdır, nəticədə +12 sikkə/+12 XP saxlanır. Account son renderində boş/xəta CTA-ları görünür. Landşaft lövhələri 1448×1086, portret 1086×1448; ilkin account arxivi 1672×941. Telefon referansları 1774×887 və 1706×922 lövhələrdir, hər biri dörd portret konseptdən ibarətdir. Faktiki cihaz ölçüsü yoxlanmayıb.
+- Backend: yalnız vizual kompozisiya dəyişir; domain/API/DTO/schema və iqtisadi davranış yoxdur. AppBackend dəyişməsi lazım deyil; placement bağlıdır.
+- İlkin lokal CI sandbox Gradle lock səbəbilə dayandı. İcazəli təkrar və yekun fayl dəsti üçün lokal CI BUILD SUCCESSFUL: 43 task, 42 up-to-date. Lokal diff və vizual review tamamlandı, açıq məhdudiyyətlər README-dədir. Merge nəticəsi üçün CI yenidən işlədiləcək.
+- Məhdudiyyətlər: PNG konseptidir, runtime/device screenshot deyil. Dəqiq dp, font scaling, resize, safe inset, accessibility və bütün ekranların portret variantları yoxlanmayıb; əsas mobil əməliyyat axınlarındakı əvvəlki açıq işlər qalır.
