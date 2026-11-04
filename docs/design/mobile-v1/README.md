@@ -2,7 +2,7 @@
 
 İstifadəçi şəhər referanslarından yeni mərkəzi token dəstinin yaradılmasına icazə verib. `tokens.css` konsept üçün mənbədir; Android theme implementasiyası deyil. Mövcud şəhər referansları əvəz edilmir.
 
-`mobile-primary.png`: soldan ana ekran, oyun, şəhər görünüşü, şəhər planı. Built-in imagegen ilə yaradılıb; ilkin prompt `prompt.txt`-dədir. Son redaktə promptu: “Preserve all artwork, layouts, dimensions, colors and other labels exactly. Correct ONLY the second screen's large bottom cyan button label to exact Azerbaijani word Burax.”
+`mobile-primary-v2.png` cari düzəlişdir; `mobile-primary.png` əvvəlki versiya kimi saxlanır. Hər ikisində soldan ana ekran, oyun, şəhər görünüşü, şəhər planı. Built-in imagegen ilə yaradılıb; ilkin prompt `prompt.txt`-dədir. Son redaktə promptu: “Preserve all artwork, layouts, dimensions, colors and other labels exactly. Correct ONLY the second screen's large bottom cyan button label to exact Azerbaijani word Burax.”
 
 ## Yoxlama və məhdudiyyətlər
 
@@ -17,3 +17,7 @@
 ## Adaptiv istiqamət
 
 Telefon: əsas səhnə + aşağıda bir sütunlu idarəetmə; qısa pəncərədə köməkçi məlumat yığılıb sheet/scroll-a keçir, səhnə ilə düymələr üst-üstə düşmür. Landşaftda səhnə və idarəetmə yan-yana planlaşdırılır. Planşetdə ayrıca iki panel: səhnə və seçilmiş bina/inventar paneli; mobil ekranı böyütmək kifayət deyil. Bunlar növbəti renderlərdə yoxlanmalı qərarlardır.
+
+## Dam və modul düzəlişi
+
+4 noyabr 2026 istifadəçi təsdiqi: aktiv oyunda dam yoxdur; uduzduqda avtomatik əlavə edilir. Krandakı və yerləşdirilmiş mərtəbələrin eni/dərinliyi/hündürlüyü eynidir; ofset ölçünü dəyişmir. Şəhərdə bitmiş binaların damı qalır. Son edit promptu `floor-roof-edit-prompt.txt`-dədir, built-in imagegen istifadə olunur. Bu düzəliş backend və ya Android runtime implementasiyası deyil.

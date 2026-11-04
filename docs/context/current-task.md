@@ -60,3 +60,8 @@
 - Generativ PNG vizual baxışı; altı token kontrast cütü; lokal CI BUILD SUCCESSFUL. Runtime/device/responsivlik yoxlanmayıb. Son CI və merge nəticəsi review qeydinə yazılır.
 ## Exact next step
 - mobile-v1/README.md-ni və PNG-ni oxu; yeni mobil konsept vahidində ana ekran şəhər girişini və inventar/bina detalı/bazar ekranlarını eyni tokenlərlə hazırla. Android implementasiyasına avtomatik keçmə. Planşetlərdə telefonu sadəcə böyütmə.
+
+## Son düzəliş — dam/mərtəbə
+- Cari mobil PNG: docs/design/mobile-v1/mobile-primary-v2.png. Aktiv oyun damsız və eyni ölçülü mərtəbələrlə yenidən render edilib, görüntüyə baxılıb. Əvvəlki PNG arxivdir.
+- docs/game-plan.md §3: dam yalnız uduzandan sonra avtomatik əlavə olunur; kran dam daşımır. Mərtəbə eni/dərinliyi/hündürlüyü eynidir. Engine və backend kodu dəyişməyib.
+- Review: docs/reviews/2026-11-04-floor-roof.md. Növbəti işdə v2 PNG-ni mənbə götür; əvvəlki qalan mobil/planşet işləri qüvvədədir.

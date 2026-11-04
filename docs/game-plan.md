@@ -29,7 +29,8 @@ Kran mərtəbəni sağa-sola yellədir. Buraxılan mərtəbə düşür, binaya o
 
 Mərkəzə yaxın eniş daha sabitdir. Sağ və sol yerləşdirmələr tarazlığı həmin istiqamətə dəyişir və bir-birini qismən kompensasiya edə bilir. Fizika tam tikinti simulyasiyası yox, ardıcıl və oxunaqlı modeldir.
 
-- İlk versiyada mərtəbələrin ölçüsü və fiziki çəkisi eynidir.
+- İlk versiyada mərtəbələrin eni, dərinliyi, hündürlüyü və fiziki çəkisi eynidir. Krandakı və artıq yerləşdirilmiş mərtəbələr eyni modul ölçüsünü saxlayır; fərq yerləşdirmə ofsetindən yaranır.
+- Aktiv oyunda dam örtüyü verilmir və kran dam daşımır. Oyunçu uduzduqda sistem binaya avtomatik dam örtüyü əlavə edir; bu, ayrıca oynanılan mərtəbə deyil və mərtəbə sayını, sakinləri, XP və mərtəbə mükafatını artırmır.
 - Görünüş və alışlar fiziki üstünlük vermir.
 - Zərbənin yaratdığı yellənmə zamanla zəifləyir.
 - Gözləmək təkbaşına məğlubiyyət yaratmır; təhlükə yeni yerləşdirmənin nəticəsidir.
