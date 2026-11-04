@@ -1,5 +1,13 @@
 # Wobbrik — Kotlin + Compose hazırlama planı
 
+## Cari icra göstərişi — 4 noyabr 2026
+
+İstifadəçi yekun Android oyununun hazırlanmasını başladıb; ayrıca atılacaq prototip tələb olunmur. İlk oyun vahidi yekun layihə strukturu və əsas oynanan tikinti dövrüdür. Mövcud `android-billing` inteqrasiya üçün qorunur. Ölçülər sənədləşdirilmiş, versiyalı oyun dizaynı parametrləri kimi seçilə bilər; geometry həmin modeldən çıxarılmalıdır. Bu göstəriş əvvəlki ölçü mənbəyi gözləmə məhdudiyyətini əvəz edir. Rəqəmlər real bina ölçməsi və ya ölçülmüş balans kimi təqdim edilmir.
+
+Yeni dizayn tokenləri mərkəzləşdiriləcək; ui-craft kontrast və faktiki render/baxış tələb edir. Domain dəyişiklikləri AppBackend ilə birlikdə yoxlanır. Typed geometry, provenance, union/transform/containment/overlap server yoxlamaları hazır olmadan placement bağlı qalır. Real SKU, Console və deploy əhatədən kənardır. Branch → uyğun commit → lokal review → lokal CI/fix dövrü → uğurdan sonra merge qaydası AGENTS.md-dədir. GitHub CI yaradılmır.
+
+Hazırkı ilk kiçik vahid lokal Git/CI iş axınıdır. Oyun hostu, engine və geometry hələ implementasiya edilməyib; aşağıdakı tarixi “kod icazəsi yoxdur” qeydləri bu göstərişlə əvəz olunur. Davam üçün `docs/context/current-task.md` əsasdır.
+
 Tarix: 3 noyabr 2026. Status: koddan əvvəl baxış üçün texniki plan. Android-only, Kotlin + Compose, Spark, ayrıca Wobbrik adapteri və game-plan bölmə 23 kataloqu təsdiqlənib. Aşağıdakı yeni modul/data/API bölgüsü implementasiya təklifidir; istifadəçinin əvvəlki məhsul qaydalarını avtomatik dəyişmir. PostgreSQL authority və AppBackend DB qəbul vaxtı 3 noyabr 2026-da təsdiqlənib. Bu tapşırıqda tətbiq/backend kodu yazılmayıb.
 
 ## 1. Əsas yanaşma
