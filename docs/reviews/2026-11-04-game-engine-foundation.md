@@ -7,4 +7,4 @@
 - Local CI passed: five engine tests, billing core regression tests, billing Android debug assembly and lint. Game UI and APK do not exist yet; no visual or device check claimed.
 - Backend: no API/DTO/schema or economic flow changed. Offline state has no wallet, progression, reward, ownership or checkpoint writes. AppBackend change unnecessary for this unit; online compatibility not claimed.
 - Remaining: balance/sway/rescue, first-five forgiveness, difficulty, Android host, process restore and performance measurement.
-- Final documentation and merge CI results recorded after execution below.
+- Final documentation CI passed. Implementation commit: 240727f; merge: 8c9b18a. Post-merge local CI passed (47 tasks).

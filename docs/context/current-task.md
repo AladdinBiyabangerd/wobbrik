@@ -5,7 +5,7 @@
 - Five regression tests and local CI integration. Existing billing preserved.
 
 ## Current state
-- Branch feat/game-engine-foundation; final review/commit/merge gate in progress.
+- Implementation 240727f merged to main as 8c9b18a; branch history retained. Post-merge local CI passed.
 - No Android game host or playable APK. Pre-existing untracked responsive rule files excluded.
 
 ## Decisions
@@ -30,4 +30,4 @@
 - No game UI render/device check: game UI does not exist yet.
 
 ## Exact next step
-- Complete foundation final CI/commit/merge record, then implement bounded engine balance/rescue against game-plan sections 3–4 before the Compose host.
+- Implement bounded engine balance/rescue against game-plan sections 3–4 before the Compose host.
