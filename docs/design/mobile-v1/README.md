@@ -1,5 +1,7 @@
 # Mobil dizayn — ilk dəst, 4 noyabr 2026
 
+Qalan 12 mobil görünüşün cari PNG-ləri və yoxlama sərhədləri: [remaining-screens.md](remaining-screens.md). Cari əlavə dəstlər: `inventory-market-v2.png`, `play-progress-v2.png`, `account-states.png`.
+
 İstifadəçi şəhər referanslarından yeni mərkəzi token dəstinin yaradılmasına icazə verib. `tokens.css` konsept üçün mənbədir; Android theme implementasiyası deyil. Mövcud şəhər referansları əvəz edilmir.
 
 `mobile-primary-v2.png` cari düzəlişdir; `mobile-primary.png` əvvəlki versiya kimi saxlanır. Hər ikisində soldan ana ekran, oyun, şəhər görünüşü, şəhər planı. Built-in imagegen ilə yaradılıb; ilkin prompt `prompt.txt`-dədir. Son redaktə promptu: “Preserve all artwork, layouts, dimensions, colors and other labels exactly. Correct ONLY the second screen's large bottom cyan button label to exact Azerbaijani word Burax.”
