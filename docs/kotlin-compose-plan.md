@@ -1,5 +1,7 @@
 # Wobbrik — Kotlin + Compose hazırlama planı
 
+Şəhərin qüvvədə olan vizual mənbəyi: [təsdiqlənmiş iki görünüş](design/README.md). Plan və həcmli şəhər görünüşü birlikdə tətbiq edilir; köhnə konseptlər istifadə edilmir.
+
 ## Cari icra göstərişi — 4 noyabr 2026
 
 İstifadəçi yekun Android oyununun hazırlanmasını başladıb; ayrıca atılacaq prototip tələb olunmur. İlk oyun vahidi yekun layihə strukturu və əsas oynanan tikinti dövrüdür. Mövcud `android-billing` inteqrasiya üçün qorunur. Ölçülər sənədləşdirilmiş, versiyalı oyun dizaynı parametrləri kimi seçilə bilər; geometry həmin modeldən çıxarılmalıdır. Bu göstəriş əvvəlki ölçü mənbəyi gözləmə məhdudiyyətini əvəz edir. Rəqəmlər real bina ölçməsi və ya ölçülmüş balans kimi təqdim edilmir.
@@ -156,7 +158,7 @@ AppBackend-də `GET /v1/apps/wobbrik/game/leaderboard` ümumi və cari Bakı hə
 
 ### Şəhərin ölçülərdən asılı olmayan server vahidi — 4 noyabr 2026
 
-İstifadəçi şəhər üçün yuxarıdan ikiölçülü x/y planını seçib; dəqiq sahə, boşluq və dekorasiya ölçülərinin açıq saxlanmasını, yalnız onlardan asılı olmayan server hissəsinin tamamlanmasını istəyib. AppBackend `GET /game/city` ilə hesab üzrə şəhər üzvlüyünü, revision-u və bütün yerləşmiş binaların sakin cəmini verir; cəm overflow-suz dəqiq onluq string-dir. `POST /game/city/buildings/return` bina mülkiyyətini/hissələrini və aktiv elanı saxlayaraq onu inventara qaytarır; refund/XP vermir. Migration 010 şəhər üzvlüyünün real sahibə aidliyini və bina silinəndə təmizlənməsini qoruyur.
+İstifadəçi şəhər üçün yuxarıdan ikiölçülü x/y planını və eyni şəhərin həcmli görünüşünü seçib; dəqiq sahə, boşluq və dekorasiya ölçülərinin açıq saxlanmasını, yalnız onlardan asılı olmayan server hissəsinin tamamlanmasını istəyib. AppBackend `GET /game/city` ilə hesab üzrə şəhər üzvlüyünü, revision-u və bütün yerləşmiş binaların sakin cəmini verir; cəm overflow-suz dəqiq onluq string-dir. `POST /game/city/buildings/return` bina mülkiyyətini/hissələrini və aktiv elanı saxlayaraq onu inventara qaytarır; refund/XP vermir. Migration 010 şəhər üzvlüyünün real sahibə aidliyini və bina silinəndə təmizlənməsini qoruyur.
 
 Yerləşdirmə hələ aktiv deyil (`placement_enabled:false`). Əyri binanın x/y sahəsinə çevrilməsi, koordinat vahidi, ərazi formaları, təhlükəsiz boşluq, dönmə və dekorasiya footprint-ləri seçilməyib. Opaque structural-v1 snapshot-dan həndəsə uydurulmur. Dəqiq hazır müqavilə və qalan həndəsə tələbləri `AppBackend/docs/wobbrik-game-api.md`-nin şəhər bölməsindədir; Android host/oyun/SKU/Console/deploy bu vahidə daxil deyil.
 
