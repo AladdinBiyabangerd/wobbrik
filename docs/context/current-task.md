@@ -42,3 +42,21 @@
 
 ## Exact next step
 - Bu handoff və docs/reviews/local-ci-workflow.md-ni oxu, git status/log ilə workflow merge vəziyyətini təsdiqlə; feat/android-construction-loop branch-i aç. Yalnız istinad edilən faylləri oxuyaraq yekun app + engine strukturunu və əsas oyun dövrünü implementasiya et. Ölçüləri dizayn modeli kimi seç və sənədləşdir; backend iqtisadi müqaviləsini pozma, placement bağlı qalsın. Lokal CI-ni yeni modullara genişləndir, review/fix/rerun uğurundan sonra merge et.
+
+# Aktiv vizual vahid — mobil PNG, 4 noyabr 2026
+
+## Completed
+- İstifadəçi şəhər referanslarından token dəsti yaratmağı seçdi. mobile-v1/tokens.css yaradıldı; 6 kontrast cütü keçdi.
+- Built-in imagegen ilə ana ekran, oyun, şəhər görünüşü və plan üçün dörd panelli PNG yaradıldı; Burax yazısı düzəldildi, hər iki renderə baxıldı.
+## Current state
+- İlk mobil konsept dəstidir, bütün ekranlar və responsiv implementasiya tamam deyil. Branch feat/mobile-design-png; əvvəlki untracked responsive rule fayllarına toxunulmur.
+## Decisions
+- Təsdiqlənmiş city-plan/view referansları saxlanır. Tokenlər yeni konsept mənbəyidir, Android theme deyil. Domain/API dəyişmədiyi üçün backend dəyişikliyi lazım deyil.
+## Remaining work
+- Ana ekranda birbaşa şəhər girişi; qalan mobil ekranlar və vəziyyətlər; kiçik/geniş telefon və landşaft renderləri. Sonra ayrıca planşet kompozisiyaları, iki panel və ölçü yoxlaması.
+## Relevant files
+- docs/design/mobile-v1/{README.md,tokens.css,prompt.txt,mobile-primary.png}; docs/reviews/2026-11-04-mobile-design.md; docs/design/README.md.
+## Checks performed
+- Generativ PNG vizual baxışı; altı token kontrast cütü; lokal CI BUILD SUCCESSFUL. Runtime/device/responsivlik yoxlanmayıb. Son CI və merge nəticəsi review qeydinə yazılır.
+## Exact next step
+- mobile-v1/README.md-ni və PNG-ni oxu; yeni mobil konsept vahidində ana ekran şəhər girişini və inventar/bina detalı/bazar ekranlarını eyni tokenlərlə hazırla. Android implementasiyasına avtomatik keçmə. Planşetlərdə telefonu sadəcə böyütmə.

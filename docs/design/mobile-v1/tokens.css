@@ -1,0 +1,26 @@
+/* Mobile concept v1. Derived from the approved city references; proposed, not shipped. */
+:root {
+  --background: #061831;
+  --surface: #102c53;
+  --surface-raised: #193d69;
+  --text: #f4f7ff;
+  --muted: #b3c8ec;
+  --accent: #28e5ef;
+  --on-accent: #061831;
+  --success: #32edbd;
+  --danger: #ffb4c8;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --radius-control: 16px;
+  --radius-card: 24px;
+  --type-caption: 12px;
+  --type-label: 14px;
+  --type-body: 16px;
+  --type-title: 24px;
+  --type-score: 32px;
+  --target-min: 48px;
+}
