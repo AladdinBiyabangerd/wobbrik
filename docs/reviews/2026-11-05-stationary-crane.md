@@ -2,7 +2,8 @@
 
 Branch: `fix/continuous-tower-stationary-crane`, base `62228ac`.
 Reviewed diff: GameScene, scene Canvas modifier, debug fixture/capture parameter,
-design behavior clarification and context. Commit/merge/CI recorded after merge.
+design behavior clarification and context. Reviewed commit `cacd445`
+(diff `62228ac..cacd445`); merged with history preserved as `6d59cbb`.
 
 ## Findings and fixes
 
@@ -46,7 +47,12 @@ is linear in state size, but only visible sprites issue drawing calls.
   The marker identifies count, x, drift, pause and terminal flags, not just activity.
 - Capture script syntax parsed with Python AST; branch rendering build passed.
 - Whitespace check and scoped source review; no remaining findings for these fixes.
-- Post-merge main CI: pending.
+- Post-merge main `6d59cbb`: `./scripts/local-ci.sh` passed in 22s;
+  106 actionable tasks, 9 executed / 97 up-to-date. App assemble/lint and
+  existing core/engine regression gates passed (tests were up-to-date).
+- Documentation-only branch `docs/stationary-crane-validation`: scoped diff
+  against `6d59cbb` reviewed, whitespace passed, no findings. Main CI rerun after
+  that merge; no runtime code/art changed in this validation follow-up.
 
 The body and upper attachment are stationary; the current practice renderer does
 not introduce a new pendulum simulation or constant-length rope physics. The
