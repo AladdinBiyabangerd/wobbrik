@@ -20,4 +20,4 @@
 - Visuals unchanged; no render or design-fidelity claim. Existing schematic host
   remains outstanding debt against approved mobile-v1/game-tap-v2 designs.
 - Checks: source review completed; `git diff --check` passed. CI not run on the
-  branch. Post-merge main CI result will be recorded after execution.
+  branch. Post-merge main CI passed at `6720c34` (merge commit; see Git history), exit 0: 47 actionable tasks, 45 executed/2 up-to-date. The new test suite reports 5 tests, 0 failures/errors/skips. Existing uncommitted Compose host was temporarily stashed, so it was not part of this clean-tree CI. No remote CI/push/deploy occurred.
