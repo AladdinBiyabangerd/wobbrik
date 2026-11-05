@@ -31,7 +31,7 @@
 
 ## Checks performed
 - Lokal source review və diff whitespace check keçib; branch-də CI işlədilməyib.
-- Main merge sonrası CI nəticəsi bu vahidin review qeydində yazılacaq.
+- Main merge sonrası təmiz ağacda ./scripts/local-ci.sh keçdi: exit 0, 47 task; yeni testlər 5/5, failure/error/skip yoxdur. Mövcud dirty host bu yoxlamaya daxil deyil. Review: docs/reviews/2026-11-05-attempt-recovery-core.md.
 - UI dəyişdirilməyib/render edilməyib. Backend dəyişdirilməyib/test suite işlədilməyib.
 
 ## Exact next step
