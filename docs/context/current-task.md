@@ -38,7 +38,8 @@
 
 ## Checks performed
 - Scoped source/diff review and branch whitespace check; no branch CI.
-- Post-merge main local CI pending.
+- Post-merge main `./scripts/local-ci.sh` passed: 106 tasks, 16 executed, 90
+  up-to-date. Seven new restoration tests passed; app assemble/lint passed.
 - No visual, device/live server, push or deploy checks/actions.
 
 ## Exact next step
