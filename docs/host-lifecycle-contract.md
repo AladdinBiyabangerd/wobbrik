@@ -39,7 +39,11 @@ Offline practice restart remains local and must never be routed to online finish
 Build a nonvisual owner with injected Sessions/token provider, backend and journal;
 connect the Android application singleton only once real auth configuration is
 available. Inspect existing billing bootstrap before introducing Firebase setup.
-The current app depends only on engine and has no authenticated bootstrap.
+The app now has an application-owned Firebase Auth bootstrap in
+`WobbrikApplication`. It requires the existing Firebase configuration and explicit
+`wobbrik.backendOrigin` Gradle property. Missing configuration is exposed without
+starting recovery. No real backend origin or device authentication has been verified.
+The visible game remains offline practice; online engine bindings are still pending.
 
 Acceptance criteria for that unit:
 
