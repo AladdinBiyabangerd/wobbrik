@@ -52,7 +52,11 @@ Only this camera/aiming unit is implemented; broader design parity is deferred.
 - QA tooling: system Python lacks Pillow; first board generation failed, then a
   typo failed parsing. Boards were successfully regenerated using `uv --with pillow`
   and inspected. Neither failed attempt is a passing check.
-- Main local CI: pending merge; tests are not yet claimed as passed.
+- Main `dec1d95` after history-preserving merge: `./scripts/local-ci.sh` passed
+  in 30s; 106 tasks, 12 executed / 94 up-to-date. Engine tests executed, including
+  camera regressions; app build/lint and core/Android gates passed.
+- Validation follow-up changes review/context text only; reviewed locally against
+  dec1d95, whitespace passed, no findings. Main CI is repeated after its merge.
 
 ## Backend and limits
 
