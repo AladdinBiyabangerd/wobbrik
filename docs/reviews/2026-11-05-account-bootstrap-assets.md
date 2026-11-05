@@ -28,3 +28,16 @@
 Auth API istinadı: [Firebase Android anonymous auth](https://firebase.google.com/docs/auth/android/anonymous-auth)
 (`signInAnonymously`, guest üçün `linkWithCredential`). Console-da provider
 aktivləşdirilməyib; runtime xəta ayrıca AccountState.Error kimi saxlanır.
+
+## Main yoxlaması və handoff
+- Reviewed implementation commit: `1b98d11`; main merge: `3541f13`.
+- Main-də `./scripts/local-ci.sh`: BUILD SUCCESSFUL, 33s,
+  106 actionable tasks (13 executed, 93 up-to-date). Compile/assemble/lint
+  və mövcud core/engine testləri keçdi; yeni auth runtime testi deyil.
+- Hər üç asset alpha kanallıdır; alpha-preview.png-ə baxılıb.
+  Telefon/planşet UI renderi və dizaynla yanaşı müqayisə hələ aparılmayıb.
+- Handoff branch: `docs/account-preparation-handoff`, yalnız CI nəticəsi
+  və current-task düzəlişi. Diff manual review və diff-check keçdi;
+  branch-də CI işlədilməyib. Merge sonrası main CI təkrarlanır.
+- Plan vahid 2 açıqdır: MainActivity online ekran/start/resume/progression
+  bağlantısı növbəti chatdə implementasiya edilməlidir.
