@@ -30,7 +30,7 @@
 
 ## Checks performed
 - Əvvəlki design-fidelity qaydası üçün main CI uğurlu idi.
-- Bu vahidin review və yekun CI nəticəsi docs/reviews/2026-11-05-product-scope-main-ci.md-də izlənir.
+- Bu vahid main-ə merge edildikdən sonra lokal CI keçdi (47 task, exit 0); review və CI nəticəsi docs/reviews/2026-11-05-product-scope-main-ci.md-də izlənir.
 - Bu vahiddə UI dəyişdirilməyib və yeni render aparılmayıb.
 
 ## Exact next step
