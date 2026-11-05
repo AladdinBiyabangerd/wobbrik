@@ -1,6 +1,9 @@
-# Game scene asset integration — 5 November 2026
+# Continuous tower / stationary crane correction — 5 November 2026
 
 ## Completed
+- Follow-up: actual floor bounds plus Canvas clipping prevent a hidden section of
+  tower / leaking foundation. Crane body and upper attachment stay fixed; only
+  cables/hanging module move. No horizontal camera tracking.
 - User approved four replacement sprites and authorized integration/comparison.
 - Runtime copies preserve approved PNG pixels/alpha; matching landscape cloud added.
 - GameScene replaces schematic floor/crane/island/roof. Ring/cable anchors, guide,
@@ -9,6 +12,8 @@
   phone, font 1.5/short window and 40-floor crane-limit renders inspected.
 
 ## Current state
+- Follow-up branch fix/continuous-tower-stationary-crane; review/main CI results
+  will be recorded in docs/reviews/2026-11-05-stationary-crane.md.
 - Implementation b638536 merged as 55a28e5; main local CI passed (106 tasks,
   10 executed / 96 up-to-date). Validation note merged separately; see review.
 - Sprites integrated. Exact concept parity is NOT complete: scene/garden proportions,
@@ -33,7 +38,9 @@
 - Physical-device performance/release/accessibility checks remain outstanding.
 
 ## Relevant files
-- docs/reviews/2026-11-05-game-scene-assets.md — review/results/differences.
+- docs/reviews/2026-11-05-stationary-crane.md — latest correction and checks.
+- docs/reviews/stationary-crane/ — 1/12/40-floor and crane-endpoint renders.
+- docs/reviews/2026-11-05-game-scene-assets.md — earlier comparisons/differences.
 - docs/reviews/game-scene-assets/*-comparison.png — approved concept vs emulator.
 - docs/design/game-assets-v1/ — approved art, prompts and hashes.
 - android-billing/app/src/main/kotlin/com/aladdin/wobbrik/GameScene.kt
@@ -44,6 +51,10 @@
 - engine AcceptedEngineHost/AcceptedAttemptCommands; docs/host-lifecycle-contract.md.
 
 ## Checks performed
+- Follow-up: phone 1/12/40-floor and tablet 12-floor renders inspected after
+  actual Canvas clipping. Phone/tablet left/right crane-body ROIs are pixel-identical;
+  count-1/12/40 phone ROI also identical. No detached foundation in final captures.
+- Debug fixture marker replaces the stale snapshot-prone screenshot-size check.
 - Branch :app:assembleDebug passed; no branch CI. Contrast pairs 8.22–16.57 pass 4.5.
 - Whitespace/capture syntax; source/runtime PNG byte hashes and alpha checked.
 - Phone 1080×2400/420dpi; tablet 1200×1920 + 1920×1200/240dpi;

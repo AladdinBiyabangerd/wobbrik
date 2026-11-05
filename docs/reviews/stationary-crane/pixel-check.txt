@@ -1,0 +1,3 @@
+phone: body ROI (480, 720, 1050, 815), 25127 gold pixels; left/right body pixels identical.
+Phone body ROI also identical at floor counts 1, 12 and 40.
+tablet: body ROI (905, 75, 1380, 150), 17488 gold pixels; left/right body pixels identical.
