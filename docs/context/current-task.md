@@ -1,36 +1,42 @@
-# Əsas tikinti dövrü — Compose uyğunluğu + FPS, 6 noyabr 2026
+# Mərhələ 3 / vahid 2 — online ekran + progression, 6 noyabr 2026
 
 ## Completed
-- Branch `feat/construction-cycle-compose` main-dən açılıb.
-- GameScene framing/guide/cable polish; HUD/fasilə token polish; FrameTiming.
-- Emulator capture matrisi və kontrast yoxlaması; review yazılıb.
+- Branch `feat/stage-three-online-progression` main-dən (construction-cycle daxil)
+  açılıb; əvvəlki `feat/stage-three-online-screens` işi cherry-pick edilib.
+- MainActivity offline PracticeSession yaratmır; OnlineGame application-owned
+  AcceptedEngineHost frame/drop/resume və typed start axınına bağlıdır.
+- Hazır şəhər/logo/hesab art + UI ikonları/recovery hero Android resurslarındadır.
+- Compose framing/FrameTiming main-də qalır; PracticeGame yalnız debug fixture üçündür.
 
 ## Current state
-- Offline PracticeGame hələ hostdur; online 3.4 açıqdır.
-- Compose səhnə game-tap-v2-yə əvvəlkindən yaxındır; yeni garden/sky art yoxdur.
-- FrameTiming emulator soft-GPU-da ~19 FPS göstərir — fiziki cihaz ölçüsü yoxdur.
+- Vahid 2 hələ açıqdır: Google guest link UI və dizayn birəbir uyğunluğu qalıb.
+- Room keş/outbox (vahid 3) və inteqrasiya sübutu (vahid 4) bu branch-ə daxil deyil.
+- Backend origin/canlı Firebase bu APK-da sübut edilməyib.
 
 ## Decisions
-- Fizika vahidləri dəyişmədi; yalnız presentation framing/HUD/metrics.
-- Yeni sprite olmadan glow/cable draw ilə yaxınlaşma; konsept işığı açıq borc.
-- Online AcceptedEngineHost bu branch-ə daxil deyil.
+- Eyni qonaq UID Google credential ilə `linkGuest`-ə bağlanır; wallet birləşməsi yoxdur.
+- Console/SKU/deploy/push ayrıca göstərişədək bağlıdır.
+- Auth uğuru Ready deyil; balans/XP/nailiyyət yalnız server snapshot-dandır.
+- AppBackend API/schema bu UI bağlantısı üçün dəyişmir.
 
 ## Remaining work
-- Branch lokal review bitəndən sonra main-ə merge → yalnız main-də lokal CI.
-- Fiziki zəif/orta cihazda release-tipli 60 Hz P95/P99/jank/RAM/startup.
-- Sonra mərhələ 3.4: onlayn simulyasiya + checkpoint dövrü.
+- Google credential alınmasını hesab ekranında `linkGuest`-ə bağla.
+- Təsdiqlənmiş mobile-v1/tablet-v1/game-tap-v2 ilə qalan vizual fərqləri bağla.
+- Diff review → merge → yalnız istənəndə main-də `./scripts/local-ci.sh`.
+- Sonra ayrıca branch-lərdə Room outbox və fault proof.
 
 ## Relevant files
-- android-billing/app/.../{GameScene,MainActivity,GameTokens,FrameTiming}.kt
-- docs/reviews/2026-11-06-construction-cycle-compose.md
-- docs/reviews/construction-cycle-compose/
-- docs/design/game-tap-v2/
+- android-billing/app/.../{MainActivity,OnlineGame,GameTokens,WobbrikApplication}.kt
+- android-billing/engine/.../AcceptedEngineHost.kt
+- docs/reviews/2026-11-05-online-screens.md
+- docs/stage-three-online-plan.md
+- docs/design/account-assets-v1/
 
 ## Checks performed
-- assembleDebug/installDebug (Studio JBR); contrast text pairs ≥4.5.
-- Emulator captures inspected; pause hierarchy + cyan pixels confirmed.
-- FrameTiming logcat on Pixel_6 swiftshader (not a 60 FPS claim).
+- Cherry-pick conflict: GameTokens (ExpandedWidth + PanelElevation) və MainActivity
+  (OnlineGame host; PracticeGame FrameTiming saxlanıb) əl ilə birləşdirilib.
+- Build/test bu handoff yazılana qədər hələ yenidən işlədilməyib.
 
 ## Exact next step
-- Diff review → merge `feat/construction-cycle-compose` → `./scripts/local-ci.sh` on main.
-- Separately: physical-device FrameTiming run, then plan unit / stage 3.4 online host.
+- Google Sign-In credential axınını mövcud `linkGuest`-ə bağla (Console dəyişmə).
+- Sonra eyni vahid 2 daxilində açıq dizayn tapıntılarını bağla və review et.
