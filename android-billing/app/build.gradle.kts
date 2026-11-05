@@ -18,6 +18,9 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "0.1"
+        val backendOrigin = providers.gradleProperty("wobbrik.backendOrigin").orElse("").get()
+        require(backendOrigin.none { it == '"' || it == '\\' || it.isISOControl() })
+        buildConfigField("String", "BACKEND_ORIGIN", "\"$backendOrigin\"")
     }
     buildFeatures { compose = true; buildConfig = true }
     compileOptions { sourceCompatibility = JavaVersion.VERSION_21; targetCompatibility = JavaVersion.VERSION_21 }
@@ -25,6 +28,10 @@ android {
 kotlin { jvmToolchain(21) }
 dependencies {
     implementation(project(":engine"))
+    implementation(project(":android"))
+    implementation("androidx.lifecycle:lifecycle-process:2.8.7")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.10.2")
     implementation("androidx.activity:activity-compose:1.9.3")
     implementation("androidx.compose.ui:ui:1.7.6")
     implementation("androidx.compose.foundation:foundation:1.7.6")
@@ -33,4 +40,5 @@ dependencies {
     implementation("com.google.firebase:firebase-crashlytics")
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-config")
+    implementation("com.google.firebase:firebase-auth")
 }

@@ -59,3 +59,24 @@ JDK21 və Android SDK36 ilə:
 ```
 
 19 core ssenarisi: kosmetika restore, təkrar coin callback, consumed token olmayan yeni cihaz, itmiş cavab/process restart, pending, disk/network xətası, account/epoch dəyişməsi, logout zamanı cache, mənfi balansın rəddi və revoked cache. AAR/lint sınağı real Google alışını və cihaz KeyStore davranışını təsdiqləmir; onlar real dəyişənlər veriləndə ayrıca yoxlanacaq.
+
+### Android application auth bootstrap
+
+The app now owns one `AuthenticatedRecoveryOwner`, disk journal and Firebase Auth
+listener per process. Existing Firebase sessions are observed; this does not create
+an anonymous account or add sign-in UI. ID tokens come from the current Firebase
+user on each request (SDK refresh enabled), with account/epoch guards around I/O.
+Process foreground retries recovery; Activity recreation does not create writers.
+
+Supply the actual AppBackend HTTPS origin through the Gradle property
+`wobbrik.backendOrigin` (for example in user-local `~/.gradle/gradle.properties`).
+Only an HTTPS origin is accepted; no path, credentials, query or fragment. No
+production endpoint is assumed. The existing git-excluded `app/google-services.json`
+selects Firebase. Without either configuration the application reports
+`MissingFirebase` / `MissingBackendOrigin` through `WobbrikApplication.bootstrap`
+and does not start recovery. Invalid nonempty origins fail explicitly.
+
+The visible game still runs offline practice. Auth bootstrap does not unlock online
+input or bind start/checkpoint/finish/restart/abandon. Live sign-in, account switching,
+process death and backend connectivity require configured device verification.
+Firebase listener semantics: https://firebase.google.com/docs/reference/android/com/google/firebase/auth/FirebaseAuth
