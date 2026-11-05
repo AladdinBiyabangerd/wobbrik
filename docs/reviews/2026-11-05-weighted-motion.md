@@ -3,7 +3,10 @@
 Branch: `fix/weighted-game-motion`, base `d6854c0`.
 Reviewed scope: PracticeEngine/EngineCheckpoint and their tests, GameScene,
 SceneMotion, PracticeGame frame lifecycle, debug fixture and engine contract notes.
-CI is pending merge; branch CI has NOT been run.
+Reviewed commit `40f2bf5` (diff `d6854c0..40f2bf5`); merged preserving history
+as `229f058`. No branch CI was run. Main `./scripts/local-ci.sh` passed in 36s:
+106 actionable tasks, 11 executed / 95 up-to-date. Engine tests executed;
+app assemble/lint and core/Android gates passed (some up-to-date).
 
 ## Request and implementation
 
@@ -64,7 +67,7 @@ user-approved motion work, not a claim of exact prior static-board parity.
   paused captures one second apart are pixel-identical excluding system bars;
   see `pause-check.txt`. Emulator size/density overrides restored.
 - Final source diff reviewed locally; `git diff --check` passed. No remaining
-  source-review finding for this unit; automated regression result pending main.
+  source-review finding for this unit; main regression gate passed.
 
 ## Backend and limitations
 
@@ -81,3 +84,12 @@ state resets on process recreation. No physical-device feel/performance test,
 new phone landscape/tablet portrait/large-font validation or online playable
 accepted-attempt integration is claimed. Existing broader product/design debt
 remains open. No push, deployment, new SKU or Console changes.
+
+
+Validation documentation follow-up is docs-only. Stationary phone crane-body ROI
+is pixel-identical at all five post-release samples; hook/cables excluded. See
+`weighted-motion/crane-pixel-check.txt`. Final APK reinstalled after the terminal
+settling-displacement guard; active/pause rendering is unaffected by that guard.
+No physical-device performance or subjective realism claim is inferred from CI.
+Docs-only follow-up diff reviewed locally; whitespace passed; no findings.
+Main CI is repeated after its merge and the exact result is reported in chat.

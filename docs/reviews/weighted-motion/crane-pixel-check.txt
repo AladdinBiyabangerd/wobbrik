@@ -1,0 +1,6 @@
+Phone stationary crane body ROI (493, 636, 990, 740); excludes hook/cables below y=740.
+tick=15: difference bounding box=None
+tick=27: difference bounding box=None
+tick=40: difference bounding box=None
+tick=65: difference bounding box=None
+tick=100: difference bounding box=None
