@@ -1,35 +1,37 @@
-# Balance/rescue — 4 November 2026
+# Yekun oyun məqsədi və main-only CI — 5 noyabr 2026
 
 ## Completed
-- Engine foundation plus persistent lean, danger hysteresis, one rescue per danger episode, perfect-landing count, damped shared sway signal, first-five forgiveness and capped speed/sensitivity.
-- Product OS decision: minimum Android 7.0 / API24, target Android16 / API36, compileSdk36; billing module updated.
+- Engine və balance/rescue main-ə merge edilib.
+- Təsdiqlənmiş dizaynların birəbir implementasiyası AGENTS.md-də məcburidir.
+- Məqsəd yekun real Android oyunudur; ayrıca prototip/məşq tətbiqi deyil.
+- CI qaydası: branch review → main-ə merge → yalnız main-də lokal CI. Uğursuzluq ayrıca fix branch ilə düzəldilir.
 
 ## Current state
-- Prepared on feat/game-balance-rescue. Review and verification: docs/reviews/2026-11-04-game-balance-rescue.md; final merge outcome in chat/Git history.
-- No Android game host or playable APK. Existing billing preserved; pre-existing untracked responsive rule/review excluded.
+- Compose host hələ əvvəlki işdən qalan uncommitted fayllardır; bu qayda düzəlişinə daxil deyil.
+- MainActivity hazırda PracticeEngine, sxematik Canvas binaları, “Offline məşq” menyusu və yalnız session/saved-instance rekord istifadə edir. Process death yeni cəhd yaradır. Bu, yekun oyun kimi qəbul edilmir.
+- Əvvəlki renderlər dizayna birəbir uyğunluğun sübutu deyil.
 
 ## Decisions
-- practice-balance-v1 parameters are provisional arcade units, not server geometry.
-- Only a landing changes persistent balance, rescue or loss. Waiting merely damps cosmetic sway.
-- Offline counters confer no XP/coins/achievements/buildings. No backend changes needed for this unit; online compatibility not claimed.
+- Adları dəyişmək çatışmayan funksiyaları tamamlamır; engine davranışını sırf Practice adı var deyə silmək olmaz.
+- Server wallet/progression authority-si qorunur; offline xal mükafat yaratmır. Real SKU/Console/deploy ayrıca göstəriş gözləyir.
+- Qayda/CI vahidi AppBackend domain/API/schema dəyişmir; backend uyğunluğu və inteqrasiya tamamlanmış sayılmır.
 
 ## Remaining work
-- Compose application host, adaptive scene, camera, tap/drop and pause/lifecycle routing.
-- Process restore and online checkpoint adapter; real SKU/Console/deploy excluded.
-- Device gameplay feel, performance and balance measurements still pending.
+- Mövcud hostu yekun məhsul axınına çevirmək: təsdiqlənmiş qrafika, real menyu/naviqasiya, cəhdin bərpası və server gameplay adapteri.
+- MainActivity/README-dəki məşq əhatəsini yalnız real əvəzləmə implementasiya ediləndən sonra yeniləmək.
+- Telefon və planşetdə render/baxış, dizayn müqayisəsi; cihaz gameplay/performance yoxlamaları.
 
 ## Relevant files
-- android-billing/engine/src/main/kotlin/az/wobbrik/engine/{PracticeEngine,Balance}.kt
-- android-billing/engine/src/test/kotlin/az/wobbrik/engine/{PracticeEngineTest,BalanceTest}.kt
-- android-billing/android/build.gradle.kts; docs/kotlin-compose-plan.md; docs/game-plan.md sections 2–4
-- docs/design/game-tap-v2/README.md; docs/design/mobile-v1/tokens.css
-- docs/reviews/2026-11-04-game-balance-rescue.md
+- AGENTS.md; .cursor/rules/local-delivery.mdc; scripts/local-ci.sh
+- docs/kotlin-compose-plan.md (xüsusən 5-ci bölmə və mərhələlər)
+- android-billing/app/README.md; android-billing/app/src/main/kotlin/az/wobbrik/game/{MainActivity,GameTokens}.kt
+- docs/design/game-tap-v2/README.md; docs/design/mobile-v1/tokens.css; docs/design/README.md
+- /Users/mac/My Workspace/AppBackend/AGENTS.md; docs/wobbrik-game-api.md (backend repository daxilində)
 
 ## Checks performed
-- Initial local CI caught incorrect danger-test setup; corrected and CI passed with ten engine tests.
-- Local CI passed with SDK target and 11 engine tests including pause/restart. Final docs/post-merge CI results in chat.
-- No game UI render/device test; no game UI exists yet.
+- Əvvəlki design-fidelity qaydası üçün main CI uğurlu idi.
+- Bu vahidin review və yekun CI nəticəsi docs/reviews/2026-11-05-product-scope-main-ci.md-də izlənir.
+- Bu vahiddə UI dəyişdirilməyib və yeni render aparılmayıb.
 
 ## Exact next step
-- After current gate, create Android Compose application host using minSdk24 / targetSdk36.
-- Read ui-craft, tap-v2 design and palette first; implement an offline practice scene wired to this engine, then render/view phone and tablet sizes. Keep reward/economy absent until server adapter integration.
+- Yeni chatdə əvvəlcə bu qeydi və istinad edilən host/dizayn/API sənədlərini oxu. Mövcud uncommitted hostu qoruyaraq yekun oyun üçün ilk kiçik implementasiya vahidini seç: server attempt lifecycle və bərpa müqaviləsini hosta bağlamaq; backend qaydalarını yoxlamadan lokal real mükafat əlavə etmə. Böyük implementasiyaya başlamazdan əvvəl ui-craft və backend AGENTS.md oxunmalıdır.

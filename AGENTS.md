@@ -3,11 +3,17 @@
 ## Branch, commit və lokal CI
 
 - Hər məntiqi vahid uyğun `feat/`, `fix/`, `chore/` və ya `docs/` branch-ində hazırlanır; `main` üzərində implementasiya edilmir. Commit-lər kiçik, məzmununa uyğun və review edilə bilən olur.
-- Hər branch bitəndə diff üzrə lokal review edilir. Tapılan problemlər düzəldilir və lokal CI yenidən işlədilir; bütün tələb olunan yoxlamalar uğurlu olana qədər dövr davam edir. Uğursuz və ya icra edilməmiş yoxlama keçmiş sayılmır.
-- CI yalnız lokaldır: `./scripts/local-ci.sh`. GitHub Actions/remote CI yaradılmır. Arrowz-dakı vahid Gradle `ci` task yanaşması nümunədir, onun oyun qaydaları köçürülmür.
+- Hər branch bitəndə diff üzrə lokal review edilir. Tapılan problemlər branch-də düzəldilir; CI branch-də işə salınmır. Uğursuz və ya icra edilməmiş yoxlama keçmiş sayılmır.
+- CI yalnız branch `main`-ə merge edildikdən sonra `main` üzərində və yalnız lokaldır: `./scripts/local-ci.sh`. GitHub Actions/remote CI yaradılmır. Arrowz-dakı vahid Gradle `ci` task yanaşması nümunədir, onun oyun qaydaları köçürülmür.
 - Review qeydi `docs/reviews/` altında branch, yoxlanmış diff/commit, tapıntılar, düzəlişlər, CI nəticəsi və qalan məhdudiyyətləri göstərir. Son dəyişiklikdən sonra uyğun yoxlamalar yenilənir.
-- Yalnız lokal review və CI uğurlu olduqdan sonra branch `main`-ə merge edilir. Merge nəticəsində CI təkrar yoxlanır; branch tarixi saxlanılır. Remote push/deploy ayrıca göstəriş tələb edir.
+- Lokal review tamamlandıqdan sonra branch tarixi saxlanılmaqla `main`-ə merge edilir; sonra `main` üzərində `./scripts/local-ci.sh` işlədilir. CI uğursuz olarsa iş tamamlanmış sayılmır: düzəliş ayrıca branch-də hazırlanır, review və merge edilir, CI yenə yalnız `main` üzərində işlədilir. Remote push/deploy ayrıca göstəriş tələb edir.
 - AppBackend dəyişərsə onun ayrıca repository/branch/commit və öz AGENTS.md yoxlamaları da tələb olunur; Wobbrik CI nəticəsi backend yoxlamalarını əvəz etmir.
+
+## Məhsulun icra məqsədi
+
+- Wobbrik yekun, real Android oyunu kimi hazırlanır; ayrıca atılacaq prototip, demo və ya yalnız məşq tətbiqi məqsəd deyil. İş mərhələlərlə görülür, lakin hər vahid yekun oyuna inteqrasiya üçün hazırlanmalıdır.
+- Lokal engine və offline iş rejimi server authority-sini əvəz etmir. Məşq rejimi, placeholder qrafika, saxta menyu və ya session-only nəticə real oyun axınının əvəzi və tamamlanmış implementasiya sayıla bilməz. Mövcud belə hissələr açıq texniki borc kimi qeyd olunmalı və yekun axına uyğunlaşdırılmalıdır.
+- Tamamlanma dizayna uyğun qrafika, real menyu/naviqasiya, cəhdin bərpası və tələb olunan AppBackend hesab/progression inteqrasiyası ilə yoxlanır; bunlar olmadan yalnız işlək mexanika yekun oyun kimi təqdim edilmir. Real SKU, Console və deploy üçün ayrıca göstəriş tələbi qüvvədədir.
 
 ## AppBackend ilə uyğunluq
 
