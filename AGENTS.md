@@ -19,6 +19,10 @@
 
 ## Visual work
 
+- Təsdiqlənmiş hazır dizaynlar implementasiya üçün məcburi vizual əsasdır və birəbir həyata keçirilməlidir: kompozisiya, rənglər, tipoqrafiya, boşluqlar, ölçü nisbətləri, formalar, ikonlar, illüstrasiyalar və oyun qrafikası qorunmalıdır. Əsas istinadlar `docs/design/mobile-v1/` və `docs/design/game-tap-v2/` altındakı cari təsdiqlənmiş dizaynlardır; eyni ekran üçün son təsdiqlənmiş versiya əsas götürülür.
+- Hazır qrafikanı özbaşına sxematik fiqurlar, placeholder və ya sadələşdirilmiş alternativlərlə əvəz etmək, ekranı yenidən dizayn etmək olmaz. Lazımi asset çatışmırsa və ya texniki məhdudiyyət birəbir uyğunluğa mane olursa, bunu açıq bildir və alternativi tətbiq etməzdən əvvəl istifadəçinin razılığını al; belə nəticəni tamamlanmış dizayn kimi təqdim etmə.
+- Yalnız pəncərə ölçüsü, orientasiya və şrift miqyası üçün zəruri responsiv/adaptiv uyğunlaşdırmalara icazə verilir; dizaynın vizual dili və elementlərin iyerarxiyası saxlanmalıdır. Bu zərurətdən kənar hər vizual dəyişiklik istifadəçi ilə əvvəlcədən razılaşdırılmalıdır.
+- Vizual yoxlamada telefon və planşet renderlərini müvafiq təsdiqlənmiş dizaynlarla yanaşı müqayisə et; fərqləri və razılaşdırılmış istisnaları review qeydində göstər. Sadəcə build-in keçməsi və ya screenshot-un mövcudluğu dizayna uyğunluğun sübutu deyil.
 - Bütün ekran və oyun interfeysləri responsiv/adaptiv olmalıdır: həm telefonda, həm də planşetdə rahat və düzgün işləməlidir.
 - Layout cihaz adına deyil, mövcud pəncərə ölçüsünə uyğunlaşmalıdır; portret, landşaft və ölçüsü dəyişən pəncərələr nəzərə alınmalıdır. Məzmun kəsilməməli, idarəetmələr üst-üstə düşməməli və əlçatmaz qalmamalıdır.
 - Telefon dizaynını sadəcə böyütmək planşet üçün kifayət etmirsə, planşetə uyğun ayrıca kompozisiya/dizayn hazırla (məsələn, iki panel və ya uyğun naviqasiya); mövcud dizayn tokenlərini saxla.
