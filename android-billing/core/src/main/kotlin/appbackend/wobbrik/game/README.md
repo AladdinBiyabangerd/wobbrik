@@ -10,16 +10,22 @@ A definitive revision conflict discards the rejected command, refreshes state an
 reports the conflict to the caller. Historical receipts are followed by sync;
 equal-revision wallet refreshes replace the balance, never add a delta.
 
-Required Android adapters are still absent:
+Implemented adapters (not yet connected to the host):
 
-- An atomic, durable, per-UID `AttemptJournal` (exclude from device backup).
-  Save must reject overwriting a pending command; remove must compare the exact
-  command. Keep pending commands across sign-out, without exposing them to another
-  UID. Only one coordinator/journal writer may own the host session.
-- An authenticated `AttemptBackend` with strict DTO/envelope serialization,
-  bounded HTTP, fresh Firebase tokens and exact error-code mapping. Construct
-  command metadata and its envelope together; they must describe the same command.
-  Only the explicit `revision_conflict` code maps to `RevisionConflict`.
+- `GameplayWire` builds typed start/checkpoint/finish envelopes and validates journal
+  metadata against the body. `GameplayHttpBackend` uses the existing `Sessions`
+  UID/login epoch and fresh token boundary; `UrlConnectionGameplayTransport` sends
+  exact retained UTF-8 bodies with bounded response size, connect/read timeouts,
+  HTTPS origin validation and no redirects. Only 409 `revision_conflict` rebases
+  through the coordinator. Other failures retain the command.
+- `DiskAttemptJournal` rejects pending overwrites and compares exact removals.
+  Android `androidAttemptJournal(context)` uses AtomicFile in noBackupFilesDir,
+  synced writes and durable tombstones. Keep ONE application-scoped journal and
+  coordinator owner; multiple writers/processes are unsupported. Corruption fails
+  closed. JVM disk tests cover recreation, not Android process/power-loss testing.
+
+Remaining integration requirements:
+
 - Complete catalog/account/attempt DTOs; `GameSnapshot` here is only the recovery
   projection, not the full account model or a complete domain adapter.
 - Versioned engine checkpoint codec and validation, Compose input gating while
