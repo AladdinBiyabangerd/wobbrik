@@ -1,4 +1,4 @@
-package az.wobbrik.engine
+package com.aladdin.wobbrik.engine
 
 import kotlin.math.abs
 

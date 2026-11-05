@@ -31,7 +31,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import az.wobbrik.engine.*
+import com.aladdin.wobbrik.engine.*
 import kotlin.math.max
 import kotlin.math.min
 

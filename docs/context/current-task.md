@@ -33,7 +33,7 @@
 
 ## Relevant files
 - android-billing/core/src/main/kotlin/appbackend/wobbrik/game/{README.md,RecoveryDtos.kt,GameplayWire.kt,GameplayHttpBackend.kt,AttemptCoordinator.kt}
-- android-billing/engine/src/main/kotlin/az/wobbrik/engine/{EngineCheckpoint.kt,PracticeEngine.kt}
+- android-billing/engine/src/main/kotlin/com/aladdin/wobbrik/engine/{EngineCheckpoint.kt,PracticeEngine.kt}
 - android-billing/{core,engine}/src/test/kotlin (RecoveryDtosTest, GameplayAdaptersTest, EngineCheckpointTest)
 - docs/reviews/2026-11-05-recovery-checkpoint.md
 - android-billing/app/README.md; docs/kotlin-compose-plan.md §5
