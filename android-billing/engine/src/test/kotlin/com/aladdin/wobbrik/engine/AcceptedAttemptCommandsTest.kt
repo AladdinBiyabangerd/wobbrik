@@ -111,6 +111,13 @@ class AcceptedAttemptCommandsTest {
             f.host.onForeground()
             assertFalse(f.host.resume(old.copy()))
             assertTrue(f.host.resume(old))
+            f.host.onFrame(1L, old)
+            f.host.pause()
+            assertTrue(f.host.snapshot().foreground)
+            assertFalse(f.host.snapshot().inputEnabled)
+            assertNull(f.host.snapshot().previousFrameNanos)
+            assertFalse(f.host.drop(old))
+            assertTrue(f.host.resume(old))
             assertFalse(f.host.drop(old.copy()))
             assertTrue(f.host.drop(old))
             var time = 0L

@@ -23,6 +23,8 @@ internal object GameTokens {
     val CardRadius = 24.dp
     val ControlRadius = 16.dp
     val Target = 48.dp
+    // Expanded breakpoint from tablet-v1; logo follows the existing panel scale.
+    val ExpandedWidth = 840.dp
     val PanelWidth = 400.dp
     val Body = 16.sp
     val Title = 24.sp
