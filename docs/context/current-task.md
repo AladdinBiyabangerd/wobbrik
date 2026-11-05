@@ -9,7 +9,8 @@
   phone, font 1.5/short window and 40-floor crane-limit renders inspected.
 
 ## Current state
-- Branch feat/game-scene-assets; review/main CI result recorded in the review note.
+- Implementation b638536 merged as 55a28e5; main local CI passed (106 tasks,
+  10 executed / 96 up-to-date). Validation note merged separately; see review.
 - Sprites integrated. Exact concept parity is NOT complete: scene/garden proportions,
   native type sizes, background and panel/guide/cable lighting still differ.
   Full visual checklist remains unchecked, with a scoped progress note.
@@ -48,7 +49,8 @@
 - Phone 1080×2400/420dpi; tablet 1200×1920 + 1920×1200/240dpi;
   phone landscape 1600×720/280dpi; 1600×800/320dpi/font 1.5 inspected.
 - Rejected splash capture and rerendered. Initial emulator resize crash documented.
-- Final input/main CI results are recorded in the review note after completion.
+- Real MainActivity: pause barrier and resume do not drop; restart + tap lands
+  count 1. Main CI passed after merge; review records exact result.
 - No physical-device/live-backend checks, push or deploy.
 
 ## Exact next step
