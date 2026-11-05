@@ -34,10 +34,10 @@
 
 ## Checks performed
 - Scoped Firebase and recovery source review; branch whitespace check.
-- Post-merge CI result recorded in the review note when available.
+- Post-merge ./scripts/local-ci.sh passed: 40 core tests including five owner
+  tests, engine tests, Android/app assemble and lint; see review for failed retries.
 - No device/live-backend or visual checks in this nonvisual unit.
 
 ## Exact next step
-- Finish post-merge local CI on main; fix any failure on a separate reviewed branch.
-- Then implement real auth bootstrap only with actual auth/backend configuration;
+- Implement real auth bootstrap only with actual auth/backend configuration;
   preserve recovery journals and leave restart/abandon unbound.
