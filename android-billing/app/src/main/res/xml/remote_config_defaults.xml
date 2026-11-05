@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- In-app Remote Config defaults; used until the first successful fetch. -->
+<defaultsMap>
+    <entry>
+        <key>min_supported_version</key>
+        <value>1</value>
+    </entry>
+</defaultsMap>
