@@ -22,9 +22,9 @@ class AuthenticatedRecoveryOwnerTest {
         val backend = object : AttemptBackend {
             override suspend fun sync(session: BillingSession): GameSnapshot {
                 calls += session
-                return sync(session)
+                return this@Fixture.sync(session)
             }
-            override suspend fun submit(session: BillingSession, command: AttemptCommand) { submit() }
+            override suspend fun submit(session: BillingSession, command: AttemptCommand) { this@Fixture.submit() }
         }
         val owner = AuthenticatedRecoveryOwner(sessions, backend, journal, scope)
         fun ready() = (owner.state.value as AuthenticatedRecoveryOwner.State.Ready).snapshot

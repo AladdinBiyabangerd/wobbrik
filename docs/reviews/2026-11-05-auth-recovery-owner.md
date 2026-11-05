@@ -20,3 +20,7 @@
 - Limits: Android singleton/auth wiring, real device recreation/process death,
   engine/input binding and full online gameplay remain open. Restart/abandon is
   unbound. No visual changes were made.
+
+- Repeat CI still failed: further review found fixture backend methods recursively
+  resolved themselves instead of injected lambdas. fix/recovery-test-backend
+  qualifies both calls with this@Fixture; reviewed exact two-call fix.
