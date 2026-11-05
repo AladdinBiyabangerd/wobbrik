@@ -18,3 +18,12 @@
 - Məhdudiyyətlər: fake contract testləri real PostgreSQL/device sübutu deyil.
   UI/auth/Room və continue qərarı bu vahidə daxil deyil; mövcud continued
   attempt fail-closed qalır. Vizual dəyişiklik yoxdur.
+
+## Callback identity follow-up
+- İlk implementation commit: 7cacd71; main CI keçdi (1m54s, 106 tasks).
+- Branch: fix/online-host-callback-identity.
+- Əlavə review tapıntısı: frame/drop da çağıranın exact Ready-sini almalıdır;
+  yeni hesab resume edildikdən sonra köhnə UI callback-i təsir etməməlidir.
+- Düzəliş: resume/frame/drop null/equal-copy/stale Ready-ni rədd edir.
+  Regression test stale frame-in clock/scene-i dəyişmədiyini yoxlayır.
+- git diff --check keçdi; branch-də CI işə salınmayıb.

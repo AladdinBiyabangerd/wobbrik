@@ -1,38 +1,42 @@
-# Mərhələ 3 başlanğıcı — 5 noyabr 2026
+# Mərhələ 3 — online host vahidi, 5 noyabr 2026
 
 ## Completed
-- İstifadəçi mərhələ 3-ə başlamağı tapşırdı; mövcud kod/müqavilə yoxlandı.
-- docs/stage-three-online-plan.md icra sırası və qəbul sərhədini verir.
+- AcceptedEngineHost recovery/commands ilə online resume/frame/drop-a bağlandı.
+- İlk settled tick-də pause/checkpoint; yeni Ready həmişə paused restore olur.
+- Accepted FINISHED checkpoint davamlı finish niyyətidir; application Ready
+  observer-i proses yenidən başlayanda da finish-i mövcud journal ilə göndərir.
+- Backend API/catalog uyğunluğu yoxlandı; backend/API/schema dəyişikliyi lazım deyil.
 
 ## Current state
-- Bu vahid araşdırma/plandır; yeni runtime kodu yoxdur.
-- MainActivity offline engine göstərir; online host input bağlıdır.
-- Firebase auth listener var, giriş axını və Room yoxdur.
+- MainActivity hələ ayrıca offline engine göstərir; UI/auth bağlantısı növbəti vahiddir.
+- Online host yalnız exact Ready + foreground explicit resume ilə açılır.
+- Terminal finish pulsuz base_6 hissələri istifadə edir; custom seçim hələ yoxdur.
 - Əlaqəsiz untracked responsive-rule/compose-game-host faylları qorunub.
 
 ## Decisions
-- İlk kod vahidi vizual dəyişikliksiz online engine idarəsidir.
-- Server vahid wallet/progression authority-dir; offline nəticələr daşınmır.
-- Plan üçün backend dəyişikliyi lazım deyil; kod zamanı yenidən yoxla.
-- Aktiv attempt üçün səssiz restart/abandon yoxdur.
+- Server wallet/progression authority-dir; offline proposal online-a keçmir.
+- FINISHED checkpoint iki command arasındakı davamlı niyyətdir.
+- Restart/abandon yoxdur; continued/unsupported checkpoint fail-closed qalır.
+- Recovery callback daxilində command dispatch edilmir; host monitoru xaricindədir.
 
 ## Remaining work
-- Online loop, terminal finish intent recovery, auth/UI, Room, cihaz/DB sübutu.
-- Dizayn borcu qalır; deploy/SKU/Console daxil deyil.
+- Plan vahid 2: Firebase anonymous bootstrap və təsdiqlənmiş dizaynla ekran bağlantısı.
+- Sonra Room migration/outbox və real cihaz/PostgreSQL nasazlıq sübutları.
+- Custom parts/continue qərarı və mövcud dizayn borcu açıqdır.
 
 ## Relevant files
-- docs/stage-three-online-plan.md; docs/kotlin-compose-plan.md §5–6.
+- docs/stage-three-online-plan.md
+- docs/reviews/2026-11-05-online-engine-host.md
 - android-billing/engine/src/main/kotlin/com/aladdin/wobbrik/engine/AcceptedEngineHost.kt
-- Eyni qovluqda AcceptedAttemptCommands.kt, AcceptedAttemptRestore.kt və testləri.
+- android-billing/engine/src/test/kotlin/com/aladdin/wobbrik/engine/AcceptedAttemptCommandsTest.kt
 - android-billing/core/src/main/kotlin/appbackend/wobbrik/game/AuthenticatedRecoveryOwner.kt
-- Eyni qovluqda AttemptCoordinator.kt və RecoveryDtos.kt.
-- android-billing/app/src/main/kotlin/com/aladdin/wobbrik/WobbrikApplication.kt və MainActivity.kt.
-- AppBackend/docs/wobbrik-game-api.md; backend AGENTS/README/context oxunub.
+- android-billing/app/src/main/kotlin/com/aladdin/wobbrik/WobbrikApplication.kt
 
 ## Checks performed
-- Scoped source/contract review; yeni live auth/DB/device yoxlaması yoxdur.
-- Docs review/main CI: docs/reviews/2026-11-05-stage-three-plan.md.
+- Diff review, git diff --check; ilk merge sonrası main local CI keçdi.
+- Final callback-identity düzəlişinin main CI nəticəsi review qeydində saxlanılır.
+- Fake backend/disk tests; live auth/DB/device yoxlanmayıb. Vizual dəyişiklik yoxdur.
 
 ## Exact next step
-- Planı və host/restore/commands testlərini oxu; feat/ branch-də online engine
-  idarəsini implementasiya et. Auth/UI/Room-u eyni böyük dəyişiklikdə yığma.
+- Review-də final CI nəticəsini oxu. Yeni chatdə plan vahid 2-ni ui-craft,
+  təsdiqlənmiş dizaynlar və scoped auth/UI mənbələrindən başlayaraq implementasiya et.

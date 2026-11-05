@@ -54,10 +54,10 @@ class AcceptedEngineHost {
      * Stop at the first settled tick: a catch-up frame must never simulate past the
      * checkpoint boundary. The coordinator independently rejects stale Ready identity.
      */
-    fun onFrame(frameNanos: Long) {
+    fun onFrame(frameNanos: Long, expected: AuthenticatedRecoveryOwner.State.Ready? = null) {
         require(frameNanos >= 0)
         val dispatch = synchronized(this) {
-            if (!current.inputEnabled) return
+            if (expected == null || expected !== ready || !current.inputEnabled) return
             val previous = current.previousFrameNanos
             if (previous != null && frameNanos < previous) {
                 pauseAndReset()
@@ -88,7 +88,7 @@ class AcceptedEngineHost {
         }
     }
 
-    @Synchronized fun resume(expected: AuthenticatedRecoveryOwner.State.Ready? = ready): Boolean {
+    @Synchronized fun resume(expected: AuthenticatedRecoveryOwner.State.Ready? = null): Boolean {
         if (expected == null || expected !== ready || commands == null || !current.foreground || current.waiting) return false
         val restored = current.restore as? AcceptedAttemptRestore.Result.Paused ?: return false
         if (restored.terminal) return false
@@ -98,8 +98,8 @@ class AcceptedEngineHost {
         return true
     }
 
-    @Synchronized fun drop(): Boolean {
-        if (!current.inputEnabled) return false
+    @Synchronized fun drop(expected: AuthenticatedRecoveryOwner.State.Ready? = null): Boolean {
+        if (expected == null || expected !== ready || !current.inputEnabled) return false
         return (engine?.drop() == true).also { current = current.copy(scene = engine?.state) }
     }
 
