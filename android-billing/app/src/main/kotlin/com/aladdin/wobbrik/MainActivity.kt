@@ -71,9 +71,11 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-internal fun PracticeGame(engine: PracticeEngine, renderOnly: Boolean = false) {
+internal fun PracticeGame(engine: PracticeEngine, renderOnly: Boolean = false, previewMotion: SceneMotion? = null) {
     // Coordinates are read in the draw phase; HUD only observes discrete changes.
     val snapshot = remember { mutableStateOf(engine.state) }
+    val motion = remember { previewMotion ?: SceneMotion().also { it.advance(engine.state, 0f) } }
+    var motionFrame by remember { mutableIntStateOf(0) }
     var paused by remember { mutableStateOf(engine.state.paused) }
     var menu by remember { mutableStateOf(false) }
     var count by remember { mutableIntStateOf(engine.state.floors.size) }
@@ -93,7 +95,7 @@ internal fun PracticeGame(engine: PracticeEngine, renderOnly: Boolean = false) {
         finished = engine.state.phase == Phase.FINISHED
     }
     fun pause() { engine.pause(); paused = true; publish() }
-    fun restart() { engine.restart(); paused = false; menu = false; publish() }
+    fun restart() { engine.restart(); motion.reset(); paused = false; menu = false; publish() }
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     DisposableEffect(lifecycle) {
         val observer = LifecycleEventObserver { _, event ->
@@ -105,9 +107,14 @@ internal fun PracticeGame(engine: PracticeEngine, renderOnly: Boolean = false) {
     BackHandler(enabled = !menu) { pause() }
     LaunchedEffect(paused, menu, finished) {
         var previous = 0L
-        while (!renderOnly && !paused && !menu && !finished) {
+        while (!renderOnly && !paused && !menu && (!finished || !motion.settled)) {
             withFrameNanos { now ->
-                if (previous != 0L) { engine.advance(now - previous); publish() }
+                if (previous != 0L) {
+                    engine.advance(now - previous)
+                    motion.advance(engine.state, (now - previous) / 1_000_000_000f)
+                    motionFrame++
+                    publish()
+                }
                 previous = now
             }
         }
@@ -129,7 +136,7 @@ internal fun PracticeGame(engine: PracticeEngine, renderOnly: Boolean = false) {
                     interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }) {
                     if (engine.drop()) learned = true
                     publish()
-                }) { drawGameScene(snapshot.value, art) }
+                }) { motionFrame; drawGameScene(snapshot.value, art, motion) }
             Row(Modifier.fillMaxWidth().safeDrawingPadding()
                 .onSizeChanged { hudHeight = with(density) { it.height.toDp() } }.padding(GameTokens.Inset),
                 horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Top) {

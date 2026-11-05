@@ -6,6 +6,10 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.rotate
+import kotlin.math.sqrt
+import kotlin.math.cos
+import kotlin.math.sin
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import com.aladdin.wobbrik.engine.*
@@ -19,16 +23,16 @@ internal data class SceneArt(val floor: ImageBitmap, val crane: ImageBitmap,
 /** Sprite coordinates are art anchors, not UI spacing or authoritative building geometry.
  * No bitmap allocation/decoding in the frame loop. Physics/collision units stay unchanged.
  */
-internal fun DrawScope.drawGameScene(state: PracticeState, art: SceneArt) {
+internal fun DrawScope.drawGameScene(state: PracticeState, art: SceneArt, motion: SceneMotion) {
     if (size.width <= 0f || size.height <= 0f) return
     val floorWidth = PracticeRulesV1.FLOOR_WIDTH.toFloat()
     val floorHeight = PracticeRulesV1.FLOOR_HEIGHT.toFloat()
     val top = state.floors.size * floorHeight
-    val camera = max(0f, top - 4 * floorHeight)
+    val camera = motion.cameraUnits
     // Reserve the full crane travel + floor width, and island through hook vertically.
-    val travelWidth = 2 * PracticeRulesV1.CRANE_RANGE.toFloat() + floorWidth + 20f
-    val scale = min(size.width / travelWidth, size.height / 405f)
-    val ground = (size.height + 265f * scale) / 2f
+    val travelWidth = 2 * PracticeRulesV1.CRANE_RANGE.toFloat() + floorWidth + 50f
+    val scale = min(size.width / travelWidth, size.height / 520f)
+    val ground = (size.height + 350f * scale) / 2f
     // Compress empty air above the stack, continuously through landing. Physics is unchanged.
     fun visualY(y: Float) = if (y > top) top + (y - top) * .5f else y
     fun point(x: Double, y: Double) = Offset(size.width / 2f + x.toFloat() * scale,
@@ -46,24 +50,27 @@ internal fun DrawScope.drawGameScene(state: PracticeState, art: SceneArt) {
     }
     val width = floorWidth * scale
     // Visible brick silhouette crop; original alpha and generated artwork are preserved.
-    fun floor(x: Double, y: Double) {
-        val p = point(x, y)
+    fun floor(x: Double, y: Double, degrees: Float = 0f, position: Offset = point(x, y)) {
+        val p = position
         val upper = p.y - width * 597 / 1064
         // Test the actual projected sprite, never a fixed suffix of the floor list.
         // Keep every visible connecting floor, including ones below the camera anchor.
-        if (p.y >= 0f && upper <= size.height) {
-            sprite(art.floor, 233, 258, 1064, 597, p.x - width / 2, upper, width)
+        if (p.y >= -width && upper <= size.height + width) {
+            rotate(degrees, p) {
+                sprite(art.floor, 233, 258, 1064, 597, p.x - width / 2, upper, width)
+            }
         }
     }
     val island = point(0.0, 0.0)
     val islandWidth = width * 1259 / 720
     sprite(art.island, 123, 129, 1259, 778, island.x - islandWidth / 2,
         island.y - width * 306 / 720, islandWidth)
-    state.floors.forEachIndexed { index, f ->
-        floor(f.centerX + state.sway * (index + 1), f.baseY)
+    // Rotate the connected stack as one body about its foundation. No per-floor sliding.
+    rotate(motion.towerDegrees, island) {
+        state.floors.forEach { f -> floor(f.centerX, f.baseY) }
     }
     if (state.phase != Phase.FINISHED) {
-        val target = point(state.floors.lastOrNull()?.let { it.centerX + state.sway * state.floors.size } ?: 0.0,
+        val target = point(state.floors.lastOrNull()?.centerX ?: 0.0,
             (state.floors.lastOrNull()?.baseY?.plus(4.0) ?: -30.0))
         // The guide sits just above the open top; it is never a collision rectangle.
         val guide = Path().apply {
@@ -73,30 +80,45 @@ internal fun DrawScope.drawGameScene(state: PracticeState, art: SceneArt) {
             lineTo(target.x + width * .24f, target.y - width * .33f)
             close()
         }
-        drawPath(guide, if (state.balance.dangerEpisode) GameTokens.Danger else GameTokens.Accent,
-            style = Stroke(2 * scale, pathEffect = PathEffect.dashPathEffect(floatArrayOf(5 * scale, 3 * scale))))
+        rotate(motion.towerDegrees, island) {
+            drawPath(guide, if (state.balance.dangerEpisode) GameTokens.Danger else GameTokens.Accent,
+                style = Stroke(2 * scale, pathEffect = PathEffect.dashPathEffect(floatArrayOf(5 * scale, 3 * scale))))
+        }
         val hangingY = top + PracticeRulesV1.DROP_HEIGHT.toFloat()
         // Crane body and upper suspension point are fixed in window coordinates.
         // Only the cable's lower endpoints follow the hanging module. Neither the
         // crane nor the tower pans horizontally with the engine's historical craneX.
         val hook = Offset(size.width / 2f,
-            ground - (4 * floorHeight + PracticeRulesV1.DROP_HEIGHT.toFloat() * .5f + 95f) * scale)
+            ground - (4 * floorHeight + PracticeRulesV1.DROP_HEIGHT.toFloat() * .5f + 185f) * scale)
         val craneWidth = width * 1.8f
         // The ring center in the cropped crane art is (174, 410).
         sprite(art.crane, 142, 134, 1858, 483, hook.x - craneWidth * 174 / 1858,
             hook.y - craneWidth * 410 / 1858, craneWidth)
         val module = state.falling ?: Floor(state.craneX, hangingY.toDouble())
+        // Center suspension has one fixed length, including while the camera settles.
+        // Map the falling floor continuously from its release arc to the landing plane.
+        val rope = SceneMotion.SUSPENSION_LENGTH * scale
+        val x = module.centerX.toFloat() * scale
+        val suspendedY = hook.y + sqrt(max(0f, rope * rope - x * x)) + width * .48f
+        val fallFraction = ((module.baseY - top) / PracticeRulesV1.DROP_HEIGHT).toFloat().coerceIn(0f, 1f)
+        val landing = point(module.centerX, top.toDouble())
+        val p = Offset(landing.x, landing.y + (suspendedY - landing.y) * fallFraction)
         if (state.phase == Phase.SWINGING) {
-            val p = point(module.centerX, module.baseY)
+            val angle = Math.toRadians(motion.loadDegrees.toDouble()).toFloat()
             for ((dx, dy) in listOf(-.48f to -.43f, -.22f to -.55f, .24f to -.4f, .48f to -.51f)) {
-                drawLine(GameTokens.Muted, hook, Offset(p.x + width * dx, p.y + width * dy), 1.5f * scale)
+                val anchor = Offset(width * dx, width * dy)
+                val rotated = Offset(anchor.x * cos(angle) - anchor.y * sin(angle),
+                    anchor.x * sin(angle) + anchor.y * cos(angle))
+                drawLine(GameTokens.Muted, hook, p + rotated, 1.5f * scale)
             }
         }
-        floor(module.centerX, module.baseY)
+        floor(module.centerX, module.baseY, motion.loadDegrees, p)
     } else if (state.floors.isNotEmpty()) {
         val last = state.floors.last()
-        val p = point(last.centerX + state.sway * state.floors.size, last.baseY)
-        sprite(art.roof, 229, 121, 1308, 641, p.x - width / 2,
-            p.y - width * .36f - width * 641 / 1308, width)
+        val p = point(last.centerX, last.baseY)
+        rotate(motion.towerDegrees, island) {
+            sprite(art.roof, 229, 121, 1308, 641, p.x - width / 2,
+                p.y - width * .36f - width * 641 / 1308, width)
+        }
     }
 }

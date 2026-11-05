@@ -22,13 +22,31 @@ class EngineCheckpointTest {
         val landed = PracticeEngine(); landed.drop(); repeat(40) { landed.advance(16_666_667) }
         assertEquals(1, landed.state.floors.size)
         roundtrip(landed)
-        val missed = PracticeEngine(); repeat(70) { missed.advance(16_666_667) }; missed.drop()
+        val missed = PracticeEngine(); repeat(100) { missed.advance(16_666_667) }; missed.drop()
         repeat(40) { missed.advance(16_666_667) }; assertEquals(Phase.FINISHED, missed.state.phase)
         roundtrip(missed)
     }
+    @Test fun legacyCheckpointKeepsItsOriginalTrajectory() {
+        val engine = PracticeEngine()
+        engine.restore(engine.checkpoint().copy(rules = PracticeRulesV1.LEGACY_VERSION))
+        engine.advance(100_000_000)
+        assertEquals(9.0, engine.state.craneX, 0.0)
+        assertEquals(PracticeRulesV1.LEGACY_VERSION, engine.checkpoint().rules)
+        roundtrip(engine)
+    }
+    @Test fun pendulumSlowsAtTurningPointAndReplaysThere() {
+        val engine = PracticeEngine()
+        engine.advance(16_666_667)
+        val centerStep = engine.state.craneX
+        repeat(123) { engine.advance(16_666_667) }
+        val before = engine.state.craneX
+        engine.advance(16_666_667)
+        assertTrue(kotlin.math.abs(engine.state.craneX - before) < centerStep * 0.1)
+        roundtrip(engine)
+    }
     @Test fun rejectsCorruptionAndDoesNotMutateLiveEngine() {
         val engine = PracticeEngine(); val before = engine.checkpoint()
-        val bad = listOf(before.copy(version = "future"), before.copy(direction = 0),
+        val bad = listOf(before.copy(version = "future"), before.copy(rules = "future"), before.copy(direction = 0),
             before.copy(tickUnits = 1_000_000_000), before.copy(fallVelocity = Double.NaN),
             before.copy(state = before.state.copy(phase = Phase.FALLING)),
             before.copy(state = before.state.copy(floors = listOf(Floor(0.0, 9.0)))))

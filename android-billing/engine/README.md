@@ -12,3 +12,34 @@ matches floors/perfect/rescue counters from a server attempt. This is local reco
 not server physics verification or online host binding. Call pause and reset the host
 frame timestamp for lifecycle recovery; do not pass background elapsed time. Snapshots
 over the server's 16 KiB limit fail rather than truncate floors.
+
+
+## Motion revision (5 November 2026)
+
+New attempts use inner checkpoint rules `practice-pendulum-v2`: crane x follows a
+smooth sinusoidal pendulum phase, slowing continuously at each turn. Drop x is
+still the actual engine x; presentation never substitutes a different horizontal
+aiming position. Step rate, range, gravity, overlap, balance, scoring and difficulty
+are unchanged. The slower ends increase the swing period versus v1; this is an
+intentional timing change requiring device playtesting.
+
+`practice-checkpoint-v1` accepts both inner rule IDs. Restoring
+`practice-balance-v1` retains its exact constant-speed trajectory and re-encodes
+that rule ID; restart creates a new v2 attempt. Unknown rule IDs still fail closed.
+An older v1-only client cannot resume a v2 snapshot and must retain its existing
+unsupported-checkpoint barrier rather than replaying it as v1.
+
+The server's outer `wobbrik-v1` / `wobbrik-structural-v1` envelope and <=16 KiB
+opaque JSON contract do not change. Revision, sequence, dedup, UID/login epoch,
+wallet and accepted-restore gates are unchanged. AppBackend `attempts.go` checks
+opaque JSON and structural counters, not the inner trajectory; no backend code,
+DTO or migration is required. This does not add server physics verification or
+unlock the unfinished online game host.
+
+Android presentation adds fixed center-suspension arc, suspended-load angular
+inertia, a connected stack rotating about its foundation with impact-driven damped
+motion, and smoothed camera following. These visual springs are not persisted and
+cannot change collision or rewards. They freeze on pause and reset on restart;
+process recreation resumes the authoritative/local checkpoint with fresh visual
+springs. This remains a stylized 2D single-body presentation, not a validated
+structural or full rigid-body simulation (release has no horizontal ballistic drift).

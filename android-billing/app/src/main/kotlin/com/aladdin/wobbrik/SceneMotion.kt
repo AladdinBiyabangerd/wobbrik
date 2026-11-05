@@ -1,0 +1,69 @@
+package com.aladdin.wobbrik
+
+import com.aladdin.wobbrik.engine.Phase
+import com.aladdin.wobbrik.engine.PracticeRulesV1
+import com.aladdin.wobbrik.engine.PracticeState
+import kotlin.math.asin
+import kotlin.math.abs
+import kotlin.math.max
+import kotlin.math.exp
+
+/** Presentation inertia only. Never serialized, scored or used as collision geometry. */
+internal class SceneMotion {
+    companion object { const val SUSPENSION_LENGTH = 155f }
+    var towerDegrees = 0f
+        private set
+    var loadDegrees = 0f
+        private set
+    var cameraUnits = 0f
+        private set
+    private var towerVelocity = 0f
+    private var loadVelocity = 0f
+    private var previous: PracticeState? = null
+
+    val settled: Boolean get() {
+        val target = (previous?.balance?.lean ?: 0.0).toFloat() * 1.4f
+        return abs(towerVelocity) < .01f && abs(loadVelocity) < .01f &&
+            abs(towerDegrees - target) < .01f && abs(loadDegrees) < .01f
+    }
+
+    fun reset() {
+        towerDegrees = 0f; towerVelocity = 0f; loadDegrees = 0f; loadVelocity = 0f
+        previous = null
+        cameraUnits = 0f
+    }
+
+    fun advance(state: PracticeState, seconds: Float) {
+        val old = previous
+        val cameraTarget = max(0f, (state.floors.size - 4) * PracticeRulesV1.FLOOR_HEIGHT.toFloat())
+        if (old == null || state.floors.size < old.floors.size) cameraUnits = cameraTarget
+        if (old != null && state.floors.size < old.floors.size) {
+            towerDegrees = 0f; towerVelocity = 0f; loadDegrees = 0f; loadVelocity = 0f
+        }
+        if (old != null && state.floors.size > old.floors.size) {
+            val support = old.floors.lastOrNull()?.centerX ?: 0.0
+            val offset = ((state.floors.last().centerX - support) / PracticeRulesV1.FLOOR_WIDTH).toFloat()
+            // Heavy, slow response: more height means a longer settling period.
+            towerVelocity += offset * 16f
+        }
+        previous = state
+        val dt = seconds.coerceIn(0f, .05f)
+        cameraUnits += (cameraTarget - cameraUnits) * (1f - exp(-7f * dt))
+        // Small substeps keep springs stable across 30/60/120 Hz and bounded stalls.
+        repeat(6) {
+            val h = dt / 6
+            val height = state.floors.size.coerceAtMost(20)
+            val stiffness = 19f / (1f + height * .06f)
+            val target = state.balance.lean.toFloat() * 1.4f
+            towerVelocity += ((target - towerDegrees) * stiffness - towerVelocity * 2.5f) * h
+            towerDegrees += towerVelocity * h
+            val cableAngle = Math.toDegrees(asin((state.craneX / SUSPENSION_LENGTH).coerceIn(-1.0, 1.0))).toFloat()
+            val loadTarget = if (state.phase == Phase.SWINGING) -cableAngle * .22f else 0f
+            // Suspension pulls the load; after release angular momentum decays slowly.
+            val spring = if (state.phase == Phase.SWINGING) 24f else 4f
+            val damping = if (state.phase == Phase.SWINGING) 4f else 1.2f
+            loadVelocity += ((loadTarget - loadDegrees) * spring - damping * loadVelocity) * h
+            loadDegrees += loadVelocity * h
+        }
+    }
+}
