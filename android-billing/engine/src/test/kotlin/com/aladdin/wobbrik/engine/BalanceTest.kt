@@ -5,6 +5,11 @@ import org.junit.Test
 import kotlin.math.abs
 
 class BalanceTest {
+    // Historical fixed-origin scenarios remain regression coverage for v2 restores.
+    private fun legacyEngine() = PracticeEngine().also {
+        it.restore(it.checkpoint().copy(rules = PracticeRulesV1.PENDULUM_VERSION))
+    }
+
     @Test fun centeredLandingIsStableAndOppositeOffsetCanRescue() {
         assertEquals(Balance(), BalanceRulesV1.land(Balance(), 0.0, 1))
         val danger = BalanceRulesV1.land(Balance(0.4), 40.0, 6)
@@ -44,7 +49,7 @@ class BalanceTest {
     }
 
     @Test fun engineDangerDoesNotDisappearOrLoseWhileWaiting() {
-        val engine = PracticeEngine()
+        val engine = legacyEngine()
         repeat(10) { landAt(engine, 0.0) }
         landAt(engine, 60.0)
         landAt(engine, 120.0)
@@ -61,7 +66,7 @@ class BalanceTest {
     }
 
     @Test fun engineTopplesOnLandingEvenWithOverlap() {
-        val engine = PracticeEngine()
+        val engine = legacyEngine()
         repeat(45) { landAt(engine, 0.0) }
         assertEquals(45, engine.state.perfectLandings)
         landAt(engine, 90.0)
@@ -74,8 +79,8 @@ class BalanceTest {
     }
 
     @Test fun pausePreservesImpactVelocityAndRestartRemovesIt() {
-        val uninterrupted = PracticeEngine()
-        val paused = PracticeEngine()
+        val uninterrupted = legacyEngine()
+        val paused = legacyEngine()
         landAt(uninterrupted, 60.0)
         landAt(paused, 60.0)
         paused.pause()
