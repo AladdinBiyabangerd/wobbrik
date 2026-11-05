@@ -13,7 +13,10 @@
   No new Firebase project/configuration or sign-in flow was invented.
 - Backend: no API, DTO, schema or rule change required by this recovery-only unit.
 - Branch checks: source/diff review and git diff --check; no branch CI.
-- CI: pending post-merge ./scripts/local-ci.sh on main.
+- Initial main CI: 40 core tests, four owner test failures from assertions before
+  queued Unconfined launches ran inside runBlocking. Fix branch
+  fix/recovery-test-scheduling explicitly yields before observing asynchronous work;
+  reviewed scheduling-only diff and whitespace. Repeat main CI pending.
 - Limits: Android singleton/auth wiring, real device recreation/process death,
   engine/input binding and full online gameplay remain open. Restart/abandon is
   unbound. No visual changes were made.

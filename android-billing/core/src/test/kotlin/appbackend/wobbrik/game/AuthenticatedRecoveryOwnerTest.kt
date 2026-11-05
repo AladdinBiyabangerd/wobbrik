@@ -40,9 +40,11 @@ class AuthenticatedRecoveryOwnerTest {
                 snapshot(session.uid)
             }
             f.owner.onAuthChanged("alice")
+            yield() // Allow the unconfined launch queued by runBlocking to run.
             repeat(3) { f.owner.onForeground() }
             assertEquals(1, f.calls.size)
             f.owner.onAuthChanged("bob")
+            yield() // Allow the unconfined launch queued by runBlocking to run.
             assertEquals(AuthenticatedRecoveryOwner.State.Recovering, f.owner.state.value)
             gate.complete(Unit)
             yield()
@@ -55,13 +57,16 @@ class AuthenticatedRecoveryOwnerTest {
         val f = Fixture()
         try {
             f.owner.onAuthChanged("alice")
+            yield() // Allow the unconfined launch queued by runBlocking to run.
             val first = f.sessions.current()!!
             val gate = CompletableDeferred<Unit>()
             f.sync = { gate.await(); snapshot(it.uid) }
             f.owner.onAuthChanged("alice")
+            yield() // Allow the unconfined launch queued by runBlocking to run.
             assertNotEquals(first, f.sessions.current())
             assertEquals(AuthenticatedRecoveryOwner.State.Recovering, f.owner.state.value)
             f.owner.onAuthChanged("alice")
+            yield() // Allow the unconfined launch queued by runBlocking to run.
             gate.complete(Unit)
             yield()
             assertEquals(f.sessions.current(), f.calls.last())
@@ -73,14 +78,17 @@ class AuthenticatedRecoveryOwnerTest {
         val f = Fixture()
         try {
             f.owner.onAuthChanged("alice")
+            yield() // Allow the unconfined launch queued by runBlocking to run.
             assertEquals(1L, f.ready().coins)
             f.sync = { error("offline") }
             // Recreated hosts retain this application owner and invoke foreground on it.
             val recreatedHostOwner = f.owner
             recreatedHostOwner.onForeground()
+            yield() // Allow the unconfined launch queued by runBlocking to run.
             assertTrue(f.owner.state.value is AuthenticatedRecoveryOwner.State.Error)
             f.sync = { snapshot(it.uid) }
             recreatedHostOwner.onForeground()
+            yield() // Allow the unconfined launch queued by runBlocking to run.
             assertSame(f.owner, recreatedHostOwner)
             assertEquals(1L, f.ready().coins)
             assertEquals(3, f.calls.size)
@@ -94,15 +102,19 @@ class AuthenticatedRecoveryOwnerTest {
             f.pending["alice"] = command
             f.submit = { error("lost response") }
             f.owner.onAuthChanged("alice")
+            yield() // Allow the unconfined launch queued by runBlocking to run.
             assertTrue(f.owner.state.value is AuthenticatedRecoveryOwner.State.Error)
             assertEquals(command, f.pending["alice"])
             f.owner.onAuthChanged(null)
+            yield() // Allow the unconfined launch queued by runBlocking to run.
             assertEquals(AuthenticatedRecoveryOwner.State.SignedOut, f.owner.state.value)
             f.owner.onAuthChanged("bob")
+            yield() // Allow the unconfined launch queued by runBlocking to run.
             assertEquals(2L, f.ready().coins)
             assertEquals(command, f.pending["alice"])
             f.submit = {}
             f.owner.onAuthChanged("alice")
+            yield() // Allow the unconfined launch queued by runBlocking to run.
             assertEquals(1L, f.ready().coins)
             assertNull(f.pending["alice"])
         } finally { f.close() }
@@ -116,7 +128,9 @@ class AuthenticatedRecoveryOwnerTest {
             val gate = CompletableDeferred<Unit>()
             f.submit = { withContext(NonCancellable) { gate.await() } }
             f.owner.onAuthChanged("alice")
+            yield() // Allow the unconfined launch queued by runBlocking to run.
             f.owner.onAuthChanged(null)
+            yield() // Allow the unconfined launch queued by runBlocking to run.
             gate.complete(Unit)
             yield()
             assertEquals(AuthenticatedRecoveryOwner.State.SignedOut, f.owner.state.value)
