@@ -18,11 +18,16 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.res.imageResource
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.layout.onSizeChanged
@@ -33,7 +38,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.aladdin.wobbrik.engine.*
 import kotlin.math.max
-import kotlin.math.min
 
 class PracticeSession : ViewModel() {
     val engine = PracticeEngine()
@@ -66,15 +70,19 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-private fun PracticeGame(engine: PracticeEngine) {
+internal fun PracticeGame(engine: PracticeEngine, renderOnly: Boolean = false) {
     // Coordinates are read in the draw phase; HUD only observes discrete changes.
     val snapshot = remember { mutableStateOf(engine.state) }
     var paused by remember { mutableStateOf(engine.state.paused) }
     var menu by remember { mutableStateOf(false) }
     var count by remember { mutableIntStateOf(engine.state.floors.size) }
     var finished by remember { mutableStateOf(engine.state.phase == Phase.FINISHED) }
-    var best by rememberSaveable { mutableIntStateOf(0) }
+    var best by rememberSaveable { mutableIntStateOf(engine.state.floors.size) }
     var learned by rememberSaveable { mutableStateOf(false) }
+    val art = SceneArt(
+        ImageBitmap.imageResource(R.drawable.game_floor), ImageBitmap.imageResource(R.drawable.game_crane),
+        ImageBitmap.imageResource(R.drawable.game_island), ImageBitmap.imageResource(R.drawable.game_roof),
+        ImageBitmap.imageResource(R.drawable.game_cloud))
     val density = LocalDensity.current
     var hudHeight by remember { mutableStateOf(GameTokens.Target + GameTokens.Inset) }
     fun publish() {
@@ -96,17 +104,19 @@ private fun PracticeGame(engine: PracticeEngine) {
     BackHandler(enabled = !menu) { pause() }
     LaunchedEffect(paused, menu, finished) {
         var previous = 0L
-        while (!paused && !menu && !finished) {
+        while (!renderOnly && !paused && !menu && !finished) {
             withFrameNanos { now ->
                 if (previous != 0L) { engine.advance(now - previous); publish() }
                 previous = now
             }
         }
     }
-    Box(Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(GameTokens.Background, GameTokens.Surface)))) {
+    BoxWithConstraints(Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(GameTokens.Background, GameTokens.Surface)))) {
+        // Wide windows share the top scene with the corner HUD, as in tablet-landscape.
+        val sceneTop = if (maxWidth > maxHeight) 0.dp else hudHeight
         if (!menu) {
             Canvas(Modifier.fillMaxSize().safeDrawingPadding()
-                .padding(top = hudHeight, bottom = GameTokens.Target)
+                .padding(top = sceneTop, bottom = GameTokens.Target)
                 .semantics {
                     contentDescription = "Tikinti səhnəsi"
                     if (!paused && !finished) onClick("Mərtəbəni burax") {
@@ -117,16 +127,17 @@ private fun PracticeGame(engine: PracticeEngine) {
                     interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }) {
                     if (engine.drop()) learned = true
                     publish()
-                }) { drawScene(snapshot.value) }
-            Row(Modifier.fillMaxWidth().safeDrawingPadding().padding(GameTokens.Inset)
-                .onSizeChanged { hudHeight = with(density) { it.height.toDp() } },
+                }) { drawGameScene(snapshot.value, art) }
+            Row(Modifier.fillMaxWidth().safeDrawingPadding()
+                .onSizeChanged { hudHeight = with(density) { it.height.toDp() } }.padding(GameTokens.Inset),
                 horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Top) {
                 Column(Modifier.weight(1f).padding(end = GameTokens.Small)) {
-                    Text("$count mərtəbə", color = GameTokens.Text, fontSize = GameTokens.Score)
-                    Text("Məşq rekordu $best", color = GameTokens.Muted, fontSize = GameTokens.Body)
+                    Text("$count mərtəbə", color = GameTokens.Text, fontSize = GameTokens.Score, fontWeight = FontWeight.Bold)
+                    Text("Rekord $best", color = GameTokens.Muted, fontSize = GameTokens.Body,
+                        modifier = Modifier.semantics { contentDescription = "Məşq rekordu $best" })
                 }
                 Button(onClick = { pause() }, modifier = Modifier.size(GameTokens.Target),
-                    contentPadding = PaddingValues(GameTokens.Small), shape = RoundedCornerShape(GameTokens.ControlRadius),
+                    contentPadding = PaddingValues(GameTokens.Small), shape = CircleShape, border = BorderStroke(GameTokens.Hairline, GameTokens.Raised),
                     colors = ButtonDefaults.buttonColors(containerColor = GameTokens.Raised, contentColor = GameTokens.Text)) {
                     Text("Ⅱ", modifier = Modifier.semantics { contentDescription = "Fasilə" })
                 }
@@ -136,14 +147,23 @@ private fun PracticeGame(engine: PracticeEngine) {
         }
         if (menu || paused || finished) {
             // Full-window input barrier: outside taps never reach the scene.
-            Box(Modifier.fillMaxSize().background(GameTokens.Background.copy(alpha = 0.8f))
+            Box(Modifier.fillMaxSize().background(GameTokens.Background.copy(alpha = GameTokens.DimOpacity))
                 .clickable(indication = null, interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }) {})
             Column(Modifier.align(Alignment.Center).safeDrawingPadding().padding(GameTokens.Inset)
                 .widthIn(max = GameTokens.PanelWidth).fillMaxWidth()
-                .background(GameTokens.Surface, RoundedCornerShape(GameTokens.CardRadius))
+                .shadow(GameTokens.Small, RoundedCornerShape(GameTokens.CardRadius))
+                .background(Brush.verticalGradient(listOf(GameTokens.Raised, GameTokens.Surface)), RoundedCornerShape(GameTokens.CardRadius))
+                .border(GameTokens.Hairline, GameTokens.Raised, RoundedCornerShape(GameTokens.CardRadius))
                 .verticalScroll(rememberScrollState()).padding(GameTokens.Inset),
                 verticalArrangement = Arrangement.spacedBy(GameTokens.Gap), horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(if (menu) "Wobbrik" else if (finished) "Cəhd bitdi" else "Fasilə", color = GameTokens.Text, fontSize = GameTokens.Title)
+                Row(horizontalArrangement = Arrangement.spacedBy(GameTokens.Gap), verticalAlignment = Alignment.CenterVertically) {
+                    if (!menu && !finished) Text("›", color = GameTokens.Accent, fontSize = GameTokens.Title, fontWeight = FontWeight.Bold,
+                        modifier = Modifier.clearAndSetSemantics {})
+                    Text(if (menu) "Wobbrik" else if (finished) "Cəhd bitdi" else "Fasilə", color = GameTokens.Text,
+                        fontSize = GameTokens.Title, fontWeight = FontWeight.Bold)
+                    if (!menu && !finished) Text("‹", color = GameTokens.Accent, fontSize = GameTokens.Title, fontWeight = FontWeight.Bold,
+                        modifier = Modifier.clearAndSetSemantics {})
+                }
                 if (menu || finished) Text(if (menu) "Offline məşq · mükafatsız" else "$count mərtəbə · məşq nəticəsi",
                     color = GameTokens.Muted)
                 if (!menu && !finished) Action("Davam et", true) { engine.resume(); paused = false; publish() }
@@ -156,67 +176,14 @@ private fun PracticeGame(engine: PracticeEngine) {
 
 @Composable
 private fun Action(label: String, primary: Boolean, action: () -> Unit) {
-    Button(onClick = action, modifier = Modifier.fillMaxWidth().heightIn(min = GameTokens.Target),
+    Button(onClick = action, modifier = Modifier.fillMaxWidth().heightIn(min = GameTokens.Target)
+            .clip(RoundedCornerShape(GameTokens.ControlRadius))
+            .background(Brush.verticalGradient(if (primary) listOf(GameTokens.Accent, GameTokens.Accent)
+                else listOf(GameTokens.Raised, GameTokens.Surface))),
         shape = RoundedCornerShape(GameTokens.ControlRadius),
-        colors = ButtonDefaults.buttonColors(containerColor = if (primary) GameTokens.Accent else GameTokens.Raised,
-            contentColor = if (primary) GameTokens.Background else GameTokens.Text)) { Text(label) }
-}
-
-private fun DrawScope.drawScene(state: PracticeState) {
-    if (size.width <= 0f || size.height <= 0f) return
-    val scale = min(size.width / 380f, size.height / 420f)
-    val top = state.floors.size * PracticeRulesV1.FLOOR_HEIGHT.toFloat()
-    val camera = max(0f, top - 120f)
-    val ground = min(size.height - 32f * scale, size.height / 2 + 175f * scale)
-    fun point(x: Double, y: Double) = Offset(size.width / 2 + x.toFloat() * scale, ground - (y.toFloat() - camera) * scale)
-    val w = PracticeRulesV1.FLOOR_WIDTH.toFloat() * scale
-    val h = PracticeRulesV1.FLOOR_HEIGHT.toFloat() * scale
-    fun floor(x: Double, y: Double) {
-        val p = point(x, y)
-        drawRect(GameTokens.Raised, Offset(p.x - w / 2, p.y - h), Size(w, h))
-        val side = androidx.compose.ui.graphics.Path().apply {
-            moveTo(p.x + w / 2, p.y); lineTo(p.x + w / 2 + 12 * scale, p.y - 8 * scale)
-            lineTo(p.x + w / 2 + 12 * scale, p.y - h - 8 * scale)
-            lineTo(p.x + w / 2, p.y - h); close()
-        }
-        drawPath(side, GameTokens.Surface)
-        drawRect(GameTokens.Muted, Offset(p.x - w / 2, p.y - h), Size(w, 3f * scale))
-        drawRect(GameTokens.Surface, Offset(p.x - w / 2, p.y - 3f * scale), Size(w, 3f * scale))
-        repeat(3) { i ->
-            drawRect(GameTokens.Accent, Offset(p.x - w / 2 + (14 + i * 28) * scale, p.y - h + 8 * scale), Size(14 * scale, 13 * scale))
-        }
-    }
-    if (camera == 0f) drawOval(GameTokens.Success, Offset(size.width / 2 - 150 * scale, ground - 5 * scale), Size(300 * scale, 28 * scale))
-    val start = max(0, ((camera - 30) / 30).toInt())
-    for (index in start until state.floors.size) {
-        val f = state.floors[index]
-        floor(f.centerX + state.sway * (index + 1), f.baseY)
-    }
-    val target = point(state.floors.lastOrNull()?.centerX ?: 0.0, top.toDouble())
-    drawRect(if (state.balance.dangerEpisode) GameTokens.Danger else GameTokens.Accent,
-        Offset(target.x - w / 2, target.y - h), Size(w, h), style = Stroke(2 * scale))
-    if (state.phase != Phase.FINISHED) {
-        val hangingY = top + PracticeRulesV1.DROP_HEIGHT.toFloat()
-        val module = state.falling ?: Floor(state.craneX, hangingY.toDouble())
-        floor(module.centerX, module.baseY)
-        val hook = point(state.craneX, hangingY.toDouble() + 85)
-        drawLine(GameTokens.Accent, Offset(0f, hook.y - 12 * scale), Offset(size.width, hook.y - 12 * scale), 8 * scale)
-        drawLine(GameTokens.Muted, Offset(0f, hook.y - 28 * scale), Offset(size.width, hook.y - 28 * scale), 3 * scale)
-        repeat((size.width / (24 * scale)).toInt() + 1) { i ->
-            val x = i * 24 * scale
-            drawLine(GameTokens.Accent, Offset(x, hook.y - 12 * scale), Offset(x + 12 * scale, hook.y - 28 * scale), 2 * scale)
-            drawLine(GameTokens.Accent, Offset(x + 12 * scale, hook.y - 28 * scale), Offset(x + 24 * scale, hook.y - 12 * scale), 2 * scale)
-        }
-        if (state.phase == Phase.SWINGING) {
-            val p = point(module.centerX, module.baseY + PracticeRulesV1.FLOOR_HEIGHT)
-            drawLine(GameTokens.Muted, hook, Offset(p.x - w / 2, p.y), 2 * scale)
-            drawLine(GameTokens.Muted, hook, Offset(p.x + w / 2, p.y), 2 * scale)
-        }
-    } else if (state.floors.isNotEmpty()) {
-        val p = point(state.floors.last().centerX, top.toDouble())
-        val roof = androidx.compose.ui.graphics.Path().apply {
-            moveTo(p.x - w / 2, p.y); lineTo(p.x, p.y - h); lineTo(p.x + w / 2, p.y); close()
-        }
-        drawPath(roof, GameTokens.Danger)
+        colors = ButtonDefaults.buttonColors(containerColor = androidx.compose.ui.graphics.Color.Transparent,
+            contentColor = if (primary) GameTokens.Background else GameTokens.Text),
+        border = BorderStroke(GameTokens.Hairline, if (primary) GameTokens.Text else GameTokens.Raised)) {
+        Text(label, fontSize = GameTokens.Body, fontWeight = FontWeight.Bold)
     }
 }

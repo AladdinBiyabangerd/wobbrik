@@ -27,6 +27,9 @@ Ekranda görünən oyun hələ ayrıca offline məşqdir. Onlayn hostun input-u 
 - [x] Lokal məşq səhnəsi və pauza mexanizmi var.
 - [ ] Bu mexanika ayrıca məşq axınından yekun onlayn oyuna inteqrasiya edilsin.
 - [ ] Oyun səhnəsi təsdiqlənmiş qrafika və dizayna uyğunlaşdırılsın.
+  Təsdiqlənmiş sprite-lar qoşulub; native UI işıqlandırması və konseptlə dəqiq
+  vizual uyğunluq hələ açıqdır. Aktiv/pauza renderləri və fərqlər:
+  [asset review](reviews/2026-11-05-game-scene-assets.md).
 - [ ] Uzun cəhdlər və müxtəlif frame sürətləri üzrə yekun oyun davranışı yoxlanılsın.
 - [ ] Zəif və orta cihazlarda FPS, jank, yaddaş və başlanğıc vaxtı ölçülsün.
 

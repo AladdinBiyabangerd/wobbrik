@@ -1,53 +1,59 @@
-# Durable attempt commands — 5 November 2026
+# Game scene asset integration — 5 November 2026
 
 ## Completed
-- Application-owned AcceptedAttemptCommands uses recovery's sole coordinator/journal.
-- Typed start/checkpoint/terminal finish admitted only from exact current Ready.
-- Coordinator captures expected UID/login session before queued work; stale account
-  proposals, duplicate dispatch, invalid counters/floor rewrites fail closed.
-- Atomic command journal/retry and fresh sync remain the only success path.
-- Application host input remains locked; resume/drop false, physics paused.
+- User approved four replacement sprites and authorized integration/comparison.
+- Runtime copies preserve approved PNG pixels/alpha; matching landscape cloud added.
+- GameScene replaces schematic floor/crane/island/roof. Ring/cable anchors, guide,
+  wide-window framing and tall-tower viewport culling corrected after rendering.
+- Phone/tablet active/pause comparisons saved beside approved concepts. Landscape
+  phone, font 1.5/short window and 40-floor crane-limit renders inspected.
 
 ## Current state
-- Implementation locally reviewed and merged: `d748830` → `9b38e31`; main CI passed.
-- Visible scene remains separate offline practice; no online input binding.
-- Unrelated untracked responsive rule/review files preserved.
+- Branch feat/game-scene-assets; review/main CI result recorded in the review note.
+- Sprites integrated. Exact concept parity is NOT complete: scene/garden proportions,
+  native type sizes, background and panel/guide/cable lighting still differ.
+  Full visual checklist remains unchecked, with a scoped progress note.
+- Visible scene remains offline practice. Online AcceptedEngineHost input stays
+  locked; prior durable command work is merged (9b38e31, before checklist commits).
+- Unrelated untracked responsive rule and compose-game-host review files preserved.
 
 ## Decisions
-- No AppBackend API/DTO/schema/rules change needed; existing structural-v1 and shared
-  wallet remain authoritative. No local grants, rebase, restart/abandon binding.
-- Terminal landing with new floors requires checkpoint → new Ready → explicit finish.
-  Each command is durable separately; no automatic multi-command finish intent.
-- Live origin/device checks remain deferred; continuation stabilization stays blocked.
+- Visual-only work needs no AppBackend/domain/API/DTO/schema/wallet changes.
+- No invented restart/abandon, continued physics or reward source.
+- Frozen ScenePreviewActivity is debug-only, not a real accepted online attempt.
+- Keep structural-v1 accepted recovery, sole journal and durable command authority.
 
 ## Remaining work
-- Integrate online simulation with per-landing checkpoint admission and accepted
-  recovery before unlocking input; never route offline practice into server commands.
-- Decide explicit terminal finish orchestration and cosmetic part selection using
-  catalog/unlocks. No invented continuation or restart/abandon policy.
-- Auth UI, approved visual/navigation integration, real origin/account/epoch/
-  foreground/process-death checks.
+- Close visual differences against comparison boards before claiming exact design.
+- Then 3.4: online simulation, per-landing checkpoint admission, accepted recovery
+  before input unlock; terminal checkpoint → fresh Ready → explicit finish.
+- Cosmetic catalog/unlocks; auth and real menu/navigation/results; live origin,
+  account/epoch/foreground/process-death checks. Continued stabilization unresolved.
+- Physical-device performance/release/accessibility checks remain outstanding.
 
 ## Relevant files
-- docs/project-progress.md — user-facing seven-stage checklist; next unit is 3.4.
-- android-billing/engine/src/main/kotlin/com/aladdin/wobbrik/engine/AcceptedAttemptCommands.kt
-- android-billing/engine/src/test/kotlin/com/aladdin/wobbrik/engine/AcceptedAttemptCommandsTest.kt
-- android-billing/engine/src/main/kotlin/com/aladdin/wobbrik/engine/AcceptedEngineHost.kt
-- android-billing/core/src/main/kotlin/appbackend/wobbrik/game/AuthenticatedRecoveryOwner.kt
-- android-billing/core/src/main/kotlin/appbackend/wobbrik/game/AttemptCoordinator.kt
-- android-billing/app/src/main/kotlin/com/aladdin/wobbrik/WobbrikApplication.kt
-- docs/host-lifecycle-contract.md
-- docs/reviews/2026-11-05-durable-attempt-commands.md
+- docs/reviews/2026-11-05-game-scene-assets.md — review/results/differences.
+- docs/reviews/game-scene-assets/*-comparison.png — approved concept vs emulator.
+- docs/design/game-assets-v1/ — approved art, prompts and hashes.
+- android-billing/app/src/main/kotlin/com/aladdin/wobbrik/GameScene.kt
+- android-billing/app/src/main/kotlin/com/aladdin/wobbrik/MainActivity.kt
+- android-billing/app/src/main/kotlin/com/aladdin/wobbrik/GameTokens.kt
+- android-billing/app/src/debug/; scripts/capture-game-scene.py.
+- docs/project-progress.md; docs/design/game-tap-v2/README.md.
+- engine AcceptedEngineHost/AcceptedAttemptCommands; docs/host-lifecycle-contract.md.
 
 ## Checks performed
-- Scoped source review and git diff --check; no branch CI.
-- Post-merge main ./scripts/local-ci.sh passed: 106 tasks, 32 executed, 74 up-to-date;
-  core/engine tests, app assemble/lint passed. Ten command integration tests and
-  six coordinator tests report zero failures/errors (11 new tests).
-- No live/backend DB/device/visual checks or push/deploy.
+- Branch :app:assembleDebug passed; no branch CI. Contrast pairs 8.22–16.57 pass 4.5.
+- Whitespace/capture syntax; source/runtime PNG byte hashes and alpha checked.
+- Phone 1080×2400/420dpi; tablet 1200×1920 + 1920×1200/240dpi;
+  phone landscape 1600×720/280dpi; 1600×800/320dpi/font 1.5 inspected.
+- Rejected splash capture and rerendered. Initial emulator resize crash documented.
+- Final input/main CI results are recorded in the review note after completion.
+- No physical-device/live-backend checks, push or deploy.
 
 ## Exact next step
-- In a new chat, design and implement the small online simulation/landing admission
-  loop using AcceptedEngineHost and AcceptedAttemptCommands, with lifecycle resets,
-  current-Ready identity and checkpoint retry/reconciliation gates. Keep input locked
-  until this loop is verified; restart/abandon and continuation remain unresolved.
+- Read this note and the game-scene-assets review, inspect the three comparison
+  PNGs, and finish concept/layout/type/lighting differences in a new small visual
+  branch. Re-render phone/tablet, review, merge, then local main CI. Keep full design
+  checklist open until comparison supports completion. Do not fold online 3.4 or
+  backend rule changes into visual finishing.
