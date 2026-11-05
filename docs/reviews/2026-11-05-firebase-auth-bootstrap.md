@@ -21,7 +21,9 @@
 - First post-merge CI failed at app compile: ambiguous super.onCreate inherited
   from Application and DefaultLifecycleObserver. Fixed on
   `fix/firebase-bootstrap-supertype` with explicit `super<Application>.onCreate()`;
-  reviewed one-line correction and whitespace check. CI rerun pending on main.
+  reviewed one-line correction and whitespace check. Post-merge rerun on main passed: `./scripts/local-ci.sh`, 106 tasks
+  (16 executed, 90 up-to-date), app assemble/lint successful, core/engine tests
+  up-to-date. Existing MainActivity lifecycle deprecation warning remains.
 - Limitations: no supplied real backend origin or device sign-in; live token, account
   switch, foreground and process-kill verification not performed. Existing core owner
   regressions cover epoch isolation, recovery failures and retained journal behavior.

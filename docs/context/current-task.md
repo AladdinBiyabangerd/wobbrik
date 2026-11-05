@@ -1,43 +1,47 @@
-# Auth recovery owner — 5 November 2026
+# Firebase auth bootstrap — 5 November 2026
 
 ## Completed
-- Main includes AuthenticatedRecoveryOwner (a14ac15): injected sessions/backend/
-  journal/scope, one private coordinator, epoch guarding and recovery state flow.
-- Added coordinator cancellation guard and focused owner regression tests.
-- Inspected Firebase changes 403569b/83ce44b: Crashlytics, Analytics, Remote Config.
+- Application-owned Firebase Auth listener, AccountSessions token loader, one recovery
+  owner/journal per process, ProcessLifecycleOwner foreground recovery.
+- Firebase Auth/core/Android/coroutine dependencies and INTERNET permission added.
+- Reviewed feature a7dca49 and compile fix bcfe100; merged with history into main.
+- Bootstrap availability exposes missing Firebase/backend config; no endpoint guessed.
 
 ## Current state
-- App remains offline practice. Firebase Auth, listener and authenticated application
-  bootstrap are absent; Firebase services do not supply an auth session.
-- Owner is not wired to Android. Retain one instance/journal per application when
-  real auth/backend configuration is supplied; no Activity-owned writer.
+- Existing google-services.json present locally; actual backend origin not supplied.
+- Configure user-local Gradle `wobbrik.backendOrigin` with actual AppBackend HTTPS
+  origin to activate recovery. No live auth/backend/device verification performed.
+- Visible game remains offline practice. Auth UI, engine restore/input and online
+  gameplay are not wired. Restart/abandon remains unbound.
 - Unrelated untracked responsive rule/review files preserved.
 
 ## Decisions
-- Restart/abandon remains unbound; never use finish or erase pending commands.
-- No backend/schema/rule change needed for recovery ownership.
-- No invented Firebase project, auth UX or endpoint configuration.
+- No anonymous account or invented auth UX/config. Firebase auth state callbacks create
+  epochs; SDK token refresh does not establish a new login. ID tokens not persisted.
+- No AppBackend API/schema/rule changes needed for existing bearer recovery transport.
+- Never erase pending journal commands or implement finish-as-abandon.
 
 ## Remaining work
-- Application singleton and real auth listener/token bootstrap, then lifecycle/input/
-  engine restore. Resolve continued/zero-checkpoint behavior separately.
-- Device recreation/process-kill verification; approved visual/navigation debt remains.
+- Supply actual backend origin; verify real sign-in/out, same-UID re-login, account
+  isolation, foreground retry, Activity recreation and process-kill on device.
+- Online engine restore and lifecycle/input gating, zero-checkpoint/terminal/continued
+  behavior and approved visual/navigation implementation remain separate work.
 
 ## Relevant files
-- docs/host-lifecycle-contract.md
-- docs/reviews/2026-11-05-auth-recovery-owner.md
-- android-billing/core/src/main/kotlin/appbackend/wobbrik/game/AuthenticatedRecoveryOwner.kt
-- android-billing/core/src/main/kotlin/appbackend/wobbrik/game/AttemptCoordinator.kt
-- android-billing/core/src/test/kotlin/appbackend/wobbrik/game/AuthenticatedRecoveryOwnerTest.kt
+- android-billing/app/src/main/kotlin/com/aladdin/wobbrik/WobbrikApplication.kt
 - android-billing/app/build.gradle.kts
-- android-billing/app/src/main/kotlin/com/aladdin/wobbrik/RemoteConfigInit.kt
+- android-billing/README.md
+- docs/host-lifecycle-contract.md
+- docs/reviews/2026-11-05-firebase-auth-bootstrap.md
+- android-billing/core/src/main/kotlin/appbackend/wobbrik/game/AuthenticatedRecoveryOwner.kt
 
 ## Checks performed
-- Scoped Firebase and recovery source review; branch whitespace check.
-- Post-merge ./scripts/local-ci.sh passed: 40 core tests including five owner
-  tests, engine tests, Android/app assemble and lint; see review for failed retries.
-- No device/live-backend or visual checks in this nonvisual unit.
+- Scoped diff review and whitespace checks on branches; no branch CI.
+- First post-merge CI failed on ambiguous super.onCreate; fixed via separate reviewed
+  branch and merged. Subsequent main ./scripts/local-ci.sh passed (106 tasks;
+  16 executed, 90 up-to-date; core/engine tests up-to-date, app build/lint passed).
+- No visual change or device/live server checks. No remote push/deploy.
 
 ## Exact next step
-- Implement real auth bootstrap only with actual auth/backend configuration;
-  preserve recovery journals and leave restart/abandon unbound.
+- Configure actual AppBackend HTTPS origin and verify Firebase sessions/recovery on
+  device before starting the separate online engine binding unit.
