@@ -3,6 +3,8 @@ package appbackend.wobbrik.game
 import appbackend.wobbrik.billing.AccountChanged
 import appbackend.wobbrik.billing.BillingSession
 import appbackend.wobbrik.billing.Sessions
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
@@ -98,7 +100,8 @@ class AttemptCoordinator(
     }
 
     private fun current() = sessions.current() ?: error("Authenticated gameplay session required")
-    private fun stillCurrent(session: BillingSession) {
+    private suspend fun stillCurrent(session: BillingSession) {
+        currentCoroutineContext().ensureActive()
         if (sessions.current() != session) throw AccountChanged()
     }
 }
