@@ -9,7 +9,8 @@
   motion samples inspected. Pause captures pixel-identical after panel appeared.
 
 ## Current state
-- Branch fix/weighted-game-motion reviewed; merge/main local CI pending.
+- Implementation 40f2bf5 reviewed and merged as 229f058. Main local CI passed
+  in 36s: 106 tasks, 11 executed / 95 up-to-date. Validation follow-up only changes documentation and pixel-check evidence.
 - Review: docs/reviews/2026-11-05-weighted-motion.md.
 - Visible game remains offline practice; accepted online input is still locked.
 - Exact concept parity is open: scene/garden size, background/type/lighting.
@@ -43,12 +44,11 @@
 - Phone 1080x2400/420dpi; tablet landscape 1920x1200/240dpi. Impact ticks
   0/15/27/40/65/100, 40-floor swing, four-floor reference comparisons inspected.
 - Live motion contact sheet inspected; settled pause scene pixel-identical.
-- Scope diff review and whitespace passed; full regression pending main merge.
+- Scope diff review and whitespace passed; main regression gate passed (engine tests executed).
 - No backend/live-account/physical-device/release checks, push or deployment.
 
 ## Exact next step
-- Merge reviewed motion branch preserving history, run ./scripts/local-ci.sh only
-  on main. If it fails, use a separate fix branch/review/merge; repeat main CI.
-- After passing, update this note/review with exact hashes/results. Next chat:
-  inspect the motion clip on a real device and refine only this motion if needed;
-  keep unfinished online integration and broader design parity separate.
+- Next chat: read this note and the weighted-motion review; inspect
+  docs/reviews/weighted-motion/phone-motion.gif and compare motion on a real
+  device. Refine only this motion if needed; keep unfinished online integration
+  and broader design parity separate.
