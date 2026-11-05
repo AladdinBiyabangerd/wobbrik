@@ -111,15 +111,21 @@ class AcceptedAttemptCommandsTest {
             f.host.onForeground()
             assertFalse(f.host.resume(old.copy()))
             assertTrue(f.host.resume(old))
-            assertTrue(f.host.drop())
+            assertFalse(f.host.drop(old.copy()))
+            assertTrue(f.host.drop(old))
             var time = 0L
-            repeat(20) { time += 100_000_000L; f.host.onFrame(time) }
+            repeat(20) { time += 100_000_000L; f.host.onFrame(time, old) }
             yield()
             assertEquals(1L, f.ready().snapshot.attempt!!.floors)
             assertEquals(2, f.sent.size)
             assertFalse(f.host.snapshot().inputEnabled)
             assertFalse(f.host.resume(old))
             assertTrue(f.host.resume(f.ready()))
+            val scene = f.host.snapshot().scene
+            f.host.onFrame(Long.MAX_VALUE, old)
+            assertEquals(scene, f.host.snapshot().scene)
+            assertNull(f.host.snapshot().previousFrameNanos)
+            assertFalse(f.host.drop(old))
             f.host.onPause()
             f.host.onFrame(Long.MAX_VALUE)
             assertFalse(f.host.drop())
