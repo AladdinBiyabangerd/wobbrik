@@ -7,5 +7,7 @@
   online scene, approved visuals and live verification. Backend endpoint availability
   is not marked as completed Android functionality. No percentages or release claims.
 - Checks: scoped documentation review and git diff --check passed. No branch CI.
-- Main CI: pending post-merge ./scripts/local-ci.sh.
+- Reviewed implementation: `74174f1`; validation-note diff also reviewed.
+- Main CI: post-merge ./scripts/local-ci.sh passed: 106 tasks, 2 executed,
+  104 up-to-date; core/engine tests and app assemble/lint successful.
 - Limits: checklist is a sourced progress summary, not a new full repository audit.
