@@ -1,12 +1,13 @@
 package appbackend.wobbrik.game
 
 import appbackend.wobbrik.billing.AccountSessions
+import appbackend.wobbrik.billing.BillingSession
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-/** Retain once in the application, never in an Activity. No gameplay mutations are exposed. */
+/** One application-owned coordinator/journal for recovery and all attempt mutations. */
 class AuthenticatedRecoveryOwner(
     private val sessions: AccountSessions,
     backend: AttemptBackend,
@@ -49,13 +50,29 @@ class AuthenticatedRecoveryOwner(
         mutableState.value = state
     }
 
-    private fun recoverLocked() {
+    /**
+     * Accept only the exact published Ready instance, not an equal snapshot from another
+     * account/login/recovery. Build once before invalidation; retries use the journal.
+     * True means dispatched, never committed. Invalid proposals throw before dispatch.
+     */
+    fun submit(expected: State.Ready, build: (GameSnapshot) -> AttemptCommand): Boolean = synchronized(lock) {
+        if (mutableState.value !== expected || work?.isCompleted == false || !coordinator.ready()) return false
+        val command = build(expected.snapshot)
+        GameplayWire.validate(command)
+        require(command.expectedRevision == expected.snapshot.revision)
+        launchLocked { session -> coordinator.execute(command, session) }
+        true
+    }
+
+    private fun recoverLocked() = launchLocked { session -> coordinator.recover(session) }
+
+    private fun launchLocked(action: suspend (BillingSession) -> GameSnapshot) {
         val session = sessions.current() ?: return
         val epoch = generation
         publishLocked(State.Recovering)
         work = scope.launch(start = CoroutineStart.LAZY) {
             try {
-                val snapshot = coordinator.recover()
+                val snapshot = action(session)
                 ensureActive()
                 synchronized(lock) {
                     if (epoch == generation && sessions.current() == session && coordinator.ready()) {

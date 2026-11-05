@@ -9,7 +9,7 @@ class AcceptedEngineHost {
         val foreground: Boolean = false,
         val previousFrameNanos: Long? = null,
     ) {
-        // Durable start/checkpoint/finish handling is not connected yet.
+        // Durable commands exist; the online simulation/scene input loop is not bound yet.
         val inputEnabled: Boolean get() = false
     }
 
@@ -44,7 +44,7 @@ class AcceptedEngineHost {
         current = current.copy(previousFrameNanos = null)
     }
 
-    /** Frame callbacks cannot accumulate background time while the command boundary is locked. */
+    /** Frame callbacks cannot accumulate background time while the online simulation/input boundary is locked. */
     @Synchronized fun onFrame(frameNanos: Long) {
         require(frameNanos >= 0)
         pauseAndReset()
