@@ -29,6 +29,7 @@
   foreground/process-death checks.
 
 ## Relevant files
+- docs/project-progress.md — user-facing seven-stage checklist; next unit is 3.4.
 - android-billing/engine/src/main/kotlin/com/aladdin/wobbrik/engine/AcceptedAttemptCommands.kt
 - android-billing/engine/src/test/kotlin/com/aladdin/wobbrik/engine/AcceptedAttemptCommandsTest.kt
 - android-billing/engine/src/main/kotlin/com/aladdin/wobbrik/engine/AcceptedEngineHost.kt
