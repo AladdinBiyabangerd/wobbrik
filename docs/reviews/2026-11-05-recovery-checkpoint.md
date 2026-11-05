@@ -11,7 +11,8 @@
 - Review: inspected scoped diff, strict scalar types, null attempt/snapshot, pinned versions,
   exact historical receipt handling, validate-before-mutation, floor/phase/numeric bounds,
   deterministic fractional-time and velocity preservation. git diff --check passed.
-- Branch CI: deliberately not run. Main-only post-merge CI pending.
+- Branch CI: deliberately not run. Main CI after merge 588b5f6 failed during Gradle script compilation: missing newline between dependencies.
+  fix/checkpoint-gradle-dependencies separates declarations; scoped diff reviewed; no branch CI. Main rerun pending.
 - Limits: no host/UI/auth/lifecycle binding or visual change; no render claim. No abandon,
   restart-as-finish or trusted geometry. Structural server does not verify physics.
   16 KiB snapshot limit rejects oversize state; no unbounded-height encoding. Android
