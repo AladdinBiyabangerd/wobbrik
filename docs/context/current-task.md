@@ -41,7 +41,8 @@
 ## Checks performed
 - Auth diff manual review, git diff --check; backend gameplay API compatibility read.
 - Asset outputs visually inspected, PNG alpha metadata checked; UI render yoxdur.
-- Main CI nəticəsi review qeydində tamamlanacaq; canlı auth/DB sınağı yoxdur.
+- Reviewed commit 1b98d11, main merge 3541f13; main local CI keçdi (33s,
+  106 task: 13 executed, 93 up-to-date). Canlı auth/DB sınağı yoxdur.
 
 ## Exact next step
 - Review-də final CI/asset vəziyyətini oxu. ui-craft ilə tokens və
