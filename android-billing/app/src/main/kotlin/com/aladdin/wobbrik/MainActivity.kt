@@ -24,6 +24,7 @@ import androidx.compose.ui.res.imageResource
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.shadow
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.text.font.FontWeight
@@ -117,6 +118,7 @@ internal fun PracticeGame(engine: PracticeEngine, renderOnly: Boolean = false) {
         if (!menu) {
             Canvas(Modifier.fillMaxSize().safeDrawingPadding()
                 .padding(top = sceneTop, bottom = GameTokens.Target)
+                .clipToBounds()
                 .semantics {
                     contentDescription = "Tikinti səhnəsi"
                     if (!paused && !finished) onClick("Mərtəbəni burax") {

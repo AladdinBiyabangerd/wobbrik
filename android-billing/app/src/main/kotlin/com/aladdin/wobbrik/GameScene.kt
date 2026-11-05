@@ -26,13 +26,12 @@ internal fun DrawScope.drawGameScene(state: PracticeState, art: SceneArt) {
     val top = state.floors.size * floorHeight
     val camera = max(0f, top - 4 * floorHeight)
     // Reserve the full crane travel + floor width, and island through hook vertically.
-    val scale = min(size.width / 300f, size.height / 405f)
+    val travelWidth = 2 * PracticeRulesV1.CRANE_RANGE.toFloat() + floorWidth + 20f
+    val scale = min(size.width / travelWidth, size.height / 405f)
     val ground = (size.height + 265f * scale) / 2f
-    // A shared camera translation keeps both tower and the full crane travel visible.
-    val cameraX = state.craneX.toFloat() * .35f
     // Compress empty air above the stack, continuously through landing. Physics is unchanged.
     fun visualY(y: Float) = if (y > top) top + (y - top) * .5f else y
-    fun point(x: Double, y: Double) = Offset(size.width / 2f + (x.toFloat() - cameraX) * scale,
+    fun point(x: Double, y: Double) = Offset(size.width / 2f + x.toFloat() * scale,
         ground - (visualY(y.toFloat()) - camera) * scale)
     fun sprite(bitmap: ImageBitmap, sx: Int, sy: Int, sw: Int, sh: Int,
         left: Float, upper: Float, width: Float) {
@@ -49,18 +48,18 @@ internal fun DrawScope.drawGameScene(state: PracticeState, art: SceneArt) {
     // Visible brick silhouette crop; original alpha and generated artwork are preserved.
     fun floor(x: Double, y: Double) {
         val p = point(x, y)
-        sprite(art.floor, 233, 258, 1064, 597, p.x - width / 2, p.y - width * 597 / 1064, width)
+        val upper = p.y - width * 597 / 1064
+        // Test the actual projected sprite, never a fixed suffix of the floor list.
+        // Keep every visible connecting floor, including ones below the camera anchor.
+        if (p.y >= 0f && upper <= size.height) {
+            sprite(art.floor, 233, 258, 1064, 597, p.x - width / 2, upper, width)
+        }
     }
     val island = point(0.0, 0.0)
     val islandWidth = width * 1259 / 720
     sprite(art.island, 123, 129, 1259, 778, island.x - islandWidth / 2,
         island.y - width * 306 / 720, islandWidth)
-    // Cull against the actual viewport, including the sprite's projected depth.
-    // A fixed number of floors would leave tall towers visibly floating.
-    val lowestVisibleBase = camera + (ground - size.height) / scale - floorWidth * 597 / 1064
-    val start = max(0, (lowestVisibleBase / floorHeight).toInt())
-    for (index in start until state.floors.size) {
-        val f = state.floors[index]
+    state.floors.forEachIndexed { index, f ->
         floor(f.centerX + state.sway * (index + 1), f.baseY)
     }
     if (state.phase != Phase.FINISHED) {
@@ -77,7 +76,11 @@ internal fun DrawScope.drawGameScene(state: PracticeState, art: SceneArt) {
         drawPath(guide, if (state.balance.dangerEpisode) GameTokens.Danger else GameTokens.Accent,
             style = Stroke(2 * scale, pathEffect = PathEffect.dashPathEffect(floatArrayOf(5 * scale, 3 * scale))))
         val hangingY = top + PracticeRulesV1.DROP_HEIGHT.toFloat()
-        val hook = point(state.craneX, hangingY.toDouble() + 190)
+        // Crane body and upper suspension point are fixed in window coordinates.
+        // Only the cable's lower endpoints follow the hanging module. Neither the
+        // crane nor the tower pans horizontally with the engine's historical craneX.
+        val hook = Offset(size.width / 2f,
+            ground - (4 * floorHeight + PracticeRulesV1.DROP_HEIGHT.toFloat() * .5f + 95f) * scale)
         val craneWidth = width * 1.8f
         // The ring center in the cropped crane art is (174, 410).
         sprite(art.crane, 142, 134, 1858, 483, hook.x - craneWidth * 174 / 1858,

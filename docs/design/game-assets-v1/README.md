@@ -12,8 +12,9 @@ from the same moving coordinates; settled floors are drawn back to front. The
 entrance island is decorative foundation, not a rewarded or counted floor. The
 pitched roof appears only after FINISHED; active and paused towers stay roofless.
 
-Framing uses window dimensions and a shared camera translation, leaving space
-for the full crane travel. Empty air above the stack is compressed continuously
+Framing uses window dimensions and leaves space for the full hanging-module
+travel. The crane body and upper suspension point remain fixed; only the cable
+and hanging module move horizontally. There is no horizontal camera tracking. Empty air above the stack is compressed continuously
 through landing; simulation, collision and checkpoint coordinates are unchanged.
 These rendering transforms are not server-authoritative building geometry.
 

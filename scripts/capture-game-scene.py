@@ -15,22 +15,27 @@ def adb(*args):
 def setting(key):
     return adb("shell", "settings", "get", "system", key).decode().strip()
 
-def launch(name, paused=False, floors=4, crane=0, finished=False):
+def launch(name, paused=False, floors=4, crane=0, finished=False, drift=0):
     adb("shell", "am", "force-stop", "com.aladdin.wobbrik")
     adb("shell", "am", "start", "-W", "-n", "com.aladdin.wobbrik/.ScenePreviewActivity",
         "--ez", "paused", str(paused).lower(), "--ei", "floors", str(floors),
-        "--ei", "crane", str(crane), "--ez", "finished", str(finished).lower())
-    # A slow emulator may still show the small, nearly uniform system splash after -W.
-    # Retry that capture; every result must also be visually inspected by the reviewer.
-    for _ in range(10):
-        time.sleep(3)
-        png = adb("exec-out", "screencap", "-p")
-        if len(png) > 80000:
-            (OUT / f"{name}.png").write_bytes(png)
+        "--ei", "crane", str(crane), "--ei", "drift", str(drift),
+        "--ez", "finished", str(finished).lower())
+    # Android may show a large stale task snapshot while a new fixture starts.
+    # Match the debug-only semantic marker, not just screenshot size or a timer.
+    marker = (f"Wobbrik fixture floors={floors} crane={crane} paused={str(paused).lower()} "
+              f"drift={drift} finished={str(finished).lower()}")
+    for _ in range(5):
+        adb("shell", "uiautomator", "dump", "/sdcard/wobbrik-capture.xml")
+        hierarchy = adb("shell", "cat", "/sdcard/wobbrik-capture.xml").decode()
+        if marker in hierarchy:
+            time.sleep(1)
+            (OUT / f"{name}.png").write_bytes(adb("exec-out", "screencap", "-p"))
             print(name, "captured", flush=True)
             break
+        time.sleep(1)
     else:
-        raise RuntimeError(f"Scene did not render: {name}")
+        raise RuntimeError(f"Expected fixture did not render: {marker}")
 
 def main():
     OUT.mkdir(parents=True, exist_ok=True)

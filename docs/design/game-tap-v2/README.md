@@ -12,6 +12,9 @@ Built-in imagegen ilə yaradılan konsept lövhələridir; hər PNG iki vəziyy�
 
 ## Davranış
 
+5 noyabr düzəlişi: kranın gövdəsi və yuxarı asılma nöqtəsi sabit qalır.
+Sağa-sola ip/asqı və asılmış mərtəbə hərəkət edir; səhnə kranla birlikdə pan etmir.
+
 - Oyun bütün pəncərənin səhnəsidir. Aktiv oyunda yalnız bir düymə var: sağ yuxarı təhlükəsiz sahədə pauza. Sol/sağ menyu, geri/ana ekran, wallet, logo, alt idarəetmə rəfi və ayrıca Burax düyməsi yoxdur.
 - Oyun sahəsinə toxunmaq bir mərtəbəni buraxır. Mərtəbə düşərkən, eniş qiymətləndirilərkən, server təsdiqi gözlənərkən və fasilədə buraxma bağlıdır. Pauza toxunuşu oyun sahəsinə ötürülmür.
 - Mərtəbə sayı və rekord kiçik, interaktiv olmayan göstəricilərdir. İlk cəhddə “Buraxmaq üçün toxun” qısa mətn təlimatıdır; düymə deyil və öyrənildikdən sonra itir.
