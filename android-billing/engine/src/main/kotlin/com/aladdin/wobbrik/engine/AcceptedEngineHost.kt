@@ -10,6 +10,7 @@ class AcceptedEngineHost {
         val previousFrameNanos: Long? = null,
         val scene: PracticeState? = null,
         val waiting: Boolean = false,
+        val cameraX: Double = 0.0,
     ) {
         val inputEnabled: Boolean get() = foreground && !waiting && scene?.paused == false && scene.phase != Phase.FINISHED
     }
@@ -20,7 +21,7 @@ class AcceptedEngineHost {
 
     @Synchronized fun bind(commands: AcceptedAttemptCommands) { this.commands = commands }
     private var current = Snapshot()
-    @Synchronized fun snapshot(): Snapshot = current
+    @Synchronized fun snapshot(): Snapshot = current.copy(cameraX = engine?.cameraX ?: 0.0)
 
     /** Synchronous with recovery transitions, including same-UID auth epochs. */
     @Synchronized fun onRecoveryChanged(state: AuthenticatedRecoveryOwner.State) {
@@ -44,6 +45,9 @@ class AcceptedEngineHost {
         pauseAndReset()
         current = current.copy(foreground = false)
     }
+
+    /** User pause preserves foreground eligibility but always resets the frame clock. */
+    @Synchronized fun pause() { pauseAndReset() }
 
     private fun pauseAndReset() {
         engine?.pause()

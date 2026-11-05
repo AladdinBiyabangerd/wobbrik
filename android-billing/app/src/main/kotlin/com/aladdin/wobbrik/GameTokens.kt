@@ -23,6 +23,8 @@ internal object GameTokens {
     val CardRadius = 24.dp
     val ControlRadius = 16.dp
     val Target = 48.dp
+    // Expanded breakpoint from tablet-v1; pause panel width matches game-tap framing.
+    val ExpandedWidth = 840.dp
     val PanelWidth = 360.dp
     val PanelElevation = 12.dp
     val Body = 16.sp
