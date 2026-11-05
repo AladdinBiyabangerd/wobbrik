@@ -76,6 +76,7 @@ class AuthenticatedRecoveryOwner(
                 ensureActive()
                 synchronized(lock) {
                     if (epoch == generation && sessions.current() == session && coordinator.ready()) {
+                        work = null // Ready observers may dispatch the next durable command.
                         publishLocked(State.Ready(snapshot))
                     }
                 }
