@@ -3,7 +3,8 @@
 Branch: `feat/game-scene-assets`, based on `66ce11a`.
 Reviewed scope: MainActivity, GameTokens, new GameScene renderer, debug-only preview,
 PNG resources/provenance, capture recipe and progress/context documentation.
-Commit and post-merge CI result are recorded after validation below.
+Reviewed implementation commit: `b638536` (diff `66ce11a..b638536`).
+Merged with history preserved as `55a28e5`; validation below.
 
 ## Changes and review findings
 
@@ -63,7 +64,12 @@ requires human visual inspection. Only final accepted captures count as evidence
   Screenshots and input-check.txt record this. Initial XML assertion expected HUD
   text behind the modal, which is excluded from the accessibility tree; that
   assertion was rejected and counts were checked on the actual screenshots.
-- Post-merge main CI: pending below.
+- Post-merge main `55a28e5`: `./scripts/local-ci.sh` passed in 26s;
+  106 actionable tasks, 10 executed / 96 up-to-date. App assemble/lint and
+  engine/core regression gates passed (existing tests were up-to-date).
+- Documentation-only follow-up branch `docs/game-scene-validation`: reviewed
+  review/context result changes against `55a28e5`, no findings; whitespace passed.
+  Main CI is rerun after that merge; no code or pixels changed in the follow-up.
 
 Backend assessment: visual-only diff; AppBackend domain/API/DTO/schema, shared
 wallet, revision/dedup, auth/recovery and commands are unchanged. No backend
