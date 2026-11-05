@@ -3,6 +3,12 @@ plugins {
     kotlin("android")
     id("org.jetbrains.kotlin.plugin.compose")
 }
+// google-services.json is git-excluded (secret config). Apply Firebase Gradle plugins only
+// when it is present so clean checkouts and CI still build.
+if (file("google-services.json").exists()) {
+    apply(plugin = "com.google.gms.google-services")
+    apply(plugin = "com.google.firebase.crashlytics")
+}
 android {
     namespace = "com.aladdin.wobbrik"
     compileSdk = 36
@@ -13,7 +19,7 @@ android {
         versionCode = 1
         versionName = "0.1"
     }
-    buildFeatures { compose = true }
+    buildFeatures { compose = true; buildConfig = true }
     compileOptions { sourceCompatibility = JavaVersion.VERSION_21; targetCompatibility = JavaVersion.VERSION_21 }
 }
 kotlin { jvmToolchain(21) }
@@ -23,4 +29,8 @@ dependencies {
     implementation("androidx.compose.ui:ui:1.7.6")
     implementation("androidx.compose.foundation:foundation:1.7.6")
     implementation("androidx.compose.material3:material3:1.3.1")
+    implementation(platform("com.google.firebase:firebase-bom:33.7.0"))
+    implementation("com.google.firebase:firebase-crashlytics")
+    implementation("com.google.firebase:firebase-analytics")
+    implementation("com.google.firebase:firebase-config")
 }
