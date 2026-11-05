@@ -12,8 +12,8 @@
   phone, font 1.5/short window and 40-floor crane-limit renders inspected.
 
 ## Current state
-- Follow-up branch fix/continuous-tower-stationary-crane; review/main CI results
-  will be recorded in docs/reviews/2026-11-05-stationary-crane.md.
+- Follow-up cacd445 merged as 6d59cbb; main local CI passed (106 tasks,
+  9 executed / 97 up-to-date). Latest review: 2026-11-05-stationary-crane.md.
 - Implementation b638536 merged as 55a28e5; main local CI passed (106 tasks,
   10 executed / 96 up-to-date). Validation note merged separately; see review.
 - Sprites integrated. Exact concept parity is NOT complete: scene/garden proportions,
@@ -55,6 +55,7 @@
   actual Canvas clipping. Phone/tablet left/right crane-body ROIs are pixel-identical;
   count-1/12/40 phone ROI also identical. No detached foundation in final captures.
 - Debug fixture marker replaces the stale snapshot-prone screenshot-size check.
+- Follow-up main CI passed after merge; exact result is in the latest review.
 - Branch :app:assembleDebug passed; no branch CI. Contrast pairs 8.22–16.57 pass 4.5.
 - Whitespace/capture syntax; source/runtime PNG byte hashes and alpha checked.
 - Phone 1080×2400/420dpi; tablet 1200×1920 + 1920×1200/240dpi;
