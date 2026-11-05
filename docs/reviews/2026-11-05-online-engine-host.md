@@ -27,3 +27,13 @@
 - Düzəliş: resume/frame/drop null/equal-copy/stale Ready-ni rədd edir.
   Regression test stale frame-in clock/scene-i dəyişmədiyini yoxlayır.
 - git diff --check keçdi; branch-də CI işə salınmayıb.
+
+## Final runtime validation
+- Reviewed fix commit: 74ef9f6; main merge: a27dac7.
+- Main üzərində ./scripts/local-ci.sh: BUILD SUCCESSFUL, 25s,
+  106 actionable tasks (16 executed, 90 up-to-date).
+- Build/assemble, Android lint, core və engine testləri keçdi.
+- Əvvəldən mövcud LocalLifecycleOwner deprecation warning qalır.
+- Əlaqəsiz untracked fayllar dəyişdirilməyib. Push/deploy edilməyib.
+- Bu əlavə yalnız nəticə/handoff sənədləşməsidir; diff review və
+  git diff --check keçdi. Merge-dən sonra main CI yenidən yoxlanılır.
