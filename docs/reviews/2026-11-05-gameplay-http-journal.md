@@ -25,4 +25,6 @@
   process-kill or power-loss verification. No live Firebase/server request made.
 - Visuals unchanged. No UI rendering or design-fidelity claim.
 - Branch checks: source review and git diff --check passed. CI not run on branch.
-  Main post-merge CI: pending.
+  Main post-merge CI at `dfc10c5`: passed, exit 0; 47 tasks (21 executed,
+  26 up-to-date). New GameplayAdaptersTest: 5 tests, zero failures/errors/skips.
+  Existing dirty host files were stashed and excluded from this clean-tree gate.
