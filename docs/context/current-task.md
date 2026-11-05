@@ -9,7 +9,7 @@
 - Application host input remains locked; resume/drop false, physics paused.
 
 ## Current state
-- Implementation locally reviewed; main CI pending after merge.
+- Implementation locally reviewed and merged: `d748830` → `9b38e31`; main CI passed.
 - Visible scene remains separate offline practice; no online input binding.
 - Unrelated untracked responsive rule/review files preserved.
 
@@ -40,7 +40,10 @@
 
 ## Checks performed
 - Scoped source review and git diff --check; no branch CI.
-- Main CI pending. No live/backend DB/device/visual checks or push/deploy.
+- Post-merge main ./scripts/local-ci.sh passed: 106 tasks, 32 executed, 74 up-to-date;
+  core/engine tests, app assemble/lint passed. Ten command integration tests and
+  six coordinator tests report zero failures/errors (11 new tests).
+- No live/backend DB/device/visual checks or push/deploy.
 
 ## Exact next step
 - In a new chat, design and implement the small online simulation/landing admission
