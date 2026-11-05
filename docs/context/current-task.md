@@ -1,47 +1,39 @@
-# Level-dependent swing speed — 5 November 2026
+# Smooth horizontal camera — 5 November 2026
 
 ## Completed
-- Prior horizontal camera unit is merged/validated: top-floor tracking with fixed
-  on-screen crane, unchanged suspension/range; review 2026-11-05-horizontal-camera.md.
-- User then requested increasing swing speed with level. Implemented +8% of base
-  per landed floor, cap 3x at upcoming floor 26. Implementation f56e0f6 reviewed.
-- Phone/tablet level 1/11/26 samples at tick 30 rendered and inspected.
+- Read prior level-speed/camera handoff. User requested removing abrupt camera movement.
+- Implementation 1f69672 reviewed and merged to main preserving history.
+- Camera now eases horizontally with the existing 7/s vertical response; crane
+  authoritative origin remains separate so release coordinates stay correct.
+- Finished scene includes camera settling; restore/restart initializes directly.
+- Phone/tablet frame samples rendered, inspected and compared with approved art.
 
 ## Current state
-- feat/level-swing-speed reviewed and merged preserving history as 10c611f.
-- Main CI passed in 32s: 106 tasks, 11 executed / 95 up-to-date; 43 engine tests
-  passed with zero failures/errors. Documentation follow-up repeats main CI.
-- Review: docs/reviews/2026-11-05-level-swing-speed.md.
-- Debug APK installed; visible game remains offline practice, online input locked.
+- Main CI passed: 40s, 106 tasks (9 executed, 97 up-to-date).
+- Validation evidence/docs follow-up merged; main CI repeated afterward.
+- Debug APK installed on Pixel_6_34 emulator. Visible game remains offline practice.
 - Unrelated untracked responsive-rule/compose-game-host files preserved.
 
 ## Decisions
-- Level means in-attempt upcoming floor, not backend account XP level.
-- New practice-speed-v4 curve is independent from balance difficulty. Gravity,
-  balance/scoring, suspension/range and camera behavior are unchanged.
-- v1/v2/v3 checkpoints retain their original speed and camera behavior. v3/v4
-  share followsTower; older clients fail closed on v4. JSON keys unchanged.
-- AppBackend opaque structural-v1 JSON contract inspected; no backend change.
+- Presentation-only easing; no engine/checkpoint/rules/backend change required.
+- Hook remains fixed; hanging module follows authoritative world origin during pan.
+- Existing level-speed v4 behavior unchanged.
 
 ## Remaining work
-- User/physical-device assessment of level speed; no hardware test claimed.
-- Broader design parity and real auth/menu/results/catalog/online integration remain
-  separate unfinished work; this speed unit does not complete the product.
+- Physical-device/live landing assessment, other orientations and font scales.
+- Existing approved-design parity and real online/menu/account integration unfinished.
 
 ## Relevant files
-- android-billing/engine/src/main/kotlin/com/aladdin/wobbrik/engine/{PracticeEngine,EngineCheckpoint}.kt
-- android-billing/engine/src/test/kotlin/com/aladdin/wobbrik/engine/SwingSpeedTest.kt
-- android-billing/engine/README.md; docs/reviews/level-swing-speed/
-- Camera implementation: app/src/main/kotlin/com/aladdin/wobbrik/{GameScene,SceneMotion,MainActivity}.kt under android-billing.
+- android-billing/app/src/main/kotlin/com/aladdin/wobbrik/{SceneMotion,GameScene}.kt
+- android-billing/app/src/debug/kotlin/com/aladdin/wobbrik/ScenePreviewActivity.kt
+- docs/reviews/2026-11-05-smooth-camera.md; docs/reviews/smooth-camera/
 
 ## Checks performed
-- Branch assembleDebug passed: 27s, 66 tasks, 8 executed. No branch CI/tests.
-- Phone 1080x2400/420dpi and tablet landscape 1920x1200/240dpi samples inspected.
-  First two incomplete tablet frames rejected and recaptured; settings reset.
-- Source diff/whitespace reviewed; main build/lint and regression gate passed.
-  MainActivity launched after APK install. No hardware/backend/new orientation run.
+- Branch assembleDebug passed after setting ANDROID_HOME; no branch CI.
+- Source/whitespace review, phone 1080x2400/420dpi and tablet landscape
+  1920x1200/240dpi samples at 0/6/30 ticks inspected. Tick 0 is old-origin baseline.
+- Main local CI passed; engine tests up-to-date. No backend test/change needed.
 
 ## Exact next step
-- Assess swing speed in a new attempt: 1x at floor 1, 1.8x at floor 11, cap 3x
-  at floor 26. Next chat: read this note and the level-swing-speed review first.
-  Keep broader design parity and accepted online integration separate.
+- Assess camera on a new attempt through offset landings; release during recentering.
+  Read the smooth-camera review first. Keep broader product integration separate.
