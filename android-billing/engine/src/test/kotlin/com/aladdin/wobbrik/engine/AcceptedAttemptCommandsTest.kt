@@ -102,6 +102,52 @@ class AcceptedAttemptCommandsTest {
     }
     private fun terminalZero() = PracticeEngine().checkpoint().let { it.copy(state = it.state.copy(phase = Phase.FINISHED)) }
 
+    @Test fun onlineHostStopsAtLandingAndRequiresFreshExplicitResume() = runBlocking {
+        Fixture().use { f ->
+            f.host.bind(f.commands)
+            f.login(); yield()
+            f.commands.start(f.ready()); yield()
+            val old = f.ready()
+            f.host.onForeground()
+            assertFalse(f.host.resume(old.copy()))
+            assertTrue(f.host.resume(old))
+            assertTrue(f.host.drop())
+            var time = 0L
+            repeat(20) { time += 100_000_000L; f.host.onFrame(time) }
+            yield()
+            assertEquals(1L, f.ready().snapshot.attempt!!.floors)
+            assertEquals(2, f.sent.size)
+            assertFalse(f.host.snapshot().inputEnabled)
+            assertFalse(f.host.resume(old))
+            assertTrue(f.host.resume(f.ready()))
+            f.host.onPause()
+            f.host.onFrame(Long.MAX_VALUE)
+            assertFalse(f.host.drop())
+            f.login("bob"); yield()
+            assertNull(f.host.snapshot().scene)
+        }
+    }
+
+    @Test fun terminalCheckpointRecoversFinishIntentWithoutLocalMemory() = runBlocking {
+        Fixture().use { f ->
+            f.login(); yield()
+            f.commands.start(f.ready()); yield()
+            f.commands.checkpoint(f.ready(), landed(true)); yield()
+            // No finish has been submitted; recreate from only server checkpoint + disk.
+            f.recreate(); yield()
+            val freshHost = AcceptedEngineHost()
+            freshHost.bind(f.commands)
+            freshHost.onRecoveryChanged(f.ready())
+            assertFalse(freshHost.resume())
+            assertTrue(freshHost.reconcileTerminal()); yield()
+            assertFalse(freshHost.reconcileTerminal())
+            assertNull(f.ready().snapshot.attempt)
+            assertEquals(listOf(AttemptCommand.Route.START, AttemptCommand.Route.CHECKPOINT, AttemptCommand.Route.FINISH),
+                f.sent.map { it.second.route })
+            assertEquals(1L, f.ready().snapshot.coins)
+        }
+    }
+
     @Test fun completeFlowUsesAcceptedSequenceAndOnlyServerWalletWhileInputRemainsLocked() = runBlocking {
         Fixture().use { f ->
             f.login(); yield()

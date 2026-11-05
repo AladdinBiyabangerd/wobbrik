@@ -18,8 +18,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.yield
 
-/** Process-owned recovery and durable commands; online scene input and restart remain unbound. */
+/** Process-owned recovery and durable commands; online physics; screen/auth controls remain a separate unit. */
 class WobbrikApplication : Application(), DefaultLifecycleObserver {
     sealed interface Bootstrap {
         data object MissingFirebase : Bootstrap
@@ -59,7 +61,16 @@ class WobbrikApplication : Application(), DefaultLifecycleObserver {
             sessions, GameplayHttpBackend(sessions, transport), androidAttemptJournal(this), recoveryScope,
             onStateChanged = engineHost::onRecoveryChanged,
         )
-        bootstrap = Bootstrap.Configured(owner, AcceptedAttemptCommands(owner))
+        val commands = AcceptedAttemptCommands(owner)
+        engineHost.bind(commands)
+        bootstrap = Bootstrap.Configured(owner, commands)
+        recoveryScope.launch {
+            owner.state.collect { state ->
+                // Never submit inside the synchronous recovery invalidation callback.
+                yield()
+                if (state is AuthenticatedRecoveryOwner.State.Ready) engineHost.reconcileTerminal()
+            }
+        }
         authListener = FirebaseAuth.AuthStateListener { source ->
             // Do not deduplicate by UID: a re-login must establish a new recovery epoch.
             owner.onAuthChanged(source.currentUser?.uid)
