@@ -52,3 +52,13 @@ Auth, real online host, server progression, davamlı bərpa və nasazlıq sübut
 birlikdə işləmədən mərhələ 3 tamam deyil. Offline menyu/session-only rekord və
 dizayn uyğunluğu borcu açıqdır. UI telefon/planşetdə təsdiqlənmiş dizaynlarla
 yanaşı müqayisə edilməlidir.
+
+## 5 noyabr — vahid 2 ekran branch-i (açıq)
+
+`feat/stage-three-online-screens`: MainActivity online host-a bağlanıb;
+hazır art Android resurslarına keçirilib, əlavə ikon/recovery asset-ləri
+istifadəçinin təsdiqi ilə hazırlanıb. Bu branch hələ main-də deyil və vahid 2
+bağlanmayıb. Review: `docs/reviews/2026-11-05-online-screens.md`.
+Google hesabı ilə qonağı eyni UID-də link etmək seçilib; credential UI/binding
+və təsdiqlənmiş dizaynla qalan uyğunluq işləri növbəti addımdır. Konfiqurasiya,
+fixture renderi və fake engine testləri real auth/backend sübutu sayılmır.
