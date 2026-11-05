@@ -94,7 +94,7 @@ internal fun DrawScope.drawGameScene(state: PracticeState, art: SceneArt, motion
         // The ring center in the cropped crane art is (174, 410).
         sprite(art.crane, 142, 134, 1858, 483, hook.x - craneWidth * 174 / 1858,
             hook.y - craneWidth * 410 / 1858, craneWidth)
-        val module = state.falling ?: Floor(state.craneX + motion.cameraXUnits, hangingY.toDouble())
+        val module = state.falling ?: Floor(state.craneX + motion.craneOriginXUnits, hangingY.toDouble())
         // Center suspension has one fixed length, including while the camera settles.
         // Map the falling floor continuously from its release arc to the landing plane.
         val rope = SceneMotion.SUSPENSION_LENGTH * scale

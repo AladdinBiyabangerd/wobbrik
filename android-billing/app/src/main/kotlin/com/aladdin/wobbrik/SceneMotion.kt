@@ -17,6 +17,8 @@ internal class SceneMotion {
         private set
     var cameraXUnits = 0f
         private set
+    var craneOriginXUnits = 0f
+        private set
     var cameraUnits = 0f
         private set
     private var towerVelocity = 0f
@@ -26,7 +28,10 @@ internal class SceneMotion {
     val settled: Boolean get() {
         val target = (previous?.balance?.lean ?: 0.0).toFloat() * 1.4f
         return abs(towerVelocity) < .01f && abs(loadVelocity) < .01f &&
-            abs(towerDegrees - target) < .01f && abs(loadDegrees) < .01f
+            abs(towerDegrees - target) < .01f && abs(loadDegrees) < .01f &&
+            abs(cameraXUnits - craneOriginXUnits) < .01f &&
+            abs(cameraUnits - max(0f, ((previous?.floors?.size ?: 0) - 4) *
+                PracticeRulesV1.FLOOR_HEIGHT.toFloat())) < .01f
     }
 
     fun reset() {
@@ -34,15 +39,18 @@ internal class SceneMotion {
         previous = null
         cameraUnits = 0f
         cameraXUnits = 0f
+        craneOriginXUnits = 0f
     }
 
     fun advance(state: PracticeState, seconds: Float, cameraX: Double = 0.0) {
-        // Pan atomically with the new landing origin. Easing only the view would
-        // detach the fixed-screen suspension from the engine's actual drop x.
-        cameraXUnits = cameraX.toFloat()
+        // Keep authoritative aiming separate from the eased world-to-screen view.
+        craneOriginXUnits = cameraX.toFloat()
         val old = previous
         val cameraTarget = max(0f, (state.floors.size - 4) * PracticeRulesV1.FLOOR_HEIGHT.toFloat())
-        if (old == null || state.floors.size < old.floors.size) cameraUnits = cameraTarget
+        if (old == null || state.floors.size < old.floors.size) {
+            cameraUnits = cameraTarget
+            cameraXUnits = craneOriginXUnits
+        }
         if (old != null && state.floors.size < old.floors.size) {
             towerDegrees = 0f; towerVelocity = 0f; loadDegrees = 0f; loadVelocity = 0f
         }
@@ -54,7 +62,9 @@ internal class SceneMotion {
         }
         previous = state
         val dt = seconds.coerceIn(0f, .05f)
-        cameraUnits += (cameraTarget - cameraUnits) * (1f - exp(-7f * dt))
+        val cameraBlend = 1f - exp(-7f * dt)
+        cameraUnits += (cameraTarget - cameraUnits) * cameraBlend
+        cameraXUnits += (craneOriginXUnits - cameraXUnits) * cameraBlend
         // Small substeps keep springs stable across 30/60/120 Hz and bounded stalls.
         repeat(6) {
             val h = dt / 6

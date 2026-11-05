@@ -32,7 +32,8 @@ class ScenePreviewActivity : ComponentActivity() {
         }
         // Deterministic animation samples for frame-by-frame visual review.
         val motion = SceneMotion()
-        motion.advance(engine.state, 0f, engine.cameraX)
+        motion.advance(engine.state, 0f,
+            intent.getIntExtra("camera_from", engine.cameraX.toInt()).toDouble())
         val dropTick = intent.getIntExtra("drop_tick", -1)
         repeat(intent.getIntExtra("ticks", 0).coerceIn(0, 600)) { tick ->
             if (tick == dropTick) engine.drop()
