@@ -8,7 +8,8 @@ import kotlin.math.PI
 
 /** Versioned, provisional game units; not measured building dimensions or server geometry. */
 object PracticeRulesV1 {
-    const val VERSION = "practice-pendulum-v2"
+    const val VERSION = "practice-camera-v3"
+    const val PENDULUM_VERSION = "practice-pendulum-v2"
     const val LEGACY_VERSION = "practice-balance-v1"
     const val TICKS_PER_SECOND = 60
     const val MAX_CATCH_UP_TICKS = 8
@@ -43,6 +44,10 @@ class PracticeEngine {
     private var accumulatedTickUnits = 0L
     private var swayVelocity = 0.0
 
+    /** World-space center of the fixed-screen crane. Old snapshots retain their fixed origin. */
+    val cameraX: Double get() = if (rules == PracticeRulesV1.VERSION)
+        state.floors.lastOrNull()?.centerX ?: 0.0 else 0.0
+
     fun checkpoint(): EngineCheckpoint = EngineCheckpoint(rules = rules, state = state.copy(floors = state.floors.toList()),
         direction = direction, fallVelocity = fallVelocity, tickUnits = accumulatedTickUnits, swayVelocity = swayVelocity)
 
@@ -62,7 +67,7 @@ class PracticeEngine {
         fallVelocity = 0.0
         state = state.copy(
             phase = Phase.FALLING,
-            falling = Floor(state.craneX, landingY() + PracticeRulesV1.DROP_HEIGHT),
+            falling = Floor(cameraX + state.craneX, landingY() + PracticeRulesV1.DROP_HEIGHT),
         )
         return true
     }

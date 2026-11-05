@@ -1,0 +1,2 @@
+phone: crane yellow bounds (493, 636, 989, 766); left/center/right crane ROI identical: True
+tablet: crane yellow bounds (928, 93, 1264, 480); left/center/right crane ROI identical: True

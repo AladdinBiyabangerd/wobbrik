@@ -74,7 +74,7 @@ class MainActivity : ComponentActivity() {
 internal fun PracticeGame(engine: PracticeEngine, renderOnly: Boolean = false, previewMotion: SceneMotion? = null) {
     // Coordinates are read in the draw phase; HUD only observes discrete changes.
     val snapshot = remember { mutableStateOf(engine.state) }
-    val motion = remember { previewMotion ?: SceneMotion().also { it.advance(engine.state, 0f) } }
+    val motion = remember { previewMotion ?: SceneMotion().also { it.advance(engine.state, 0f, engine.cameraX) } }
     var motionFrame by remember { mutableIntStateOf(0) }
     var paused by remember { mutableStateOf(engine.state.paused) }
     var menu by remember { mutableStateOf(false) }
@@ -111,7 +111,7 @@ internal fun PracticeGame(engine: PracticeEngine, renderOnly: Boolean = false, p
             withFrameNanos { now ->
                 if (previous != 0L) {
                     engine.advance(now - previous)
-                    motion.advance(engine.state, (now - previous) / 1_000_000_000f)
+                    motion.advance(engine.state, (now - previous) / 1_000_000_000f, engine.cameraX)
                     motionFrame++
                     publish()
                 }

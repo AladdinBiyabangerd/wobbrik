@@ -43,3 +43,28 @@ cannot change collision or rewards. They freeze on pause and reset on restart;
 process recreation resumes the authoritative/local checkpoint with fresh visual
 springs. This remains a stylized 2D single-body presentation, not a validated
 structural or full rigid-body simulation (release has no horizontal ballistic drift).
+
+## Horizontal camera revision (5 November 2026)
+
+New attempts/restart now use `practice-camera-v3`. The horizontal camera and the
+fixed-screen crane share a world origin at the last landed floor's center (zero
+before the first landing). `craneX` remains the local pendulum displacement with
+the same +/-120 range and 155-unit presentation suspension. Drop stores the world
+x `cameraX + craneX`; overlap and balance use actual world-space floor positions.
+The view subtracts exactly that origin from the island, stack, guide and falling
+module. Recentring is atomic on landing, with no independent horizontal view lag;
+vertical camera smoothing remains. The crane/HUD/background do not pan.
+
+World floor x can exceed the former +/-120 boundary, while every adjacent floor
+must still overlap. Both sides can still miss or reach the existing balance-loss
+threshold; camera tracking is not a new stability model. This does not add a
+mass-distribution solver or collapse animation.
+
+The JSON keys and outer checkpoint/structural-v1 contracts are unchanged. The
+inner rule ID distinguishes local swing x from world falling/floor x. Both
+`practice-balance-v1` and `practice-pendulum-v2` restore and re-encode their original
+fixed-origin behavior; old clients reject unknown v3 rules rather than replaying
+with incorrect coordinates. No wallet/reward/domain changes or online-host unlock.
+AppBackend `internal/wobbrik/attempts.go` and `docs/wobbrik-game-api.md` were checked:
+the server still carries opaque valid JSON <=16 KiB and authoritative counters;
+no backend code, DTO, migration or test change is required for this revision.

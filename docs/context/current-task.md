@@ -1,54 +1,46 @@
-# Weighted scene motion — 5 November 2026
+# Horizontal tower camera — 5 November 2026
 
 ## Completed
-- User authorized more lifelike movement while preserving approved art.
-- New-attempt pendulum trajectory; legacy v1 checkpoint trajectory preserved.
-- Fixed center-suspension arc, load angular inertia, impact-driven connected tower
-  rotation, smooth camera. Pause freezes motion; restart resets it.
-- Phone/tablet impact sequences, 40-floor renders, concept comparisons and live
-  motion samples inspected. Pause captures pixel-identical after panel appeared.
+- User rejected shortening suspension/swing range and explicitly chose horizontal
+  camera following with the crane fixed on screen.
+- Implemented v3 world/local aiming and shared camera translation; retained v1/v2
+  restore behavior. Reviewed implementation 7daa3f7 on fix/horizontal-camera-follow.
+- Phone/tablet left/center/right, pause and 40-floor frames rendered and inspected.
+  Crane ROI pixel-identical across all three horizontal directions.
 
 ## Current state
-- Implementation 40f2bf5 reviewed and merged as 229f058. Main local CI passed
-  in 36s: 106 tasks, 11 executed / 95 up-to-date. Validation follow-up only changes documentation and pixel-check evidence.
-- Review: docs/reviews/2026-11-05-weighted-motion.md.
-- Visible game remains offline practice; accepted online input is still locked.
-- Exact concept parity is open: scene/garden size, background/type/lighting.
+- Review: docs/reviews/2026-11-05-horizontal-camera.md.
+- Branch assembled and APK installed. Merge/main CI pending at this note revision.
+- Visible game remains offline practice; accepted online input locked.
 - Unrelated untracked responsive-rule/compose-game-host files preserved.
 
 ## Decisions
-- New inner rules practice-pendulum-v2; restore/encode legacy practice-balance-v1
-  unchanged. Older clients reject v2 rather than replaying incorrectly.
-- No AppBackend changes: opaque structural snapshot contract inspected in code;
-  outer API/rules, wallet, revision/dedup, UID/epoch and retry gates unchanged.
-- Motion uses original assets/tokens. Longer suspension needs taller framing.
-- Visual spring state is cosmetic and resets on process recreation. No claim of
-  full structural/rigid-body simulation; release has no horizontal ballistic drift.
+- Camera origin is the last landed floor center; craneX stays local pendulum x.
+  Falling/landed floor centers are world x; drop = origin + local x.
+- Horizontal camera recenters atomically on landing; vertical smoothing retained.
+- New rule practice-camera-v3; legacy v1/v2 retain original fixed-origin behavior.
+- No mass-distribution solver, art/palette/framing or suspension/range changes.
+- AppBackend opaque JSON contract inspected; no backend change needed. Wallet,
+  revision/dedup, account isolation/retry/recovery gates unchanged.
 
 ## Remaining work
-- Real-device feel/performance and user assessment of the motion excerpt.
-- Existing exact-design differences; online simulation/checkpoint admission,
-  accepted recovery before unlock, real auth/menu/navigation/results and catalog.
-- No new phone-landscape/tablet-portrait/large-font render in this motion unit.
+- Main local CI after reviewed merge; then physical-device/user assessment.
+- Broader exact-design differences and real auth/menu/results/catalog/online host
+  remain separate unfinished work; this camera unit does not complete the game.
 
 ## Relevant files
 - android-billing/app/src/main/kotlin/com/aladdin/wobbrik/{GameScene,SceneMotion,MainActivity}.kt
 - android-billing/app/src/debug/kotlin/com/aladdin/wobbrik/ScenePreviewActivity.kt
 - android-billing/engine/src/main/kotlin/com/aladdin/wobbrik/engine/{PracticeEngine,EngineCheckpoint}.kt
-- android-billing/engine/README.md and engine checkpoint/practice tests.
-- docs/reviews/weighted-motion/ — frames, comparisons, live mp4/gif, pause evidence.
-- docs/design/game-tap-v2/; docs/reviews/2026-11-05-game-scene-assets.md.
+- android-billing/engine/src/test/kotlin/com/aladdin/wobbrik/engine/{CameraFollowTest,BalanceTest}.kt
+- android-billing/engine/README.md; docs/reviews/horizontal-camera/
 
 ## Checks performed
-- Branch assembleDebug passed after fixing missing ANDROID_HOME; no branch CI.
-- Phone 1080x2400/420dpi; tablet landscape 1920x1200/240dpi. Impact ticks
-  0/15/27/40/65/100, 40-floor swing, four-floor reference comparisons inspected.
-- Live motion contact sheet inspected; settled pause scene pixel-identical.
-- Scope diff review and whitespace passed; main regression gate passed (engine tests executed).
-- No backend/live-account/physical-device/release checks, push or deployment.
+- Branch assembleDebug passed: 34s, 66 tasks, 8 executed. No branch CI/tests.
+- Phone 1080x2400/420dpi, tablet landscape 1920x1200/240dpi inspected, with
+  concept comparisons. Source diff/whitespace reviewed. Device overrides restored.
+- No physical-device, new phone-landscape/tablet-portrait/font-scale or backend run.
 
 ## Exact next step
-- Next chat: read this note and the weighted-motion review; inspect
-  docs/reviews/weighted-motion/phone-motion.gif and compare motion on a real
-  device. Refine only this motion if needed; keep unfinished online integration
-  and broader design parity separate.
+- Merge reviewed branch preserving history and run ./scripts/local-ci.sh on main.
+  Record actual result; if it fails, fix on a separate reviewed branch and remerge.

@@ -15,6 +15,8 @@ internal class SceneMotion {
         private set
     var loadDegrees = 0f
         private set
+    var cameraXUnits = 0f
+        private set
     var cameraUnits = 0f
         private set
     private var towerVelocity = 0f
@@ -31,9 +33,13 @@ internal class SceneMotion {
         towerDegrees = 0f; towerVelocity = 0f; loadDegrees = 0f; loadVelocity = 0f
         previous = null
         cameraUnits = 0f
+        cameraXUnits = 0f
     }
 
-    fun advance(state: PracticeState, seconds: Float) {
+    fun advance(state: PracticeState, seconds: Float, cameraX: Double = 0.0) {
+        // Pan atomically with the new landing origin. Easing only the view would
+        // detach the fixed-screen suspension from the engine's actual drop x.
+        cameraXUnits = cameraX.toFloat()
         val old = previous
         val cameraTarget = max(0f, (state.floors.size - 4) * PracticeRulesV1.FLOOR_HEIGHT.toFloat())
         if (old == null || state.floors.size < old.floors.size) cameraUnits = cameraTarget

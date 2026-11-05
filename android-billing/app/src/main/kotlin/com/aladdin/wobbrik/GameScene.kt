@@ -35,7 +35,7 @@ internal fun DrawScope.drawGameScene(state: PracticeState, art: SceneArt, motion
     val ground = (size.height + 350f * scale) / 2f
     // Compress empty air above the stack, continuously through landing. Physics is unchanged.
     fun visualY(y: Float) = if (y > top) top + (y - top) * .5f else y
-    fun point(x: Double, y: Double) = Offset(size.width / 2f + x.toFloat() * scale,
+    fun point(x: Double, y: Double) = Offset(size.width / 2f + (x.toFloat() - motion.cameraXUnits) * scale,
         ground - (visualY(y.toFloat()) - camera) * scale)
     fun sprite(bitmap: ImageBitmap, sx: Int, sy: Int, sw: Int, sh: Int,
         left: Float, upper: Float, width: Float) {
@@ -86,19 +86,19 @@ internal fun DrawScope.drawGameScene(state: PracticeState, art: SceneArt, motion
         }
         val hangingY = top + PracticeRulesV1.DROP_HEIGHT.toFloat()
         // Crane body and upper suspension point are fixed in window coordinates.
-        // Only the cable's lower endpoints follow the hanging module. Neither the
-        // crane nor the tower pans horizontally with the engine's historical craneX.
+        // The world pans to follow the top floor; only the cable's lower endpoints
+        // follow the hanging module. The hook stays at the screen center.
         val hook = Offset(size.width / 2f,
             ground - (4 * floorHeight + PracticeRulesV1.DROP_HEIGHT.toFloat() * .5f + 185f) * scale)
         val craneWidth = width * 1.8f
         // The ring center in the cropped crane art is (174, 410).
         sprite(art.crane, 142, 134, 1858, 483, hook.x - craneWidth * 174 / 1858,
             hook.y - craneWidth * 410 / 1858, craneWidth)
-        val module = state.falling ?: Floor(state.craneX, hangingY.toDouble())
+        val module = state.falling ?: Floor(state.craneX + motion.cameraXUnits, hangingY.toDouble())
         // Center suspension has one fixed length, including while the camera settles.
         // Map the falling floor continuously from its release arc to the landing plane.
         val rope = SceneMotion.SUSPENSION_LENGTH * scale
-        val x = module.centerX.toFloat() * scale
+        val x = (module.centerX.toFloat() - motion.cameraXUnits) * scale
         val suspendedY = hook.y + sqrt(max(0f, rope * rope - x * x)) + width * .48f
         val fallFraction = ((module.baseY - top) / PracticeRulesV1.DROP_HEIGHT).toFloat().coerceIn(0f, 1f)
         val landing = point(module.centerX, top.toDouble())
