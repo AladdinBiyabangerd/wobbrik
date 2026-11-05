@@ -24,3 +24,8 @@
 - Repeat CI still failed: further review found fixture backend methods recursively
   resolved themselves instead of injected lambdas. fix/recovery-test-backend
   qualifies both calls with this@Fixture; reviewed exact two-call fix.
+
+- Final implementation CI on main: ./scripts/local-ci.sh passed (13s),
+  including 40 core tests (five owner tests), engine tests, app/library assemble
+  and lint. Prior failures above are retained as evidence, not counted as passes.
+- Documentation follow-up reviewed with git diff --check; no runtime changes.
