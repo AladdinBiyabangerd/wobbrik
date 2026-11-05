@@ -68,3 +68,19 @@ with incorrect coordinates. No wallet/reward/domain changes or online-host unloc
 AppBackend `internal/wobbrik/attempts.go` and `docs/wobbrik-game-api.md` were checked:
 the server still carries opaque valid JSON <=16 KiB and authoritative counters;
 no backend code, DTO, migration or test change is required for this revision.
+
+## Level swing speed revision (5 November 2026)
+
+New attempts/restart use `practice-speed-v4`. In-attempt level is the upcoming
+floor number (landed count + 1), not backend account XP level. Swing phase speed
+is base speed times `1 + min(landed floors, 25) * 0.08`: 1x at floor 1, 1.8x at
+floor 11, 3x at floor 26 and above. Only the SWINGING phase uses this multiplier;
+range, suspension, gravity, balance difficulty, camera and perfect scoring retain
+their previous rules. Speed advances after a successful landing, not while waiting.
+
+Restoring v1/v2/v3 preserves each original speed curve and original camera mode;
+v3 and v4 both follow the tower. Unknown inner rule IDs still fail closed. JSON
+keys, opaque <=16 KiB outer structural-v1 snapshots, server counters, retry/dedup,
+account isolation and wallet remain unchanged. AppBackend attempts.go was checked;
+no backend DTO/schema/migration or code change is required. This does not connect
+the unfinished accepted online host or make local state authoritative rewards.

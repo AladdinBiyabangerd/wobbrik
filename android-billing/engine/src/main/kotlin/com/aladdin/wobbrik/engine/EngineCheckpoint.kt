@@ -14,7 +14,7 @@ data class EngineCheckpoint(
     val swayVelocity: Double,
 ) {
     fun validate() {
-        require(version == "practice-checkpoint-v1" && rules in setOf(PracticeRulesV1.VERSION, PracticeRulesV1.PENDULUM_VERSION, PracticeRulesV1.LEGACY_VERSION))
+        require(version == "practice-checkpoint-v1" && rules in setOf(PracticeRulesV1.VERSION, PracticeRulesV1.CAMERA_VERSION, PracticeRulesV1.PENDULUM_VERSION, PracticeRulesV1.LEGACY_VERSION))
         require(direction == -1 || direction == 1)
         require(tickUnits in 0 until 1_000_000_000L)
         require(fallVelocity.isFinite() && fallVelocity >= 0 && swayVelocity.isFinite())
@@ -24,14 +24,14 @@ data class EngineCheckpoint(
         require((state.phase == Phase.FALLING) == (state.falling != null))
         state.floors.forEachIndexed { index, f ->
             require(f.centerX.isFinite())
-            if (rules != PracticeRulesV1.VERSION) require(abs(f.centerX) <= PracticeRulesV1.CRANE_RANGE)
+            if (!PracticeRulesV1.followsTower(rules)) require(abs(f.centerX) <= PracticeRulesV1.CRANE_RANGE)
             require(f.baseY == index * PracticeRulesV1.FLOOR_HEIGHT)
             val support = state.floors.getOrNull(index - 1)?.centerX ?: 0.0
             require(abs(f.centerX - support) < PracticeRulesV1.FLOOR_WIDTH)
         }
         state.falling?.let {
             val y = state.floors.size * PracticeRulesV1.FLOOR_HEIGHT
-            val origin = if (rules == PracticeRulesV1.VERSION) state.floors.lastOrNull()?.centerX ?: 0.0 else 0.0
+            val origin = if (PracticeRulesV1.followsTower(rules)) state.floors.lastOrNull()?.centerX ?: 0.0 else 0.0
             require(it.centerX == origin + state.craneX && it.baseY.isFinite() && it.baseY > y && it.baseY <= y + PracticeRulesV1.DROP_HEIGHT)
         }
         require(state.phase == Phase.FINISHED || abs(state.balance.lean) < BalanceRulesV1.TOPPLE)
