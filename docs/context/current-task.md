@@ -1,40 +1,52 @@
-# Attempt recovery core — 5 noyabr 2026
+# Gameplay HTTP + attempt journal — 5 noyabr 2026
 
 ## Completed
-- AppBackend AGENTS/README/context və gameplay API, Compose host və dizayn davranışı oxundu.
-- Transportdan asılı olmayan AttemptCoordinator əlavə edildi: UID/login epoch, serial mutation, göndərmədən əvvəl journal save, exact retry, definitive revision conflict sonrası sync, receipt sonrası sync və equal-revision wallet replacement.
-- Beş məqsədli regression testi əlavə edildi; durable disk/process yoxlaması deyil.
+- Typed start/checkpoint/finish envelope builders and persisted metadata validation.
+- GameplayHttpBackend: fresh Sessions token, UID/login epoch, exact wire retry,
+  explicit 409 revision_conflict mapping; bounded HTTPS transport, no redirects.
+- DiskAttemptJournal + Android AtomicFile in noBackupFilesDir: per-UID hashed files,
+  embedded identity/version, pending overwrite rejection, compare removal/tombstones.
+- Five adapter regressions including actual JVM disk recreation and lost response.
 
 ## Current state
-- Koordinator hələ Compose hosta bağlı deyil. HTTP/Firebase adapteri, durable journal, tam DTO və engine checkpoint codec yoxdur. Yekun oyun axını hazır deyil.
-- Əvvəlki uncommitted host/build/rule/review dəyişiklikləri saxlanır; bu vahidə commit edilmir.
-- MainActivity hələ PracticeEngine, sxematik Canvas, offline məşq menyusu və session rekord istifadə edir; process death yeni cəhd yaradır. Dizayna uyğunluğu təsdiqlənməyib.
+- Implementation commit b6a4f9b, reviewed merge dfc10c5 on main. Local CI passed.
+- Previous dirty Compose app/build/settings/rule/review files preserved and restored
+  after clean-tree CI; excluded from this unit and its verification.
+- Host still PracticeEngine/offline/session record/schematic Canvas, not connected.
+- One application-scoped journal/coordinator owner required; multi-process writers
+  unsupported. JVM disk tests do not verify Android AtomicFile process/power loss.
 
 ## Decisions
-- Authority yalnız AppBackend/PostgreSQL; lokal mükafat əlavə edilmir.
-- Bu core vahidi mövcud API ilə uyğundur; backend/schema/rules dəyişiklik tələb etmir. Tam adapter uyğunluğu hələ yoxlanmayıb.
-- API-də abandon yoxdur. Restart/menu davranışını finish/mükafat kimi yozmaq olmaz; hosta bağlamadan əvvəl lifecycle müqaviləsi həll edilməlidir.
-- Real SKU/Console/deploy/push üçün ayrıca göstəriş gözlənir.
+- AppBackend API/source inspected; existing contract suffices, no server/schema/rules
+  changes needed for this adapter unit. Authority remains AppBackend/PostgreSQL.
+- Only revision_conflict clears a rejected pending command; all other failures
+  retain exact command. No operation-404 inference or automatic mutation rebasing.
+- No UI changes or visual-fidelity claim. No push, deployment, SKU or Console work.
 
 ## Remaining work
-- Typed HTTP DTO/envelope serializer və authenticated backend adapter; per-UID atomik durable journal və backup istisnası.
-- Tam account/attempt DTO, engine checkpoint roundtrip/validation, host auth bootstrap və input gating/recovery.
-- Restart/abandon server davranışı; təsdiqlənmiş qrafika və real menyu/naviqasiya; telefon/planşet dizayn müqayisəsi və cihaz yoxlamaları.
+- Full account/catalog/attempt/receipt DTOs beyond recovery projection.
+- Versioned engine checkpoint codec and validation; auth bootstrap, input gating,
+  lifecycle recovery and host binding. Resolve restart/abandon server contract first.
+- Android process-kill/AtomicFile device tests and live authenticated transport tests.
+- Approved graphics, real menus/navigation, phone/tablet design comparison.
 
 ## Relevant files
-- android-billing/core/src/main/kotlin/appbackend/wobbrik/game/{AttemptCoordinator.kt,README.md}
-- android-billing/core/src/test/kotlin/appbackend/wobbrik/game/AttemptCoordinatorTest.kt
-- docs/reviews/2026-11-05-attempt-recovery-core.md
-- android-billing/app/src/main/kotlin/az/wobbrik/game/{MainActivity,GameTokens}.kt; app/README.md
-- docs/kotlin-compose-plan.md §5; docs/design/{mobile-v1,game-tap-v2}/
-- /Users/mac/My Workspace/AppBackend/docs/wobbrik-game-api.md və AGENTS.md
+- android-billing/core/src/main/kotlin/appbackend/wobbrik/game/{README.md,AttemptCoordinator.kt,GameplayWire.kt,GameplayHttpBackend.kt,DiskAttemptJournal.kt}
+- android-billing/android/src/main/kotlin/appbackend/wobbrik/game/AndroidAttemptJournal.kt
+- android-billing/core/src/test/kotlin/appbackend/wobbrik/game/GameplayAdaptersTest.kt
+- docs/reviews/2026-11-05-gameplay-http-journal.md
+- docs/kotlin-compose-plan.md §5; android-billing/app/README.md
+- /Users/mac/My Workspace/AppBackend/docs/wobbrik-game-api.md
 
 ## Checks performed
-- Lokal source review və diff whitespace check keçib; branch-də CI işlədilməyib.
-- Main merge sonrası təmiz ağacda ./scripts/local-ci.sh keçdi: exit 0, 47 task; yeni testlər 5/5, failure/error/skip yoxdur. Mövcud dirty host bu yoxlamaya daxil deyil. Review: docs/reviews/2026-11-05-attempt-recovery-core.md.
-- UI dəyişdirilməyib/render edilməyib. Backend dəyişdirilməyib/test suite işlədilməyib.
+- Branch source review + git diff --check; no branch CI.
+- Main dfc10c5 ./scripts/local-ci.sh: exit 0, 47 tasks, 21 executed/26 up-to-date.
+- New adapter suite: 5 tests, 0 failure/error/skip. Android assemble/lint passed.
+- Backend tests, device process-kill, live HTTP/Firebase and UI renders not run.
 
 ## Exact next step
-- Bu qeydi, core README və review qeydini oxu. Əvvəlki dirty hostu qoru.
-- Növbəti kiçik vahid: mövcud billing AppBackendClient/AccountSessions sərhədlərini istifadə edərək typed gameplay HTTP adapter və durable per-UID attempt journal qur; exact wire retry, login epoch, timeout/conflict və real disk recreation testləri ilə yoxla. Branch-də review, main-ə merge, yalnız sonra main-də lokal CI.
-- Sonra ayrıca vahiddə checkpoint codec və host lifecycle bağlanması; restart/abandon üçün server müqaviləsini əvvəl həll et. Placeholder qrafikanı yekun dizayn sayma.
+- Read this and core gameplay README; preserve dirty host files.
+- Next small unit: full recovery DTO/engine checkpoint roundtrip validation, before
+  host lifecycle binding. Check PracticeEngine state and backend structural bounds;
+  do not invent abandon/restart-as-finish behavior. Review on feat/fix branch,
+  merge retaining history, CI only on main. Keep approved visual design unchanged.
