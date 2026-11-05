@@ -29,7 +29,7 @@ class GameplayAdaptersTest {
             override fun current() = session
             override suspend fun idToken(session: BillingSession): String { tokens++; return "fresh-$tokens" }
         }
-        val snapshot = """{"rules_version":"wobbrik-v1","revision":0,"coins":7,"xp":0,"attempt":null}"""
+        val snapshot = """{"rules_version":"wobbrik-v1","revision":0,"coins":7,"xp":0,"attempt":null,"server_time":"2026-11-05T00:00:00Z","first_online_at":"2026-11-05T00:00:00Z","grace_until":"2026-11-05T20:00:00Z","level":1,"rescues":0,"achievements":[],"unlocks":[],"land":[],"part_progress":[]}"""
         val receipt = """{"revision":1,"accepted_at":"2026-11-05T00:00:00Z","result":{"attempt_id":"op"}}"""
     }
     @Test fun diskRecreationIsolationCompareRemoveAndCorruption() {
@@ -87,6 +87,6 @@ class GameplayAdaptersTest {
         val checkpoint = GameplayWire.checkpoint("cp", 1, "op", 1, 10, 2, 0, "{\"x\":1}")
         GameplayWire.validate(checkpoint)
         GameplayWire.validate(GameplayWire.finish("finish", 2, "op", 1, setOf("wall", "window", "entrance", "roof", "lighting").associateWith { "free_$it" }))
-        assertThrows(Exception::class.java) { GameplayWire.snapshot("""{"rules_version":"wobbrik-v1","revision":"0","coins":0,"xp":0,"attempt":null}""") }
+        assertThrows(Exception::class.java) { GameplayWire.snapshot("""{"rules_version":"wobbrik-v1","revision":"0","coins":0,"xp":0,"attempt":null,"server_time":"2026-11-05T00:00:00Z","first_online_at":"2026-11-05T00:00:00Z","grace_until":"2026-11-05T20:00:00Z","level":1,"rescues":0,"achievements":[],"unlocks":[],"land":[],"part_progress":[]}""") }
     }
 }
