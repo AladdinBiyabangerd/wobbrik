@@ -26,9 +26,25 @@ class AuthenticatedRecoveryOwnerTest {
             }
             override suspend fun submit(session: BillingSession, command: AttemptCommand) { this@Fixture.submit() }
         }
-        val owner = AuthenticatedRecoveryOwner(sessions, backend, journal, scope)
+        val notifications = mutableListOf<AuthenticatedRecoveryOwner.State>()
+        val owner = AuthenticatedRecoveryOwner(sessions, backend, journal, scope, notifications::add)
         fun ready() = (owner.state.value as AuthenticatedRecoveryOwner.State.Ready).snapshot
         fun close() = scope.cancel()
+    }
+
+    @Test fun invalidationNotifiesSynchronouslyEvenWhenFlowWouldConflate() = runBlocking {
+        val f = Fixture()
+        try {
+            f.owner.onAuthChanged("alice")
+            yield()
+            assertTrue(f.notifications.last() is AuthenticatedRecoveryOwner.State.Ready)
+            f.sync = { awaitCancellation() }
+            f.notifications.clear()
+            f.owner.onAuthChanged("alice")
+            assertEquals(AuthenticatedRecoveryOwner.State.Recovering, f.notifications.first())
+            f.owner.onAuthChanged(null)
+            assertEquals(AuthenticatedRecoveryOwner.State.SignedOut, f.notifications.last())
+        } finally { f.close() }
     }
 
     @Test fun delayedOldAccountCannotPublishAndForegroundIsSerialized() = runBlocking {

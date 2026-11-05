@@ -78,7 +78,22 @@ snapshots fail closed. Restored physics is always paused with tick accumulation 
 the future host must also reset its monotonic frame clock before explicit resume.
 Terminal active snapshots remain terminal; continued attempts remain blocked until
 stabilization is specified. This boundary does not authorize input or issue commands.
-It is not yet connected to the visible offline practice scene or application owner.
+It is connected to the application-owned `AcceptedEngineHost`, but not to the visible offline practice scene.
 
 User deferred live origin/device verification on 5 November 2026. This removes that
 check as a prerequisite for this implementation work, not as a release requirement.
+
+## Application-owned engine host
+
+`WobbrikApplication.engineHost` retains online physics across activity recreation.
+Recovery publishes to the host synchronously under the recovery owner's lock, before
+StateFlow publication, so conflation cannot skip an auth/recovery invalidation.
+The host clears physics on every transition, restores only accepted paused snapshots,
+and exposes no mutable engine. Process stop and immediate activity pause both pause
+and reset timing. Foreground never resumes physics. While durable command handling
+is absent, frame callbacks discard timing, resume/drop return false, and input stays
+locked even for a valid Ready snapshot. No online restart/abandon binding exists.
+The existing visible offline practice engine remains separate technical debt; this
+unit does not complete online gameplay, approved visuals, or navigation integration.
+No backend API/DTO/schema/rules change is required: this host only consumes the
+existing recovery contract and sends no commands.
