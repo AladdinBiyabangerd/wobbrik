@@ -6,7 +6,7 @@ alwaysApply: true
 - Follow AGENTS.md section “Branch, commit və lokal CI” for every change.
 - Use a focused feat/, fix/, chore/ or docs/ branch and meaningful commits.
 - Review the final diff locally and record findings in docs/reviews/.
-- Run ./scripts/local-ci.sh; fix failures and rerun until successful.
+- Run ./scripts/local-ci.sh only on main after merging the reviewed branch. Never run CI on feature/fix/docs/chore branches.
 - Do not add GitHub CI. Never treat skipped or failed checks as passing.
-- Merge only after successful review and local CI; verify the merge locally.
+- Merge after successful local review, preserving branch history; then run CI on main. Fix failures on a separate branch, review and merge it, then rerun CI on main. Failed main CI means delivery is incomplete.
 - Backend changes need their own branch, review and required backend checks.
