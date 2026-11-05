@@ -8,7 +8,8 @@ import kotlin.math.PI
 
 /** Versioned, provisional game units; not measured building dimensions or server geometry. */
 object PracticeRulesV1 {
-    const val VERSION = "practice-camera-v3"
+    const val VERSION = "practice-speed-v4"
+    const val CAMERA_VERSION = "practice-camera-v3"
     const val PENDULUM_VERSION = "practice-pendulum-v2"
     const val LEGACY_VERSION = "practice-balance-v1"
     const val TICKS_PER_SECOND = 60
@@ -19,6 +20,14 @@ object PracticeRulesV1 {
     const val CRANE_SPEED = 1.5
     const val DROP_HEIGHT = 150.0
     const val GRAVITY_PER_TICK = 0.4
+
+    fun followsTower(rules: String): Boolean = rules == VERSION || rules == CAMERA_VERSION
+
+    /** Upcoming floor is the in-attempt level: +8% base speed per landed floor, max 3x. */
+    fun swingMultiplier(floorNumber: Int): Double {
+        require(floorNumber > 0)
+        return 1.0 + (floorNumber - 1).coerceAtMost(25) * 0.08
+    }
 }
 
 enum class Phase { SWINGING, FALLING, FINISHED }
@@ -45,7 +54,7 @@ class PracticeEngine {
     private var swayVelocity = 0.0
 
     /** World-space center of the fixed-screen crane. Old snapshots retain their fixed origin. */
-    val cameraX: Double get() = if (rules == PracticeRulesV1.VERSION)
+    val cameraX: Double get() = if (PracticeRulesV1.followsTower(rules))
         state.floors.lastOrNull()?.centerX ?: 0.0 else 0.0
 
     fun checkpoint(): EngineCheckpoint = EngineCheckpoint(rules = rules, state = state.copy(floors = state.floors.toList()),
@@ -111,7 +120,10 @@ class PracticeEngine {
         state = state.copy(sway = state.sway + swayVelocity)
         when (state.phase) {
             Phase.SWINGING -> {
-                val speed = PracticeRulesV1.CRANE_SPEED * BalanceRulesV1.difficulty(state.floors.size + 1)
+                val floorNumber = state.floors.size + 1
+                val multiplier = if (rules == PracticeRulesV1.VERSION) PracticeRulesV1.swingMultiplier(floorNumber)
+                    else BalanceRulesV1.difficulty(floorNumber)
+                val speed = PracticeRulesV1.CRANE_SPEED * multiplier
                 if (rules == PracticeRulesV1.LEGACY_VERSION) {
                     val next = state.craneX + direction * speed
                     state = state.copy(craneX = next.coerceIn(-PracticeRulesV1.CRANE_RANGE, PracticeRulesV1.CRANE_RANGE))
