@@ -1,0 +1,4 @@
+Real MainActivity (not frozen fixture):
+System back opens pause. Outside tap retains pause, count 0.
+Resume then back returns pause; screenshot confirms count 0 (no propagated drop).
+Restart + scene tap lands a real floor; screenshot confirms count 1, record 1.

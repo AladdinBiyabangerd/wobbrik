@@ -1,0 +1,46 @@
+{
+  "status": "Four primary sprites approved by user on 5 November 2026; integrated. Cloud follows approved tablet backdrop.",
+  "tool": "built-in image_gen",
+  "assets": [
+    {
+      "name": "floor",
+      "prompt": "Use case: stylized-concept. Asset type: production candidate transparent Android game sprite. Reference image 1 is approved Wobbrik art direction, NOT an edit target. ONE reusable purple building FLOOR MODULE only. Match the suspended rectangular module in reference: two warm golden four-pane front windows and one right-side window, purple brick walls, ivory pink stone horizontal rims, flat open roofless top with shallow parapet. Front face broad, right face narrow. No ropes, rings, crane, ground, roof or other floors. Stackable vertical walls. Centered fully visible isolated object. Preserve polished playful richly shaded 3D toy-like illustration, camera looking slightly down with front and right side visible, same perspective and upper-left lighting as reference. Actual transparent alpha background, clean silhouette, generous transparent margin. No text, UI, watermark, background rectangle, cast shadow outside object or mockup. Deliver a single sprite, not a board.",
+      "source": "/Users/mac/.codex/generated_images/01a1ab74-7aa0-7291-b26e-9d91a1b1cec9/exec-f62292e5-a2e0-43e0-82c3-ef6efa3eeff8.png",
+      "file": "floor.png",
+      "runtime": "android-billing/app/src/main/res/drawable-nodpi/game_floor.png",
+      "sha256": "8e46b0b357245ba48d804cd0550539d7580b13e375290cd551b0a8549d08386c"
+    },
+    {
+      "name": "crane",
+      "prompt": "Use case: stylized-concept. Asset type: production candidate transparent Android game sprite. Reference image 1 is approved Wobbrik art direction, NOT an edit target. ONE golden yellow crane horizontal lattice jib with trolley and circular hook, matching the top crane in reference. Jib extends right from trolley at left third. No cables below hook, no building, no floor, no mast, no landscape. Fully visible isolated object; broad horizontal sprite. Preserve polished playful richly shaded 3D toy-like illustration, camera looking slightly down with front and right side visible, same perspective and upper-left lighting as reference. Actual transparent alpha background, clean silhouette, generous transparent margin. No text, UI, watermark, background rectangle, cast shadow outside object or mockup. Deliver a single sprite, not a board.",
+      "source": "/Users/mac/.codex/generated_images/01a1ab74-7aa0-7291-b26e-9d91a1b1cec9/exec-ff54d250-1acd-4e63-b8cf-0a094f423937.png",
+      "file": "crane.png",
+      "runtime": "android-billing/app/src/main/res/drawable-nodpi/game_crane.png",
+      "sha256": "27b217c395b99e4fad1fe409d3e4e5c5731aa6d1d8e051657706d16e8f260c58"
+    },
+    {
+      "name": "island",
+      "prompt": "Use case: stylized-concept. Asset type: production candidate transparent Android game sprite. Reference image 1 is approved Wobbrik art direction, NOT an edit target. ONE lush tiny green foundation island WITH its single purple ground-floor entrance module, matching reference bottom: arched wooden doorway, warm lanterns, purple brick, ivory pink stone rim, shrubs, flowers, two trees flanking building, stepping stones and short front stairs. No upper stories, no crane, no roof. Ground floor top is flat and ready to receive the separate stackable module. Fully visible isolated object. Preserve polished playful richly shaded 3D toy-like illustration, camera looking slightly down with front and right side visible, same perspective and upper-left lighting as reference. Actual transparent alpha background, clean silhouette, generous transparent margin. No text, UI, watermark, background rectangle, cast shadow outside object or mockup. Deliver a single sprite, not a board.",
+      "source": "/Users/mac/.codex/generated_images/01a1ab74-7aa0-7291-b26e-9d91a1b1cec9/exec-bdabc4f5-ab88-43bd-90e4-47983ec6a65e.png",
+      "file": "island.png",
+      "runtime": "android-billing/app/src/main/res/drawable-nodpi/game_island.png",
+      "sha256": "ce4b4524f88f9223c968a91d08d6b9108bdd57a1f32dde8cdcb3ef3940123cd1"
+    },
+    {
+      "name": "roof",
+      "prompt": "Use case: stylized-concept. Asset type: production candidate transparent Android game sprite. Reference image 1 is approved Wobbrik art direction, NOT an edit target. ONE detached pitched purple roof cap for the reference purple modular building, only for after game loss. Same broad front and narrow right-side isometric projection, ivory pink eaves, rich purple tiles. No building walls, windows, crane, island or other objects. Fully visible isolated roof cap. Preserve polished playful richly shaded 3D toy-like illustration, camera looking slightly down with front and right side visible, same perspective and upper-left lighting as reference. Actual transparent alpha background, clean silhouette, generous transparent margin. No text, UI, watermark, background rectangle, cast shadow outside object or mockup. Deliver a single sprite, not a board.",
+      "source": "/Users/mac/.codex/generated_images/01a1ab74-7aa0-7291-b26e-9d91a1b1cec9/exec-3bc359a6-b0b8-4cc1-8594-3116c2ebfc6f.png",
+      "file": "roof.png",
+      "runtime": "android-billing/app/src/main/res/drawable-nodpi/game_roof.png",
+      "sha256": "1e4748c52993b22e44a1627a1060dfea721a2697ba2ba39e13ce432a8c51b106"
+    },
+    {
+      "name": "cloud",
+      "file": "cloud.png",
+      "runtime": "android-billing/app/src/main/res/drawable-nodpi/game_cloud.png",
+      "prompt_file": "cloud-prompt.txt",
+      "reference": "docs/design/game-tap-v2/tablet-landscape.png",
+      "sha256": "b018a04605cb23a1f1726f7367be69b15fa2e73465910f7eb16d4efd6e8b2b79"
+    }
+  ]
+}

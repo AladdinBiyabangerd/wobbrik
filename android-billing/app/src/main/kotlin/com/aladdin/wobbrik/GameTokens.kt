@@ -14,6 +14,9 @@ internal object GameTokens {
     val Accent = Color(0xFF28E5EF)
     val Success = Color(0xFF32EDBD)
     val Danger = Color(0xFFFFB4C8)
+    // Fine outline and dim treatment used by the approved game/pause design.
+    val Hairline = 1.dp
+    const val DimOpacity = 0.65f
     val Small = 8.dp
     val Gap = 16.dp
     val Inset = 24.dp

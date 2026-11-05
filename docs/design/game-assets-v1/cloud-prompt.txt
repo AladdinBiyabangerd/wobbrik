@@ -1,0 +1,8 @@
+Built-in image_gen; transparent_background=true.
+Reference: docs/design/game-tap-v2/tablet-landscape.png.
+Use case: stylized-concept. Asset type: Wobbrik tablet game backdrop cloud sprite.
+Generate ONE isolated soft rounded navy-blue 3D cartoon cloud like the small blue
+clouds flanking the tower in the approved reference. Broad low puffy cloud, large
+central rounded lobe, smaller side lobes, soft top-left blue highlight and deep
+navy bottom. Actual transparent alpha background. No sky rectangle, tower, text,
+UI, watermark or other objects. Match reference faithfully.
