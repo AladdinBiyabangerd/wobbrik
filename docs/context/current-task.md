@@ -8,7 +8,9 @@
 - Phone/tablet level 1/11/26 samples at tick 30 rendered and inspected.
 
 ## Current state
-- Branch feat/level-swing-speed; source review complete, main merge/CI pending.
+- feat/level-swing-speed reviewed and merged preserving history as 10c611f.
+- Main CI passed in 32s: 106 tasks, 11 executed / 95 up-to-date; 43 engine tests
+  passed with zero failures/errors. Documentation follow-up repeats main CI.
 - Review: docs/reviews/2026-11-05-level-swing-speed.md.
 - Debug APK installed; visible game remains offline practice, online input locked.
 - Unrelated untracked responsive-rule/compose-game-host files preserved.
@@ -22,7 +24,7 @@
 - AppBackend opaque structural-v1 JSON contract inspected; no backend change.
 
 ## Remaining work
-- Merge reviewed branch and run main local CI, then user/physical-device assessment.
+- User/physical-device assessment of level speed; no hardware test claimed.
 - Broader design parity and real auth/menu/results/catalog/online integration remain
   separate unfinished work; this speed unit does not complete the product.
 
@@ -36,8 +38,10 @@
 - Branch assembleDebug passed: 27s, 66 tasks, 8 executed. No branch CI/tests.
 - Phone 1080x2400/420dpi and tablet landscape 1920x1200/240dpi samples inspected.
   First two incomplete tablet frames rejected and recaptured; settings reset.
-- Source diff/whitespace reviewed. No hardware, backend or new orientation/font run.
+- Source diff/whitespace reviewed; main build/lint and regression gate passed.
+  MainActivity launched after APK install. No hardware/backend/new orientation run.
 
 ## Exact next step
-- Merge preserving history; run ./scripts/local-ci.sh on main and record actual
-  results. If it fails, fix on a separate reviewed branch before remerging.
+- Assess swing speed in a new attempt: 1x at floor 1, 1.8x at floor 11, cap 3x
+  at floor 26. Next chat: read this note and the level-swing-speed review first.
+  Keep broader design parity and accepted online integration separate.

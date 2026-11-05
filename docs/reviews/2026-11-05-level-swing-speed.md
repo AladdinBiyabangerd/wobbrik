@@ -29,7 +29,7 @@ scoring are unchanged; speed does not also multiply stability difficulty.
 - `ui-craft` used; existing GameTokens inspected. No palette/type/spacing change,
   so no new contrast pair; original contrast evidence remains applicable.
 - Branch assembleDebug passed in 27s: 66 tasks, 8 executed / 58 up-to-date.
-  No CI/tests were run on the branch; regression results pending main merge.
+  No CI/tests were run on the branch; regressions ran after the main merge.
 - Installed debug APK on emulator-5556. Phone 1080x2400/420dpi and tablet landscape
   1920x1200/240dpi: levels 1/11/26 after the same 30 ticks (0.5s) from x=0.
   Captures and inspection sheets in `level-swing-speed/` were viewed. The faster
@@ -44,7 +44,12 @@ scoring are unchanged; speed does not also multiply stability difficulty.
   used in the preceding camera review. Only requested movement timing changes;
   existing long-suspension/framing exception and background/type/lighting/scene-size
   differences remain. These level fixtures are not a claim of concept parity.
-- Main local CI: pending reviewed merge.
+- Main `10c611f` after history-preserving merge: `./scripts/local-ci.sh` passed
+  in 32s, 106 tasks, 11 executed / 95 up-to-date. All 43 engine tests passed
+  (zero failures/errors); engine tests executed, app build/lint and core/Android
+  gates passed. MainActivity launched successfully after installation.
+- Documentation-only validation follow-up reviewed against 10c611f; whitespace
+  passed, no findings. Main local CI repeated after its merge; result in chat.
 
 ## Backend and limits
 
