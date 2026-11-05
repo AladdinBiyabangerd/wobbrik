@@ -20,8 +20,13 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.yield
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import com.google.firebase.auth.AuthCredential
 
-/** Process-owned recovery and durable commands; online physics; screen/auth controls remain a separate unit. */
+/** Process-owned account bootstrap, recovery, durable commands and accepted online physics. */
 class WobbrikApplication : Application(), DefaultLifecycleObserver {
     sealed interface Bootstrap {
         data object MissingFirebase : Bootstrap
@@ -35,6 +40,47 @@ class WobbrikApplication : Application(), DefaultLifecycleObserver {
         private set
     private val recoveryScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private var authListener: FirebaseAuth.AuthStateListener? = null
+    sealed interface AccountState {
+        data object Loading : AccountState
+        data class Session(val anonymous: Boolean) : AccountState
+        data class Error(val cause: Exception) : AccountState
+    }
+    private val mutableAccount = MutableStateFlow<AccountState>(AccountState.Loading)
+    val account = mutableAccount.asStateFlow()
+    private var accountWork: Job? = null
+
+    /** Existing Firebase sessions are retained. Only a signed-out installation creates a guest. */
+    fun retryAccount() {
+        if (bootstrap !is Bootstrap.Configured || accountWork?.isActive == true) return
+        val auth = FirebaseAuth.getInstance()
+        accountWork = recoveryScope.launch {
+            mutableAccount.value = AccountState.Loading
+            try {
+                val user = auth.currentUser ?: auth.signInAnonymously().await().user
+                    ?: error("Firebase returned no user")
+                if (auth.currentUser?.uid != user.uid) throw AccountChanged()
+                mutableAccount.value = AccountState.Session(user.isAnonymous)
+                // The listener owns auth epochs; only backend recovery can publish Ready.
+                (bootstrap as Bootstrap.Configured).recovery.onForeground()
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (failure: Exception) {
+                mutableAccount.value = AccountState.Error(failure)
+            }
+        }
+    }
+
+    /** Link in place, never sign in over a guest or combine two server wallets. */
+    suspend fun linkGuest(credential: AuthCredential) {
+        check(bootstrap is Bootstrap.Configured)
+        val auth = FirebaseAuth.getInstance()
+        val guest = auth.currentUser ?: throw AccountChanged()
+        require(guest.isAnonymous) { "An anonymous session is required" }
+        val linked = guest.linkWithCredential(credential).await().user ?: throw AccountChanged()
+        check(linked.uid == guest.uid && auth.currentUser?.uid == guest.uid)
+        mutableAccount.value = AccountState.Session(linked.isAnonymous)
+        (bootstrap as? Bootstrap.Configured)?.recovery?.onAuthChanged(linked.uid)
+    }
 
     override fun onCreate() {
         super<Application>.onCreate()
@@ -74,8 +120,11 @@ class WobbrikApplication : Application(), DefaultLifecycleObserver {
         authListener = FirebaseAuth.AuthStateListener { source ->
             // Do not deduplicate by UID: a re-login must establish a new recovery epoch.
             owner.onAuthChanged(source.currentUser?.uid)
+            mutableAccount.value = source.currentUser?.let { AccountState.Session(it.isAnonymous) }
+                ?: AccountState.Loading
         }.also(auth::addAuthStateListener)
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)
+        retryAccount()
     }
 
     override fun onStart(owner: LifecycleOwner) {
