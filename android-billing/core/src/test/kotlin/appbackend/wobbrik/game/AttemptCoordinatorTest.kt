@@ -91,6 +91,19 @@ class AttemptCoordinatorTest {
         assertEquals(1, f.sent.size)
     }
 
+    @Test fun commandCapturedInAnOldEpochCannotUseNewAccountsAcceptedState() = runBlocking {
+        val f = Fixture()
+        val c = f.coordinator()
+        c.recover()
+        val alice = f.session!!
+        f.session = BillingSession("bob", "login-2")
+        c.recover() // Same revision, different account, including a valid new Ready.
+        try { c.execute(f.command(), alice); fail() } catch (_: AccountChanged) { }
+        assertTrue(f.commands.isEmpty())
+        assertTrue(f.sent.isEmpty())
+        try { c.recover(alice); fail() } catch (_: AccountChanged) { }
+    }
+
     @Test fun equalRevisionRefreshReplacesWalletAndUnsupportedRulesBlockInput() = runBlocking {
         val f = Fixture()
         val c = f.coordinator()

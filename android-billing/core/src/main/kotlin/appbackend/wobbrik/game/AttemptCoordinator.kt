@@ -51,14 +51,16 @@ class AttemptCoordinator(
         return accepted?.first == session && journal.pending(session.uid) == null && sessions.current() == session
     }
 
-    suspend fun recover(): GameSnapshot = mutex.withLock {
+    suspend fun recover(expectedSession: BillingSession = current()): GameSnapshot = mutex.withLock {
         val session = current()
+        if (session != expectedSession) throw AccountChanged()
         accepted = null
         journal.pending(session.uid)?.let { drain(session, it) } ?: refresh(session)
     }
 
-    suspend fun execute(command: AttemptCommand): GameSnapshot = mutex.withLock {
+    suspend fun execute(command: AttemptCommand, expectedSession: BillingSession = current()): GameSnapshot = mutex.withLock {
         val session = current()
+        if (session != expectedSession) throw AccountChanged()
         val state = accepted?.takeIf { it.first == session }?.second
         check(state != null && journal.pending(session.uid) == null) { "Recover before issuing a command" }
         require(command.operationId.isNotBlank() && command.envelope.isNotBlank())

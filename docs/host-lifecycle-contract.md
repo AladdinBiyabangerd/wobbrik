@@ -58,7 +58,8 @@ Acceptance criteria for that unit:
 5. Focused tests cover delayed old-account completion, same-UID epoch changes,
    foreground retries, pending failures and owner reuse across host recreation.
 
-This unit does not bind engine drops, start/checkpoint/finish or restart/menu actions.
+The original recovery unit did not bind commands. The durable command integration below
+now exposes typed start/checkpoint/finish; scene drops and restart/menu remain unbound.
 Later engine restore uses decodeAccepted with server counters, explicitly pauses
 and resets frame time, and handles zero-checkpoint, terminal and continued states
 before enabling input. Continued-state stabilization is still unresolved.
@@ -90,10 +91,52 @@ Recovery publishes to the host synchronously under the recovery owner's lock, be
 StateFlow publication, so conflation cannot skip an auth/recovery invalidation.
 The host clears physics on every transition, restores only accepted paused snapshots,
 and exposes no mutable engine. Process stop and immediate activity pause both pause
-and reset timing. Foreground never resumes physics. While durable command handling
-is absent, frame callbacks discard timing, resume/drop return false, and input stays
+and reset timing. Foreground never resumes physics. Until the online simulation and scene loop is integrated, frame callbacks discard
+timing, resume/drop return false, and input stays
 locked even for a valid Ready snapshot. No online restart/abandon binding exists.
 The existing visible offline practice engine remains separate technical debt; this
 unit does not complete online gameplay, approved visuals, or navigation integration.
 No backend API/DTO/schema/rules change is required: this host only consumes the
 existing recovery contract and sends no commands.
+
+## Durable typed attempt commands — 5 November 2026
+
+`Bootstrap.Configured.commands` is one application-owned `AcceptedAttemptCommands`
+using the recovery owner's existing coordinator and AtomicFile journal. No second
+writer or local wallet is introduced. The scene remains separate offline practice;
+its input is never routed into online commands.
+
+- Each call requires the exact currently published `State.Ready` object. Equal,
+  copied, prior-account, prior-login and prior-recovery snapshots cannot authorize
+  a command. Coordinator work additionally captures the UID/login session before
+  waiting on its mutex; stale queued work cannot adopt a later account.
+- Start accepts only a supported absent/finished attempt; an active attempt cannot
+  be restarted. Continued, invalid and unsupported attempts remain blocked.
+- Checkpoint accepts a validated settled physics proposal against that Ready. Floors
+  must increase, the accepted floor prefix is immutable, counter increments are
+  bounded by new floors, and sequence is exactly accepted + 1. Pause, unchanged,
+  zero-floor and falling proposals are rejected. Persisted physics is paused with
+  zero timing accumulation. Terminal accepted attempts cannot add more floors.
+- Finish requires an explicit terminal proposal with exactly the accepted floors
+  and counters, and the five selected cosmetic part IDs. Parts/unlock validity
+  remains server-authoritative. A terminal landing with new floors must first be
+  checkpointed; wait for the next Ready before finish. A miss may finish at zero
+  floors or at the unchanged accepted sequence. Finish is never an abandon alias.
+- Dispatch returns a Boolean indicating admission only. Recovering immediately
+  hides accepted physics and locks input; only journal persistence followed by a
+  committed receipt and fresh sync can yield a new Ready. No optimistic coins,
+  XP, building ownership or results are granted. Persisted commands retain exact
+  ID, revision, route and envelope on lost response/sync, logout and process death.
+  Definitive revision conflict clears that rejected command, syncs, exposes Error
+  and requires recovery/new explicit intent; it never silently rebases or retries
+  as a new operation. Other failures preserve the original pending command.
+- Multi-stage checkpoint→finish intent is not automatically durable as a whole.
+  Each admitted command is journaled separately. After a crash between them, the
+  accepted terminal checkpoint restores paused and requires explicit finish again.
+  A terminal miss after the last accepted checkpoint may restore that last physics
+  boundary after process death, per the existing accepted-checkpoint contract.
+
+No backend API/DTO/schema/rules version changes are needed: the integration uses
+existing structural-v1 requests and the unified PostgreSQL wallet/ledger. Server
+physics proof, continuation stabilization, final scene/navigation and live origin/
+device verification remain outstanding. Input is deliberately still locked.

@@ -11,6 +11,7 @@ import appbackend.wobbrik.game.GameplayHttpBackend
 import appbackend.wobbrik.game.UrlConnectionGameplayTransport
 import appbackend.wobbrik.game.androidAttemptJournal
 import com.aladdin.wobbrik.engine.AcceptedEngineHost
+import com.aladdin.wobbrik.engine.AcceptedAttemptCommands
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.CoroutineScope
@@ -18,12 +19,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.tasks.await
 
-/** Process-owned auth/recovery only. No online gameplay or restart actions are exposed. */
+/** Process-owned recovery and durable commands; online scene input and restart remain unbound. */
 class WobbrikApplication : Application(), DefaultLifecycleObserver {
     sealed interface Bootstrap {
         data object MissingFirebase : Bootstrap
         data object MissingBackendOrigin : Bootstrap
-        data class Configured(val recovery: AuthenticatedRecoveryOwner) : Bootstrap
+        data class Configured(val recovery: AuthenticatedRecoveryOwner, val commands: AcceptedAttemptCommands) : Bootstrap
     }
 
     val engineHost = AcceptedEngineHost()
@@ -58,7 +59,7 @@ class WobbrikApplication : Application(), DefaultLifecycleObserver {
             sessions, GameplayHttpBackend(sessions, transport), androidAttemptJournal(this), recoveryScope,
             onStateChanged = engineHost::onRecoveryChanged,
         )
-        bootstrap = Bootstrap.Configured(owner)
+        bootstrap = Bootstrap.Configured(owner, AcceptedAttemptCommands(owner))
         authListener = FirebaseAuth.AuthStateListener { source ->
             // Do not deduplicate by UID: a re-login must establish a new recovery epoch.
             owner.onAuthChanged(source.currentUser?.uid)
