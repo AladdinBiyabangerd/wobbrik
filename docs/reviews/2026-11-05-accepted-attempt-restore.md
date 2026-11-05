@@ -1,7 +1,7 @@
 # Accepted attempt restore — 5 November 2026
 
 - Branch: `feat/accepted-attempt-restore`.
-- Reviewed diff: engine/core dependency, new AcceptedAttemptRestore and its focused
+- Reviewed implementation commit: `71544cc`; engine/core dependency, new AcceptedAttemptRestore and its focused
   regression tests, host contract and current-task handoff.
 - Read-only boundary: successful recovery only; server counters and versions checked;
   zero checkpoint, finished, terminal and continued outcomes are explicit. No command,
@@ -12,7 +12,10 @@
   checkpoints strictly increase positive floors/sequence. Existing DTO/API/schema and
   rules suffice; backend code changes are unnecessary for this read-only boundary.
 - Branch whitespace review passed; CI not run on branch per repository instructions.
-- Post-merge main CI: pending.
+- Post-merge main CI passed: `./scripts/local-ci.sh`, 106 tasks (16 executed,
+  90 up-to-date); engine tests executed, app assemble/lint passed. Seven new
+  restoration regression tests passed. Documentation follow-up reviewed on
+  `docs/accepted-restore-validation`; whitespace check passed, no branch CI.
 - Limitations: no application/scene wiring, frame-clock host or mutation/input gate yet.
   Continued stabilization remains unresolved. Offline practice is still visible.
   User deferred real origin/device verification; Firebase config exists and matches
