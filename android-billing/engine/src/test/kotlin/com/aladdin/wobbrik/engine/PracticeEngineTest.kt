@@ -47,7 +47,7 @@ class PracticeEngineTest {
 
     @Test fun missedFloorEndsAttemptAndRestartClearsIt() {
         val engine = PracticeEngine()
-        repeat(13) { engine.advance(100_000_000) }
+        repeat(14) { engine.advance(100_000_000) }
         assertTrue(engine.state.craneX > PracticeRulesV1.FLOOR_WIDTH)
         engine.drop()
         settle(engine)
@@ -63,7 +63,9 @@ class PracticeEngineTest {
     @Test fun stallIsBoundedAndWaitingCannotLose() {
         val engine = PracticeEngine()
         engine.advance(Long.MAX_VALUE)
-        assertEquals(12.0, engine.state.craneX, 0.0)
+        val eightTicks = PracticeEngine()
+        repeat(8) { eightTicks.advance(16_666_667) }
+        assertEquals(eightTicks.state, engine.state)
         repeat(10_000) { engine.advance(100_000_000) }
         assertEquals(Phase.SWINGING, engine.state.phase)
         assertTrue(engine.state.floors.isEmpty())

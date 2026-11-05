@@ -14,7 +14,7 @@ data class EngineCheckpoint(
     val swayVelocity: Double,
 ) {
     fun validate() {
-        require(version == "practice-checkpoint-v1" && rules == PracticeRulesV1.VERSION)
+        require(version == "practice-checkpoint-v1" && rules in setOf(PracticeRulesV1.VERSION, PracticeRulesV1.LEGACY_VERSION))
         require(direction == -1 || direction == 1)
         require(tickUnits in 0 until 1_000_000_000L)
         require(fallVelocity.isFinite() && fallVelocity >= 0 && swayVelocity.isFinite())

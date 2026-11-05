@@ -2,10 +2,14 @@ package com.aladdin.wobbrik.engine
 
 import kotlin.math.abs
 import kotlin.math.min
+import kotlin.math.asin
+import kotlin.math.sin
+import kotlin.math.PI
 
 /** Versioned, provisional game units; not measured building dimensions or server geometry. */
 object PracticeRulesV1 {
-    const val VERSION = "practice-balance-v1"
+    const val VERSION = "practice-pendulum-v2"
+    const val LEGACY_VERSION = "practice-balance-v1"
     const val TICKS_PER_SECOND = 60
     const val MAX_CATCH_UP_TICKS = 8
     const val FLOOR_WIDTH = 100.0
@@ -33,18 +37,20 @@ data class PracticeState(
 class PracticeEngine {
     var state = PracticeState()
         private set
+    private var rules = PracticeRulesV1.VERSION
     private var direction = 1
     private var fallVelocity = 0.0
     private var accumulatedTickUnits = 0L
     private var swayVelocity = 0.0
 
-    fun checkpoint(): EngineCheckpoint = EngineCheckpoint(state = state.copy(floors = state.floors.toList()),
+    fun checkpoint(): EngineCheckpoint = EngineCheckpoint(rules = rules, state = state.copy(floors = state.floors.toList()),
         direction = direction, fallVelocity = fallVelocity, tickUnits = accumulatedTickUnits, swayVelocity = swayVelocity)
 
     /** Validate before changing any live state. Host must pause/reset its frame clock on lifecycle restore. */
     fun restore(checkpoint: EngineCheckpoint) {
         checkpoint.validate()
         state = checkpoint.state.copy(floors = checkpoint.state.floors.toList())
+        rules = checkpoint.rules
         direction = checkpoint.direction
         fallVelocity = checkpoint.fallVelocity
         accumulatedTickUnits = checkpoint.tickUnits
@@ -73,6 +79,7 @@ class PracticeEngine {
 
     fun restart() {
         state = PracticeState()
+        rules = PracticeRulesV1.VERSION
         direction = 1
         fallVelocity = 0.0
         accumulatedTickUnits = 0
@@ -100,9 +107,19 @@ class PracticeEngine {
         when (state.phase) {
             Phase.SWINGING -> {
                 val speed = PracticeRulesV1.CRANE_SPEED * BalanceRulesV1.difficulty(state.floors.size + 1)
-                val next = state.craneX + direction * speed
-                state = state.copy(craneX = next.coerceIn(-PracticeRulesV1.CRANE_RANGE, PracticeRulesV1.CRANE_RANGE))
-                if (abs(next) >= PracticeRulesV1.CRANE_RANGE) direction = -direction
+                if (rules == PracticeRulesV1.LEGACY_VERSION) {
+                    val next = state.craneX + direction * speed
+                    state = state.copy(craneX = next.coerceIn(-PracticeRulesV1.CRANE_RANGE, PracticeRulesV1.CRANE_RANGE))
+                    if (abs(next) >= PracticeRulesV1.CRANE_RANGE) direction = -direction
+                } else {
+                    // Position encodes pendulum phase; the existing direction stores its branch.
+                    // Reflect excess phase so reversal is smooth and checkpoint replay is exact.
+                    var phase = asin((state.craneX / PracticeRulesV1.CRANE_RANGE).coerceIn(-1.0, 1.0)) +
+                        direction * speed / PracticeRulesV1.CRANE_RANGE
+                    if (phase > PI / 2) { phase = PI - phase; direction = -1 }
+                    if (phase < -PI / 2) { phase = -PI - phase; direction = 1 }
+                    state = state.copy(craneX = PracticeRulesV1.CRANE_RANGE * sin(phase))
+                }
             }
             Phase.FALLING -> {
                 val floor = checkNotNull(state.falling)

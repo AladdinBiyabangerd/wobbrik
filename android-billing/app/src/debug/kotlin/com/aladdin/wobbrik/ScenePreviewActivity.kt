@@ -30,6 +30,15 @@ class ScenePreviewActivity : ComponentActivity() {
             it.restore(EngineCheckpoint(state = state, direction = 1, fallVelocity = 0.0,
                 tickUnits = 0, swayVelocity = 0.0))
         }
+        // Deterministic animation samples for frame-by-frame visual review.
+        val motion = SceneMotion()
+        motion.advance(engine.state, 0f)
+        val dropTick = intent.getIntExtra("drop_tick", -1)
+        repeat(intent.getIntExtra("ticks", 0).coerceIn(0, 600)) { tick ->
+            if (tick == dropTick) engine.drop()
+            engine.advance(16_666_667)
+            motion.advance(engine.state, 1f / 60f)
+        }
         setContent {
             MaterialTheme(colorScheme = darkColorScheme(primary = GameTokens.Accent,
                 onPrimary = GameTokens.Background, surface = GameTokens.Surface,
@@ -37,7 +46,7 @@ class ScenePreviewActivity : ComponentActivity() {
                 // Reject Android's stale task-snapshot starting window in capture tooling.
                 val marker = "Wobbrik fixture floors=$count crane=${state.craneX.toInt()} paused=${state.paused} drift=$drift finished=${state.phase == Phase.FINISHED}"
                 Box(Modifier.fillMaxSize().semantics { contentDescription = marker }) {
-                    PracticeGame(engine, renderOnly = true)
+                    PracticeGame(engine, renderOnly = !intent.getBooleanExtra("animate", false), previewMotion = motion)
                 }
             }
         }

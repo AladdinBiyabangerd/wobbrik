@@ -1,0 +1,2 @@
+1080x2400, paused captures one second apart; excluding status/navigation bars: difference bounding box=None
+Initial premature pre-panel capture rejected.

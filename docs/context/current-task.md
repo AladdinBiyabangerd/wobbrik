@@ -1,73 +1,54 @@
-# Continuous tower / stationary crane correction — 5 November 2026
+# Weighted scene motion — 5 November 2026
 
 ## Completed
-- Follow-up: actual floor bounds plus Canvas clipping prevent a hidden section of
-  tower / leaking foundation. Crane body and upper attachment stay fixed; only
-  cables/hanging module move. No horizontal camera tracking.
-- User approved four replacement sprites and authorized integration/comparison.
-- Runtime copies preserve approved PNG pixels/alpha; matching landscape cloud added.
-- GameScene replaces schematic floor/crane/island/roof. Ring/cable anchors, guide,
-  wide-window framing and tall-tower viewport culling corrected after rendering.
-- Phone/tablet active/pause comparisons saved beside approved concepts. Landscape
-  phone, font 1.5/short window and 40-floor crane-limit renders inspected.
+- User authorized more lifelike movement while preserving approved art.
+- New-attempt pendulum trajectory; legacy v1 checkpoint trajectory preserved.
+- Fixed center-suspension arc, load angular inertia, impact-driven connected tower
+  rotation, smooth camera. Pause freezes motion; restart resets it.
+- Phone/tablet impact sequences, 40-floor renders, concept comparisons and live
+  motion samples inspected. Pause captures pixel-identical after panel appeared.
 
 ## Current state
-- Follow-up cacd445 merged as 6d59cbb; main local CI passed (106 tasks,
-  9 executed / 97 up-to-date). Latest review: 2026-11-05-stationary-crane.md.
-- Implementation b638536 merged as 55a28e5; main local CI passed (106 tasks,
-  10 executed / 96 up-to-date). Validation note merged separately; see review.
-- Sprites integrated. Exact concept parity is NOT complete: scene/garden proportions,
-  native type sizes, background and panel/guide/cable lighting still differ.
-  Full visual checklist remains unchecked, with a scoped progress note.
-- Visible scene remains offline practice. Online AcceptedEngineHost input stays
-  locked; prior durable command work is merged (9b38e31, before checklist commits).
-- Unrelated untracked responsive rule and compose-game-host review files preserved.
+- Branch fix/weighted-game-motion reviewed; merge/main local CI pending.
+- Review: docs/reviews/2026-11-05-weighted-motion.md.
+- Visible game remains offline practice; accepted online input is still locked.
+- Exact concept parity is open: scene/garden size, background/type/lighting.
+- Unrelated untracked responsive-rule/compose-game-host files preserved.
 
 ## Decisions
-- Visual-only work needs no AppBackend/domain/API/DTO/schema/wallet changes.
-- No invented restart/abandon, continued physics or reward source.
-- Frozen ScenePreviewActivity is debug-only, not a real accepted online attempt.
-- Keep structural-v1 accepted recovery, sole journal and durable command authority.
+- New inner rules practice-pendulum-v2; restore/encode legacy practice-balance-v1
+  unchanged. Older clients reject v2 rather than replaying incorrectly.
+- No AppBackend changes: opaque structural snapshot contract inspected in code;
+  outer API/rules, wallet, revision/dedup, UID/epoch and retry gates unchanged.
+- Motion uses original assets/tokens. Longer suspension needs taller framing.
+- Visual spring state is cosmetic and resets on process recreation. No claim of
+  full structural/rigid-body simulation; release has no horizontal ballistic drift.
 
 ## Remaining work
-- Close visual differences against comparison boards before claiming exact design.
-- Then 3.4: online simulation, per-landing checkpoint admission, accepted recovery
-  before input unlock; terminal checkpoint → fresh Ready → explicit finish.
-- Cosmetic catalog/unlocks; auth and real menu/navigation/results; live origin,
-  account/epoch/foreground/process-death checks. Continued stabilization unresolved.
-- Physical-device performance/release/accessibility checks remain outstanding.
+- Real-device feel/performance and user assessment of the motion excerpt.
+- Existing exact-design differences; online simulation/checkpoint admission,
+  accepted recovery before unlock, real auth/menu/navigation/results and catalog.
+- No new phone-landscape/tablet-portrait/large-font render in this motion unit.
 
 ## Relevant files
-- docs/reviews/2026-11-05-stationary-crane.md — latest correction and checks.
-- docs/reviews/stationary-crane/ — 1/12/40-floor and crane-endpoint renders.
-- docs/reviews/2026-11-05-game-scene-assets.md — earlier comparisons/differences.
-- docs/reviews/game-scene-assets/*-comparison.png — approved concept vs emulator.
-- docs/design/game-assets-v1/ — approved art, prompts and hashes.
-- android-billing/app/src/main/kotlin/com/aladdin/wobbrik/GameScene.kt
-- android-billing/app/src/main/kotlin/com/aladdin/wobbrik/MainActivity.kt
-- android-billing/app/src/main/kotlin/com/aladdin/wobbrik/GameTokens.kt
-- android-billing/app/src/debug/; scripts/capture-game-scene.py.
-- docs/project-progress.md; docs/design/game-tap-v2/README.md.
-- engine AcceptedEngineHost/AcceptedAttemptCommands; docs/host-lifecycle-contract.md.
+- android-billing/app/src/main/kotlin/com/aladdin/wobbrik/{GameScene,SceneMotion,MainActivity}.kt
+- android-billing/app/src/debug/kotlin/com/aladdin/wobbrik/ScenePreviewActivity.kt
+- android-billing/engine/src/main/kotlin/com/aladdin/wobbrik/engine/{PracticeEngine,EngineCheckpoint}.kt
+- android-billing/engine/README.md and engine checkpoint/practice tests.
+- docs/reviews/weighted-motion/ — frames, comparisons, live mp4/gif, pause evidence.
+- docs/design/game-tap-v2/; docs/reviews/2026-11-05-game-scene-assets.md.
 
 ## Checks performed
-- Follow-up: phone 1/12/40-floor and tablet 12-floor renders inspected after
-  actual Canvas clipping. Phone/tablet left/right crane-body ROIs are pixel-identical;
-  count-1/12/40 phone ROI also identical. No detached foundation in final captures.
-- Debug fixture marker replaces the stale snapshot-prone screenshot-size check.
-- Follow-up main CI passed after merge; exact result is in the latest review.
-- Branch :app:assembleDebug passed; no branch CI. Contrast pairs 8.22–16.57 pass 4.5.
-- Whitespace/capture syntax; source/runtime PNG byte hashes and alpha checked.
-- Phone 1080×2400/420dpi; tablet 1200×1920 + 1920×1200/240dpi;
-  phone landscape 1600×720/280dpi; 1600×800/320dpi/font 1.5 inspected.
-- Rejected splash capture and rerendered. Initial emulator resize crash documented.
-- Real MainActivity: pause barrier and resume do not drop; restart + tap lands
-  count 1. Main CI passed after merge; review records exact result.
-- No physical-device/live-backend checks, push or deploy.
+- Branch assembleDebug passed after fixing missing ANDROID_HOME; no branch CI.
+- Phone 1080x2400/420dpi; tablet landscape 1920x1200/240dpi. Impact ticks
+  0/15/27/40/65/100, 40-floor swing, four-floor reference comparisons inspected.
+- Live motion contact sheet inspected; settled pause scene pixel-identical.
+- Scope diff review and whitespace passed; full regression pending main merge.
+- No backend/live-account/physical-device/release checks, push or deployment.
 
 ## Exact next step
-- Read this note and the game-scene-assets review, inspect the three comparison
-  PNGs, and finish concept/layout/type/lighting differences in a new small visual
-  branch. Re-render phone/tablet, review, merge, then local main CI. Keep full design
-  checklist open until comparison supports completion. Do not fold online 3.4 or
-  backend rule changes into visual finishing.
+- Merge reviewed motion branch preserving history, run ./scripts/local-ci.sh only
+  on main. If it fails, use a separate fix branch/review/merge; repeat main CI.
+- After passing, update this note/review with exact hashes/results. Next chat:
+  inspect the motion clip on a real device and refine only this motion if needed;
+  keep unfinished online integration and broader design parity separate.
