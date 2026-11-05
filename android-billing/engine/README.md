@@ -5,3 +5,10 @@ Pure Kotlin module in the existing Gradle workspace. PracticeRulesV1 names provi
 Current scope: bounded 60 Hz stepping, moving crane, falling floor, support overlap, miss, pause/resume and restart. No currency or account effects. This is a foundation for the final engine: camera, persistence and Android host remain pending. practice-balance-v1 adds persistent lean, danger hysteresis, one rescue per danger episode, perfect landings, a damped shared sway signal, first-five forgiveness and capped difficulty. Sway is cosmetic and cannot cause a loss or rescue; only a landing changes balance. No physical validation or device balancing is claimed. Local state is not an online checkpoint or proof of rewards.
 
 Run ./scripts/local-ci.sh from the repository root.
+
+EngineCheckpointCodec provides versioned bounded JSON roundtrip of public and hidden
+simulation state. PracticeEngine.restore validates before mutation. decodeAccepted
+matches floors/perfect/rescue counters from a server attempt. This is local recovery,
+not server physics verification or online host binding. Call pause and reset the host
+frame timestamp for lifecycle recovery; do not pass background elapsed time. Snapshots
+over the server's 16 KiB limit fail rather than truncate floors.

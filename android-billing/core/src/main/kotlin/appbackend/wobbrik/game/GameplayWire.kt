@@ -17,7 +17,7 @@ object GameplayWire {
         buildJsonObject { put("engine_version", "wobbrik-structural-v1") })
     fun checkpoint(id: String, revision: Long, attempt: String, sequence: Long, floors: Long,
                    precise: Long, rescues: Long, snapshot: String): AttemptCommand {
-        require(attempt.isNotBlank() && sequence > 0 && floors >= 0 && precise in 0..floors && rescues >= 0)
+        require(attempt.isNotBlank() && sequence > 0 && floors > 0 && precise in 0..floors && rescues in 0..floors)
         require(snapshot.toByteArray(Charsets.UTF_8).size <= 16384)
         val state = Json.parseToJsonElement(snapshot)
         return command(id, revision, AttemptCommand.Route.CHECKPOINT, buildJsonObject {
@@ -46,20 +46,8 @@ object GameplayWire {
         }
         require(Json.parseToJsonElement(rebuilt.envelope) == root) { "Unexpected command fields" }
     }
-    fun snapshot(body: String): GameSnapshot {
-        val r = Json.parseToJsonElement(body).jsonObject
-        require(r.string("rules_version") == "wobbrik-v1")
-        val a = r.getValue("attempt").takeUnless { it == JsonNull }?.jsonObject?.let {
-            require(it.string("rules_version") == "wobbrik-v1" && it.string("engine_version") == "wobbrik-structural-v1")
-            val status = it.string("status"); require(status == "active" || status == "finished")
-            ServerAttempt(it.string("attempt_id"), status == "active", it.number("sequence"), it.getValue("snapshot").takeUnless { v -> v == JsonNull }?.toString())
-        }
-        return GameSnapshot(r.string("rules_version"), r.number("revision"), r.number("coins"), r.number("xp"), a)
-    }
-    fun receipt(body: String) {
-        val r = Json.parseToJsonElement(body).jsonObject
-        r.number("revision"); require(r.string("accepted_at").isNotBlank()); require(r.getValue("result") is JsonObject)
-    }
+    fun snapshot(body: String): GameSnapshot = RecoveryDtos.snapshot(body)
+    fun receipt(body: String): OperationReceipt = RecoveryDtos.receipt(body)
     fun error(body: String): String? = runCatching { Json.parseToJsonElement(body).jsonObject.string("error") }.getOrNull()
     private fun JsonObject.string(key: String) = getValue(key).jsonPrimitive.also { require(it.isString) }.content
     private fun JsonObject.number(key: String) = getValue(key).jsonPrimitive.also { require(!it.isString) }.long.also { require(it >= 0) }

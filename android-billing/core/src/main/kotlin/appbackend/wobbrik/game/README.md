@@ -26,9 +26,11 @@ Implemented adapters (not yet connected to the host):
 
 Remaining integration requirements:
 
-- Complete catalog/account/attempt DTOs; `GameSnapshot` here is only the recovery
-  projection, not the full account model or a complete domain adapter.
-- Versioned engine checkpoint codec and validation, Compose input gating while
+- Catalog HTTP loading and other domain routes; RecoveryDtos now decodes full catalog,
+  account recovery, attempts and typed attempt receipts. Production sync requires all
+  current recovery fields. GameSnapshot keeps account data alongside its coordinator
+  projection; synthetic test backends may omit it. This is not a complete domain adapter.
+- Compose input gating while
   `ready()` is false, lifecycle recovery, and account/auth bootstrap.
 
 The current PracticeEngine is not yet bound to these contracts. No local coin,
@@ -38,3 +40,13 @@ or grant a reward. Resolve that lifecycle contract before wiring those actions.
 
 Reference: AppBackend `docs/wobbrik-game-api.md`, Wobbrik
 `docs/kotlin-compose-plan.md` section 5. Backend contract/schema/rules are unchanged.
+
+EngineCheckpointCodec in :engine carries practice-checkpoint-v1 and pinned local
+rules, including direction, fall/sway velocities and fractional tick units. Decode
+and restore reject unsupported versions, invalid numeric/phase/floor state and
+oversize JSON. decodeAccepted additionally matches server attempt counters. It is
+opaque structural-v1 payload, not physics proof or trusted city geometry. The host
+must explicitly pause/reset its frame clock after lifecycle restore. The 16 KiB
+limit is fail-closed; unlimited-height compact encoding is not implemented. Only
+strictly increasing successful-floor checkpoints are accepted by the current API;
+zero-floor, pause/restart/abandon and continuation stabilization remain host work.

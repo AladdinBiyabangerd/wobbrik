@@ -20,7 +20,7 @@ class GameplayHttpBackend(private val sessions: Sessions, private val transport:
     override suspend fun submit(session: BillingSession, command: AttemptCommand) {
         GameplayWire.validate(command)
         val path = "attempts/" + command.route.name.lowercase(java.util.Locale.ROOT)
-        GameplayWire.receipt(request(session, path, command.envelope))
+        RecoveryDtos.attemptReceipt(request(session, path, command.envelope), command.route)
     }
     private suspend fun request(session: BillingSession, path: String, body: String?): String {
         current(session)

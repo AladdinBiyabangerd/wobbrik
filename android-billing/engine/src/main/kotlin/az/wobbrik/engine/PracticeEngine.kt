@@ -38,6 +38,19 @@ class PracticeEngine {
     private var accumulatedTickUnits = 0L
     private var swayVelocity = 0.0
 
+    fun checkpoint(): EngineCheckpoint = EngineCheckpoint(state = state.copy(floors = state.floors.toList()),
+        direction = direction, fallVelocity = fallVelocity, tickUnits = accumulatedTickUnits, swayVelocity = swayVelocity)
+
+    /** Validate before changing any live state. Host must pause/reset its frame clock on lifecycle restore. */
+    fun restore(checkpoint: EngineCheckpoint) {
+        checkpoint.validate()
+        state = checkpoint.state.copy(floors = checkpoint.state.floors.toList())
+        direction = checkpoint.direction
+        fallVelocity = checkpoint.fallVelocity
+        accumulatedTickUnits = checkpoint.tickUnits
+        swayVelocity = checkpoint.swayVelocity
+    }
+
     fun drop(): Boolean {
         if (state.paused || state.phase != Phase.SWINGING) return false
         fallVelocity = 0.0

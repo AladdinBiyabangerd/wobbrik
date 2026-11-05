@@ -10,8 +10,8 @@ import kotlinx.coroutines.sync.withLock
 data class AttemptCommand(val operationId: String, val expectedRevision: Long, val route: Route, val envelope: String) {
     enum class Route { START, CHECKPOINT, FINISH }
 }
-data class ServerAttempt(val id: String, val active: Boolean, val sequence: Long, val checkpointJson: String?)
-data class GameSnapshot(val rulesVersion: String, val revision: Long, val coins: Long, val xp: Long, val attempt: ServerAttempt?)
+data class ServerAttempt(val id: String, val active: Boolean, val sequence: Long, val checkpointJson: String?, val floors: Long = 0, val precise: Long = 0, val rescues: Long = 0, val continued: Boolean = false, val rulesVersion: String = "wobbrik-v1", val engineVersion: String = "wobbrik-structural-v1")
+data class GameSnapshot(val rulesVersion: String, val revision: Long, val coins: Long, val xp: Long, val attempt: ServerAttempt?, val account: AccountRecovery? = null)
 
 interface AttemptBackend {
     suspend fun sync(session: BillingSession): GameSnapshot
