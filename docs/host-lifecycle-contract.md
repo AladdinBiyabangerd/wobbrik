@@ -65,3 +65,20 @@ before enabling input. Continued-state stabilization is still unresolved.
 
 No AppBackend code/schema/rules change is needed for this selected read/recovery
 ownership unit. Full online gameplay and a complete domain adapter remain pending.
+
+## Accepted attempt restore boundary
+
+`AcceptedAttemptRestore` in the engine module consumes only a successful recovery
+state. Signed-out/recovering/error exposes no attempt. An absent attempt and a
+finished attempt are distinct outcomes; neither creates a local online attempt.
+An active zero-sequence attempt may initialize fresh physics only with zero counters
+and no checkpoint. Positive sequences require positive floors, sequence <= floors,
+and `decodeAccepted` matching all three server counters. Unsupported or malformed
+snapshots fail closed. Restored physics is always paused with tick accumulation reset;
+the future host must also reset its monotonic frame clock before explicit resume.
+Terminal active snapshots remain terminal; continued attempts remain blocked until
+stabilization is specified. This boundary does not authorize input or issue commands.
+It is not yet connected to the visible offline practice scene or application owner.
+
+User deferred live origin/device verification on 5 November 2026. This removes that
+check as a prerequisite for this implementation work, not as a release requirement.
