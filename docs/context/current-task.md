@@ -9,7 +9,7 @@
 
 ## Current state
 - Application host is nonvisual; visible game remains a separate offline practice scene.
-- Main CI pending post-merge. Origin/device verification still deferred by user.
+- Main CI passed. Origin/device verification still deferred by user.
 - Unrelated untracked responsive rule/review files preserved.
 
 ## Decisions
@@ -32,7 +32,9 @@
 
 ## Checks performed
 - Scoped local diff review and whitespace checks; no branch CI.
-- Main CI pending. No device/live/visual checks or push/deploy.
+- Post-merge `./scripts/local-ci.sh` passed: 106 tasks, 32 executed, 74 up-to-date;
+  core/engine tests (four new), app assemble/lint passed. Existing lifecycle deprecation warning.
+- No device/live/visual checks or push/deploy.
 
 ## Exact next step
 - Design the small durable command integration unit against existing AttemptCoordinator
