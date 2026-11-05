@@ -1,0 +1,54 @@
+# Mərhələ 3 — onlayn cəhd və progression
+
+5 noyabr 2026: istifadəçi mərhələ 3-ə başlamağa icazə verdi. Bu icra planıdır;
+mərhələnin tamamlandığını bildirmir.
+
+## Yoxlanmış vəziyyət
+
+- AttemptCoordinator: account/login epoch, serial mutasiya, şəbəkədən əvvəl
+  davamlı command, exact retry və receipt-dən sonra sync var.
+- AuthenticatedRecoveryOwner: auth/foreground recovery və exact Ready instance
+  ilə dispatch var. RecoveryDtos server XP, sikkə və nailiyyətləri oxuyur.
+- AndroidAttemptJournal no-backup AtomicFile istifadə edir; Room deyil.
+- AcceptedAttemptCommands start/checkpoint/terminal finish göndərə bilir.
+- AcceptedEngineHost server checkpoint-i paused bərpa edir, frame/drop/resume bağlıdır.
+- MainActivity ayrıca offline PracticeEngine göstərir. WobbrikApplication Firebase
+  listener-i mövcud hesabı izləyir; hesab yaratma/giriş axını yoxdur.
+
+## İmplementasiya sırası
+
+1. **Online engine idarəsi, vizual dəyişikliksiz.** Exact Ready və foreground ilə
+   explicit resume/frame/drop bağla. Settled landing-də simulyasiyanı dayandır,
+   mövcud command vasitəsilə checkpoint göndər, yeni server Ready-dən bərpa et.
+   Recovery/error/auth dəyişməsində input dərhal bağlansın. Offline engine-dən
+   online proposal götürmə. Terminal əlavə mərtəbə checkpoint-indən sonra finish
+   niyyətinin proses ölümündə bərpasını həll et; iki command atomik deyil.
+2. **Hesab və ekran bağlantısı.** ui-craft və təsdiqlənmiş dizaynları oxu.
+   Firebase anonymous giriş və mövcud hesab sessiyasını bootstrap-a bağla.
+   Token alınmasını backend sync uğuru sayma. Ready/Recovering/Error, explicit
+   start/resume və server progression göstər. Aktiv cəhdi restart ilə silmə:
+   abandon müqaviləsi yoxdur. Guest link UID-ni saxlasın; hesab balansları toplanmasın.
+3. **Room keş/outbox.** Account-scoped cache və exact command outbox-u vahid
+   coordinator-a bağla. AtomicFile pending command üçün itkisiz migration hazırla;
+   iki aktiv journal yaratma. Room wallet authority deyil. Eyni revision-da
+   yeni server balansını da qəbul et: billing domain revision-u artırmır.
+4. **İnteqrasiya sübutu.** Cavab itkisi, commit sonrası timeout, proses ölümü,
+   şəbəkə fasiləsi, login epoch və iki cihaz revision yarışı yoxlanılsın.
+   XP/sikkə/nailiyyət təkrarlanmasın; restore son server checkpoint-i olsun.
+   Real PostgreSQL/device sınağını fake testlərdən ayır.
+
+Hər vahid ayrıca branch/review/merge ilə bitir. CI yalnız main-də merge-dən sonra
+`./scripts/local-ci.sh` ilə işləyir. Backend dəyişərsə ayrıca repository qaydaları
+və DB yoxlamaları tətbiq edilir. Push/deploy/Console/real SKU daxil deyil.
+
+## Server sərhədi və tamamlanma
+
+AppBackend/docs/wobbrik-game-api.md start/checkpoint/finish, sync və receipt
+müqavilələrini artıq verir. Bu plan üçün API/schema dəyişikliyi tələb olunmadı;
+kod vahidində uyğunluq yenidən yoxlanmalıdır. Structural-v1 fizika/terminal failure
+sübutu deyil; saxta uyğun checkpoint riski qalır.
+
+Auth, real online host, server progression, davamlı bərpa və nasazlıq sübutu
+birlikdə işləmədən mərhələ 3 tamam deyil. Offline menyu/session-only rekord və
+dizayn uyğunluğu borcu açıqdır. UI telefon/planşetdə təsdiqlənmiş dizaynlarla
+yanaşı müqayisə edilməlidir.
