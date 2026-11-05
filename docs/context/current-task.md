@@ -1,52 +1,54 @@
-# Gameplay HTTP + attempt journal — 5 noyabr 2026
+# Recovery DTO + engine checkpoint — 5 noyabr 2026
 
 ## Completed
-- Typed start/checkpoint/finish envelope builders and persisted metadata validation.
-- GameplayHttpBackend: fresh Sessions token, UID/login epoch, exact wire retry,
-  explicit 409 revision_conflict mapping; bounded HTTPS transport, no redirects.
-- DiskAttemptJournal + Android AtomicFile in noBackupFilesDir: per-UID hashed files,
-  embedded identity/version, pending overwrite rejection, compare removal/tombstones.
-- Five adapter regressions including actual JVM disk recreation and lost response.
+- Full account recovery fields, catalog/land-offer DTO decoder, active/finished attempt
+  counters/continued/pinned versions and typed start/checkpoint/finish receipts.
+- HTTP sync now retains full account recovery; submitted receipt validated by route.
+- practice-checkpoint-v1 JSON codec captures direction, fall/sway velocities and tick
+  remainder. Restore validates before mutation; decodeAccepted checks server counters.
+- Positive checkpoint floors/rescues bounds aligned with AppBackend.
+- Deterministic roundtrip tests for swing, fall, pause, successful landing and finish;
+  malformed/version/size/counter rejection and DTO/legacy receipt regressions.
 
 ## Current state
-- Implementation commit b6a4f9b, reviewed merge dfc10c5 on main. Local CI passed.
-- Previous dirty Compose app/build/settings/rule/review files preserved and restored
-  after clean-tree CI; excluded from this unit and its verification.
-- Host still PracticeEngine/offline/session record/schematic Canvas, not connected.
-- One application-scoped journal/coordinator owner required; multi-process writers
-  unsupported. JVM disk tests do not verify Android AtomicFile process/power loss.
+- Implementation 588b5f6; Gradle newline fix d07cf5d; reviewed merges on main.
+- Main 1d28bab local CI passed: 47 tasks, 17 executed/30 up-to-date.
+- Prior dirty Compose app/build/settings/rule/review files excluded from CI and preserved;
+  restore them after verification. No host binding or visual change in this unit.
 
 ## Decisions
-- AppBackend API/source inspected; existing contract suffices, no server/schema/rules
-  changes needed for this adapter unit. Authority remains AppBackend/PostgreSQL.
-- Only revision_conflict clears a rejected pending command; all other failures
-  retain exact command. No operation-404 inference or automatic mutation rebasing.
-- No UI changes or visual-fidelity claim. No push, deployment, SKU or Console work.
+- AppBackend source/API checked; no backend/schema/rules changes needed.
+- PostgreSQL remains authority; JSON is opaque structural-v1, never trusted geometry.
+- Server UTC timestamp text validated using Android-24-compatible parser.
+- Oversize 16 KiB checkpoint fails closed; no truncation or unlimited-height codec.
+- No abandon/restart-as-finish, continuation stabilization, push, deploy or SKU work.
 
 ## Remaining work
-- Full account/catalog/attempt/receipt DTOs beyond recovery projection.
-- Versioned engine checkpoint codec and validation; auth bootstrap, input gating,
-  lifecycle recovery and host binding. Resolve restart/abandon server contract first.
-- Android process-kill/AtomicFile device tests and live authenticated transport tests.
-- Approved graphics, real menus/navigation, phone/tablet design comparison.
+- Auth bootstrap, application-scoped coordinator/journal owner, lifecycle recovery,
+  accepted checkpoint decode + pause/frame-clock reset and input gating in host.
+- Resolve restart/abandon server contract BEFORE wiring those actions.
+- Catalog/attempt/operation read-route transport integration; other domain adapters.
+- Android process-kill/AtomicFile and authenticated live HTTP tests.
+- Approved graphics/menu/navigation and phone/tablet visual comparison.
 
 ## Relevant files
-- android-billing/core/src/main/kotlin/appbackend/wobbrik/game/{README.md,AttemptCoordinator.kt,GameplayWire.kt,GameplayHttpBackend.kt,DiskAttemptJournal.kt}
-- android-billing/android/src/main/kotlin/appbackend/wobbrik/game/AndroidAttemptJournal.kt
-- android-billing/core/src/test/kotlin/appbackend/wobbrik/game/GameplayAdaptersTest.kt
-- docs/reviews/2026-11-05-gameplay-http-journal.md
-- docs/kotlin-compose-plan.md §5; android-billing/app/README.md
+- android-billing/core/src/main/kotlin/appbackend/wobbrik/game/{README.md,RecoveryDtos.kt,GameplayWire.kt,GameplayHttpBackend.kt,AttemptCoordinator.kt}
+- android-billing/engine/src/main/kotlin/az/wobbrik/engine/{EngineCheckpoint.kt,PracticeEngine.kt}
+- android-billing/{core,engine}/src/test/kotlin (RecoveryDtosTest, GameplayAdaptersTest, EngineCheckpointTest)
+- docs/reviews/2026-11-05-recovery-checkpoint.md
+- android-billing/app/README.md; docs/kotlin-compose-plan.md §5
 - /Users/mac/My Workspace/AppBackend/docs/wobbrik-game-api.md
 
 ## Checks performed
-- Branch source review + git diff --check; no branch CI.
-- Main dfc10c5 ./scripts/local-ci.sh: exit 0, 47 tasks, 21 executed/26 up-to-date.
-- New adapter suite: 5 tests, 0 failure/error/skip. Android assemble/lint passed.
-- Backend tests, device process-kill, live HTTP/Firebase and UI renders not run.
+- Scoped source review and git diff --check; no branch CI.
+- First main CI failed on Gradle dependency newline; fixed on separate reviewed branch.
+- Main rerun passed: core 35 tests + engine 13 tests, zero failures/errors/skips;
+  Android assemble/lint passed. Verification docs merge requires final main rerun.
+- No UI/device/live backend tests or complete domain-adapter claim.
 
 ## Exact next step
 - Read this and core gameplay README; preserve dirty host files.
-- Next small unit: full recovery DTO/engine checkpoint roundtrip validation, before
-  host lifecycle binding. Check PracticeEngine state and backend structural bounds;
-  do not invent abandon/restart-as-finish behavior. Review on feat/fix branch,
-  merge retaining history, CI only on main. Keep approved visual design unchanged.
+- Next chat: inspect scoped host/auth/lifecycle boundaries and unresolved abandon/restart
+  contract; choose one small binding unit before implementation. Use decodeAccepted
+  with authoritative attempt counters; do not blindly resume terminal/pending state.
+- Review on feat/fix branch, merge with history; CI only on main.

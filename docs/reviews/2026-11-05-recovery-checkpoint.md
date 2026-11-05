@@ -19,3 +19,12 @@
   process-kill, live API and continuation stabilization not tested. Catalog decoder is
   supplied; catalog/attempt/operation read-route transport integration remains separate.
 - Existing dirty Compose app/build/settings/rule/review files excluded and preserved.
+
+## Verification result
+- Implementation 588b5f6; reviewed fix d07cf5d; main merge 1d28bab.
+- Main ./scripts/local-ci.sh exit 0: 47 tasks, 17 executed/30 up-to-date.
+- XML results: core 35 + engine 13 tests; zero failures/errors/skips.
+- Android assembleDebug and lintDebug passed. Existing uncommitted Compose application
+  excluded, so this result does not validate that host. No backend changes/tests required.
+- Verification/context documentation updated on docs/recovery-checkpoint-verification;
+  diff reviewed, git diff --check passed; final main rerun follows its merge.
