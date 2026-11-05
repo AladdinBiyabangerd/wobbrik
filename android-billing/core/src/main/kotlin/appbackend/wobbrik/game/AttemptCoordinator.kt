@@ -1,0 +1,104 @@
+package appbackend.wobbrik.game
+
+import appbackend.wobbrik.billing.AccountChanged
+import appbackend.wobbrik.billing.BillingSession
+import appbackend.wobbrik.billing.Sessions
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+
+/** Wire bodies are immutable and retained verbatim, including operation ID and revision. */
+data class AttemptCommand(val operationId: String, val expectedRevision: Long, val route: Route, val envelope: String) {
+    enum class Route { START, CHECKPOINT, FINISH }
+}
+data class ServerAttempt(val id: String, val active: Boolean, val sequence: Long, val checkpointJson: String?)
+data class GameSnapshot(val rulesVersion: String, val revision: Long, val coins: Long, val xp: Long, val attempt: ServerAttempt?)
+
+interface AttemptBackend {
+    suspend fun sync(session: BillingSession): GameSnapshot
+    /** Return only after a committed receipt; HTTP/network errors must throw. */
+    suspend fun submit(session: BillingSession, command: AttemptCommand)
+}
+
+interface AttemptJournal {
+    fun pending(uid: String): AttemptCommand?
+    /** Durable, atomic, account-scoped write before network I/O; never stores credentials. */
+    fun save(uid: String, command: AttemptCommand)
+    fun remove(uid: String, command: AttemptCommand)
+}
+
+/** Only a definitive revision_conflict, not timeout, 404 or operation_conflict. */
+class RevisionConflict : IllegalStateException("Sync required before a new operation")
+
+/** Serializes this host's mutations; server revisions handle other devices. No local grants. */
+class AttemptCoordinator(
+    private val sessions: Sessions,
+    private val backend: AttemptBackend,
+    private val journal: AttemptJournal,
+) {
+    private val mutex = Mutex()
+    @Volatile private var accepted: Pair<BillingSession, GameSnapshot>? = null
+
+    fun snapshot(): GameSnapshot? {
+        val value = accepted ?: return null
+        return value.second.takeIf { sessions.current() == value.first }
+    }
+
+    /** False after failure/account switch and until any pending command has been recovered. */
+    fun ready(): Boolean {
+        val session = sessions.current() ?: return false
+        return accepted?.first == session && journal.pending(session.uid) == null && sessions.current() == session
+    }
+
+    suspend fun recover(): GameSnapshot = mutex.withLock {
+        val session = current()
+        accepted = null
+        journal.pending(session.uid)?.let { drain(session, it) } ?: refresh(session)
+    }
+
+    suspend fun execute(command: AttemptCommand): GameSnapshot = mutex.withLock {
+        val session = current()
+        val state = accepted?.takeIf { it.first == session }?.second
+        check(state != null && journal.pending(session.uid) == null) { "Recover before issuing a command" }
+        require(command.operationId.isNotBlank() && command.envelope.isNotBlank())
+        require(command.expectedRevision == state.revision) { "Stale command" }
+        stillCurrent(session)
+        accepted = null // Block input even if durable persistence fails.
+        journal.save(session.uid, command)
+        stillCurrent(session)
+        drain(session, command)
+    }
+
+    private suspend fun drain(session: BillingSession, command: AttemptCommand): GameSnapshot {
+        stillCurrent(session)
+        try {
+            backend.submit(session, command)
+        } catch (conflict: RevisionConflict) {
+            stillCurrent(session)
+            journal.remove(session.uid, command)
+            refresh(session)
+            throw conflict // Caller must make a new decision; never silently rebase a mutation.
+        }
+        stillCurrent(session)
+        // A receipt may be historical. Always sync, including at an equal revision (billing).
+        val result = backend.sync(session)
+        stillCurrent(session)
+        check(result.rulesVersion == "wobbrik-v1") { "Unsupported server rules" }
+        journal.remove(session.uid, command)
+        stillCurrent(session)
+        accepted = session to result
+        return result
+    }
+
+    private suspend fun refresh(session: BillingSession): GameSnapshot {
+        val result = backend.sync(session)
+        stillCurrent(session)
+        check(result.rulesVersion == "wobbrik-v1") { "Unsupported server rules" }
+        accepted = session to result
+        return result
+    }
+
+    private fun current() = sessions.current() ?: error("Authenticated gameplay session required")
+    private fun stillCurrent(session: BillingSession) {
+        if (sessions.current() != session) throw AccountChanged()
+    }
+}

@@ -1,37 +1,40 @@
-# Yekun oyun məqsədi və main-only CI — 5 noyabr 2026
+# Attempt recovery core — 5 noyabr 2026
 
 ## Completed
-- Engine və balance/rescue main-ə merge edilib.
-- Təsdiqlənmiş dizaynların birəbir implementasiyası AGENTS.md-də məcburidir.
-- Məqsəd yekun real Android oyunudur; ayrıca prototip/məşq tətbiqi deyil.
-- CI qaydası: branch review → main-ə merge → yalnız main-də lokal CI. Uğursuzluq ayrıca fix branch ilə düzəldilir.
+- AppBackend AGENTS/README/context və gameplay API, Compose host və dizayn davranışı oxundu.
+- Transportdan asılı olmayan AttemptCoordinator əlavə edildi: UID/login epoch, serial mutation, göndərmədən əvvəl journal save, exact retry, definitive revision conflict sonrası sync, receipt sonrası sync və equal-revision wallet replacement.
+- Beş məqsədli regression testi əlavə edildi; durable disk/process yoxlaması deyil.
 
 ## Current state
-- Compose host hələ əvvəlki işdən qalan uncommitted fayllardır; bu qayda düzəlişinə daxil deyil.
-- MainActivity hazırda PracticeEngine, sxematik Canvas binaları, “Offline məşq” menyusu və yalnız session/saved-instance rekord istifadə edir. Process death yeni cəhd yaradır. Bu, yekun oyun kimi qəbul edilmir.
-- Əvvəlki renderlər dizayna birəbir uyğunluğun sübutu deyil.
+- Koordinator hələ Compose hosta bağlı deyil. HTTP/Firebase adapteri, durable journal, tam DTO və engine checkpoint codec yoxdur. Yekun oyun axını hazır deyil.
+- Əvvəlki uncommitted host/build/rule/review dəyişiklikləri saxlanır; bu vahidə commit edilmir.
+- MainActivity hələ PracticeEngine, sxematik Canvas, offline məşq menyusu və session rekord istifadə edir; process death yeni cəhd yaradır. Dizayna uyğunluğu təsdiqlənməyib.
 
 ## Decisions
-- Adları dəyişmək çatışmayan funksiyaları tamamlamır; engine davranışını sırf Practice adı var deyə silmək olmaz.
-- Server wallet/progression authority-si qorunur; offline xal mükafat yaratmır. Real SKU/Console/deploy ayrıca göstəriş gözləyir.
-- Qayda/CI vahidi AppBackend domain/API/schema dəyişmir; backend uyğunluğu və inteqrasiya tamamlanmış sayılmır.
+- Authority yalnız AppBackend/PostgreSQL; lokal mükafat əlavə edilmir.
+- Bu core vahidi mövcud API ilə uyğundur; backend/schema/rules dəyişiklik tələb etmir. Tam adapter uyğunluğu hələ yoxlanmayıb.
+- API-də abandon yoxdur. Restart/menu davranışını finish/mükafat kimi yozmaq olmaz; hosta bağlamadan əvvəl lifecycle müqaviləsi həll edilməlidir.
+- Real SKU/Console/deploy/push üçün ayrıca göstəriş gözlənir.
 
 ## Remaining work
-- Mövcud hostu yekun məhsul axınına çevirmək: təsdiqlənmiş qrafika, real menyu/naviqasiya, cəhdin bərpası və server gameplay adapteri.
-- MainActivity/README-dəki məşq əhatəsini yalnız real əvəzləmə implementasiya ediləndən sonra yeniləmək.
-- Telefon və planşetdə render/baxış, dizayn müqayisəsi; cihaz gameplay/performance yoxlamaları.
+- Typed HTTP DTO/envelope serializer və authenticated backend adapter; per-UID atomik durable journal və backup istisnası.
+- Tam account/attempt DTO, engine checkpoint roundtrip/validation, host auth bootstrap və input gating/recovery.
+- Restart/abandon server davranışı; təsdiqlənmiş qrafika və real menyu/naviqasiya; telefon/planşet dizayn müqayisəsi və cihaz yoxlamaları.
 
 ## Relevant files
-- AGENTS.md; .cursor/rules/local-delivery.mdc; scripts/local-ci.sh
-- docs/kotlin-compose-plan.md (xüsusən 5-ci bölmə və mərhələlər)
-- android-billing/app/README.md; android-billing/app/src/main/kotlin/az/wobbrik/game/{MainActivity,GameTokens}.kt
-- docs/design/game-tap-v2/README.md; docs/design/mobile-v1/tokens.css; docs/design/README.md
-- /Users/mac/My Workspace/AppBackend/AGENTS.md; docs/wobbrik-game-api.md (backend repository daxilində)
+- android-billing/core/src/main/kotlin/appbackend/wobbrik/game/{AttemptCoordinator.kt,README.md}
+- android-billing/core/src/test/kotlin/appbackend/wobbrik/game/AttemptCoordinatorTest.kt
+- docs/reviews/2026-11-05-attempt-recovery-core.md
+- android-billing/app/src/main/kotlin/az/wobbrik/game/{MainActivity,GameTokens}.kt; app/README.md
+- docs/kotlin-compose-plan.md §5; docs/design/{mobile-v1,game-tap-v2}/
+- /Users/mac/My Workspace/AppBackend/docs/wobbrik-game-api.md və AGENTS.md
 
 ## Checks performed
-- Əvvəlki design-fidelity qaydası üçün main CI uğurlu idi.
-- Bu vahid main-ə merge edildikdən sonra lokal CI keçdi (47 task, exit 0); review və CI nəticəsi docs/reviews/2026-11-05-product-scope-main-ci.md-də izlənir.
-- Bu vahiddə UI dəyişdirilməyib və yeni render aparılmayıb.
+- Lokal source review və diff whitespace check keçib; branch-də CI işlədilməyib.
+- Main merge sonrası CI nəticəsi bu vahidin review qeydində yazılacaq.
+- UI dəyişdirilməyib/render edilməyib. Backend dəyişdirilməyib/test suite işlədilməyib.
 
 ## Exact next step
-- Yeni chatdə əvvəlcə bu qeydi və istinad edilən host/dizayn/API sənədlərini oxu. Mövcud uncommitted hostu qoruyaraq yekun oyun üçün ilk kiçik implementasiya vahidini seç: server attempt lifecycle və bərpa müqaviləsini hosta bağlamaq; backend qaydalarını yoxlamadan lokal real mükafat əlavə etmə. Böyük implementasiyaya başlamazdan əvvəl ui-craft və backend AGENTS.md oxunmalıdır.
+- Bu qeydi, core README və review qeydini oxu. Əvvəlki dirty hostu qoru.
+- Növbəti kiçik vahid: mövcud billing AppBackendClient/AccountSessions sərhədlərini istifadə edərək typed gameplay HTTP adapter və durable per-UID attempt journal qur; exact wire retry, login epoch, timeout/conflict və real disk recreation testləri ilə yoxla. Branch-də review, main-ə merge, yalnız sonra main-də lokal CI.
+- Sonra ayrıca vahiddə checkpoint codec və host lifecycle bağlanması; restart/abandon üçün server müqaviləsini əvvəl həll et. Placeholder qrafikanı yekun dizayn sayma.
