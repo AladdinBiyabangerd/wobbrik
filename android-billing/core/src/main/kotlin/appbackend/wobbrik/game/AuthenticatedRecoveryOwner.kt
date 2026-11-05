@@ -12,6 +12,8 @@ class AuthenticatedRecoveryOwner(
     backend: AttemptBackend,
     journal: AttemptJournal,
     private val scope: CoroutineScope,
+    // Called under the owner lock before publication; must be synchronous and non-reentrant.
+    private val onStateChanged: (State) -> Unit = {},
 ) {
     sealed interface State {
         data object SignedOut : State
@@ -33,7 +35,7 @@ class AuthenticatedRecoveryOwner(
         work?.cancel()
         work = null
         sessions.onAuthChanged(uid)
-        mutableState.value = if (uid == null) State.SignedOut else State.Recovering
+        publishLocked(if (uid == null) State.SignedOut else State.Recovering)
         if (uid != null) recoverLocked()
     }
 
@@ -42,17 +44,22 @@ class AuthenticatedRecoveryOwner(
         if (sessions.current() != null && work?.isCompleted != false) recoverLocked()
     }
 
+    private fun publishLocked(state: State) {
+        onStateChanged(state)
+        mutableState.value = state
+    }
+
     private fun recoverLocked() {
         val session = sessions.current() ?: return
         val epoch = generation
-        mutableState.value = State.Recovering
+        publishLocked(State.Recovering)
         work = scope.launch(start = CoroutineStart.LAZY) {
             try {
                 val snapshot = coordinator.recover()
                 ensureActive()
                 synchronized(lock) {
                     if (epoch == generation && sessions.current() == session && coordinator.ready()) {
-                        mutableState.value = State.Ready(snapshot)
+                        publishLocked(State.Ready(snapshot))
                     }
                 }
             } catch (cancelled: CancellationException) {
@@ -60,7 +67,7 @@ class AuthenticatedRecoveryOwner(
             } catch (failure: Exception) {
                 synchronized(lock) {
                     if (epoch == generation && sessions.current() == session) {
-                        mutableState.value = State.Error(failure)
+                        publishLocked(State.Error(failure))
                     }
                 }
             }

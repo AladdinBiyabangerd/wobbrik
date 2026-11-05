@@ -40,6 +40,17 @@ class PracticeSession : ViewModel() {
 }
 
 class MainActivity : ComponentActivity() {
+    override fun onResume() {
+        super.onResume()
+        (application as WobbrikApplication).engineHost.onForeground()
+    }
+
+    override fun onPause() {
+        // Process ON_STOP is delayed; revoke timing/input at the actual activity pause.
+        (application as WobbrikApplication).engineHost.onPause()
+        super.onPause()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         RemoteConfigInit.start(applicationContext)

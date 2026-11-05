@@ -10,6 +10,7 @@ import appbackend.wobbrik.game.AuthenticatedRecoveryOwner
 import appbackend.wobbrik.game.GameplayHttpBackend
 import appbackend.wobbrik.game.UrlConnectionGameplayTransport
 import appbackend.wobbrik.game.androidAttemptJournal
+import com.aladdin.wobbrik.engine.AcceptedEngineHost
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.CoroutineScope
@@ -24,6 +25,8 @@ class WobbrikApplication : Application(), DefaultLifecycleObserver {
         data object MissingBackendOrigin : Bootstrap
         data class Configured(val recovery: AuthenticatedRecoveryOwner) : Bootstrap
     }
+
+    val engineHost = AcceptedEngineHost()
 
     lateinit var bootstrap: Bootstrap
         private set
@@ -53,6 +56,7 @@ class WobbrikApplication : Application(), DefaultLifecycleObserver {
         }
         val owner = AuthenticatedRecoveryOwner(
             sessions, GameplayHttpBackend(sessions, transport), androidAttemptJournal(this), recoveryScope,
+            onStateChanged = engineHost::onRecoveryChanged,
         )
         bootstrap = Bootstrap.Configured(owner)
         authListener = FirebaseAuth.AuthStateListener { source ->
@@ -63,6 +67,11 @@ class WobbrikApplication : Application(), DefaultLifecycleObserver {
     }
 
     override fun onStart(owner: LifecycleOwner) {
+        engineHost.onForeground()
         (bootstrap as? Bootstrap.Configured)?.recovery?.onForeground()
+    }
+
+    override fun onStop(owner: LifecycleOwner) {
+        engineHost.onPause()
     }
 }
