@@ -34,7 +34,7 @@
 
 ## Checks performed
 - Diff review, git diff --check; ilk merge sonrası main local CI keçdi.
-- Final callback-identity düzəlişinin main CI nəticəsi review qeydində saxlanılır.
+- Final callback-identity main CI keçdi (25s); nəticə review qeydindədir.
 - Fake backend/disk tests; live auth/DB/device yoxlanmayıb. Vizual dəyişiklik yoxdur.
 
 ## Exact next step
