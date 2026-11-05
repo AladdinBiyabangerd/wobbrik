@@ -50,3 +50,7 @@ must explicitly pause/reset its frame clock after lifecycle restore. The 16 KiB
 limit is fail-closed; unlimited-height compact encoding is not implemented. Only
 strictly increasing successful-floor checkpoints are accepted by the current API;
 zero-floor, pause/restart/abandon and continuation stabilization remain host work.
+
+Host lifecycle constraints and the selected auth/recovery ownership unit are in
+[host-lifecycle-contract](../../../../../../../../docs/host-lifecycle-contract.md).
+Online restart/abandon remains unbound pending a product/server contract.
