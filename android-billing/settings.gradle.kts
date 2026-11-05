@@ -3,3 +3,4 @@ dependencyResolutionManagement { repositoriesMode.set(RepositoriesMode.FAIL_ON_P
 rootProject.name = "wobbrik-billing"
 include(":core", ":android")
 include(":engine")
+include(":app")
