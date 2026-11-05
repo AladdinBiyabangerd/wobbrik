@@ -18,7 +18,10 @@
 - Restart/abandon and online engine input remain unbound. Visible app is still offline
   practice; no visual changes. No UI render needed for this nonvisual unit.
 - Branch checks: `git diff --check` passed. CI deliberately not run on branch.
-- Post-merge CI: pending.
+- First post-merge CI failed at app compile: ambiguous super.onCreate inherited
+  from Application and DefaultLifecycleObserver. Fixed on
+  `fix/firebase-bootstrap-supertype` with explicit `super<Application>.onCreate()`;
+  reviewed one-line correction and whitespace check. CI rerun pending on main.
 - Limitations: no supplied real backend origin or device sign-in; live token, account
   switch, foreground and process-kill verification not performed. Existing core owner
   regressions cover epoch isolation, recovery failures and retained journal behavior.

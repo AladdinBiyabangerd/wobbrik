@@ -31,7 +31,7 @@ class WobbrikApplication : Application(), DefaultLifecycleObserver {
     private var authListener: FirebaseAuth.AuthStateListener? = null
 
     override fun onCreate() {
-        super.onCreate()
+        super<Application>.onCreate()
         if (FirebaseApp.getApps(this).isEmpty()) {
             bootstrap = Bootstrap.MissingFirebase
             return
