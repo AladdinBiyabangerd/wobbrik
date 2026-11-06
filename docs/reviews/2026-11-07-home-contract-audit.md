@@ -8,6 +8,8 @@
 - Düzəliş: kodla təsdiqlənmiş sərhədlər və ayrıca implementasiya/test mərhələləri
   qeyd edildi; beş tələb və backend adapteri tamamlanmış göstərilmir.
 - Lokal review: mənbələr üzrə yoxlama və git diff --check; kod/UI dəyişmir.
-- CI: main merge-dən sonra ./scripts/local-ci.sh nəticəsi aşağıda qeyd ediləcək.
+- CI: 944f71a main-ə merge edildikdən sonra ./scripts/local-ci.sh PASS;
+  BUILD SUCCESSFUL, 103 task (2 executed, 101 up-to-date). Bu nəticə backend
+  və qorunan online branch-in yoxlanması deyil.
 - Məhdudiyyətlər: API/DB/device runtime test yoxdur; vizual dəyişiklik və render
   yoxdur. Backend oxunub, dəyişdirilməyib; backend CI icra edilməyib.
