@@ -63,14 +63,17 @@ Ekranda görünən oyun hələ ayrıca offline məşqdir. Onlayn hostun input-u 
 - [x] Bu inteqrasiya üçün 11 yeni test əlavə edilib və lokal CI keçib.
 - [ ] Eyni davranış real server, şəbəkə kəsilməsi və cihazda prosesin bağlanması ilə yoxlanılsın.
 
-### 3.4. Real oyunun onlayn axına qoşulması — NÖVBƏTİ ADDIM
+### 3.4. Real oyunun onlayn axına qoşulması — DAVAM EDİR
 
-- [ ] Onlayn simulyasiya və hər enişdən sonra checkpoint göndərmə dövrü qurulsun.
-- [ ] Təsdiq gözlənərkən, xətada və bərpada simulyasiya/input təhlükəsiz dayansın.
-- [ ] Retry və reconciliation-dan sonra yalnız düzgün qəbul edilmiş vəziyyətdən davam edilsin.
-- [ ] Son eniş → checkpoint → yeni Ready → finish ardıcıllığı yekun oyun axınına qoşulsun.
+- [x] Host settled landing-də checkpoint/finish göndərir; UI OnlineGame ilə bağlıdır
+  (`feat/stage-three-online-progression`, hələ main-də deyil).
+- [x] Təsdiq gözlənərkən (`waiting`), xətada və bərpada input bağlanır.
+- [ ] Retry və reconciliation-dan sonra yalnız düzgün qəbul edilmiş vəziyyətdən davam — fake test var; live device/DB açıqdır.
+- [ ] Son eniş → checkpoint → yeni Ready → finish yekun axında live yoxlanılsın.
 - [ ] Finish üçün kosmetik hissə seçimi kataloq və hesabın açdığı hissələrlə əlaqələndirilsin.
-- [ ] Təhlükəsiz axın yoxlanıldıqdan sonra onlayn input açılsın.
+- [x] Explicit resume/drop ilə onlayn input açılır; restart/abandon hələ bağlıdır.
+- [ ] Google guest link UI yazılıb; live Console web client + provider yoxlaması açıqdır.
+- [ ] Room keş/outbox hələ AtomicFile journal-dadır (plan vahid 3).
 
 **Məhdudiyyət:** hər əmr ayrıca davamlıdır. Checkpoint ilə finish arasındakı niyyət
 avtomatik saxlanmır; həmin arada proses bağlanarsa, bərpadan sonra explicit finish

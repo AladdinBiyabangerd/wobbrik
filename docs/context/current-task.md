@@ -1,42 +1,43 @@
-# Mərhələ 3 / vahid 2 — online ekran + progression, 6 noyabr 2026
+# Mərhələ 3 / vahid 2 — online ekran + Google link, 7 noyabr 2026
 
 ## Completed
-- Branch `feat/stage-three-online-progression` main-dən (construction-cycle daxil)
-  açılıb; əvvəlki `feat/stage-three-online-screens` işi cherry-pick edilib.
-- MainActivity offline PracticeSession yaratmır; OnlineGame application-owned
-  AcceptedEngineHost frame/drop/resume və typed start axınına bağlıdır.
-- Hazır şəhər/logo/hesab art + UI ikonları/recovery hero Android resurslarındadır.
-- Compose framing/FrameTiming main-də qalır; PracticeGame yalnız debug fixture üçündür.
+- Branch `feat/stage-three-online-progression` main-dən açılıb; köhnə online-screens
+  cherry-pick edilib (construction-cycle ilə birləşdirilib).
+- MainActivity → OnlineGame → AcceptedEngineHost (start/frame/drop/resume/checkpoint).
+- Credential Manager + `linkGuest` hesab ekranında bağlanıb; collision/cancel
+  wallet birləşdirmir; eyni UID recovery epoch yenilənir.
+- `wobbrik.googleWebClientId` BuildConfig property əlavə olunub.
+- Google link + review qeydi commit olunub.
 
 ## Current state
-- Vahid 2 hələ açıqdır: Google guest link UI və dizayn birəbir uyğunluğu qalıb.
-- Room keş/outbox (vahid 3) və inteqrasiya sübutu (vahid 4) bu branch-ə daxil deyil.
-- Backend origin/canlı Firebase bu APK-da sübut edilməyib.
+- Vahid 2 hələ açıqdır: dizayn birəbir uyğunluğu, tablet rail, live Google/Console.
+- `google-services.json`-də oauth_client/default_web_client_id yoxdur; live link
+  üçün Console web client + Google provider ayrıca icazə tələb edir.
+- Room keş/outbox (vahid 3) və fault proof (vahid 4) bu branch-də deyil.
 
 ## Decisions
-- Eyni qonaq UID Google credential ilə `linkGuest`-ə bağlanır; wallet birləşməsi yoxdur.
-- Console/SKU/deploy/push ayrıca göstərişədək bağlıdır.
-- Auth uğuru Ready deyil; balans/XP/nailiyyət yalnız server snapshot-dandır.
-- AppBackend API/schema bu UI bağlantısı üçün dəyişmir.
+- Link yalnız `linkWithCredential`; collision-da sign-in yoxdur.
+- Console/SKU/deploy/push bağlı qalır.
+- Auth uğuru Ready deyil; progression server snapshot-dandır.
 
 ## Remaining work
-- Google credential alınmasını hesab ekranında `linkGuest`-ə bağla.
-- Təsdiqlənmiş mobile-v1/tablet-v1/game-tap-v2 ilə qalan vizual fərqləri bağla.
-- Diff review → merge → yalnız istənəndə main-də `./scripts/local-ci.sh`.
-- Sonra ayrıca branch-lərdə Room outbox və fault proof.
+- Dizayn polish/render (mobile-v1 / tablet rail / account actions).
+- Console web client icazəsi alınanda live link yoxla.
+- Merge → yalnız istənəndə main CI.
+- Sonra ayrıca branch: Room outbox, sonra inteqrasiya sübutu.
 
 ## Relevant files
-- android-billing/app/.../{MainActivity,OnlineGame,GameTokens,WobbrikApplication}.kt
-- android-billing/engine/.../AcceptedEngineHost.kt
+- android-billing/app/.../{OnlineGame,GoogleGuestLink,WobbrikApplication,MainActivity}.kt
+- android-billing/app/build.gradle.kts
 - docs/reviews/2026-11-05-online-screens.md
 - docs/stage-three-online-plan.md
-- docs/design/account-assets-v1/
+- docs/design/mobile-v1/, docs/design/ (tablet account/primary)
 
 ## Checks performed
-- Cherry-pick conflict: GameTokens (ExpandedWidth + PanelElevation) və MainActivity
-  (OnlineGame host; PracticeGame FrameTiming saxlanıb) əl ilə birləşdirilib.
-- Build/test bu handoff yazılana qədər hələ yenidən işlədilməyib.
+- `:app:compileDebugKotlin` + `:engine:test` BUILD SUCCESSFUL.
+- Backend API/schema bu vahiddə dəyişməyib.
+- Lokal diff review qeydi yenilənib; CI branch-də işlədilməyib.
 
 ## Exact next step
-- Google Sign-In credential axınını mövcud `linkGuest`-ə bağla (Console dəyişmə).
-- Sonra eyni vahid 2 daxilində açıq dizayn tapıntılarını bağla və review et.
+- Təsdiqlənmiş mobile/tablet account dizaynları ilə OnlineGame vizual uyğunluğunu
+  bağla (ui-craft + render); sonra merge qərarı.

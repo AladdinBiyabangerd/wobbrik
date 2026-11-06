@@ -1,5 +1,6 @@
 package com.aladdin.wobbrik
 
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
@@ -23,6 +24,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.imageResource
@@ -30,6 +32,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import appbackend.wobbrik.game.AuthenticatedRecoveryOwner
 import com.aladdin.wobbrik.engine.*
+import kotlinx.coroutines.launch
 
 /** UI reads server recovery; only the application host may own accepted physics. */
 @Composable
@@ -45,6 +48,10 @@ internal fun OnlineGame(app: WobbrikApplication) {
     var page by rememberSaveable { mutableStateOf("home") }
     val host = app.engineHost
     var hostState by remember { mutableStateOf(host.snapshot()) }
+    var linkMessage by remember { mutableStateOf<String?>(null) }
+    var linking by remember { mutableStateOf(false) }
+    val activity = LocalContext.current as? ComponentActivity
+    val scope = rememberCoroutineScope()
     // Snapshot has no Compose dependency. Poll even when paused so lifecycle revocation is visible.
     LaunchedEffect(host, configured) {
         while (true) withFrameNanos { now ->
@@ -70,9 +77,14 @@ internal fun OnlineGame(app: WobbrikApplication) {
         restore is AcceptedAttemptRestore.Result.Blocked -> "Cəhd bu versiyada bərpa edilə bilmir"
         else -> null
     }
+    val guest = (account as? WobbrikApplication.AccountState.Session)?.anonymous == true
     AccountScreen(page, ready, account, status,
-        onPage = { page = it },
-        onRetry = { if (account is WobbrikApplication.AccountState.Error) app.retryAccount() else configured?.recovery?.onForeground() },
+        onPage = { page = it; linkMessage = null },
+        onRetry = {
+            linkMessage = null
+            if (account is WobbrikApplication.AccountState.Error) app.retryAccount()
+            else configured?.recovery?.onForeground()
+        },
         onPlay = if (ready != null && restore !is AcceptedAttemptRestore.Result.Blocked) ({
             when (restore) {
                 AcceptedAttemptRestore.Result.NoAttempt, is AcceptedAttemptRestore.Result.Finished -> {
@@ -82,7 +94,23 @@ internal fun OnlineGame(app: WobbrikApplication) {
                 else -> Unit
             }
         }) else null,
-        active = restore is AcceptedAttemptRestore.Result.Paused)
+        active = restore is AcceptedAttemptRestore.Result.Paused,
+        onLinkGoogle = if (guest && configured != null && activity != null && !linking) ({
+            linking = true
+            linkMessage = null
+            scope.launch {
+                try {
+                    val clientId = GoogleGuestLink.serverClientId(activity)
+                    app.linkGuest(GoogleGuestLink.googleCredential(activity, clientId))
+                } catch (failure: Throwable) {
+                    GoogleGuestLink.userMessage(failure)?.let { linkMessage = it }
+                } finally {
+                    linking = false
+                }
+            }
+        }) else null,
+        linking = linking,
+        linkMessage = linkMessage)
 }
 
 @Composable
@@ -95,6 +123,9 @@ internal fun AccountScreen(
     onRetry: () -> Unit,
     onPlay: (() -> Unit)?,
     active: Boolean,
+    onLinkGoogle: (() -> Unit)? = null,
+    linking: Boolean = false,
+    linkMessage: String? = null,
 ) {
     val snapshot = ready?.snapshot
     BoxWithConstraints(Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(GameTokens.Surface, GameTokens.Background)))
@@ -143,6 +174,13 @@ internal fun AccountScreen(
                                 Text(snapshot?.account?.achievements?.let { if (it.isEmpty()) "Hələ nailiyyət yoxdur" else "${it.size} nailiyyət açılıb" } ?: "—", color = GameTokens.Muted)
                             }
                         }
+                    }
+                    if (page == "account" && onLinkGoogle != null) {
+                        OnlineAction(if (linking) "Google bağlanır…" else "Google ilə bağla", true,
+                            enabled = !linking, onClick = onLinkGoogle)
+                        Text("Eyni oyun hesabı saxlanır; balansı başqa hesaba birləşdirmir.",
+                            color = GameTokens.Muted, fontSize = GameTokens.Body)
+                        if (linkMessage != null) Text(linkMessage, color = GameTokens.Danger, fontSize = GameTokens.Body)
                     }
                     if (page == "achievements" || page == "collection") {
                         val items = if (page == "achievements") snapshot?.account?.achievements else snapshot?.account?.unlocks

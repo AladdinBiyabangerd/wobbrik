@@ -76,7 +76,15 @@ selects Firebase. Without either configuration the application reports
 `MissingFirebase` / `MissingBackendOrigin` through `WobbrikApplication.bootstrap`
 and does not start recovery. Invalid nonempty origins fail explicitly.
 
-The visible game still runs offline practice. Auth bootstrap does not unlock online
-input or bind start/checkpoint/finish/restart/abandon. Live sign-in, account switching,
-process death and backend connectivity require configured device verification.
+Guest → Google link uses Credential Manager and `linkWithCredential` only (same UID;
+no `signInWithCredential` fallback). Provide the Web OAuth client ID via
+`wobbrik.googleWebClientId`, or ensure `google-services.json` generates
+`default_web_client_id`. Enabling the Google provider in Firebase Console remains a
+separate explicit step; this repo does not change Console settings.
+
+`MainActivity` hosts `OnlineGame` on the application-owned `AcceptedEngineHost`.
+Offline `PracticeGame` remains debug/fixture-only. Restart/abandon stay unbound.
+Live auth, process death and backend connectivity still need configured device
+verification.
 Firebase listener semantics: https://firebase.google.com/docs/reference/android/com/google/firebase/auth/FirebaseAuth
+Google account linking: https://firebase.google.com/docs/auth/android/account-linking

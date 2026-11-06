@@ -3,8 +3,8 @@
 Branch: əvvəl `feat/stage-three-online-screens`; 6 noyabr 2026-da main +
 construction-cycle üzərinə `feat/stage-three-online-progression` kimi gətirilib.
 Bu branch yekun deyil, main-ə merge edilməyib; `./scripts/local-ci.sh`
-işlədilməyib. Dizayn uyğunluğu və Google credential axını bağlanmadan vahid 2
-tamamlanmış sayılmır.
+işlədilməyib. Dizayn uyğunluğu və live Google/Console yoxlaması bağlanmadan
+vahid 2 tamamlanmış sayılmır.
 
 ## Yoxlanmış diff
 
@@ -13,6 +13,9 @@ tamamlanmış sayılmır.
 - Ekran/host commit-i: `b8c9d31`; yoxlanmış diff: MainActivity, OnlineGame, GameTokens,
   AcceptedEngineHost, AcceptedAttemptCommandsTest, AccountPreviewActivity,
   debug manifest və capture-online-screens.py.
+- Google guest link (7 noyabr 2026): `GoogleGuestLink.kt`, OnlineGame hesab
+  ekranı binding, `linkGuest` collision/epoch qorunması, `wobbrik.googleWebClientId`
+  BuildConfig, credentials/googleid asılılıqları, README.
 - Əlaqəsiz untracked responsive-rule və compose-game-host faylları qorunub.
 
 ## İmplementasiya və düzəldilmiş tapıntılar
@@ -61,10 +64,11 @@ tamamlanmış sayılmır.
 
 ## Açıq tapıntılar / merge sərhədi
 
-- **Vahid 2 TAMAM DEYİL.** Google hesabı ilə guest link istifadəçi tərəfindən
-  seçilib; credential alınması və linkGuest UI binding hələ yoxdur. Eyni UID,
-  collision/retry və auth dəyişəndə input revocation qorunmalıdır. Console
-  dəyişikliyi ayrıca icazə tələb edir; bu işdə Console dəyişdirilməyib.
+- **Vahid 2 TAMAM DEYİL.** Google guest link UI yazılıb: Credential Manager +
+  `linkWithCredential` (eyni UID); collision/cancel-da sign-in yoxdur; linkdən
+  sonra recovery epoch yenilənir. Live sübut yoxdur: `google-services.json`-də
+  oauth_client/default_web_client_id yoxdur; Console web client + Google
+  provider ayrıca icazə tələb edir; bu işdə Console dəyişdirilməyib.
 - Təsdiqlənmiş mobile-primary-v2, account-states və tablet primary/account
   lövhələri ilə müqayisədə tipoqrafiya, dekor, düymə forması və kompozisiya
   fərqləri qalır. Tablet naviqasiya rail-i və hesabın tam actions quruluşu

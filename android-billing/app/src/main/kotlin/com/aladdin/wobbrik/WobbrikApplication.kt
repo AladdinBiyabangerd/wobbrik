@@ -76,9 +76,12 @@ class WobbrikApplication : Application(), DefaultLifecycleObserver {
         val auth = FirebaseAuth.getInstance()
         val guest = auth.currentUser ?: throw AccountChanged()
         require(guest.isAnonymous) { "An anonymous session is required" }
+        // Collision must fail here: callers must not fall back to signInWithCredential.
         val linked = guest.linkWithCredential(credential).await().user ?: throw AccountChanged()
         check(linked.uid == guest.uid && auth.currentUser?.uid == guest.uid)
+        check(!linked.isAnonymous) { "Google link left the session anonymous" }
         mutableAccount.value = AccountState.Session(linked.isAnonymous)
+        // Same UID still needs a recovery epoch so stale Ready cannot authorize input.
         (bootstrap as? Bootstrap.Configured)?.recovery?.onAuthChanged(linked.uid)
     }
 
