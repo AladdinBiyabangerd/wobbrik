@@ -16,15 +16,17 @@ internal object GameTokens {
     val Danger = Color(0xFFFFB4C8)
     // Fine outline and dim treatment used by the approved game/pause design.
     val Hairline = 1.dp
-    const val DimOpacity = 0.65f
+    const val DimOpacity = 0.72f
     val Small = 8.dp
     val Gap = 16.dp
     val Inset = 24.dp
     val CardRadius = 24.dp
     val ControlRadius = 16.dp
     val Target = 48.dp
-    val PanelWidth = 400.dp
+    val PanelWidth = 360.dp
+    val PanelElevation = 12.dp
     val Body = 16.sp
     val Title = 24.sp
     val Score = 32.sp
+    val Hint = 18.sp
 }

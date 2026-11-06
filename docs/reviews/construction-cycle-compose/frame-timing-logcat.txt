@@ -1,0 +1,2 @@
+--------- beginning of main
+11-06 23:54:26.949  7159  7159 I WobbrikFrameTiming: frames=189 avg=19fps p50=50.0ms p95=133.3ms p99=183.3ms jank16=143 jank33=143

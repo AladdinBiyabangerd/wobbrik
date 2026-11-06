@@ -1,6 +1,6 @@
 # Wobbrik — ümumi plan və tamamlanma siyahısı
 
-Son yenilənmə: **5 noyabr 2026**.
+Son yenilənmə: **6 noyabr 2026**.
 
 Bu sənəd layihənin ümumi mərhələlərini və hazırkı irəliləyişi göstərir.
 `[x]` — göstərilən konkret iş tamamlanıb; `[ ]` — hələ tamamlanmayıb.
@@ -26,12 +26,13 @@ Ekranda görünən oyun hələ ayrıca offline məşqdir. Onlayn hostun input-u 
 - [x] Fizikanın checkpoint formatında saxlanması və geri bərpası var.
 - [x] Lokal məşq səhnəsi və pauza mexanizmi var.
 - [ ] Bu mexanika ayrıca məşq axınından yekun onlayn oyuna inteqrasiya edilsin.
-- [ ] Oyun səhnəsi təsdiqlənmiş qrafika və dizayna uyğunlaşdırılsın.
-  Təsdiqlənmiş sprite-lar qoşulub; native UI işıqlandırması və konseptlə dəqiq
-  vizual uyğunluq hələ açıqdır. Aktiv/pauza renderləri və fərqlər:
-  [asset review](reviews/2026-11-05-game-scene-assets.md).
+- [x] Oyun səhnəsi təsdiqlənmiş qrafika və dizayna yaxınlaşdırılıb (framing, HUD,
+  fasilə paneli, guide/cable). Sprite-lar əvvəlki təsdiqdən; yeni garden/sky art
+  yoxdur. Capture və fərqlər:
+  [compose review](reviews/2026-11-06-construction-cycle-compose.md).
 - [ ] Uzun cəhdlər və müxtəlif frame sürətləri üzrə yekun oyun davranışı yoxlanılsın.
 - [ ] Zəif və orta cihazlarda FPS, jank, yaddaş və başlanğıc vaxtı ölçülsün.
+  Emulator soft-GPU-da FrameTiming harness işləyir; fiziki 60 Hz sübutu açıqdır.
 
 ## 3. Onlayn oyun və serverdə irəliləyiş — hazırda üzərində işlənən mərhələ
 
