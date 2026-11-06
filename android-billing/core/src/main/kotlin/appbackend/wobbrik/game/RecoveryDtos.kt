@@ -1,5 +1,6 @@
 package appbackend.wobbrik.game
 
+import java.math.BigInteger
 import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.TimeZone
@@ -8,7 +9,9 @@ import kotlinx.serialization.json.*
 data class PartProgress(val itemId: String, val completed: Long, val required: Long, val unlocked: Boolean)
 data class AccountRecovery(val serverTime: String, val firstOnlineAt: String, val graceUntil: String,
     val level: Long, val rescues: Long, val achievements: List<String>, val unlocks: List<String>,
-    val land: List<String>, val partProgress: List<PartProgress>)
+    val land: List<String>, val partProgress: List<PartProgress>,
+    val bestFloors: Long? = null, val xpInterval: XpInterval? = null)
+data class XpInterval(val start: BigInteger, val next: BigInteger)
 sealed interface AttemptResult {
     data class Started(val attemptId: String) : AttemptResult
     data class Checkpointed(val xp: Long, val level: Long, val rescues: Long, val granted: List<String>, val coins: Long) : AttemptResult
@@ -43,6 +46,21 @@ object RecoveryDtos {
         require(r.s("rules_version") == "wobbrik-v1")
         require(r.s("engine_version") == "wobbrik-structural-v1")
     }
+    private fun JsonObject.xpInterval(xp: Long, level: Long): XpInterval? {
+        val keys = listOf("level_start_xp", "next_level_xp")
+        if (keys.none { containsKey(it) }) return null
+        fun decimal(key: String): BigInteger {
+            val value = s(key)
+            require(value.length <= 20 && Regex("0|[1-9][0-9]*").matches(value))
+            return BigInteger(value)
+        }
+        require(level > 0)
+        val start = decimal(keys[0]); val next = decimal(keys[1])
+        val l = BigInteger.valueOf(level); val scale = l * BigInteger.valueOf(25)
+        require(start == scale * (l - BigInteger.ONE) && next == scale * (l + BigInteger.ONE))
+        require(BigInteger.valueOf(xp) >= start && BigInteger.valueOf(xp) < next)
+        return XpInterval(start, next)
+    }
     fun snapshot(body: String): GameSnapshot {
         val r = root(body); require(r.s("rules_version") == "wobbrik-v1")
         val attempt = r.getValue("attempt").takeUnless { it == JsonNull }?.jsonObject?.let { a ->
@@ -63,7 +81,8 @@ object RecoveryDtos {
         }
         require(progress.map { it.itemId }.distinct().size == progress.size)
         val account = AccountRecovery(r.time("server_time"), r.time("first_online_at"), r.time("grace_until"),
-            r.n("level"), r.n("rescues"), r.ids("achievements"), r.ids("unlocks"), r.ids("land"), progress)
+            r.n("level"), r.n("rescues"), r.ids("achievements"), r.ids("unlocks"), r.ids("land"), progress,
+            r["best_floors"]?.let { r.n("best_floors") }, r.xpInterval(r.n("xp"), r.n("level")))
         return GameSnapshot(r.s("rules_version"), r.n("revision"), r.n("coins"), r.n("xp"), attempt, account)
     }
     fun receipt(body: String): OperationReceipt {
