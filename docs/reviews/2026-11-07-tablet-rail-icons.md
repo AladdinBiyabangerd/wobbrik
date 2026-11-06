@@ -6,5 +6,7 @@
 - İstinad: tablet-v1/primary-landscape.png; ev, skyline, çanta və çəhrayı/ağ tentli mağaza motivləri qorunub. Generativ kontur/bevel fərqləri var, piksel eyniliyi deyil. Yeni alternativ dizayn əlavə edilməyib.
 - `render-preview.py`: 390×844 və 1280×800, 24/32/48/96px; iki render açılıb baxıldı, dörd ikon seçilir. Bu asset yoxlamasıdır; Compose ekranı və real rail uyğunluğu deyil. Token palitrası dəyişmədiyinə görə kontrast yenidən hesablanmadı.
 - Backend: API/DTO/schema, progression/wallet dəyişmədiyinə görə AppBackend dəyişikliyi tələb olunmur. Backend yoxlaması iddia edilmir.
-- Branch-də CI işə salınmayıb. Main merge-dən sonra lokal CI nəticəsi aşağıda qeyd ediləcək.
+- Yoxlanmış asset commit: `abe0d90`; main merge-dən sonra `./scripts/local-ci.sh`: BUILD SUCCESSFUL, 103/103 task executed (engine/core test, app/library assemble və lint). Branch-də CI işə salınmayıb.
+- Son sənəd düzəlişi: README sonundakı artıq boş sətir silindi; diff-check təkrar yoxlanır. İlkin staged diff-check bu whitespace tapıntısını göstərmişdi; ilkin yoxlama keçmiş sayılmır.
 - Qalan iş: rail runtime inteqrasiyası və telefon/planşet ekran müqayisəsi; əlavə istifadəçi tələbləri (rekord, növbəti XP həddi, inventory sayı, Parametrlər, Şəhərim) bu asset diff-inə daxil deyil.
+- `docs/tablet-icons-review-result`: yalnız README whitespace, bu review nəticəsi və context handoff diff-i lokal yoxlandı; `git diff --check` keçdi. Runtime/asset dəyişməyib; branch-də CI yoxdur, merge-dən sonra main gate təkrarlanır.
