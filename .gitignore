@@ -13,3 +13,16 @@ output/
 google-services.json
 .firebase/
 *.log
+*.apk
+*.aab
+*.ap_
+.cxx/
+captures/
+
+# Local review renders — keep docs/reviews/*.md notes only
+docs/reviews/**/*.png
+docs/reviews/**/*.jpg
+docs/reviews/**/*.jpeg
+docs/reviews/**/*.gif
+docs/reviews/**/*.webp
+docs/reviews/**/*.mp4
