@@ -1,46 +1,55 @@
-# Tablet rail asset-ləri və home çatışmazlıqları — 7 noyabr 2026
+# Beş home çatışmazlığı — müqavilə auditi, 7 noyabr 2026
 
 ## Completed
-- `feat/tablet-rail-icons`: ui_home/city/inventory/market RGBA PNG-ləri hazırlanıb;
-  abe0d90 review-dan sonra tarix saxlanılmaqla main-ə merge edilib.
-- Asset QA: 390×844 və 1280×800, 24/32/48/96px renderlərə baxılıb.
-- Main lokal CI: BUILD SUCCESSFUL, 103 task executed. Backend dəyişməyib.
+- Rekord/XP üçün Wobbrik DTO, online home və AppBackend read/finish/Level/
+  leaderboard müqaviləsi yoxlanıb. Audit: `docs/home-contract-audit.md`.
+- Tablet rail asset-lərinin əvvəlki main merge-i saxlanıb; runtime inteqrasiyası deyil.
 
 ## Current state
-- Cari istifadəçi branch-i `feat/stage-three-online-progression`; oradakı online
-  ekran + Google guest link işi qorunur, main-ə merge edilməyib.
-- Yeni ikonlar resursdur; runtime rail və yekun dizayn uyğunluğu hazır deyil.
-- Google live link üçün web client/provider Console konfiqurasiyası açıqdır.
+- Beş tələb implementasiya edilməyib. Bu vahid yalnız müqavilə auditidir.
+- Online ekran/Google guest link işi `feat/stage-three-online-progression`
+  branch-ində, b7d97a4-də qorunur; main-ə merge edilməyib.
+- AppBackend main oxunub, dəyişdirilməyib. Rekord və XP intervalı üçün backend
+  read müqaviləsinə additive sahələr lazımdır; hazır sync bunları vermir.
+- Google provider/web client Console konfiqurasiyası açıqdır.
 
 ## Decisions
-- İstinad tablet-v1/primary-landscape.png; generativ rekonstruksiya piksel eyniliyi deyil.
-- Saxta Rekord 28, XP 580/800 və 12 bina yazılmır; real server məlumatı tələb olunur.
-- Real SKU/Console/deploy/push ayrıca icazəsiz edilmir.
-- Əlavə tələblər bu asset vahidində implementasiya edilməyib.
+- Rekord tamamlanmış online nəticələrin maksimum mərtəbəsidir; sub-ten və
+  continued daxildir. Aktiv checkpoint/offline/inventar sayından çıxarılmır.
+- L başlanğıcı 25×L×(L−1), növbəti hədd 25×L×(L+1). Təklif olunan müqavilə:
+  best_floors integer, level_start_xp/next_level_xp decimal string; overflow
+  və köhnə serverdə unavailable davranışı testlərlə bağlanmalıdır.
+- Təsdiqlənmiş dizaynlar və tokenlər qorunur. City placement açılmır;
+  geometry qərarları açıqdır. Real SKU/Console/deploy/push ayrıca göstəriş tələb edir.
 
 ## Remaining work
-- İstifadəçi əlavə olaraq istəyir: rekord, növbəti XP həddi ilə XP bar,
-  inventory API-dən bina sayı, Parametrlər ekranı, tablet home Şəhərim axını.
-- Bu domain tələblərində AppBackend-in öz AGENTS.md-si, API/DTO/schema/rule
-  revision/dedup/account isolation/retry/old-client davranışı yoxlanmalıdır.
-- Tablet rail runtime inteqrasiyası; təsdiqlənmiş dizaynla telefon/planşet müqayisəsi.
-- Əvvəlki mərhələ: Room cache/outbox və fault proof hələ qalıb.
+1. Backend read müqaviləsi + mobil DTO/test uyğunluğu (UI-siz kiçik vahid).
+2. Real rekord və XP barının təsdiqlənmiş home-a inteqrasiyası.
+3. Inventory API-dən dəqiq bina sayı; pagination/concurrent revision yoxlaması.
+4. Real Parametrlər ekranı və preference/navigation.
+5. Tablet home Şəhərim real read/navigation axını və rail inteqrasiyası.
+- Əvvəlki Room cache/outbox/fault proof işi də tamamlanmayıb.
 
 ## Relevant files
-- docs/design/tablet-rail-icons-v1/{README.md,render-preview.py,preview-*.png}
-- docs/reviews/2026-11-07-tablet-rail-icons.md
-- docs/design/{tablet-v1,mobile-v1,game-tap-v2}/
-- android-billing/app/src/main/kotlin/com/aladdin/wobbrik/{OnlineGame,GameTokens,GoogleGuestLink}.kt
-- docs/kotlin-compose-plan.md (bölmə 5), docs/stage-three-online-plan.md
-- /Users/mac/My Workspace/AppBackend/AGENTS.md və docs/wobbrik-billing.md
+- docs/home-contract-audit.md — müqavilə tapıntıları, mərhələlər, qəbul yoxlamaları.
+- android-billing/core/src/main/kotlin/appbackend/wobbrik/game/{RecoveryDtos,AttemptCoordinator}.kt
+- android-billing/app/src/main/kotlin/com/aladdin/wobbrik/{OnlineGame,GameTokens}.kt
+- docs/design/{mobile-v1,tablet-v1,game-tap-v2,tablet-rail-icons-v1}/
+- docs/kotlin-compose-plan.md §5; docs/stage-three-online-plan.md
+- /Users/mac/My Workspace/AppBackend/{AGENTS.md,README.md,docs/context/current-task.md}
+- AppBackend internal/wobbrik/{read,attempts,finish,leaderboard}.go və docs/wobbrik-game-api.md
 
 ## Checks performed
-- Yeni dörd asset 1254×1254 RGBA, alpha 0–255, künclər alpha 0.
-- Asset preview renderləri açılıb baxılıb; Compose/device screenshot deyil.
-- Main-də ./scripts/local-ci.sh uğurludur; online branch CI nəticəsi deyil.
-- Docs whitespace düzəlişi ayrıca review branch-indədir; son merge-dən sonra CI yenilənir.
+- Mənbə/müqavilə yoxlaması; runtime/API/DB test icra edilməyib.
+- Vizual dəyişiklik/render yoxdur; dizayn uyğunluğu iddia edilmir.
+- Audit branch-inin review/CI nəticəsi docs/reviews/2026-11-07-home-contract-audit.md-dədir.
 
 ## Exact next step
-- Bu sənədi oxu, online branch-də qorunan işi nəzərə al; beş əlavə tələbdən
-  əvvəl rekord + XP növbəti həddinin real server müqaviləsini mobil və AppBackend
-  tərəfində məhdud scope ilə yoxla və ayrıca məntiqi branch-də tamamla.
+- Bu qeyd və audit sənədini oxu. AppBackend-də ayrıca feat branch-də sync və
+  attempt-read üçün best_floors + XP intervalı implementasiya et; real PostgreSQL
+  izolyasiya/retry/boundary testləri və backend yoxlamalarını tamamla.
+- Mobil DTO işini online branch-dən ayrıca feat branch-də et; main-ə hələ
+  review edilməmiş online işi dolayı yolla merge etmə. Branch review-dan sonra
+  tarix saxlanılmaqla main merge; Wobbrik CI yalnız main-də.
+- Main hazırda /Users/mac/My Workspace/Wobbrik-rail-icons worktree-sindədir;
+  həmin worktree-nin təmizliyini yoxla. Cari Wobbrik worktree online branch-ə qaytarılır.
