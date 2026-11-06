@@ -11,6 +11,35 @@ class RecoveryDtosTest {
       "part_progress":[{"item_id":"reward_wall_1","completed":1,"required":3,"unlocked":false}],
       "attempt":{"attempt_id":"a","rules_version":"wobbrik-v1","engine_version":"wobbrik-structural-v1",
       "sequence":2,"floors":3,"precise":2,"rescues":1,"status":"active","continued":true,"snapshot":{"v":1}}}"""
+    private fun fields(extra: String) = body.replace("\"revision\":4", "\"revision\":4,$extra")
+    @Test fun optionalHomeContractAndLargeIntervals() {
+        assertNull(RecoveryDtos.snapshot(body).account!!.bestFloors)
+        assertNull(RecoveryDtos.snapshot(body).account!!.xpInterval)
+        val extra = "\"best_floors\":9,\"level_start_xp\":\"0\",\"next_level_xp\":\"50\""
+        val account = RecoveryDtos.snapshot(fields(extra)).account!!
+        assertEquals(9L, account.bestFloors)
+        assertEquals(java.math.BigInteger.valueOf(50), account.xpInterval!!.next)
+        val large = fields("\"best_floors\":0,\"level_start_xp\":\"9223372021815247500\",\"next_level_xp\":\"9223372052185252500\"")
+            .replace("\"xp\":2", "\"xp\":9223372036854775807").replace("\"level\":1", "\"level\":607400100")
+        assertTrue(RecoveryDtos.snapshot(large).account!!.xpInterval!!.next > java.math.BigInteger.valueOf(Long.MAX_VALUE))
+        for ((xp, level) in listOf(0 to 1, 49 to 1, 50 to 2, 149 to 2, 150 to 3)) {
+            val start = 25L * level * (level - 1); val next = 25L * level * (level + 1)
+            val json = fields("\"level_start_xp\":\"$start\",\"next_level_xp\":\"$next\"")
+                .replace("\"xp\":2", "\"xp\":$xp").replace("\"level\":1", "\"level\":$level")
+            assertNotNull(RecoveryDtos.snapshot(json).account!!.xpInterval)
+        }
+    }
+    @Test fun malformedHomeFieldsFailClosed() {
+        listOf("\"best_floors\":-1", "\"best_floors\":\"9\"", "\"best_floors\":null",
+            "\"level_start_xp\":\"0\"", "\"level_start_xp\":0,\"next_level_xp\":50",
+            "\"level_start_xp\":\"0\",\"next_level_xp\":\"51\"",
+            "\"level_start_xp\":\"50\",\"next_level_xp\":\"150\"",
+            "\"level_start_xp\":\"-1\",\"next_level_xp\":\"50\"",
+            "\"level_start_xp\":\"00\",\"next_level_xp\":\"50\"",
+            "\"level_start_xp\":null,\"next_level_xp\":\"50\"").forEach {
+            assertThrows(Exception::class.java) { RecoveryDtos.snapshot(fields(it)) }
+        }
+    }
     @Test fun preservesFullRecoveryAndHistoricalReceipts() {
         val s = GameplayWire.snapshot(body)
         assertEquals(3L, s.attempt!!.floors); assertTrue(s.attempt.continued)
