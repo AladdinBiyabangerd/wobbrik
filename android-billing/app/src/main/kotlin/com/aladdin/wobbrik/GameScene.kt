@@ -29,10 +29,12 @@ internal fun DrawScope.drawGameScene(state: PracticeState, art: SceneArt, motion
     val floorHeight = PracticeRulesV1.FLOOR_HEIGHT.toFloat()
     val top = state.floors.size * floorHeight
     val camera = motion.cameraUnits
-    // Reserve the full crane travel + floor width, and island through hook vertically.
-    val travelWidth = 2 * PracticeRulesV1.CRANE_RANGE.toFloat() + floorWidth + 50f
-    val scale = min(size.width / travelWidth, size.height / 520f)
-    val ground = (size.height + 350f * scale) / 2f
+    // Keep the hanging floor inside the window at max swing, but drop the old
+    // 50u gutter so the tower reads closer to game-tap-v2 hero scale.
+    val travelWidth = 2 * PracticeRulesV1.CRANE_RANGE.toFloat() + floorWidth
+    // Tighter vertical budget: island through crane fills more of the portrait frame.
+    val scale = min(size.width / travelWidth, size.height / 455f)
+    val ground = (size.height + 280f * scale) / 2f
     // Compress empty air above the stack, continuously through landing. Physics is unchanged.
     fun visualY(y: Float) = if (y > top) top + (y - top) * .5f else y
     fun point(x: Double, y: Double) = Offset(size.width / 2f + (x.toFloat() - motion.cameraXUnits) * scale,
@@ -80,17 +82,24 @@ internal fun DrawScope.drawGameScene(state: PracticeState, art: SceneArt, motion
             lineTo(target.x + width * .24f, target.y - width * .33f)
             close()
         }
+        val guideColor = if (state.balance.dangerEpisode) GameTokens.Danger else GameTokens.Accent
+        val dash = PathEffect.dashPathEffect(floatArrayOf(6 * scale, 4 * scale))
         rotate(motion.towerDegrees, island) {
-            drawPath(guide, if (state.balance.dangerEpisode) GameTokens.Danger else GameTokens.Accent,
-                style = Stroke(2 * scale, pathEffect = PathEffect.dashPathEffect(floatArrayOf(5 * scale, 3 * scale))))
+            // Soft outer glow, then a crisp dashed core — concept-readable without new art.
+            drawPath(guide, guideColor.copy(alpha = 0.22f),
+                style = Stroke(7 * scale, pathEffect = dash))
+            drawPath(guide, guideColor.copy(alpha = 0.45f),
+                style = Stroke(4 * scale, pathEffect = dash))
+            drawPath(guide, guideColor,
+                style = Stroke(2.25f * scale, pathEffect = dash))
         }
         val hangingY = top + PracticeRulesV1.DROP_HEIGHT.toFloat()
         // Crane body and upper suspension point are fixed in window coordinates.
         // The world pans to follow the top floor; only the cable's lower endpoints
         // follow the hanging module. The hook stays at the screen center.
         val hook = Offset(size.width / 2f,
-            ground - (4 * floorHeight + PracticeRulesV1.DROP_HEIGHT.toFloat() * .5f + 185f) * scale)
-        val craneWidth = width * 1.8f
+            ground - (4 * floorHeight + PracticeRulesV1.DROP_HEIGHT.toFloat() * .5f + 175f) * scale)
+        val craneWidth = width * 2.05f
         // The ring center in the cropped crane art is (174, 410).
         sprite(art.crane, 142, 134, 1858, 483, hook.x - craneWidth * 174 / 1858,
             hook.y - craneWidth * 410 / 1858, craneWidth)
@@ -109,7 +118,9 @@ internal fun DrawScope.drawGameScene(state: PracticeState, art: SceneArt, motion
                 val anchor = Offset(width * dx, width * dy)
                 val rotated = Offset(anchor.x * cos(angle) - anchor.y * sin(angle),
                     anchor.x * sin(angle) + anchor.y * cos(angle))
-                drawLine(GameTokens.Muted, hook, p + rotated, 1.5f * scale)
+                val end = p + rotated
+                drawLine(GameTokens.Text.copy(alpha = 0.35f), hook, end, 3.2f * scale)
+                drawLine(GameTokens.Muted, hook, end, 1.8f * scale)
             }
         }
         floor(module.centerX, module.baseY, motion.loadDegrees, p)
