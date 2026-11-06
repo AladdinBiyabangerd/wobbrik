@@ -2,10 +2,16 @@
 
 ## Status və scope
 
-Bu vahid kod/müqavilə yoxlamasıdır; beş çatışmazlığın implementasiyası deyil.
-Wobbrik online işi `feat/stage-three-online-progression` branch-ində qorunur.
-AppBackend `main` oxunub, dəyişdirilməyib. Backend dəyişikliyi tələb olunur:
-şəxsi rekord və XP intervalı hazırda sync müqaviləsində yoxdur.
+Bu sənəd ilkin müqavilə auditini və sonrakı vahidlərin vəziyyətini saxlayır.
+7 noyabr 2026: birinci vahid tamamlandı — AppBackend `8ec40ec` sync/attempt-read
+üçün `best_floors`, `level_start_xp`, `next_level_xp` verir; Wobbrik `8b1376f`
+bunları nullable rekord və BigInteger intervalı kimi oxuyur. Hər iki vahid ayrıca
+review edilib tarix saxlanılmaqla öz main branch-inə merge olunub. Backend race/real
+PostgreSQL və Wobbrik main lokal CI keçib; review qeydlərinə bax.
+UI çatışmazlıqları hələ implementasiya edilməyib. Online iş
+`feat/stage-three-online-progression` branch-ində qorunur və main-ə merge edilməyib.
+Aşağıdakı ilkin tapıntılarda “növbəti implementasiya” deyilən müqavilə işi artıq
+birinci vahiddə görülüb; UI və digər mərhələlər açıqdır.
 
 ## 1. Rekord
 
