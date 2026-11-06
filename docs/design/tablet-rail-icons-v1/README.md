@@ -27,4 +27,3 @@ Production Wobbrik Android navigation icon: market. Reference image is approved 
 ### Home transparency correction
 
 Remove ALL background and white grey blue haze from around this house icon. Keep only the solid house silhouette exactly unchanged, preserve color geometry and dark doorway. Outside silhouette alpha must be exactly ZERO, no shadows no glow no residual pixels anywhere. Actual clean transparent production UI cutout.
-
