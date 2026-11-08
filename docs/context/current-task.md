@@ -1,3 +1,18 @@
+## Latest real HTTP account / epoch check — 8 November 2026
+- Completed: two focused private JVM scenarios use production core and real Firebase/backend HTTPS. Delayed receipt across A→B preserves A pending; B does not drain it; A recovers identical scenario envelope. Same-UID host callback new epoch rejects old sync. Review: `docs/reviews/2026-11-08-live-account-epoch-isolation.md`.
+- Current state: docs/live-account-epoch-isolation; independent account runtime reused (DB 55449, HTTP 18084, TLS 18447), existing real tokens refreshed privately. Both DBs' 22-table before/after snapshots identical; retained active attempt sequence/floors 2 and device journal unchanged.
+- Decisions: network/backend are real; response gate and host auth callbacks are injected. Not Android Firebase sign-out/re-login/UI or AtomicFile proof. No new gameplay writes. Google preparation/nonfree purchase test stays user-skipped; guest shop policy unchanged.
+- Remaining work: actual Android lifecycle, disposable APK upgrade/unsupported journal UI, Room/outbox and full stage/physical/visual acceptance. Do not mark live UI epoch acceptance complete from JVM scenarios.
+- Relevant files: latest epoch review; historical-journal review; PLAN §3.4; production AccountSessions/GameplayHttpBackend/AttemptCoordinator/DiskAttemptJournal. Private source/init/report and snapshots under ignored output/account-unlock-live; no tokens printed/committed.
+- Checks performed: focused Gradle live core test PASS (11s, 2 tests, zero failures/errors/skips), both 22-table equalities and retained journal equality; backend owner clean. No device input/install/restart, production change, suite/CI, merge/push/deploy or visual acceptance.
+- Exact next step: new bounded chat selects disposable APK upgrade/unsupported-version recovery under historical review + PLAN §3.4; first establish separate device-data ownership and retained baseline. Preserve current active attempt; do not reopen skipped Google test or start Room/outbox implicitly.
+
+## Latest user decision — skip Google-dependent purchase test
+- User explicitly keeps the existing guest shop restriction unchanged and skips Google-login preparation / the dependent live nonfree purchase test for now.
+- Status: skipped by user, not PASS; positive acquisition/retry/building persistence remains unverified. Do not request Google configuration or resume this test unless the user reopens it.
+- No runtime, device, active attempt or backend changes for this decision. Earlier environment observations are historical, not refreshed.
+- Exact next step: select another remaining PLAN §3.4 acceptance unit when requested; preserve retained active attempt and isolated environments.
+
 ## Latest real Firebase account isolation API check — 8 November 2026
 - Completed: independent verified backend artifact/DB/TLS; two real guest identities; foreign reads/finish/replay, locked finish rejection/exact retry and free-wall positive control PASS. Review: `docs/reviews/2026-11-08-account-isolation-live-api.md`.
 - Current state: docs/account-isolation-live-api. New ignored output/account-unlock-live; DB 55449/wobbrik_account_unlock; backend 18084 PID 27357/session 72229; TLS 18447 PID 27379/session 59279. A disposable attempt active at zero/revision 1; B API free-finish control complete at zero/revision 2. No emulator attached to new route.
