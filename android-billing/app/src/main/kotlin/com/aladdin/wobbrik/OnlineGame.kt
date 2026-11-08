@@ -68,7 +68,10 @@ internal fun OnlineGame(app: WobbrikApplication) {
     val ready = state as? AuthenticatedRecoveryOwner.State.Ready
     val restore = AcceptedAttemptRestore.from(state ?: AuthenticatedRecoveryOwner.State.SignedOut)
     if (page == "game" && ready != null && hostState.scene != null) {
-        AcceptedScene(hostState, ready, host, onHome = { page = "home" })
+        if (hostState.choosingFinish) FinishCosmeticScreen(hostState, ready,
+            onSelect = { category, id -> host.selectPart(ready, category, id) },
+            onConfirm = { host.confirmFinish(ready) }, onBack = { page = "home" })
+        else AcceptedScene(hostState, ready, host, onHome = { page = "home" })
         return
     }
     val error = account is WobbrikApplication.AccountState.Error || state is AuthenticatedRecoveryOwner.State.Error

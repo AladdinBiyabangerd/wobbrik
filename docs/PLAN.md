@@ -86,15 +86,17 @@ Ekranda görünən oyun hələ ayrıca offline məşqdir. Onlayn hostun input-u 
 - [x] Təsdiq gözlənərkən (`waiting`), xətada və bərpada input bağlanır.
 - [ ] Retry və reconciliation-dan sonra yalnız düzgün qəbul edilmiş vəziyyətdən davam — fake test var; live device/DB açıqdır.
 - [ ] Son eniş → checkpoint → yeni Ready → finish yekun axında live yoxlanılsın.
-- [ ] Finish üçün kosmetik hissə seçimi kataloq və hesabın açdığı hissələrlə əlaqələndirilsin.
+- [x] Finish kosmetik seçimi versiyalı server kataloqu və cari hesabın unlock-larına bağlandı (`feat/finish-cosmetics`); durable draft və explicit təsdiq var. Canlı yoxlama və vizual qəbul istifadəçidədir, main-ə merge edilməyib.
 - [x] Explicit resume/drop ilə onlayn input açılır; restart/abandon hələ bağlıdır.
 - [ ] Google guest link UI yazılıb; live Console web client + provider yoxlaması açıqdır.
 - [ ] Room keş/outbox hələ AtomicFile journal-dadır (plan vahid 3).
 
-**Məhdudiyyət:** hər əmr ayrıca davamlıdır. Checkpoint ilə finish arasındakı niyyət
-avtomatik saxlanmır; həmin arada proses bağlanarsa, bərpadan sonra explicit finish
-yenidən tələb olunur. Testlərdə server müqaviləsini təqlid edən fake istifadə olunub;
-cihazda və canlı serverdə yoxlama aparılmış sayılmır.
+**Məhdudiyyət:** checkpoint və finish ayrıca journal əmrləridir. Terminal server
+checkpoint-i və hesab/cəhd üzrə lokal kosmetik draft seçim niyyətini bərpa edir;
+mərtəbə əlavə etməyən miss də qəbul edilmiş progress ilə tutuşdurulur. Finish
+avtomatik göndərilmir: açıq təsdiq tələb edir. Pending envelope əvvəlki ID/revision
+ilə dəyişmədən drain olunur. Yeni draft server snapshot-u və ya ikinci outbox deyil.
+Fake regressiyalar və izolə renderlər canlı server/cihaz sübutu sayılmır.
 
 ## 4. Kolleksiya, hissələr və şəhər — yekun Android axını tamamlanmayıb
 

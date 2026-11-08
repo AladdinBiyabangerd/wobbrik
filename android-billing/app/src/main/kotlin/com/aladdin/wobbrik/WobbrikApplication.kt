@@ -19,7 +19,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.yield
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -34,7 +33,7 @@ class WobbrikApplication : Application(), DefaultLifecycleObserver {
         data class Configured(val recovery: AuthenticatedRecoveryOwner, val commands: AcceptedAttemptCommands) : Bootstrap
     }
 
-    val engineHost = AcceptedEngineHost()
+    val engineHost by lazy { AcceptedEngineHost(AndroidFinishDraftStore(this)) }
 
     lateinit var bootstrap: Bootstrap
         private set
@@ -113,13 +112,6 @@ class WobbrikApplication : Application(), DefaultLifecycleObserver {
         val commands = AcceptedAttemptCommands(owner)
         engineHost.bind(commands)
         bootstrap = Bootstrap.Configured(owner, commands)
-        recoveryScope.launch {
-            owner.state.collect { state ->
-                // Never submit inside the synchronous recovery invalidation callback.
-                yield()
-                if (state is AuthenticatedRecoveryOwner.State.Ready) engineHost.reconcileTerminal()
-            }
-        }
         authListener = FirebaseAuth.AuthStateListener { source ->
             // Do not deduplicate by UID: a re-login must establish a new recovery epoch.
             owner.onAuthChanged(source.currentUser?.uid)

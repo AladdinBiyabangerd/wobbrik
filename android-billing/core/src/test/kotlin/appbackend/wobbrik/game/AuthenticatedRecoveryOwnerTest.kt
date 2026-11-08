@@ -14,12 +14,14 @@ class AuthenticatedRecoveryOwnerTest {
         val calls = mutableListOf<BillingSession>()
         var sync: suspend (BillingSession) -> GameSnapshot = { snapshot(it.uid) }
         var submit: suspend () -> Unit = {}
+        var catalog: suspend (BillingSession) -> RecoveryCatalog? = { null }
         val journal = object : AttemptJournal {
             override fun pending(uid: String) = pending[uid]
             override fun save(uid: String, command: AttemptCommand) { pending[uid] = command }
             override fun remove(uid: String, command: AttemptCommand) { check(pending.remove(uid, command)) }
         }
         val backend = object : AttemptBackend {
+            override suspend fun catalog(session: BillingSession) = this@Fixture.catalog(session)
             override suspend fun sync(session: BillingSession): GameSnapshot {
                 calls += session
                 return this@Fixture.sync(session)
@@ -30,6 +32,23 @@ class AuthenticatedRecoveryOwnerTest {
         val owner = AuthenticatedRecoveryOwner(sessions, backend, journal, scope, notifications::add)
         fun ready() = (owner.state.value as AuthenticatedRecoveryOwner.State.Ready).snapshot
         fun close() = scope.cancel()
+    }
+
+    @Test fun delayedCatalogCannotPublishAcrossSameUidEpoch() = runBlocking {
+        val f = Fixture()
+        try {
+            val gate = CompletableDeferred<Unit>()
+            val oldCatalog = RecoveryCatalog("wobbrik-v1", "wobbrik-structural-v1", emptyList(), emptyList())
+            f.catalog = { withContext(NonCancellable) { gate.await() }; oldCatalog }
+            f.owner.onAuthChanged("alice"); yield()
+            assertTrue(f.owner.state.value is AuthenticatedRecoveryOwner.State.Recovering)
+            f.catalog = { oldCatalog.copy(items = listOf(CatalogItem("new", "new", "wall", "free", 0, null, null))) }
+            f.owner.onAuthChanged("alice"); yield()
+            gate.complete(Unit); yield()
+            val ready = f.owner.state.value as AuthenticatedRecoveryOwner.State.Ready
+            assertEquals("alice", ready.accountKey)
+            assertEquals("new", ready.catalog!!.items.single().id)
+        } finally { f.close() }
     }
 
     @Test fun invalidationNotifiesSynchronouslyEvenWhenFlowWouldConflate() = runBlocking {

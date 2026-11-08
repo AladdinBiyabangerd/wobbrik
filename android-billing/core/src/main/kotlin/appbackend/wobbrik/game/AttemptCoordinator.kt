@@ -16,6 +16,7 @@ data class ServerAttempt(val id: String, val active: Boolean, val sequence: Long
 data class GameSnapshot(val rulesVersion: String, val revision: Long, val coins: Long, val xp: Long, val attempt: ServerAttempt?, val account: AccountRecovery? = null)
 
 interface AttemptBackend {
+    suspend fun catalog(session: BillingSession): RecoveryCatalog? = null
     suspend fun sync(session: BillingSession): GameSnapshot
     /** Return only after a committed receipt; HTTP/network errors must throw. */
     suspend fun submit(session: BillingSession, command: AttemptCommand)

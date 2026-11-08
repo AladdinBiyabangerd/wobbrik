@@ -16,6 +16,7 @@ data class GameplayResponse(val status: Int, val body: String)
 class GameplayHttpError(val status: Int, val code: String?) : IOException("Gameplay request failed: $status ${code.orEmpty()}")
 
 class GameplayHttpBackend(private val sessions: Sessions, private val transport: GameplayTransport) : AttemptBackend {
+    override suspend fun catalog(session: BillingSession): RecoveryCatalog = RecoveryDtos.catalog(request(session, "catalog", null))
     override suspend fun sync(session: BillingSession): GameSnapshot = GameplayWire.snapshot(request(session, "sync", null))
     override suspend fun submit(session: BillingSession, command: AttemptCommand) {
         GameplayWire.validate(command)
@@ -46,8 +47,9 @@ class UrlConnectionGameplayTransport(origin: String) : GameplayTransport {
         require(it.path.isNullOrEmpty() || it.path == "/")
     }.toString().trimEnd('/')
     override suspend fun request(path: String, bearer: String, body: String?): GameplayResponse = withContext(Dispatchers.IO) {
-        require(path in setOf("sync", "attempts/start", "attempts/checkpoint", "attempts/finish"))
-        val connection = URI("$base/v1/apps/wobbrik/game/$path").toURL().openConnection() as HttpURLConnection
+        require(path in setOf("sync", "catalog", "attempts/start", "attempts/checkpoint", "attempts/finish"))
+        val suffix = if (path == "catalog") "catalog?rules_version=wobbrik-v1" else path
+        val connection = URI("$base/v1/apps/wobbrik/game/$suffix").toURL().openConnection() as HttpURLConnection
         try {
             connection.instanceFollowRedirects = false
             connection.connectTimeout = 8000; connection.readTimeout = 8000
