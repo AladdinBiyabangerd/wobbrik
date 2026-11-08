@@ -1,7 +1,7 @@
 # Finish cosmetics integration — 8 November 2026
 
 Branch: `feat/finish-cosmetics`, rooted at `6e22f69`, retaining restore fix
-`e0af061`. Asset commit: `17f8201`. Reviewed the complete local integration diff: core catalog/selection,
+`e0af061`. Asset commit: `17f8201`; implementation commit: `f5441a6`. Reviewed the complete local integration diff: core catalog/selection,
 engine host/draft, Android storage/UI/application binding, atlas metadata and
 assets, regressions and these plan/lifecycle/handoff updates. No merge, push,
 deploy, Console change or branch CI. Live tests are explicitly user-owned.
@@ -96,7 +96,8 @@ use or a performance acceptance result.
   data in a private read-only emulator on port 5580. No shared emulator-5554,
   real account, attempt journal, server process or live DB was controlled.
   Fixture source/manifest are not committed; final APK DEX excludes the activity.
-- Render matrix in `finish-cosmetics/`: phone 1080×2400 @420dpi and 2400×1080;
+- Local ignored render matrix in `finish-cosmetics/` (repository policy excludes
+  review PNGs from git): phone 1080×2400 @420dpi and 2400×1080;
   tablet 1600×2560 @320dpi and 2560×1600; portrait phone and wide tablet also at
   font scale 1.3. Safe drawing insets and scrolling checked. Screenshots are UI
   fixtures, NOT proof of live catalog/finish/retry/process-death behavior.
@@ -113,3 +114,12 @@ use or a performance acceptance result.
   User must test live finish, back/return, process death before confirm, pending
   response-loss retry, old journals, current-account unlocks and reward dedup.
   Stage 3 and visual acceptance remain open; next stage is not authorized.
+
+Final local APK: `output/finish-cosmetics/Wobbrik-finish-cosmetics-debug.apk`,
+40,106,305 bytes; source commit `f5441a6`, localhost TLS overlay, signature PASS.
+SHA-256: `e3c08906773e7ad8e091f156a98c56fda52f391bdd067bb55e4d9b794a894045`.
+Verified final APK contains exactly five cosmetic WebP atlases, no source PNGs
+and no FinishRenderActivity DEX. Metadata: ignored
+`output/finish-cosmetics/artifact.json`. Final source checks: core/engine tests,
+assembleDebug/lintDebug PASS; final local overlay rebuild PASS. The private
+read-only render emulator was stopped after screenshot verification.
