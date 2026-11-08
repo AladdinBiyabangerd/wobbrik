@@ -132,8 +132,8 @@ internal fun AccountScreen(
     linkMessage: String? = null,
 ) {
     val snapshot = ready?.snapshot
-    if (page == "home" && status == null && snapshot != null) {
-        HomeScreen(snapshot, active, onPlay, onPage)
+    if (page == "home") {
+        HomeScreen(snapshot, active, onPlay, onPage, status, onRetry)
         return
     }
     BoxWithConstraints(Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(GameTokens.Surface, GameTokens.Background)))

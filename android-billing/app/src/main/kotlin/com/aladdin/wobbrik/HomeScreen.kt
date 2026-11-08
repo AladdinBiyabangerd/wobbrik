@@ -1,5 +1,6 @@
 package com.aladdin.wobbrik
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -11,7 +12,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -23,7 +28,8 @@ import java.math.MathContext
 
 /** Decorative city artwork never substitutes for the player's server city. */
 @Composable
-internal fun HomeScreen(snapshot: GameSnapshot, active: Boolean, onPlay: (() -> Unit)?, onPage: (String) -> Unit) {
+internal fun HomeScreen(snapshot: GameSnapshot?, active: Boolean, onPlay: (() -> Unit)?, onPage: (String) -> Unit,
+                        status: String? = null, onRetry: () -> Unit = {}) {
     BoxWithConstraints(Modifier.fillMaxSize().background(Brush.radialGradient(listOf(GameTokens.Surface, GameTokens.Background)))
         .safeDrawingPadding().padding(GameTokens.Gap)) {
         val tablet = maxWidth >= GameTokens.MediumWidth
@@ -40,7 +46,7 @@ internal fun HomeScreen(snapshot: GameSnapshot, active: Boolean, onPlay: (() -> 
                         Row(Modifier.padding(GameTokens.Small), verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
                             HomeIcon(R.drawable.ui_coin)
-                            Text(snapshot.coins.toString(), color = GameTokens.Text, fontWeight = FontWeight.Bold)
+                            Text(snapshot?.coins?.toString() ?: "—", color = GameTokens.Text, fontWeight = FontWeight.Bold)
                         }
                     }
                     if (tablet) Spacer(Modifier.weight(1f))
@@ -51,13 +57,13 @@ internal fun HomeScreen(snapshot: GameSnapshot, active: Boolean, onPlay: (() -> 
                 if (wide) Row(Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(GameTokens.Gap),
                     verticalAlignment = Alignment.CenterVertically) {
                     HomeArt(Modifier.weight(1f).fillMaxHeight())
-                    HomeControls(snapshot, active, onPlay, onPage, tablet, true,
+                    HomeControls(snapshot, active, onPlay, onPage, status, onRetry, tablet, true, false,
                         (if (tablet) Modifier.width(GameTokens.PanelWidth + GameTokens.Target) else Modifier.weight(1f)).verticalScroll(rememberScrollState()))
                 } else Column(Modifier.weight(1f).verticalScroll(rememberScrollState()),
                     horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
                     if (!tablet) HomeHeading()
                     HomeArt(Modifier.fillMaxWidth().aspectRatio(1f))
-                    HomeControls(snapshot, active, onPlay, onPage, tablet, tablet, Modifier.fillMaxWidth())
+                    HomeControls(snapshot, active, onPlay, onPage, status, onRetry, tablet, tablet, tablet, Modifier.fillMaxWidth())
                 }
             }
         }
@@ -71,19 +77,39 @@ private fun HomeArt(modifier: Modifier) = Image(painterResource(R.drawable.home_
 private fun HomeHeading() {
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(GameTokens.Small, Alignment.CenterHorizontally)) {
-        Text("›", color = GameTokens.Accent, fontSize = GameTokens.Score, fontWeight = FontWeight.Black)
+        HomeHeadingMark()
         Text("Öz şəhərini qur", Modifier.weight(1f, fill = false), color = GameTokens.Text,
             fontSize = GameTokens.Title, fontWeight = FontWeight.ExtraBold, textAlign = TextAlign.Center)
-        Text("‹", color = GameTokens.Accent, fontSize = GameTokens.Score, fontWeight = FontWeight.Black)
+        HomeHeadingMark(mirrored = true)
+    }
+}
+
+/** Separate rays preserve the approved ornament without depending on font glyphs. */
+@Composable
+private fun HomeHeadingMark(mirrored: Boolean = false) {
+    val accent = GameTokens.Accent
+    Canvas(Modifier.size(GameTokens.Gap, GameTokens.Inset)) {
+        fun point(x: Float, y: Float) = Offset(size.width * (if (mirrored) 1f - x else x), size.height * y)
+        drawLine(accent, point(0.1f, 0.15f), point(0.8f, 0.35f), GameTokens.Hairline.toPx() * 3, StrokeCap.Round)
+        drawLine(accent, point(0.1f, 0.85f), point(0.8f, 0.65f), GameTokens.Hairline.toPx() * 3, StrokeCap.Round)
     }
 }
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun HomeControls(snapshot: GameSnapshot, active: Boolean, onPlay: (() -> Unit)?, onPage: (String) -> Unit,
-                         tablet: Boolean, heading: Boolean, modifier: Modifier) {
+private fun HomeControls(snapshot: GameSnapshot?, active: Boolean, onPlay: (() -> Unit)?, onPage: (String) -> Unit,
+                         status: String?, onRetry: () -> Unit, tablet: Boolean, heading: Boolean, portraitTablet: Boolean, modifier: Modifier) {
     Column(modifier, verticalArrangement = Arrangement.spacedBy(GameTokens.Gap)) {
         if (heading) HomeHeading()
+        if (status != null || snapshot == null) {
+            Text(status ?: "Hesab və cəhd bərpa olunur…", color = GameTokens.Text,
+                fontSize = GameTokens.Title, fontWeight = FontWeight.Bold)
+            if (status == null || status == "Hesab və cəhd bərpa olunur…") {
+                CircularProgressIndicator(color = GameTokens.Accent)
+            }
+            HomeButton("Yenilə", primary = true, onClick = onRetry)
+            return@Column
+        }
         Surface(shape = RoundedCornerShape(GameTokens.CardRadius), color = GameTokens.Surface,
             border = BorderStroke(GameTokens.Hairline, GameTokens.Raised)) {
             Column(Modifier.fillMaxWidth().padding(GameTokens.Small), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
@@ -102,8 +128,18 @@ private fun HomeControls(snapshot: GameSnapshot, active: Boolean, onPlay: (() ->
                 } else Text("XP —", color = GameTokens.Muted)
             }
         }
-        HomeButton(if (active) "Cəhdə qayıt" else "Oyna", primary = true, enabled = onPlay != null, onClick = { onPlay?.invoke() })
-        if (tablet) HomeButton("Şəhərim", R.drawable.ui_level, enabled = false, onClick = { onPage("city") })
+        if (portraitTablet && androidx.compose.ui.platform.LocalDensity.current.fontScale <= 1f) {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(GameTokens.Small),
+                verticalAlignment = Alignment.CenterVertically) {
+                HomeButton(if (active) "Cəhdə qayıt" else "Oyna", primary = true, showPlayIcon = true, enabled = onPlay != null,
+                    modifier = Modifier.weight(1f), onClick = { onPlay?.invoke() })
+                HomeButton("Şəhərim", R.drawable.ui_city, enabled = false,
+                    modifier = Modifier.weight(1f).heightIn(min = GameTokens.Target + GameTokens.Gap), onClick = { onPage("city") })
+            }
+        } else {
+            HomeButton(if (active) "Cəhdə qayıt" else "Oyna", primary = true, showPlayIcon = true, enabled = onPlay != null, onClick = { onPlay?.invoke() })
+            if (tablet) HomeButton("Şəhərim", R.drawable.ui_city, enabled = false, onClick = { onPage("city") })
+        }
         if (androidx.compose.ui.platform.LocalDensity.current.fontScale > 1f) {
             HomeButton("Kolleksiya", R.drawable.ui_medal, onClick = { onPage("collection") })
             HomeButton("Nailiyyətlər", R.drawable.ui_trophy, onClick = { onPage("achievements") })
@@ -127,10 +163,21 @@ private fun HomeIcon(icon: Int, description: String? = null) = Image(painterReso
     Modifier.size(GameTokens.Gap * 2), contentScale = ContentScale.Fit)
 
 @Composable
-private fun HomeButton(label: String, icon: Int? = null, primary: Boolean = false, enabled: Boolean = true,
+private fun HomeButton(label: String, icon: Int? = null, primary: Boolean = false, showPlayIcon: Boolean = false, enabled: Boolean = true,
                        modifier: Modifier = Modifier.fillMaxWidth(), onClick: () -> Unit) {
     Button(onClick, modifier = modifier.heightIn(min = if (primary) GameTokens.Target + GameTokens.Gap else GameTokens.Target)
-            .background(Brush.verticalGradient(if (primary) listOf(GameTokens.Accent, GameTokens.Accent) else listOf(GameTokens.Raised, GameTokens.Surface)), RoundedCornerShape(GameTokens.CardRadius)),
+            .background(Brush.verticalGradient(if (primary) listOf(GameTokens.Accent, GameTokens.Accent) else listOf(GameTokens.Raised, GameTokens.Surface)), RoundedCornerShape(GameTokens.CardRadius))
+            .drawWithContent {
+                drawContent()
+                if (primary && enabled) {
+                    val inset = GameTokens.Hairline.toPx() * 3
+                    drawRoundRect(brush = Brush.verticalGradient(listOf(GameTokens.Text, GameTokens.Accent)),
+                        topLeft = Offset(inset, inset),
+                        size = androidx.compose.ui.geometry.Size(size.width - inset * 2, size.height - inset * 2),
+                        cornerRadius = androidx.compose.ui.geometry.CornerRadius(GameTokens.CardRadius.toPx() - inset),
+                        style = Stroke(GameTokens.Hairline.toPx()))
+                }
+            },
         enabled = enabled, shape = RoundedCornerShape(GameTokens.CardRadius),
         border = BorderStroke(GameTokens.Hairline, if (primary) GameTokens.Text else GameTokens.Raised),
         colors = ButtonDefaults.buttonColors(containerColor = androidx.compose.ui.graphics.Color.Transparent,
@@ -138,7 +185,7 @@ private fun HomeButton(label: String, icon: Int? = null, primary: Boolean = fals
         Row(verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(GameTokens.Small, Alignment.CenterHorizontally)) {
             if (icon != null) HomeIcon(icon)
-            if (primary) Text("▶", fontSize = GameTokens.Title)
+            if (showPlayIcon) Text("▶", fontSize = GameTokens.Title)
             Text(label, fontSize = if (primary) GameTokens.Score else GameTokens.Body, fontWeight = FontWeight.Bold)
         }
     }

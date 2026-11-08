@@ -29,3 +29,23 @@
 - Son kodun 1080×2400 @420 font1.0/1.5; 1280×800 və 800×1280 @160 font1.0; 1600×900 @240 font1.5 görüntülərinə baxıldı. Normal fixture-də mətn və idarəetmələr kəsilmir. Font1.5-də köməkçi düymələr ayrı sətirlərdədir. Bu beş nümunə bütün mətn/data ölçülərinin yoxlanması deyil.
 - İlk avtomatik batch splash ekranını çox tez çəkmişdi; həmin fayllar `am start -W` və render gözləməsi ilə yenidən çəkilib əvəz edildi. Emulator override-ları reset edildi, font1.0-a qaytarıldı.
 - Yan-yana phone/tablet/portrait comparison faylları hazırlanıb. Qalan fərqlər yuxarıdadır; tam vizual PASS deyil.
+
+## Davam düzəlişi — 8 noyabr 2026
+
+- Yoxlanmış diff: `3115e88` üzərində HomeScreen.kt və OnlineGame.kt düzəlişi; branch `feat/home-design-alignment`. Branch hələ açıqdır; bütün online baza bu lokal review-un əhatəsi deyil.
+- İstifadəçi sistem şriftini razılaşdırılmış istisna kimi saxladı. Şrift faylı axtarışı artıq bloklayıcı deyil; digər vizual fərqlər avtomatik təsdiqlənmir.
+- Başlıqdakı font chevron-ları təsdiqlənmiş nümunədəki iki ayrı şüa ilə əvəz edildi. Mövcud Accent və ölçü tokenləri istifadə olunur.
+- Portret medium/expanded pəncərədə Oyna/Şəhərim yan-yana və eyni minimum hündürlükdədir; fontScale > 1 zamanı ardıcıl qalır. Şəhər ikonu ui_city oldu.
+- Əsas düyməyə mövcud Text/Accent tokenləri ilə daxili işıq kənarı əlavə edildi. Bu PNG-dəki bütün işıq/bevel piksellərinin eyniliyi iddiası deyil.
+- Home loading/error da eyni adaptiv çərçivəyə keçirildi; snapshot yoxdursa balans `—`, gameplay/statistics göstərilmir, status/retry saxlanır. Server authority və callback-lər dəyişmir.
+- Lokal review tapıntısı: ilk error/loading renderində Yenilə düyməsində oyun üçbucağı görünürdü; play işarəsi ayrıca parametrə çıxarılıb yalnız gameplay girişində saxlandı.
+- Backend müqaviləsi/domain/schema dəyişməyib; bu təqdimat düzəlişi üçün AppBackend dəyişikliyi tələb olunmur. Tam şəhər implementasiyası üçün bu nəticə keçərli deyil.
+
+### Fokuslu yoxlama və məhdudiyyətlər
+
+- `:app:installDebug --offline` PASS; `/tmp/wobbrik-home-followup-build.log`. `git diff --check` PASS. Lokal CI deyil.
+- Kontrast yenidən ölçüldü: Text/Surface 13.00, Muted/Surface 8.22, Background/Accent 11.45 PASS; palitra dəyişməyib.
+- `home-design-alignment/final-{phone,portrait,landscape,large,error,loading}.png` renderlərinə baxıldı. Ready: 1080×2400 @420 font1.0, 800×1280 @160 font1.0/1.5, 1280×800 @160 font1.0. Error: telefon; loading: geniş planşet. Override-lar reset, əvvəlki font bərpa edildi.
+- Mobile-primary-v2, tablet portrait və primary-landscape ilə müqayisə: işarə və portret CTA düzülüşü düzəlib; sistem fontu təsdiqlənmiş istisnadır. Runtime asset detalları, dəqiq nisbətlər, ikon miqyası, fon/işıq effektləri və əlavə XP sətrinin kart hündürlüyünə təsiri hələ birəbir deyil. Tam dizayn qəbulu verilmir.
+- Böyük font renderində aşağı köməkçi məzmun scroll altındadır; bu capture scroll sonunu yoxlamır. Yeni lokal/real cihaz/TalkBack/canlı sync-start-finish yoxlaması aparılmayıb.
+- Şəhər/İnventar/Bazar bağlıdır; tam placement scope-u saxlanır və yerinə yetirilməyib. Main merge/CI/push/deploy yoxdur.
