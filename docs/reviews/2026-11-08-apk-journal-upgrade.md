@@ -1,0 +1,34 @@
+# Disposable APK upgrade and incompatible journal — 8 November 2026
+
+Branch: `docs/apk-journal-upgrade-validation`; reviewed application source `b9a8a75` and archived old source `e0af061`. Documentation/evidence unit; no production, UI, API or schema edits. No main merge, CI, push or deploy.
+
+## Setup and provenance
+
+Read current handoff, historical-journal review and PLAN §3.4. Created exclusive `JournalDisposable` AVD at ignored `output/apk-journal-live/avd`, serial `emulator-5584`, Android 34 arm64, 1080×2400 / 420 dpi. It has a fresh independent 2 GiB ext4 data image: default emulator allocation failed its disk-space preflight; copying the sparse initial image did not boot correctly, so only this disposable image was recreated with the SDK mkfs.ext4. No retained AVD data copied or erased. Enabled/setup/unlocked only this guest and connected AndroidWifi; adb root used only here for its Wi-Fi shell command. No tokens injected into Firebase SDK: old APK created its own real anonymous Firebase identity.
+
+Old APK built from `git archive e0af061` with unchanged production sources, existing excluded Firebase config and debug-only localhost trust overlay. Old journal serializer/wire bytes compared exactly with that commit. APK SHA-256 `9b0f15e18b86cd7b43c6f5d7dcc6319a0926ea339e91e173cdfe9355a99e995b`, versionCode 1. Earlier attempted archive `a7dca49` failed compilation (ambiguous super.onCreate); no passing build claimed for it.
+
+Current APK built from `b9a8a75`, with ignored init script setting only validation versionCode 2/versionName and existing debug localhost overlay. SHA-256 `69c40db6c3ad9f72fd13b0f70b30f02f4547d694671dce161915efbf9527fd66`. Both successful APK builds PASS; old build 1m28s, version-2 build 22s. First installed current same-version APK without launching (pending equality PASS), then installed versionCode 2 using `adb -s emulator-5584 install -r`; package manager confirmed code 2. Pending bytes identical after both replacements. No uninstall/clear-data.
+
+Dedicated loopback TLS proxy 18449 forwards to existing independently verified archived guest backend 18084/DB 55449 `wobbrik_account_unlock` (79bfc12); only disposable serial reverse 18443→18449. Existing A/B account records retained unchanged; fresh guest adds one account, attempt and operation. This reuses an isolated runtime/database, not the retained checkpoint runtime/database. Proxy forwards real Firebase tokens unchanged and logs no authorization headers. It drops the old START response only after backend HTTP 200. No backend source/build/restart/schema/contract changes needed; current backend owner has unrelated dirty DailyPlate work, left untouched.
+
+## Results
+
+1. Old APK real UI Oyna sends START; backend commits once, response is suppressed. Force-stop captures a real Android AtomicFile 287-byte pending journal, not a synthetic historical fixture.
+2. In-place current APK/versionCode 2 recovery sends identical operation ID, expected revision 0, route, full envelope and request SHA-256; HTTP 200 exact dedup receipt → sync/catalog → 35-byte empty journal tombstone. All 22 domain/wallet tables exactly equal to post-commit/pre-upgrade snapshot. No extra attempt, revision, ledger, reward or floor. Restored UI eventually shows Cəhdə qayıt; no resume/drop performed.
+3. In the stopped disposable app only, mutate original journal storage version 1→2, rules wobbrik-v1→v9 and engine structural-v1→v9 separately (equal-length mutations). These are deliberately unsupported inputs, not claimed historical release formats. For each: launch, wait, capture real render, verify identical invalid bytes and zero additional proxy requests; tap visible Yenilə, wait, verify identical bytes, zero additional requests and unchanged 22-table DB again. All six startup/retry assertions PASS. Gameplay entry is absent on the error home screen.
+4. Operator restores original valid fixture only in disposable app; third identical START dedup replay drains to tombstone. This is a positive test control, not an automatic corruption migration or end-user repair flow.
+
+## Finding and acceptance limits
+
+**Open UX finding:** all unsupported journal variants are rendered as generic “Bağlantı yoxdur” with “Yenilə”. Retry safely preserves bytes and remains blocked, but supplies no version/storage explanation or actionable recovery. Therefore safe rejection PASS; informative unsupported-state UX acceptance remains OPEN. No UI alternative implemented without design approval.
+
+Viewed old connected home, all three error renders and final Ready home. Portrait phone only; no visual styling change/contrast change, design parity, tablet/orientation/font/inset/accessibility or physical-device acceptance claimed. Real adapter read/write and force-stop/app replacement exercised; arbitrary power-loss/fsync interruption or `.bak`/`.new` crash matrix not proven. APK scenario covers e0af061 START only; b6a4f9b START/CHECKPOINT/FINISH remain the historical JVM evidence, and legacy opaque snapshot modern-backend acceptance remains open. No unit suite rerun for documentation-only changes; no branch CI.
+
+Private evidence: `output/apk-journal-live/` old source/build logs/APKs, version override, own AVD/proxy, request log, pending bytes/tars, per-variant startup/retry tars/screens/DB snapshots, final verification and retained before/after evidence. Keep credentials/config/data images private and ignored. Retained emulator 5582 receives read-only tar/reverse capture only; emulator 5554 receives no commands. No retained device input/install/force-stop/sign-out, journal replacement, reverse change or backend control.
+
+## Final preservation and local review
+
+Final repeatable-read retained checkpoint DB snapshot equals initial snapshot across all 22 tables; retained attempt remains active sequence/floors 2. Every retained no_backup file payload and reverse mapping equals initial capture. Existing A/B rows in the reusable disposable DB are unchanged; only the three new-guest rows described above were added. After valid-fixture control, all 22 tables equal the first committed START baseline and the journal is an empty tombstone. Final proxy log: eight requests total, three identical successful START envelopes, no request during unsupported startup/retry cases. Own 5584 emulator and own TLS proxy were stopped after final capture; its data/evidence retained privately. Existing backend runtimes and original emulators were left running.
+
+Local review covers only this review, current handoff prepend and PLAN evidence note: claims checked against private snapshots/request/journal comparisons and viewed renders; no acceptance checkbox overclaim. `git diff --check` PASS. CI not run on branch; no merge/push/deploy. User-facing storage/version error classification is explicitly deferred to a separately approved UI unit.
