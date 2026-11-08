@@ -8,7 +8,11 @@ Bu sənəd ilkin müqavilə auditini və sonrakı vahidlərin vəziyyətini saxl
 bunları nullable rekord və BigInteger intervalı kimi oxuyur. Hər iki vahid ayrıca
 review edilib tarix saxlanılmaqla öz main branch-inə merge olunub. Backend race/real
 PostgreSQL və Wobbrik main lokal CI keçib; review qeydlərinə bax.
-UI çatışmazlıqları hələ implementasiya edilməyib. Online iş
+8 noyabr 2026: home rekord və XP interval barı `feat/home-record-xp-ui` vahidində
+server recovery-yə bağlandı; telefon/tablet fixture renderləri müqayisə edildi.
+Tam dizayn uyğunluğu və canlı end-to-end qəbul açıqdır;
+`docs/reviews/2026-11-08-home-record-xp-ui.md` qeydinə bax. Digər
+UI çatışmazlıqları açıqdır. Online iş
 `feat/stage-three-online-progression` branch-ində qorunur və main-ə merge edilməyib.
 Aşağıdakı ilkin tapıntılarda “növbəti implementasiya” deyilən müqavilə işi artıq
 birinci vahiddə görülüb; UI və digər mərhələlər açıqdır.
