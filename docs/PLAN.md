@@ -14,7 +14,9 @@ Son yenilənmə: **8 noyabr 2026**.
 
 **İş qaydası:** hər hissə ayrıca branch → lokal review → Aladdin OK verəndən sonra main-ə merge → lokal CI yalnız main-də. `google-services.json`, `local.properties`, `output/`, log və açarlar commit olunmur. Push/deploy/Console ayrıca göstərişlə.
 
-**Hazırkı yer (8 noyabr):** mərhələ 3 (onlayn) davam edir; paralel olaraq home ekranı dizayna uyğunlaşdırılır (`feat/home-design-alignment`, main-də deyil). Onlayn ekranlar `feat/stage-three-online-progression` / `feat/stage-three-online-screens` branch-lərindədir, main-ə merge olunmayıb.
+**8 noyabr merge yeniləməsi:** istifadəçinin ayrıca OK-u ilə `feat/city-footprint-placement` və onun əvvəlki branch tarixçəsi main-ə birləşdirildi (Wobbrik `cad922b`, AppBackend `1eec2ef`). Aşağıdakı “main-də deyil” qeydləri merge-dən əvvəlki tarixi statusdur. Wobbrik lokal CI və backend lokal yoxlamaları keçdi; mərhələ 3/4 qəbulu və mobil placement inteqrasiyası hələ açıqdır. Push/deploy edilməyib.
+
+**Merge-dən əvvəlki yer (8 noyabr):** mərhələ 3 (onlayn) davam edir; paralel olaraq home ekranı dizayna uyğunlaşdırılır (`feat/home-design-alignment`, main-də deyil). Onlayn ekranlar `feat/stage-three-online-progression` / `feat/stage-three-online-screens` branch-lərindədir, main-ə merge olunmayıb.
 
 Bu sənəd layihənin ümumi mərhələlərini və hazırkı irəliləyişi göstərir.
 `[x]` — göstərilən konkret iş tamamlanıb; `[ ]` — hələ tamamlanmayıb.
@@ -108,7 +110,7 @@ cihazda və canlı serverdə yoxlama aparılmış sayılmır.
 - [ ] Şəhərin təsdiqlənmiş plan və həcmli görünüşləri həyata keçirilsin.
 
 Serverdə mövcud API-lər bu mobil mərhələnin tamamlanması demək deyil.
-Yerləşdirmə main/mobil axında bağlıdır; backend feature branch-də typed geometry ilə aktivdir. Opaque checkpoint-dən etibarlı həndəsə uydurulmur.
+Backend main-də yerləşdirmə typed geometry ilə aktivdir; mobil placement axını hələ inteqrasiya edilməyib. Opaque checkpoint-dən etibarlı həndəsə uydurulmur.
 
 ## 5. Bazar və rekordlar — yekun Android axını tamamlanmayıb
 
