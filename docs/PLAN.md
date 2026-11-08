@@ -1,12 +1,26 @@
-# Wobbrik — ümumi plan və tamamlanma siyahısı
+# Wobbrik — vahid plan (PLAN.md)
 
-Son yenilənmə: **6 noyabr 2026**.
+Son yenilənmə: **8 noyabr 2026**.
+
+**Bu, layihənin yeganə işlək planıdır.** Mərhələ sırası və vəziyyəti yalnız burada saxlanılır.
+- Oyun qaydaları, kataloq və balans: [game-plan.md](game-plan.md) (mərhələ siyahısı yoxdur).
+- Texniki arxitektura, modullar, API/DB müqaviləsi: [kotlin-compose-plan.md](kotlin-compose-plan.md).
+- Köhnə mərhələ bölgüləri və Unity/texnologiya seçimi tarixi: [archive/plan-history.md](archive/plan-history.md).
+- Növbəti konkret addım: [context/current-task.md](context/current-task.md).
+
+**Stack:** Android-only, Kotlin + Compose, minSdk 24 / targetSdk 36, Firebase Spark (yalnız Auth, Crashlytics, Remote Config; Blaze/Cloud Functions yoxdur), AppBackend (Go + PostgreSQL) pul və irəliləyişin əsas mənbəyi. Paket: `com.aladdin.wobbrik`.
+
+**Dizayn mənbələri (məcburi):** `docs/design/` — `mobile-v1`, `tablet-v1`, `tablet-rail-icons-v1`, `game-tap-v2`, `game-assets-v1`, `account-assets-v1`, `city-plan.png`, `city-view.png`. Dizayn uydurulmur; çatışmayan dizayn gözlənilir.
+
+**İş qaydası:** hər hissə ayrıca branch → lokal review → Aladdin OK verəndən sonra main-ə merge → lokal CI yalnız main-də. `google-services.json`, `local.properties`, `output/`, log və açarlar commit olunmur. Push/deploy/Console ayrıca göstərişlə.
+
+**Hazırkı yer (8 noyabr):** mərhələ 3 (onlayn) davam edir; paralel olaraq home ekranı dizayna uyğunlaşdırılır (`feat/home-design-alignment`, main-də deyil). Onlayn ekranlar `feat/stage-three-online-progression` / `feat/stage-three-online-screens` branch-lərindədir, main-ə merge olunmayıb.
 
 Bu sənəd layihənin ümumi mərhələlərini və hazırkı irəliləyişi göstərir.
 `[x]` — göstərilən konkret iş tamamlanıb; `[ ]` — hələ tamamlanmayıb.
 Bir alt işin tamamlanması bütün mərhələnin və ya yekun oyunun hazır olması demək deyil.
 
-**Hazırkı yerimiz: mərhələ 3, addım 3.4 — real oyunun onlayn axına qoşulması.**
+**6 noyabr qeydi: mərhələ 3, addım 3.4 — real oyunun onlayn axına qoşulması.**
 Ekranda görünən oyun hələ ayrıca offline məşqdir. Onlayn hostun input-u kilidlidir.
 
 ## 1. Texniki təməl və müqavilə — əsas hissəsi hazırdır
@@ -132,7 +146,7 @@ Bu qərarlar özbaşına seçilmir. Onlayn restart/abandon hazırda heç bir əm
 
 Yeni chat üçün prompt:
 
-> `docs/context/current-task.md` və `docs/project-progress.md` oxu. 3.4-cü addımı —
+> `docs/context/current-task.md` və `docs/PLAN.md` oxu. 3.4-cü addımı —
 > AcceptedEngineHost və AcceptedAttemptCommands əsasında onlayn simulyasiya və eniş
 > təsdiqi dövrünü qur. Təhlükəsiz axın yoxlanana qədər input kilidli, restart/abandon
 > açıq qalsın. Tamamlanan işlərə uyğun checklist-i yenilə.
