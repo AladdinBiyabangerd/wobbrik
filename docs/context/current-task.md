@@ -1,5 +1,14 @@
 # Stage 3 live validation handoff — 8 November 2026
 
+## Latest authorized continuation — isolated build ready
+- Completed: committed prior evidence/provenance docs as `b3bb82a`; archived immutable AppBackend `25a1967` outside owner checkout; built twice with Go 1.27.3 and identical binary hash. Started separate `Pixel_6_34` at emulator-5582 in read-only/no-snapshot-save mode; boot completed. User authorizes this project's separate emulator and continued local checks; no merge/deploy.
+- Current state: branch `docs/backend-provenance-next-live-check`. Ignored `output/checkpoint-live-isolated/{source.tar,source/,server,server-repeat,manifest.json}`. Binary SHA-256 `7f400514baa2dc89d7167b68c8461a45e356add9c8fd19035ebbbfb0cf1f8278`; archive SHA-256 `286f45e8469cc510cd6742243acacd2dd51bbb6338c8f83eda9b74ac8056feac`. Emulator session 27647 retained. No isolated server/DB/TLS route or APK install yet.
+- Decisions: use clean immutable `25a1967` for future isolated verification; new manifest does not prove historical dirty build source. Owner AppBackend clean `c8e7d7b`, PID 42589, existing DB/TLS and emulator-5554 untouched. No synthetic gameplay/DB grants.
+- Remaining work: separate runtime route/DB and actual checkpoint post-commit response loss → restart → exact replay/reconciliation. Other stage-three items unchanged.
+- Relevant files: `docs/reviews/2026-11-08-backend-provenance-next-live-check.md` continuation; PLAN §3.4; existing ignored stage-three-live config/certificate and finish-cosmetics APK; AcceptedAttemptCommands.
+- Checks performed: two successful identical builds, binary metadata/hash, emulator AVD/boot status, original readyz PASS, owner Git status, docs diff review/whitespace. No new live gameplay, test suite, CI, merge/push/deploy or visual acceptance.
+- Exact next step: new bounded chat rechecks this handoff/hash/emulator ownership, creates isolated disposable DB/backend/TLS fault route, installs final APK only on emulator-5582 preserving data, then executes the selected checkpoint scenario with real UI and exact journal/request/DB evidence. Do not replace original backend or change emulator-5554. Context warning issued before this larger live unit.
+
 ## Latest provenance check and next live scenario — 8 November 2026
 - Completed: read PLAN §3.4 and prior live evidence; read-only process/executable/hash/Go metadata, AppBackend Git and certificate-verified readiness checks. Selected checkpoint post-commit response loss → process death → exact replay/reconciliation as the next remaining live scenario; not executed.
 - Current state: Wobbrik branch `docs/backend-provenance-next-live-check`, documentation only. PID 42589 still runs ignored `output/stage-three-live/server`, SHA-256 `ef8bbab51b01369ff823e52c6d5b326c41dffcef54e9bf0a7306700d7e0edefa`; embedded revision `25a1967`, dirty, Go 1.27.0. AppBackend separately clean at `c8e7d7b` on `feat/dailyplate-food-search`; local Go 1.27.3.

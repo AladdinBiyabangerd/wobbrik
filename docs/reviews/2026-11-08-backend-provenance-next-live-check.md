@@ -25,3 +25,17 @@ Not covered: old-version journals, nonfree unlock/account isolation, Google link
 ## Local review/checks
 
 Reviewed the documentation delta for unsupported source/live claims and scope violations; `git diff --check` passed after edits. No build/test suite or local CI: no implementation changed and CI is main-only. Exact old dirty-source provenance remains unresolved; recovering its build-time snapshot/manifest or a reproducible matching artifact is required to close it.
+
+## Authorized continuation — isolated build prepared
+
+User requested committing the documentation and proceeding, allowing another emulator for this project. Initial documentation/evidence commit: `b3bb82a`.
+
+Prepared an isolated source archive of AppBackend `25a19676495d1fee13c9655ee2422e702722c939`, deliberately excluding the unrelated DailyPlate commit and owner working tree. Archive SHA-256: `286f45e8469cc510cd6742243acacd2dd51bbb6338c8f83eda9b74ac8056feac`. Ignored directory: `output/checkpoint-live-isolated/`; manifest records revision, archive hash, toolchain, build command and binary hash. Build command from `source/`: `go build -trimpath -buildvcs=false -o ../server ./cmd/server`, Go 1.27.3 darwin/arm64, CGO enabled. Revision is linked through the archive/manifest, not embedded Git metadata. Two successive builds passed and produced identical SHA-256 `7f400514baa2dc89d7167b68c8461a45e356add9c8fd19035ebbbfb0cf1f8278`. This verifies repeat-build equality in the current environment, not cross-machine reproducibility or the source of the historical dirty binary.
+
+Started `Pixel_6_34` on `emulator-5582` with `-read-only -no-snapshot-save -no-boot-anim -no-audio`; boot completed (`sys.boot_completed=1`) and AVD name verified. Emulator process is retained in execution session 27647. This is a separate disposable overlay; no input/install/data reset or reverse route configured. Existing `Pixel_6` on emulator-5554 untouched.
+
+Original backend PID 42589 still runs unchanged and existing TLS readyz passes. AppBackend owner checkout remains clean at `c8e7d7b`; no backend source/branch/index/process replacement or shared DB mutation. No isolated backend process/DB/TLS route started yet. No live checkpoint scenario or test suite executed; no merge/push/deploy/CI.
+
+Next bounded unit: recheck emulator-5582 ownership and build hash, create a separate disposable PostgreSQL database and backend listener/TLS fault route using this archived source and existing local Firebase project configuration without exposing credentials. Install the existing final APK only on emulator-5582, retaining any existing app data; inspect identity/journal before gameplay. Execute the selected real checkpoint post-commit response-loss/restart/exact-replay scenario. Never reroute emulator-5554 or replace PID 42589. Any absent active attempt on the isolated account is established through actual app flow, not synthetic commands or DB grants.
+
+Documentation delta reviewed and `git diff --check` passed. No visual implementation/render acceptance claimed. Context handoff required before beginning the larger isolated runtime/live unit.
