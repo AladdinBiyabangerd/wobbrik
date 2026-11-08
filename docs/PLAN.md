@@ -101,6 +101,7 @@ cihazda və canlı serverdə yoxlama aparılmış sayılmır.
 - [ ] İnventar, hissə seçimi və bina redaktəsi serverlə inteqrasiya edilsin.
 - [ ] Ərazi alışları, şəhər/inventar keçidləri və sakin göstəriciləri qoşulsun.
 - [ ] Yerləşdirmə üçün həndəsə, ölçü və server yoxlama müqaviləsi tamamlansın.
+- [x] İlk pure həndəsə nüvəsi: integer tick, bina proyeksiyası, quarter-turn, pairwise boşluq və torpaq union containment (`AppBackend` branch `feat/city-geometry-kernel`, `6e949be`; API-yə qoşulmayıb və main-də deyil).
 - [ ] Şəhərin təsdiqlənmiş plan və həcmli görünüşləri həyata keçirilsin.
 
 Serverdə mövcud API-lər bu mobil mərhələnin tamamlanması demək deyil.

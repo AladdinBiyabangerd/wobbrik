@@ -165,7 +165,15 @@ AppBackend-də `GET /v1/apps/wobbrik/game/leaderboard` ümumi və cari Bakı hə
 
 İstifadəçi şəhər üçün yuxarıdan ikiölçülü x/y planını və eyni şəhərin həcmli görünüşünü seçib; dəqiq sahə, boşluq və dekorasiya ölçülərinin açıq saxlanmasını, yalnız onlardan asılı olmayan server hissəsinin tamamlanmasını istəyib. AppBackend `GET /game/city` ilə hesab üzrə şəhər üzvlüyünü, revision-u və bütün yerləşmiş binaların sakin cəmini verir; cəm overflow-suz dəqiq onluq string-dir. `POST /game/city/buildings/return` bina mülkiyyətini/hissələrini və aktiv elanı saxlayaraq onu inventara qaytarır; refund/XP vermir. Migration 010 şəhər üzvlüyünün real sahibə aidliyini və bina silinəndə təmizlənməsini qoruyur.
 
-Yerləşdirmə hələ aktiv deyil (`placement_enabled:false`). Əyri binanın x/y sahəsinə çevrilməsi, koordinat vahidi, ərazi formaları, təhlükəsiz boşluq, dönmə və dekorasiya footprint-ləri seçilməyib. Opaque structural-v1 snapshot-dan həndəsə uydurulmur. Dəqiq hazır müqavilə və qalan həndəsə tələbləri `AppBackend/docs/wobbrik-game-api.md`-nin şəhər bölməsindədir; Android host/oyun/SKU/Console/deploy bu vahidə daxil deyil.
+Yerləşdirmə hələ aktiv deyil (`placement_enabled:false`). Aşağıdakı 8 noyabr həndəsə qərarı əvvəlki açıq koordinat/boşluq/dönmə statusunu əvəz edir; ərazi və dekorasiya footprint-ləri hələ tamamlanmayıb. Opaque structural-v1 snapshot-dan həndəsə uydurulmur. Dəqiq hazır API müqaviləsi `AppBackend/docs/wobbrik-game-api.md`-nin şəhər bölməsindədir.
+
+### Şəhər həndəsəsinin ilk domain vahidi — 8 noyabr 2026
+
+`city-geometry-v1`: bir engine vahidi 1.000 integer tick-dir; standart mərtəbə eni/dərinliyi 100.000/100.000 tick, obyektlər arasında minimum boşluq 10.000 tick-dir. En mövcud engine 100 vahidinə uyğundur; dərinlik və boşluq icazə verilmiş ilkin oyun parametrləridir, ölçülmüş balans deyil. Koordinatlar ±1.000.000.000 tick daxilindədir; bu texniki sərhəddir, torpaq hüququ deyil.
+
+Saxlanmış mərtəbələr eyni dərinlikdədir, x ofsetləri qorunur; ardıcıl mərtəbələr en boyunca müsbət üst-üstə düşməlidir. Hamısının yerə proyeksiyasının dəqiq union-u bu modeldə düzbucaqlıdır. Origin təməl mərkəzidir, əyri binanı mərkəzləşdirmək onun ofsetini itirməməlidir. Dinamik sway/failed/falling mərtəbə footprint-ə daxil deyil. Dönmə təməl ətrafında saat əqrəbinin əksinə 0/90/180/270°; sonra integer x/y köçürmədir. Half-open sərhədlər toxunanda overlap yoxdur; boşluq bir dəfə pairwise, axis-aligned/Chebyshev məsafəsi ilə tətbiq edilir, məhz həddə bərabər boşluq keçir. Torpağın kənarında əlavə clearance nəzərdə tutulmur; footprint tam sahib olunan union daxilində olmalıdır. Torpaq düzbucaqlıların union-udur; bounding box və yalnız künclərin yoxlanması kifayət deyil.
+
+AppBackend `feat/city-geometry-kernel` / `6e949be` bu pure hesablamaları testlərlə saxlayır. Hələ API/DB-yə qoşulmayıb, typed checkpoint/provenance və Double→tick qəbul/quantization müqaviləsi tamamlanmayıb; legacy snapshot inventory-only qalır. Heç bir placement enable, wallet/schema dəyişikliyi və ya Android renderer işi görülməyib. Torpaq/12 dekor ölçüləri, typed məlumatın serverdə qəbulu, atomik əmrlər və mobil inteqrasiya növbəti vahidlərdir. Vəziyyət yalnız PLAN.md və aktiv handoff-da izlənir.
 
 ## 6. Mərhələlər
 
