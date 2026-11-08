@@ -33,6 +33,9 @@ import androidx.compose.ui.text.font.FontWeight
 import appbackend.wobbrik.game.AuthenticatedRecoveryOwner
 import com.aladdin.wobbrik.engine.*
 import kotlinx.coroutines.launch
+import java.math.BigInteger
+import java.math.BigDecimal
+import java.math.MathContext
 
 /** UI reads server recovery; only the application host may own accepted physics. */
 @Composable
@@ -113,6 +116,7 @@ internal fun OnlineGame(app: WobbrikApplication) {
         linkMessage = linkMessage)
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun AccountScreen(
     page: String,
@@ -164,10 +168,36 @@ internal fun AccountScreen(
                     if (snapshot != null) Surface(shape = RoundedCornerShape(GameTokens.CardRadius), color = GameTokens.Surface,
                         border = BorderStroke(GameTokens.Hairline, GameTokens.Raised)) {
                         Column(Modifier.fillMaxWidth().padding(GameTokens.Gap), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-                                ArtIcon(R.drawable.ui_level)
-                                Text(snapshot?.account?.let { "Səviyyə ${it.level}" } ?: "Səviyyə —", color = GameTokens.Text, fontWeight = FontWeight.Bold)
-                                Text(snapshot?.let { "${it.xp} XP" } ?: "XP —", color = GameTokens.Muted)
+                            FlowRow(horizontalArrangement = Arrangement.spacedBy(GameTokens.Gap),
+                                verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+                                Row(verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+                                    ArtIcon(R.drawable.ui_level)
+                                    Text("Səviyyə ${snapshot.account?.level ?: "—"}",
+                                        color = GameTokens.Text, fontWeight = FontWeight.Bold)
+                                }
+                                if (page == "home") Row(verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+                                    ArtIcon(R.drawable.ui_crown)
+                                    Text("Rekord ${snapshot.account?.bestFloors ?: "—"}",
+                                        color = GameTokens.Text, fontWeight = FontWeight.Bold)
+                                }
+                            }
+                            val interval = snapshot.account?.xpInterval
+                            if (page != "home") {
+                                Text("${snapshot.xp} XP", color = GameTokens.Muted)
+                            } else if (interval != null) {
+                                // Subtract as integers before converting only the drawing fraction.
+                                val earned = BigInteger.valueOf(snapshot.xp).subtract(interval.start)
+                                val required = interval.next.subtract(interval.start)
+                                val fraction = BigDecimal(earned).divide(BigDecimal(required), MathContext.DECIMAL64)
+                                    .toFloat().coerceIn(0f, 1f)
+                                Text("$earned / $required XP", color = GameTokens.Muted)
+                                LinearProgressIndicator(progress = { fraction },
+                                    modifier = Modifier.fillMaxWidth(), color = GameTokens.Accent,
+                                    trackColor = GameTokens.Background)
+                            } else {
+                                Text("XP —", color = GameTokens.Muted)
                             }
                             if (page == "account") {
                                 Text("Nailiyyətlər", color = GameTokens.Text, fontWeight = FontWeight.Bold)
