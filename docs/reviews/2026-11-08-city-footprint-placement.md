@@ -7,3 +7,11 @@ PLAN records only the completed backend subunit, preserving stage 3/4 incomplete
 Checks: docs diff review and diff --check PASS. Backend disposable PostgreSQL full race suite PASS; after final deletion-coverage/index additions focused city suite PASS; go vet and server build PASS. These backend checks do not establish Android integration. No Android build, UI render, device/network test or phase acceptance in this documentation unit.
 
 Main merge still needs separate Aladdin OK. No main merge, local main CI, push, remote CI, Console or deploy. Mobile placement DTO/renderer/navigation remains unimplemented; approved design must be presented before a future UI implementation. Stage 3 live recovery/retry/finish, account verification and Room/outbox remain open.
+
+## Authorized main merge — 8 November 2026
+
+User authorized history-preserving merges of both feature branches, including inherited history, with local checks and no push/deploy. Wobbrik main merge `cad922b` preserves feature tip `d35465d`, contract commit `8c0a958` and inherited online/home/typed-geometry commits. Backend counterpart main merge is `1eec2ef`. No conflicts or code fixes were required.
+
+`./scripts/local-ci.sh` on main `cad922b` in `/Users/mac/My Workspace/Wobbrik-rail-icons` PASS: BUILD SUCCESSFUL in 1m 52s; 103 tasks (49 executed, 54 up-to-date), including tests, lint and debug assembly. Main is checked out in this existing worktree; the original Wobbrik worktree remains on its feature branch. Log: `/private/tmp/wobbrik-placement-main-ci.log`. Backend main full real-PostgreSQL race suite, vet and build PASS (see counterpart review).
+
+This is merge/build validation, not a fresh visual/device/live-account acceptance. No UI was edited in this unit and no new render was performed. Android placement client, stage 3 live recovery/finish and Room/outbox remain open. No push/deploy/remote CI. Documentation follow-up is reviewed with diff --check and merged separately; no code changes after the passing checks.
