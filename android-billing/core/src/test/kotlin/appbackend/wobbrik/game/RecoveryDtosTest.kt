@@ -12,6 +12,18 @@ class RecoveryDtosTest {
       "attempt":{"attempt_id":"a","rules_version":"wobbrik-v1","engine_version":"wobbrik-structural-v1",
       "sequence":2,"floors":3,"precise":2,"rescues":1,"status":"active","continued":true,"snapshot":{"v":1}}}"""
     private fun fields(extra: String) = body.replace("\"revision\":4", "\"revision\":4,$extra")
+    @Test fun typedRecoveryRequiresMatchingServerProvenance() {
+        val provenance = """"geometry_version":"city-geometry-v1","accepted_geometry":{"geometry":{"version":"city-geometry-v1","centers_x_ticks":[0,1000,2000]},"attempt_id":"a","sequence":2,"operation_id":"cp","rules_version":"wobbrik-v1","engine_version":"wobbrik-structural-v1"},"""
+        val typed = body.replace("\"attempt\":{", "\"attempt\":{$provenance")
+        assertEquals("cp", RecoveryDtos.snapshot(typed).attempt!!.acceptedGeometry!!.operationId)
+        listOf(typed.replace("\"operation_id\":\"cp\"", "\"operation_id\":\"\""),
+            typed.replace("\"sequence\":2,\"operation_id\"", "\"sequence\":1,\"operation_id\""),
+            body.replace("\"attempt\":{", "\"attempt\":{\"geometry_version\":\"city-geometry-v1\","),
+            typed.replace("[0,1000,2000]", "[0,1000]")).forEach {
+            assertThrows(Exception::class.java) { RecoveryDtos.snapshot(it) }
+        }
+    }
+
     @Test fun optionalHomeContractAndLargeIntervals() {
         assertNull(RecoveryDtos.snapshot(body).account!!.bestFloors)
         assertNull(RecoveryDtos.snapshot(body).account!!.xpInterval)

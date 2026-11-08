@@ -19,7 +19,7 @@ class AcceptedAttemptCommands(
             AcceptedAttemptRestore.Result.NoAttempt, is AcceptedAttemptRestore.Result.Finished -> Unit
             else -> error("An accepted active attempt must be reconciled, not restarted")
         }
-        GameplayWire.start(operationId(), snapshot.revision)
+        GameplayWire.start(operationId(), snapshot.revision, appbackend.wobbrik.game.CityFloorGeometry.VERSION)
     }
 
     /** Only a settled landing/terminal proposal with additional floors may be checkpointed. */
@@ -38,7 +38,8 @@ class AcceptedAttemptCommands(
             require(accepted.sequence < Long.MAX_VALUE)
             GameplayWire.checkpoint(operationId(), snapshot.revision, accepted.attemptId, accepted.sequence + 1,
                 next.floors.size.toLong(), next.perfectLandings.toLong(), next.balance.rescues.toLong(),
-                EngineCheckpointCodec.encode(candidate))
+                EngineCheckpointCodec.encode(candidate),
+                snapshot.attempt?.geometryVersion?.let { candidate.cityGeometry() })
         }
 
     /**

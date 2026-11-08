@@ -77,14 +77,17 @@ Ekranda görünən oyun hələ ayrıca offline məşqdir. Onlayn hostun input-u 
 - [x] Bu inteqrasiya üçün 11 yeni test əlavə edilib və lokal CI keçib.
 - [ ] Eyni davranış real server, şəbəkə kəsilməsi və cihazda prosesin bağlanması ilə yoxlanılsın.
 
-### 3.4. Real oyunun onlayn axına qoşulması — NÖVBƏTİ ADDIM
+### 3.4. Real oyunun onlayn axına qoşulması — DAVAM EDİR
 
-- [ ] Onlayn simulyasiya və hər enişdən sonra checkpoint göndərmə dövrü qurulsun.
-- [ ] Təsdiq gözlənərkən, xətada və bərpada simulyasiya/input təhlükəsiz dayansın.
-- [ ] Retry və reconciliation-dan sonra yalnız düzgün qəbul edilmiş vəziyyətdən davam edilsin.
-- [ ] Son eniş → checkpoint → yeni Ready → finish ardıcıllığı yekun oyun axınına qoşulsun.
+- [x] Host settled landing-də checkpoint/finish göndərir; UI OnlineGame ilə bağlıdır
+  (`feat/stage-three-online-progression`, hələ main-də deyil).
+- [x] Təsdiq gözlənərkən (`waiting`), xətada və bərpada input bağlanır.
+- [ ] Retry və reconciliation-dan sonra yalnız düzgün qəbul edilmiş vəziyyətdən davam — fake test var; live device/DB açıqdır.
+- [ ] Son eniş → checkpoint → yeni Ready → finish yekun axında live yoxlanılsın.
 - [ ] Finish üçün kosmetik hissə seçimi kataloq və hesabın açdığı hissələrlə əlaqələndirilsin.
-- [ ] Təhlükəsiz axın yoxlanıldıqdan sonra onlayn input açılsın.
+- [x] Explicit resume/drop ilə onlayn input açılır; restart/abandon hələ bağlıdır.
+- [ ] Google guest link UI yazılıb; live Console web client + provider yoxlaması açıqdır.
+- [ ] Room keş/outbox hələ AtomicFile journal-dadır (plan vahid 3).
 
 **Məhdudiyyət:** hər əmr ayrıca davamlıdır. Checkpoint ilə finish arasındakı niyyət
 avtomatik saxlanmır; həmin arada proses bağlanarsa, bərpadan sonra explicit finish
@@ -98,10 +101,14 @@ cihazda və canlı serverdə yoxlama aparılmış sayılmır.
 - [ ] İnventar, hissə seçimi və bina redaktəsi serverlə inteqrasiya edilsin.
 - [ ] Ərazi alışları, şəhər/inventar keçidləri və sakin göstəriciləri qoşulsun.
 - [ ] Yerləşdirmə üçün həndəsə, ölçü və server yoxlama müqaviləsi tamamlansın.
+- [x] İlk pure həndəsə nüvəsi: integer tick, bina proyeksiyası, quarter-turn, pairwise boşluq və torpaq union containment (`AppBackend` branch `feat/city-geometry-kernel`, `6e949be`; API-yə qoşulmayıb və main-də deyil).
+- [x] Typed geometry/provenance müqaviləsi: yeni cəhd opt-in, engine→tick precision, server checkpoint qəbulu/finish persistence və Android wire/recovery uyğunluğu (`feat/typed-geometry-provenance`, hər iki repo; main-də deyil). Placement bağlı qalır.
+- [x] Torpaq və 12 dekorun ilkin footprint parametrləri istifadəçi tərəfindən təsdiqləndi (8 noyabr; dəqiq konturlar `reviews/2026-11-08-city-footprint-proposal.md`, texniki müqavilə `kotlin-compose-plan.md`). Server/mobile implementasiyası və placement aktivləşməsi deyil.
+- [x] Backend footprint/copy placement vahidi: ayrıca alınmış torpaq hüququndan pulsuz atomik parcel və bina/dekor place/move/replace/return; migration 012, server union/clearance yoxlaması və read/HTTP müqaviləsi (`feat/city-footprint-placement`, main-də deyil). Bu qeyd mobil şəhər axınının və mərhələ 3/4-ün qəbulu deyil.
 - [ ] Şəhərin təsdiqlənmiş plan və həcmli görünüşləri həyata keçirilsin.
 
 Serverdə mövcud API-lər bu mobil mərhələnin tamamlanması demək deyil.
-Yerləşdirmə hazırda bağlıdır; opaque checkpoint-dən etibarlı həndəsə uydurulmur.
+Yerləşdirmə main/mobil axında bağlıdır; backend feature branch-də typed geometry ilə aktivdir. Opaque checkpoint-dən etibarlı həndəsə uydurulmur.
 
 ## 5. Bazar və rekordlar — yekun Android axını tamamlanmayıb
 

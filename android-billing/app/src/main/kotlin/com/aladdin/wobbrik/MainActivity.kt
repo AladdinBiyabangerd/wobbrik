@@ -37,15 +37,8 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.semantics.*
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import com.aladdin.wobbrik.engine.*
 import kotlin.math.max
-
-internal class PracticeSession : ViewModel() {
-    val engine = PracticeEngine()
-    val frameTiming = FrameTiming()
-}
 
 class MainActivity : ComponentActivity() {
     override fun onResume() {
@@ -64,12 +57,11 @@ class MainActivity : ComponentActivity() {
         RemoteConfigInit.start(applicationContext)
         enableEdgeToEdge(statusBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT),
             navigationBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT))
-        val session = ViewModelProvider(this)[PracticeSession::class.java]
         setContent { MaterialTheme(colorScheme = darkColorScheme(
             primary = GameTokens.Accent, onPrimary = GameTokens.Background,
             surface = GameTokens.Surface, onSurface = GameTokens.Text,
             background = GameTokens.Background, onBackground = GameTokens.Text,
-        )) { PracticeGame(session.engine, frameTiming = session.frameTiming) } }
+        )) { OnlineGame(application as WobbrikApplication) } }
     }
 }
 

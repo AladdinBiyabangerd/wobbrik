@@ -21,6 +21,11 @@ android {
         val backendOrigin = providers.gradleProperty("wobbrik.backendOrigin").orElse("").get()
         require(backendOrigin.none { it == '"' || it == '\\' || it.isISOControl() })
         buildConfigField("String", "BACKEND_ORIGIN", "\"$backendOrigin\"")
+        // Web OAuth client for Google ID tokens. Empty until Console supplies one or
+        // google-services.json gains oauth_client / default_web_client_id.
+        val googleWebClientId = providers.gradleProperty("wobbrik.googleWebClientId").orElse("").get()
+        require(googleWebClientId.none { it == '"' || it == '\\' || it.isISOControl() })
+        buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"$googleWebClientId\"")
     }
     buildFeatures { compose = true; buildConfig = true }
     compileOptions { sourceCompatibility = JavaVersion.VERSION_21; targetCompatibility = JavaVersion.VERSION_21 }
@@ -41,4 +46,7 @@ dependencies {
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-config")
     implementation("com.google.firebase:firebase-auth")
+    implementation("androidx.credentials:credentials:1.3.0")
+    implementation("androidx.credentials:credentials-play-services-auth:1.3.0")
+    implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
 }

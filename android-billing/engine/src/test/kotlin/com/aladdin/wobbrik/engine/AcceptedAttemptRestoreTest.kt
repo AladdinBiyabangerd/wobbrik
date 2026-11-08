@@ -3,6 +3,8 @@ package com.aladdin.wobbrik.engine
 import appbackend.wobbrik.game.AuthenticatedRecoveryOwner
 import appbackend.wobbrik.game.GameSnapshot
 import appbackend.wobbrik.game.ServerAttempt
+import appbackend.wobbrik.game.AcceptedCityGeometry
+import appbackend.wobbrik.game.CityFloorGeometry
 import org.junit.Assert.*
 import org.junit.Test
 
@@ -17,6 +19,16 @@ class AcceptedAttemptRestoreTest {
         EngineCheckpointCodec.encode(checkpoint), 1, 1)
     private fun blocked(attempt: ServerAttempt, reason: AcceptedAttemptRestore.Reason = AcceptedAttemptRestore.Reason.INVALID_CHECKPOINT) {
         assertEquals(AcceptedAttemptRestore.Result.Blocked(reason), restore(attempt))
+    }
+
+    @Test fun typedRestoreRejectsMissingOrMismatchedGeometry() {
+        val provenance = AcceptedCityGeometry(CityFloorGeometry(listOf(0L)), "attempt", 1, "cp",
+            "wobbrik-v1", "wobbrik-structural-v1")
+        val typed = attempt().copy(geometryVersion = CityFloorGeometry.VERSION, acceptedGeometry = provenance)
+        assertTrue(restore(typed) is AcceptedAttemptRestore.Result.Paused)
+        blocked(typed.copy(acceptedGeometry = null))
+        blocked(typed.copy(acceptedGeometry = provenance.copy(sequence = 2)))
+        blocked(typed.copy(acceptedGeometry = provenance.copy(geometry = CityFloorGeometry(listOf(1L)))))
     }
 
     @Test fun onlySuccessfulRecoveryExposesAttempt() {

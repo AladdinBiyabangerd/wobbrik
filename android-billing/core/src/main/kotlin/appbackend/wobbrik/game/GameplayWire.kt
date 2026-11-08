@@ -13,16 +13,17 @@ object GameplayWire {
         require(body.toByteArray(Charsets.UTF_8).size <= 32768)
         return AttemptCommand(id, revision, route, body)
     }
-    fun start(id: String, revision: Long) = command(id, revision, AttemptCommand.Route.START,
-        buildJsonObject { put("engine_version", "wobbrik-structural-v1") })
+    fun start(id: String, revision: Long, geometryVersion: String? = null) = command(id, revision, AttemptCommand.Route.START,
+        buildJsonObject { put("engine_version", "wobbrik-structural-v1"); geometryVersion?.let { require(it == CityFloorGeometry.VERSION); put("geometry_version", it) } })
     fun checkpoint(id: String, revision: Long, attempt: String, sequence: Long, floors: Long,
-                   precise: Long, rescues: Long, snapshot: String): AttemptCommand {
+                   precise: Long, rescues: Long, snapshot: String, geometry: CityFloorGeometry? = null): AttemptCommand {
         require(attempt.isNotBlank() && sequence > 0 && floors > 0 && precise in 0..floors && rescues in 0..floors)
         require(snapshot.toByteArray(Charsets.UTF_8).size <= 16384)
         val state = Json.parseToJsonElement(snapshot)
         return command(id, revision, AttemptCommand.Route.CHECKPOINT, buildJsonObject {
             put("attempt_id", attempt); put("sequence", sequence); put("floors", floors)
             put("precise", precise); put("rescues", rescues); put("snapshot", state)
+            geometry?.let { require(it.centers.size.toLong() == floors); put("geometry", it.json()) }
         })
     }
     fun finish(id: String, revision: Long, attempt: String, sequence: Long, parts: Map<String, String>): AttemptCommand {
@@ -40,8 +41,8 @@ object GameplayWire {
         require(root.string("rules_version") == "wobbrik-v1")
         val r = root.getValue("request").jsonObject
         val rebuilt = when (command.route) {
-            AttemptCommand.Route.START -> { require(r.string("engine_version") == "wobbrik-structural-v1"); start(command.operationId, command.expectedRevision) }
-            AttemptCommand.Route.CHECKPOINT -> checkpoint(command.operationId, command.expectedRevision, r.string("attempt_id"), r.number("sequence"), r.number("floors"), r.number("precise"), r.number("rescues"), r.getValue("snapshot").toString())
+            AttemptCommand.Route.START -> { require(r.string("engine_version") == "wobbrik-structural-v1"); start(command.operationId, command.expectedRevision, r["geometry_version"]?.jsonPrimitive?.content) }
+            AttemptCommand.Route.CHECKPOINT -> checkpoint(command.operationId, command.expectedRevision, r.string("attempt_id"), r.number("sequence"), r.number("floors"), r.number("precise"), r.number("rescues"), r.getValue("snapshot").toString(), r["geometry"]?.let { CityFloorGeometry.parse(it.jsonObject) })
             AttemptCommand.Route.FINISH -> finish(command.operationId, command.expectedRevision, r.string("attempt_id"), r.number("sequence"), r.getValue("parts").jsonObject.mapValues { (_, v) -> v.jsonPrimitive.also { require(it.isString) }.content })
         }
         require(Json.parseToJsonElement(rebuilt.envelope) == root) { "Unexpected command fields" }

@@ -17,14 +17,19 @@ internal object GameTokens {
     // Fine outline and dim treatment used by the approved game/pause design.
     val Hairline = 1.dp
     const val DimOpacity = 0.72f
+    val Quarter = 4.dp // --space-1
     val Small = 8.dp
     val Gap = 16.dp
     val Inset = 24.dp
     val CardRadius = 24.dp
     val ControlRadius = 16.dp
     val Target = 48.dp
+    // Expanded breakpoint from tablet-v1; pause panel width matches game-tap framing.
+    val MediumWidth = 600.dp
+    val ExpandedWidth = 840.dp
     val PanelWidth = 360.dp
     val PanelElevation = 12.dp
+    val Caption = 12.sp // --type-caption
     val Body = 16.sp
     val Title = 24.sp
     val Score = 32.sp

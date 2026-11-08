@@ -71,7 +71,15 @@ object RecoveryDtos {
             val snapshot = a.getValue("snapshot").takeUnless { it == JsonNull }?.toString()
             require(snapshot == null || snapshot.toByteArray(Charsets.UTF_8).size <= 16384)
             ServerAttempt(a.s("attempt_id"), status == "active", a.n("sequence"), snapshot,
-                floors, precise, rescues, a.b("continued"), a.s("rules_version"), a.s("engine_version"))
+                floors, precise, rescues, a.b("continued"), a.s("rules_version"), a.s("engine_version"), a["geometry_version"]?.let { a.s("geometry_version").also { require(it == CityFloorGeometry.VERSION) } },
+                a["accepted_geometry"]?.takeUnless { it == JsonNull }?.let { AcceptedCityGeometry.parse(it.jsonObject) }).also { accepted ->
+                    if (accepted.geometryVersion != null && floors > 0) {
+                        val geometry = requireNotNull(accepted.acceptedGeometry)
+                        require(geometry.attemptId == accepted.id && geometry.sequence == accepted.sequence &&
+                            geometry.geometry.centers.size.toLong() == floors && geometry.rulesVersion == accepted.rulesVersion &&
+                            geometry.engineVersion == accepted.engineVersion)
+                    } else require(accepted.acceptedGeometry == null)
+                }
         }
         val progress = r.getValue("part_progress").jsonArray.map { element ->
             val p = element.jsonObject
