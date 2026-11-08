@@ -1,0 +1,25 @@
+---
+description: Wobbrik visual-work rules mirrored from AGENTS.md
+alwaysApply: true
+---
+
+## Visual work
+
+- Təsdiqlənmiş hazır dizaynlar implementasiya üçün məcburi vizual əsasdır və birəbir həyata keçirilməlidir: kompozisiya, rənglər, tipoqrafiya, boşluqlar, ölçü nisbətləri, formalar, ikonlar, illüstrasiyalar və oyun qrafikası qorunmalıdır. Əsas istinadlar `docs/design/mobile-v1/` və `docs/design/game-tap-v2/` altındakı cari təsdiqlənmiş dizaynlardır; eyni ekran üçün son təsdiqlənmiş versiya əsas götürülür.
+- Hazır qrafikanı özbaşına sxematik fiqurlar, placeholder və ya sadələşdirilmiş alternativlərlə əvəz etmək, ekranı yenidən dizayn etmək olmaz. Lazımi asset çatışmırsa və ya texniki məhdudiyyət birəbir uyğunluğa mane olursa, bunu açıq bildir və alternativi tətbiq etməzdən əvvəl istifadəçinin razılığını al; belə nəticəni tamamlanmış dizayn kimi təqdim etmə.
+- Yalnız pəncərə ölçüsü, orientasiya və şrift miqyası üçün zəruri responsiv/adaptiv uyğunlaşdırmalara icazə verilir; dizaynın vizual dili və elementlərin iyerarxiyası saxlanmalıdır. Bu zərurətdən kənar hər vizual dəyişiklik istifadəçi ilə əvvəlcədən razılaşdırılmalıdır.
+- Vizual yoxlamada telefon və planşet renderlərini müvafiq təsdiqlənmiş dizaynlarla yanaşı müqayisə et; fərqləri və razılaşdırılmış istisnaları review qeydində göstər. Sadəcə build-in keçməsi və ya screenshot-un mövcudluğu dizayna uyğunluğun sübutu deyil.
+- Bütün ekran və oyun interfeysləri responsiv/adaptiv olmalıdır: həm telefonda, həm də planşetdə rahat və düzgün işləməlidir.
+- Layout cihaz adına deyil, mövcud pəncərə ölçüsünə uyğunlaşmalıdır; portret, landşaft və ölçüsü dəyişən pəncərələr nəzərə alınmalıdır. Məzmun kəsilməməli, idarəetmələr üst-üstə düşməməli və əlçatmaz qalmamalıdır.
+- Telefon dizaynını sadəcə böyütmək planşet üçün kifayət etmirsə, planşetə uyğun ayrıca kompozisiya/dizayn hazırla (məsələn, iki panel və ya uyğun naviqasiya); mövcud dizayn tokenlərini saxla.
+- Vizual işi tamamlanmış saymazdan əvvəl telefon və planşet ölçülərində render edib görüntülərə bax; yoxlanmış ölçüləri və yoxlanmamış halları qeyd et.
+
+When a task touches how something looks, use the `ui-craft` skill — it carries
+the token, contrast and screenshot workflow. Two things hold regardless of it:
+
+- **Find the token file before writing a value.** Inventing a colour, spacing or
+  radius next to a palette that already names one is the most common way an
+  interface drifts, and it never looks broken enough to get caught in review.
+- **Don't report a visual change as working without having rendered it and
+  looked at the image.** If rendering wasn't possible, say that plainly instead
+  of implying the result was checked.
