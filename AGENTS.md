@@ -1,3 +1,41 @@
+# Project agent instructions
+
+Koddan əvvəl bu faylı və `docs/context/current-task.md`-ni oxu. Paralel əsas plan və yeni stack pinləri uydurma.
+
+## Canonical sources
+
+- Texniki icra planı: `docs/kotlin-compose-plan.md`, mərhələlər 1–7 (§6).
+- Məhsul və iqtisadiyyat qaydaları: `docs/game-plan.md`; mərhələ 3 icra detalları: `docs/stage-three-online-plan.md`.
+- Aktiv handoff: `docs/context/current-task.md`. `.cursor/context/current-task.md` yalnız bu fayla girişdir, ikinci status mənbəyi deyil.
+- Qısa kontekst: `.cursor/context/{architecture,business-rules,decisions}.md`.
+- Cursor üçün always-on güzgülər: `.cursor/rules/*.mdc`; qayda dəyişəndə uyğun güzgünü də yenilə.
+- Ziddiyyətdə istifadəçinin son açıq qərarı → planın cari icra göstərişi və təsdiqlənmiş qərarları → uyğun plan bölməsi/əlavəsi → köhnə tarixi qeydlər. Həll olunmamış ziddiyyəti soruş; köhnə statusu yeni göstərişin əvəzi sayma. Traceability ID-ləri ayrıca plan deyil.
+
+## Stack və sərhədlər
+
+- Android-only, Kotlin + Compose/Canvas; paket `com.aladdin.wobbrik`. Modul və mövcud pinlər `.cursor/context/architecture.md`-dədir; build faylları versiyalar üçün əsasdır.
+- AppBackend/PostgreSQL iqtisadiyyat və qəbul edilmiş oyun vəziyyəti üçün authority-dir; Firebase Auth kimlik üçündür. Room/cache/outbox hədəfi serveri əvəz etmir və hazır implementasiya kimi təqdim edilmir.
+- Real SKU, Console, remote push və deploy ayrıca göstəriş tələb edir.
+
+## Mərhələ qapısı
+
+1. Yalnız real açıq texniki/funksional sualları koddan əvvəl dəqiqləşdir və qərarı qeyd et; təsdiqlənmiş dizaynı yenidən seçim sualına çevirmə.
+2. Mövcud skelet üzərində həmin vahidin domain/data/UI inteqrasiyasını hazırla. Müvəqqəti saxta UI və demo adapter yekun oyun deyil.
+3. Uyğun fokuslu yoxlamaları və axının son yoxlamasını apar; CI yalnız aşağıdakı branch/main qaydasına tabedir.
+4. Mövcud təsdiqlənmiş dizaynı birəbir tətbiq et. Şablondakı “yeni nümunə → yeni dizayn dəsti” axını təsdiqlənmiş dizaynları əvəz etmir; yeni/alternativ dizayn əvvəlcədən razılıq tələb edir.
+5. Telefon/planşet, pəncərə/orientasiya, böyük şrift, inset/klaviatura, əlçatanlıq və tələb olunan lokalları yoxla; zəruri scroll-u saxla. Təsdiqlənməmiş dil siyahısını uydurma.
+6. Vizual vahiddə real build renderlərini dizaynla yanaşı müqayisə et; nəticə və məhdudiyyətləri `docs/reviews/` altında yaz. Tam mərhələ qəbulu üçün ayrıca `docs/reviews/<phase>/acceptance.md` istifadə oluna bilər; mövcud review-ları köçürmə.
+7. Dizayn nümunəsinin OK-u mərhələ qəbulu deyil; mərhələ qəbulu növbəti mərhələyə başlama icazəsi deyil. Növbəti mərhələ ayrıca istifadəçi tapşırığı ilə başlayır.
+
+## Code organization
+
+- Yeni koddan əvvəl mövcud paket/qovluq konvensiyalarını yoxla və uyğun olanı təkrar istifadə et.
+- Feature və məsuliyyət üzrə qruplaşdır; hər fayl/sinfin aydın işi olsun.
+- UI, state/orchestration, domain qaydaları və data access ayrılır. Domain qaydalarını UI/persistence-də təkrarlama.
+- Feature helper-ləri feature daxilində saxla; yalnız aydın ortaq məqsədlə paylaş. Modul sərhədində uyğun interfeys seç; dairəvi asılılıq yaratma.
+- Boş layer/framework və vaxtından əvvəl abstraksiya yaratma. Bitirməzdən əvvəl yerləşmə, dublikat və importları yoxla; uyğun build/test nəticələrini dürüst qeyd et.
+- Dirty owner işini səssiz stash/reset/force ilə məhv etmə. Diagnostic ekran real domain/repository çağırmalıdır; demo/synthetic adapter açıq işarələnməlidir.
+
 # Working notes
 
 ## Branch, commit və lokal CI
@@ -76,4 +114,3 @@ Optimize for minimum necessary context. One chat = one logical task.
 - At the start of a continuation chat, read `docs/context/current-task.md` if present, then inspect only the referenced files needed for the task.
 - Keep the handoff factual: include checks performed, unresolved issues, and the exact next step; do not invent completed work or context-usage percentages.
 - Recommend a new chat without creating one automatically. If the user chooses to continue here, respect that choice and keep the handoff current.
-
