@@ -58,14 +58,16 @@ class AcceptedAttemptCommandsTest {
                     val attempt = when (command.route) {
                         AttemptCommand.Route.START -> {
                             check(old.attempt?.active != true)
-                            ServerAttempt(command.operationId, true, 0, null)
+                            ServerAttempt(command.operationId, true, 0, null, geometryVersion = request["geometry_version"]?.jsonPrimitive?.content)
                         }
                         AttemptCommand.Route.CHECKPOINT -> {
                             val a = old.attempt!!
                             check(a.active && string("attempt_id") == a.id && number("sequence") == a.sequence + 1)
                             check(number("floors") > a.floors)
                             a.copy(sequence = number("sequence"), floors = number("floors"), precise = number("precise"),
-                                rescues = number("rescues"), checkpointJson = request.getValue("snapshot").toString())
+                                rescues = number("rescues"), checkpointJson = request.getValue("snapshot").toString(),
+                                acceptedGeometry = request["geometry"]?.let { AcceptedCityGeometry(CityFloorGeometry.parse(it.jsonObject),
+                                    a.id, number("sequence"), command.operationId, a.rulesVersion, a.engineVersion) })
                         }
                         AttemptCommand.Route.FINISH -> {
                             check(old.attempt!!.sequence == number("sequence"))
@@ -101,6 +103,17 @@ class AcceptedAttemptCommandsTest {
             phase = if (terminal) Phase.FINISHED else Phase.SWINGING))
     }
     private fun terminalZero() = PracticeEngine().checkpoint().let { it.copy(state = it.state.copy(phase = Phase.FINISHED)) }
+
+    @Test fun newAttemptOptsInAndSendsTypedCheckpointThroughDurableJournal() = runBlocking {
+        Fixture().use { f ->
+            f.login(); yield()
+            assertTrue(f.commands.start(f.ready())); yield()
+            assertEquals(CityFloorGeometry.VERSION, f.ready().snapshot.attempt!!.geometryVersion)
+            assertTrue(f.commands.checkpoint(f.ready(), landed())); yield()
+            val request = Json.parseToJsonElement(f.sent.last().second.envelope).jsonObject.getValue("request").jsonObject
+            assertEquals(listOf(0L), CityFloorGeometry.parse(request.getValue("geometry").jsonObject).centers)
+        }
+    }
 
     @Test fun onlineHostStopsAtLandingAndRequiresFreshExplicitResume() = runBlocking {
         Fixture().use { f ->

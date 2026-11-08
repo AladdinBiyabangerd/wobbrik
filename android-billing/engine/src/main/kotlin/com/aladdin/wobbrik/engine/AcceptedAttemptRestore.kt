@@ -29,6 +29,14 @@ object AcceptedAttemptRestore {
         if (attempt.continued) return Result.Blocked(Reason.CONTINUATION_UNRESOLVED)
         return try {
             val checkpoint = decode(attempt)
+            if (attempt.geometryVersion != null) {
+                require(attempt.geometryVersion == appbackend.wobbrik.game.CityFloorGeometry.VERSION)
+                if (attempt.floors > 0) {
+                    val accepted = requireNotNull(attempt.acceptedGeometry)
+                    require(accepted.attemptId == attempt.id && accepted.sequence == attempt.sequence)
+                    require(checkpoint.cityGeometry() == accepted.geometry)
+                }
+            }
             val engine = PracticeEngine()
             engine.restore(checkpoint)
             engine.pause()

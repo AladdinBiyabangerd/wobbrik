@@ -1,44 +1,37 @@
-# Main sync + şəhər həndəsəsi — 8 noyabr 2026
+# Typed geometry/provenance — 8 noyabr 2026
 
 ## Completed
-- Main `defc9e3` cari `feat/home-design-alignment` branch-inə tarix saxlanılaraq konfliktsiz merge edildi: `36b4aea`. Main branch-in əcdadıdır. Home/online işi qorunur; main-ə əks merge yoxdur.
-- Main-in yeni `docs/PLAN.md` sənədi yeganə işlək mərhələ/status planıdır. Texniki parametrlər `kotlin-compose-plan.md`-dədir.
-- AppBackend `feat/city-geometry-kernel` / `6e949be`: integer tick bina proyeksiyası, quarter-turn/translation, pairwise clearance və torpaq union containment pure nüvəsi + testlər. API/DB-yə qoşulmayıb.
-- Əvvəlki home cutout `44946d8`: original RGB saxlanan 415×451 RGBA maska və painter aspect ratio. Home rekord/XP binding saxlanır.
+- Backend və Android typed geometry müqaviləsi `feat/typed-geometry-provenance` branch-lərində tamamlandı; əvvəlki bütün branch ref-ləri saxlanıldı. Android base `e470a47`, backend base `6e949be`.
+- Yeni start opt-in; checkpoint tick shape/bounds/support/snapshot consistency və immutable integer prefix yoxlaması; server provenance atomik saxlanır və finish-də binaya köçürülür. Attempt/inventory/building/listing read provenance verir.
+- Android tick conversion, durable wire, typed recovery/provenance verification qoşuldu. Legacy active attempts/journal replay dəyişməyib; legacy bina inventory-only qalır.
 
 ## Current state
-- Wobbrik `feat/home-design-alignment`; backend `feat/city-geometry-kernel`, iki repo ayrıca commit/branch. Main CI yoxdur, push/deploy yoxdur.
-- Şəhər tam scope-u təsdiqlənib, ancaq yerləşdirmə hələ `placement_enabled:false`. Kernel feature-in tamamlanması deyil.
-- Home tam dizayn qəbulu deyil: generativ logo/ikon, səth/bevel və əlavə XP sətri fərqləri qalır; cutout planşetdə aşağı resolution səbəbindən yumşaqdır. Şəhər/İnventar/Bazar route-ları bağlıdır.
+- Hər iki repo feature branch-dədir, main merge/CI/push/deploy yoxdur. PLAN.md üzrə main merge Aladdin OK tələb edir; bütün online tarix dolayı main-ə daxil edilməməlidir.
+- Placement hələ `false`. UI/renderer dəyişməyib. Home/online mövcud işi və dizayn borcları saxlanır; typed müqavilə bütün şəhərin və ya mərhələ 3-ün qəbulu deyil.
 
 ## Decisions
-- `city-geometry-v1`: 1.000 tick/engine unit, floor width/depth 100.000 tick, gap 10.000; quarter-turn base origin ətrafında, sonra translation. ±1.000.000.000 texniki koordinat sərhədidir, torpaq hüququ deyil. Dəqiq məna texniki plandadır.
-- Torpaq union-unda holes/seams yoxlanır. Bina proyeksiyası eyni depth və ardıcıl x-overlap üçün exact rectangle-dir; transient sway/falling/failed floor daxil deyil. Typed qəbul/quantization/provenance hələ seçilib tətbiq edilməyib.
-- Server authority qalır; opaque structural-v1-dən geometry çıxarılmır; legacy inventory-only. Yeni scope/placement icazəsi istəmə.
-- Hazır dizaynlar məcburidir; sistem fontu təsdiqlənmiş istisnadır. Real SKU/Console/push/deploy ayrıca göstərişlədir.
-- PLAN.md-dəki cari qayda main merge üçün Aladdin OK tələb edir. Bütün online tarix review edilmədən main-ə dolayı daxil edilməsin.
+- `city-geometry-v1`: 1000 tick/unit, width/depth 100000, gap 10000; foundation origin saxlanır. Double×1000 ən yaxın integer, half-away-from-zero; signed zero→0. Recenter/clamp/canlı physics quantization yoxdur. Quantization dəstəyi itirəndə reject.
+- Start `geometry_version` ilə lifetime opt-in. Structural-v1/rules-v1 dəyişmir. Yeni Android üçün əvvəl backend+migration 011 lazımdır; köhnə backend yeni sahəni rədd edir. Legacy upgrade/backfill yoxdur.
+- Provenance attempt/sequence/operation/rules/engine-dir; app/UID containing DB row-dan, accepted_at ilkin checkpoint qəbzindəndir. Struktur qəbuludur, physics replay/anti-cheat deyil.
+- Main üçün ayrıca OK, real SKU/Console/push/deploy üçün ayrıca göstəriş qüvvədədir.
 
 ## Remaining work
-- Typed floor geometry + engine→tick dəqiqlik/normalization və accepted checkpoint provenance, backend finish persistence; Android uyğunluğu.
-- Torpaq və 12 dekor footprint-ləri, copy ownership, atomik place/move/replace/return, mobil renderer/naviqasiya və real DB/device testləri. Read-only şəhər tam scope əvəzi deyil.
-- Home qalan uyğunluq və canlı sync/start/finish e2e; inventory pagination, Parametrlər, Room/outbox/fault proof ayrıca açıqdır.
+- Review nəticələrini istifadəçiyə təqdim et; OK olmadan main merge etmə. Backend və Android müstəqil review/merge tələb edir.
+- Torpaq/12 dekor footprint-ləri və copy ownership; atomik place/move/replace/return; mobil şəhər renderer/naviqasiya və device/live HTTP e2e ayrıca vahidlərdir.
+- Home qalan dizayn uyğunluğu, canlı online sync/start/checkpoint/finish, inventory pagination, Parametrlər, Room/outbox/fault proof açıqdır. Yenidən dizayn icazəsi yoxdur.
 
 ## Relevant files
-- docs/PLAN.md; docs/kotlin-compose-plan.md (Cari icra göstərişi, §5 şəhər həndəsəsi); docs/game-plan.md §7/§23.
-- docs/reviews/2026-11-08-main-sync-city-geometry.md; docs/reviews/2026-11-08-home-design-alignment.md (son bölmələr).
-- /Users/mac/My Workspace/AppBackend/internal/wobbrik/{city_geometry,city_geometry_test,attempts,finish,city}.go
-- /Users/mac/My Workspace/AppBackend/docs/{wobbrik-game-api.md,reviews/2026-11-08-city-geometry-kernel.md}; backend AGENTS.md/README.md.
-- android-billing/engine/src/main/kotlin/com/aladdin/wobbrik/engine/{EngineCheckpoint,PracticeEngine,AcceptedAttemptCommands}.kt
-- android-billing/core/src/main/kotlin/appbackend/wobbrik/game/{GameplayHttpBackend,RecoveryDtos}.kt
-- HomeScreen.kt, OnlineGame.kt, GameTokens.kt; docs/design/account-assets-v1/; docs/design/mobile-v1/tokens.css.
+- docs/PLAN.md; docs/kotlin-compose-plan.md §5; docs/reviews/2026-11-08-typed-geometry-provenance.md.
+- android-billing/core/.../game/{CityFloorGeometry,GameplayWire,RecoveryDtos,AttemptCoordinator}.kt.
+- android-billing/engine/.../{CityGeometry,AcceptedAttemptCommands,AcceptedAttemptRestore}.kt və müvafiq testlər.
+- /Users/mac/My Workspace/AppBackend/internal/wobbrik/{accepted_geometry,attempts,finish,read,market}.go; migrations/011_wobbrik_typed_geometry.sql; docs/wobbrik-game-api.md və eyniadlı review.
 
 ## Checks performed
-- Merge ancestor check PASS; iki repo diff --check PASS. Wobbrik bu vahiddə docs-only; yeni Android build/render yoxdur.
-- Backend Go `go test -race -count=1 ./internal/wobbrik` PASS, `go vet ./...` PASS, `go build ./cmd/server` PASS. Binary `/private/tmp/wobbrik-contract-tools/go/bin/go`.
-- Projection/bad support, int64 bounds, 4 rotation/inverse, translation, exact clearance/one tick, seams/holes/L-shape, 3×3 grid-in 511 subset coverage oracle testləri keçib. Pure kernel olduğundan DB suite işlədilməyib; DB PASS iddiası yoxdur.
-- Əvvəlki home installDebug/render/contrast/cutout yoxlamaları home review-da saxlanır; fixture render canlı axın sübutu deyil. Tam online diff review və main CI açıqdır.
+- Android `:core:test :engine:test :app:compileDebugKotlin` PASS: core 47, engine 50, sıfır skip/failure. UI yoxdur, render/device yoxlanmayıb.
+- Backend disposable PostgreSQL 18, loopback 55439 / geometry_contract_test: `go test -race -count=1 ./...` PASS. Son numeric parsing/read test düzəlişlərindən sonra `-run 'Geometry|TypedSnapshot'` PASS. `go vet ./...`, server build PASS.
+- DB testləri: concurrent checkpoint retry, tenant isolation, typed recovery, missing geometry rollback, finish final-write rollback/replay/persistence, legacy no-upgrade/NULL provenance. Pure tests: prefix rewrite, malformed/null/string/fraction ticks/floors, Go/Kotlin precision vektorları.
+- Hər iki repo lokal diff review və diff --check PASS; CI feature branch-də işlədilməyib. Main worktree /Users/mac/My Workspace/Wobbrik-rail-icons.
 
 ## Exact next step
-- Yeni chatdə bu qeyd, PLAN.md və texniki planın şəhər bölməsini oxu; iki repo branch-ini qoru. Backend AGENTS.md-ni oxu.
-- Yalnız EngineCheckpoint/attempts/finish müqavilələrini araşdırıb integer tick typed geometry/provenance qəbulunu və precision qaydasını bağla; legacy opaque-ı trust etmə. Eyni vahiddə backend və mobil DTO uyğunluğunu testlə; sonra atomik placement vahidinə keç. Yeni paralel master plan yaratma.
-- Main worktree /Users/mac/My Workspace/Wobbrik-rail-icons. Feature review + Aladdin OK olmadan main merge etmə; CI yalnız main-də ./scripts/local-ci.sh.
+- Bu handoff, PLAN.md və hər iki repo-nun typed geometry review-unu oxu. İstifadəçi OK verərsə müvafiq feature tarixlərini ayrıca review edib merge et; Wobbrik CI yalnız main-də ./scripts/local-ci.sh.
+- Növbəti implementasiya tapşırığı ayrıca verilərsə torpaq/dekor footprint/copy ownership və atomik placement vahidinə keç; typed/provenance-ni təkrar qurma, legacy geometry uydurma. UI işinə başlamazdan əvvəl mövcud təsdiqli nümunəni təqdim edib konkret approval al.
