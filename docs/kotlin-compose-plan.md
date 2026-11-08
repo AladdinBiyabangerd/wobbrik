@@ -167,17 +167,9 @@ AppBackend-də `GET /v1/apps/wobbrik/game/leaderboard` ümumi və cari Bakı hə
 
 Yerləşdirmə hələ aktiv deyil (`placement_enabled:false`). Əyri binanın x/y sahəsinə çevrilməsi, koordinat vahidi, ərazi formaları, təhlükəsiz boşluq, dönmə və dekorasiya footprint-ləri seçilməyib. Opaque structural-v1 snapshot-dan həndəsə uydurulmur. Dəqiq hazır müqavilə və qalan həndəsə tələbləri `AppBackend/docs/wobbrik-game-api.md`-nin şəhər bölməsindədir; Android host/oyun/SKU/Console/deploy bu vahidə daxil deyil.
 
-## 6. Mərhələlər və keçid şərtləri
+## 6. Mərhələlər
 
-1. **Müqavilə və skelet.** Təsdiqlənmiş authority/vaxt qərarları əsasında oyun vəziyyətləri və API/DB invariantlarını yazmaq. Sonrakı icazə ilə app + engine skeleti; Arrowz konfiqurasiyasını götürmədən build. Çıxış: həll olunmamış məhsul qərarları ayrılıb, minimum debug/release build yolu məlumdur.
-2. **Yekun oyunun əsas tikinti dövrü.** Kran, eniş, tarazlıq, xilasetmə, kamera, fasilə/bərpa yekun tətbiq arxitekturasında və təsdiqlənmiş dizaynla implementasiya edilir; ayrıca atılacaq məşq/prototip tətbiqi qurulmur. Mağaza/reklam sonrakı mərhələdə qoşulur. Müxtəlif frame sürətlərində eyni scripted input və uzun cəhd yoxlanır. Çıxış: oyun hissi qəbul edilir; 60 Hz-də ilkin 60 FPS hədəfi real zəif/orta Android-də release tipli build ilə ölçülür. P95/P99 frame vaxtı, jank, RAM və startup qeyd olunur; hazır performans zəmanəti yoxdur.
-3. **Onlayn cəhd və progression.** Firebase kimlik, AppBackend checkpoint/dedup, server XP/sikkə/nailiyyət, Room keş/outbox. Çıxış: cavab itkisi, proses ölümü, şəbəkə fasiləsi və paralel cihazda təkrar mükafat yoxdur; bərpa son server qeydinə uyğundur.
-4. **Kolleksiya və şəhər.** 10 mərtəbə bina, 68 hissə kataloqu, 12 dekorasiya, yerləşdirmə və beş ərazi; inventar səhifələnir. Çıxış: fizika ilə kosmetika ayrıdır, alış/dekor nüsxələri serverdə ardıcıldır, aktiv elan redaktə qaydası qorunur.
-5. **Bazar və leaderboard.** Atomik mübadilə, 5 elan, həftə vaxtı və sıralama. Çıxış: iki alıcı, çatışmayan balans, təkrar sorğu, redaktə/silmə yarışı və commit sonrası timeout real PostgreSQL-də sınaqdan keçir.
-6. **Reklam və real alış.** Consent, test reklamları, davam/hissə progress, identity → Play → verify → server hüquq axını. Çıxış: pending, restore, interruption, ack/consume retry və hesab dəyişməsi sandbox cihaz sınağından keçir. Vahid wallet tamamlanmadan production IAP açılmır.
-7. **Vizual tamamlama və buraxılış hazırlığı.** Tokenlər, qrafika, səs, haptic, uzun mətn/ekran ölçüləri; render və baxış; balans ölçməsi. Çıxış: seçilmiş cihaz yoxlamaları, load/quota müşahidəsi, DB backup/restore, failed-job alert və qalan risklərin faktiki siyahısı. Məhdud qoruma ilə buraxılış seçimi sınaqları ləğv etmir.
-
-Mərhələlər scope-u kiçiltmir: bütün V1 funksiyaları hədəfdə qalır. Təqvim və vaxt qənaəti faizi ölçü olmadan vəd edilmir. Hər mərhələnin implementasiyası ayrıca tapşırıqla başlayır.
+Mərhələ siyahısı və vəziyyəti: [PLAN.md](PLAN.md). Əvvəlki mətn: [archive/plan-history.md](archive/plan-history.md).
 
 ## 7. Yoxlama və açıq qərarlar
 
