@@ -63,6 +63,7 @@ Koddan əvvəl bu faylı və `docs/context/current-task.md`-ni oxu. Paralel əsa
 
 ## Visual work
 
+- UI hazırlayanda implementasiyaya başlamazdan əvvəl tətbiq ediləcək dizaynı/vizual nümunəni istifadəçiyə göstər və açıq təsdiqini al; təsdiq gələnədək UI implementasiyasına başlama. Mövcud təsdiqlənmiş dizayn varsa, həmin dizaynı təqdim et, yeni alternativ uydurma. Ümumi işə başlama icazəsini bu konkret UI təsdiqinin əvəzi sayma.
 - Təsdiqlənmiş hazır dizaynlar implementasiya üçün məcburi vizual əsasdır və birəbir həyata keçirilməlidir: kompozisiya, rənglər, tipoqrafiya, boşluqlar, ölçü nisbətləri, formalar, ikonlar, illüstrasiyalar və oyun qrafikası qorunmalıdır. Əsas istinadlar `docs/design/mobile-v1/` və `docs/design/game-tap-v2/` altındakı cari təsdiqlənmiş dizaynlardır; eyni ekran üçün son təsdiqlənmiş versiya əsas götürülür.
 - Hazır qrafikanı özbaşına sxematik fiqurlar, placeholder və ya sadələşdirilmiş alternativlərlə əvəz etmək, ekranı yenidən dizayn etmək olmaz. Lazımi asset çatışmırsa və ya texniki məhdudiyyət birəbir uyğunluğa mane olursa, bunu açıq bildir və alternativi tətbiq etməzdən əvvəl istifadəçinin razılığını al; belə nəticəni tamamlanmış dizayn kimi təqdim etmə.
 - Yalnız pəncərə ölçüsü, orientasiya və şrift miqyası üçün zəruri responsiv/adaptiv uyğunlaşdırmalara icazə verilir; dizaynın vizual dili və elementlərin iyerarxiyası saxlanmalıdır. Bu zərurətdən kənar hər vizual dəyişiklik istifadəçi ilə əvvəlcədən razılaşdırılmalıdır.
