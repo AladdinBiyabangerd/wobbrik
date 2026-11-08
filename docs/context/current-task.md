@@ -1,3 +1,12 @@
+## Latest account isolation / nonfree unlock preflight — 8 November 2026
+- Completed: historical unit already committed as `040d58a`; prepared bounded live scenario in `docs/reviews/2026-11-08-account-isolation-unlock-preflight.md`.
+- Current state: docs/account-isolation-unlock-preflight; eight-table DB equals historical-journal-final.json. Retained active attempt f73722ea-b54f-4985-9c7e-85a442c1d0a3 remains sequence/floors 2; journal unchanged 35-byte tombstone. Runtime PIDs 8474/8484 and original 42589 present; 5582 reverse unchanged. Ownership/readiness not newly established.
+- Decisions: use separate disposable device data and independent verified runtime/DB for A/B mutations; never sign out/reset retained 5582 or grant synthetic unlocks. No backend change required for preparation. API/JVM evidence cannot close UI/live acquisition acceptance.
+- Remaining work: execute real A/B unlock/finish/retry/epoch scenario; linking, Room/outbox and full stage/visual/physical acceptance remain open.
+- Relevant files: new preflight review; historical-journal review; PLAN §3.4; FinishCosmeticsTest, AttemptCoordinatorTest, GameplayAdaptersTest, AcceptedAttemptCommandsTest; backend wobbrik-game-api.md.
+- Checks performed: read-only DB/journal equality, process presence/reverse; focused four JVM test classes PASS (5s), local documentation review/whitespace. No device input/install/restart, live write, backend test, CI, merge/push/deploy.
+- Exact next step: recheck ownership/readiness and preserved baseline; establish independent disposable verified runtime/database and two real Firebase identities, then execute review steps 2–7. Extend DB evidence to unlocks/progress/buildings before mutations. Keep retained active attempt untouched.
+
 ## Latest historical journal compatibility — 8 November 2026
 - Completed: historical b6a4f9b serializers/builders execute in test-only package; current reader/coordinator replays START/CHECKPOINT/FINISH verbatim. Invalid storage/rules/engine versions preserve bytes, block readiness/backend calls and replacement save.
 - Current state: branch `test/historical-journal-compatibility`; no production/UI/backend changes. Read-only isolated DB observation: same active attempt f73722ea-b54f-4985-9c7e-85a442c1d0a3 now sequence/floors 2, operations 3, ledger 2. External progress; no device controls or gameplay performed here. Preserve newest state, not old one-floor snapshot.
