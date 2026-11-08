@@ -76,3 +76,11 @@
 
 ### Exact next step
 - New chat: read this handoff and canonical PLAN/stage-three/lifecycle contract. Fix safe zero-sequence empty snapshot interoperability on a dedicated Wobbrik fix branch, retaining strict counters/version/account guards; add focused regression using actual server JSON. Reuse live active attempt, rebuild/install with ignored local.init.gradle + -Pwobbrik.backendOrigin=https://localhost:18443, then continue live tests once emulator control is free (or physical phone attached). No merge/deploy without separate user OK.
+
+## Initial empty snapshot fix — 8 November 2026
+- Wobbrik branch `fix/initial-empty-snapshot-restore`: initial zero-sequence restore accepts null or empty JSON object only with zero counters; all existing version/geometry/continuation/account guards retained. No backend contract/schema change needed.
+- Regression covers server-shaped JSON → RecoveryDtos → paused restore with same attempt ID, plus invalid counters/shapes/version/continuation rejection. Focused test + debug build PASS (9s); engine tests + core recovery tests PASS (3s).
+- Updated APK installed with data preserved and existing ignored local TLS overlay. Viewed live home screenshot: “Cəhdə qayıt”, coins 0 / level 1 / XP 0. Existing DB attempt `c77c47db-5e08-410a-bf39-26680343d979` still active at sequence 0 / zero counters / `{}`.
+- Emulator switched back to DailyPlate during next interaction. Stopped device controls and asked user to reserve emulator-5554; do not compete with another task. No gameplay/checkpoint/finish/retry/process-death acceptance claimed.
+- Review: `docs/reviews/2026-11-08-initial-empty-snapshot-restore.md`; lifecycle contract documents the initial empty representation. No UI redesign. No merge/push/deploy/CI.
+- Exact next step: after user confirms emulator is exclusive, open existing attempt, resume/drop to real accepted checkpoint, compare DB revision/receipts/wallet, then validate exact retry/network interruption/process-death without resetting attempt. Keep separate user OK gate for merge/deploy.

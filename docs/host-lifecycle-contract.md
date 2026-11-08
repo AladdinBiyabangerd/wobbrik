@@ -73,7 +73,9 @@ ownership unit. Full online gameplay and a complete domain adapter remain pendin
 state. Signed-out/recovering/error exposes no attempt. An absent attempt and a
 finished attempt are distinct outcomes; neither creates a local online attempt.
 An active zero-sequence attempt may initialize fresh physics only with zero counters
-and no checkpoint. Positive sequences require positive floors, sequence <= floors,
+and no checkpoint (`null` or the server initial empty JSON object `{}`). Nonempty
+objects, arrays and malformed snapshots are rejected even at sequence zero.
+Positive sequences require positive floors, sequence <= floors,
 and `decodeAccepted` matching all three server counters. Unsupported or malformed
 snapshots fail closed. Restored physics is always paused with tick accumulation reset;
 the future host must also reset its monotonic frame clock before explicit resume.

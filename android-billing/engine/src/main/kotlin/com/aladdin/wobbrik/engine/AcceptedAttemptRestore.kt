@@ -2,6 +2,8 @@ package com.aladdin.wobbrik.engine
 
 import appbackend.wobbrik.game.AuthenticatedRecoveryOwner
 import appbackend.wobbrik.game.ServerAttempt
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
 
 /** Read-only recovery boundary. No input permission, commands, rewards or continuation policy. */
 object AcceptedAttemptRestore {
@@ -53,7 +55,12 @@ object AcceptedAttemptRestore {
     private fun decode(attempt: ServerAttempt): EngineCheckpoint {
         require(attempt.id.isNotBlank())
         if (attempt.sequence == 0L) {
-            require(attempt.floors == 0L && attempt.precise == 0L && attempt.rescues == 0L && attempt.checkpointJson == null)
+            require(attempt.floors == 0L && attempt.precise == 0L && attempt.rescues == 0L)
+            // PostgreSQL initializes a new attempt with snapshot {} before any checkpoint.
+            attempt.checkpointJson?.let {
+                val snapshot = Json.parseToJsonElement(it)
+                require(snapshot is JsonObject && snapshot.isEmpty())
+            }
             return PracticeEngine().checkpoint()
         }
         require(attempt.sequence > 0 && attempt.floors > 0 && attempt.sequence <= attempt.floors)
