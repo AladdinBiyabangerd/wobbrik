@@ -1,3 +1,12 @@
+## Latest isolated checkpoint validation — 8 November 2026
+- Completed: real UI checkpoint committed → TLS response suppressed → app force-stop/relaunch → exact replay/reconciliation PASS on emulator-5582 only. Attempt `f73722ea-b54f-4985-9c7e-85a442c1d0a3`, sequence/floors 1. Both request bodies and decoded journal envelope byte-identical; pending survives force-stop, final journal is empty tombstone.
+- Current state: branch `docs/checkpoint-isolated-live-validation`. Separate PostgreSQL port 55447/db wobbrik_checkpoint; backend 18082 (PID 8474/session 48174), TLS 18445 (PID 8484/session 65268). Only 5582 reverse device 18443→host 18445. Emulator paused at accepted one floor; no second drop/finish. Fault marker removed, both TLS readiness checks PASS. Original PID 42589/DB/TLS/emulator-5554 untouched; AppBackend owner clean.
+- Decisions: ready immutable 25a1967 rejected real guest sync 403; actual proof uses separately archived existing guest fix 79bfc12 (parent 25a1967), Go 1.27.3, binary SHA-256 `93dd3e00916c7a2968ee8692fc4acb260fd9e26c4d3d9ba071d437542a58e85b`. No backend source/API/schema changes or auth bypass. Historical dirty binary provenance remains unproven.
+- Checks performed: migrations/build/install, real Firebase sync/catalog/start/drop, journal/wire equality assertions, read-only DB snapshots exactly equal after retry: revision 2, balance/XP 1, operations 2, ledger 1, results/rewards 0. Final pending=false. Viewed error/restored/resumed screenshots. Emulator install/System UI stalls recovered by guest reboot without clear-data. No suite, CI, merge/push/deploy or full visual acceptance.
+- Relevant files: `docs/reviews/2026-11-08-checkpoint-isolated-live-validation.md`; ignored `output/checkpoint-live-isolated/` manifests, snapshots, journal tar files, proxy captures and verification.json; PLAN §3.4.
+- Remaining work: old-version journals, account isolation/nonfree unlocks, Google linking, Room/outbox and existing full stage/visual/physical-device acceptance. This bounded checkpoint scenario need not repeat absent relevant changes.
+- Exact next step: in a new bounded chat, read this entry + review + PLAN §3.4 and select a remaining acceptance scenario; inspect retained isolated environment/current journal before any new gameplay. Preserve one-floor attempt; no merge/deploy or stage advancement authorized.
+
 # Stage 3 live validation handoff — 8 November 2026
 
 ## Latest authorized continuation — isolated build ready
