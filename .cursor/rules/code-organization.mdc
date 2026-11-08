@@ -1,0 +1,13 @@
+---
+description: Feature organization and UI/domain/data boundaries
+alwaysApply: true
+---
+
+## Code organization
+
+- Yeni koddan əvvəl mövcud paket/qovluq konvensiyalarını yoxla və uyğun olanı təkrar istifadə et.
+- Feature və məsuliyyət üzrə qruplaşdır; hər fayl/sinfin aydın işi olsun.
+- UI, state/orchestration, domain qaydaları və data access ayrılır. Domain qaydalarını UI/persistence-də təkrarlama.
+- Feature helper-ləri feature daxilində saxla; yalnız aydın ortaq məqsədlə paylaş. Modul sərhədində uyğun interfeys seç; dairəvi asılılıq yaratma.
+- Boş layer/framework və vaxtından əvvəl abstraksiya yaratma. Bitirməzdən əvvəl yerləşmə, dublikat və importları yoxla; uyğun build/test nəticələrini dürüst qeyd et.
+- Dirty owner işini səssiz stash/reset/force ilə məhv etmə. Diagnostic ekran real domain/repository çağırmalıdır; demo/synthetic adapter açıq işarələnməlidir.

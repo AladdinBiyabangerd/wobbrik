@@ -1,12 +1,13 @@
 ---
-description: Wobbrik branch, commit, local review and local CI delivery rules
+description: Wobbrik local-delivery rules mirrored from AGENTS.md
 alwaysApply: true
 ---
 
-- Follow AGENTS.md section “Branch, commit və lokal CI” for every change.
-- Use a focused feat/, fix/, chore/ or docs/ branch and meaningful commits.
-- Review the final diff locally and record findings in docs/reviews/.
-- Run ./scripts/local-ci.sh only on main after merging the reviewed branch. Never run CI on feature/fix/docs/chore branches.
-- Do not add GitHub CI. Never treat skipped or failed checks as passing.
-- Merge after successful local review, preserving branch history; then run CI on main. Fix failures on a separate branch, review and merge it, then rerun CI on main. Failed main CI means delivery is incomplete.
-- Backend changes need their own branch, review and required backend checks.
+## Branch, commit və lokal CI
+
+- Hər məntiqi vahid uyğun `feat/`, `fix/`, `chore/` və ya `docs/` branch-ində hazırlanır; `main` üzərində implementasiya edilmir. Commit-lər kiçik, məzmununa uyğun və review edilə bilən olur.
+- Hər branch bitəndə diff üzrə lokal review edilir. Tapılan problemlər branch-də düzəldilir; CI branch-də işə salınmır. Uğursuz və ya icra edilməmiş yoxlama keçmiş sayılmır.
+- CI yalnız branch `main`-ə merge edildikdən sonra `main` üzərində və yalnız lokaldır: `./scripts/local-ci.sh`. GitHub Actions/remote CI yaradılmır. Arrowz-dakı vahid Gradle `ci` task yanaşması nümunədir, onun oyun qaydaları köçürülmür.
+- Review qeydi `docs/reviews/` altında branch, yoxlanmış diff/commit, tapıntılar, düzəlişlər, CI nəticəsi və qalan məhdudiyyətləri göstərir. Son dəyişiklikdən sonra uyğun yoxlamalar yenilənir.
+- Lokal review tamamlandıqdan sonra branch tarixi saxlanılmaqla `main`-ə merge edilir; sonra `main` üzərində `./scripts/local-ci.sh` işlədilir. CI uğursuz olarsa iş tamamlanmış sayılmır: düzəliş ayrıca branch-də hazırlanır, review və merge edilir, CI yenə yalnız `main` üzərində işlədilir. Remote push/deploy ayrıca göstəriş tələb edir.
+- AppBackend dəyişərsə onun ayrıca repository/branch/commit və öz AGENTS.md yoxlamaları da tələb olunur; Wobbrik CI nəticəsi backend yoxlamalarını əvəz etmir.

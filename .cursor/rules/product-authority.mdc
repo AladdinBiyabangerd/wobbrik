@@ -1,0 +1,18 @@
+---
+description: Wobbrik product-authority rules mirrored from AGENTS.md
+alwaysApply: true
+---
+
+## Məhsulun icra məqsədi
+
+- Wobbrik yekun, real Android oyunu kimi hazırlanır; ayrıca atılacaq prototip, demo və ya yalnız məşq tətbiqi məqsəd deyil. İş mərhələlərlə görülür, lakin hər vahid yekun oyuna inteqrasiya üçün hazırlanmalıdır.
+- Lokal engine və offline iş rejimi server authority-sini əvəz etmir. Məşq rejimi, placeholder qrafika, saxta menyu və ya session-only nəticə real oyun axınının əvəzi və tamamlanmış implementasiya sayıla bilməz. Mövcud belə hissələr açıq texniki borc kimi qeyd olunmalı və yekun axına uyğunlaşdırılmalıdır.
+- Tamamlanma dizayna uyğun qrafika, real menyu/naviqasiya, cəhdin bərpası və tələb olunan AppBackend hesab/progression inteqrasiyası ilə yoxlanır; bunlar olmadan yalnız işlək mexanika yekun oyun kimi təqdim edilmir. Real SKU, Console və deploy üçün ayrıca göstəriş tələbi qüvvədədir.
+
+## AppBackend ilə uyğunluq
+
+- Wobbrik-in serveri `/Users/mac/My Workspace/AppBackend` layihəsidir. 4 noyabr 2026 göstərişi ilə yekun Android oyununun Kotlin + Compose implementasiyasına icazə verilib; real SKU, Console və deploy ayrıca göstərişədək sonraya saxlanır.
+- Wallet, oyun/nailiyyət mükafatları, progression/checkpoint, bina mülkiyyəti, bazar və şəhər axını qurulanda və ya yenilənəndə AppBackend-də uyğun domain qaydaları, API/DTO, schema/migration və test dəyişikliklərini də eyni işin hissəsi kimi yoxla və lazım olanları et. Yalnız mobil axını dəyişib server uyğunluğunu tamamlanmış sayma.
+- Xərclənən bütün sikkələr və mülkiyyət üçün vahid authority AppBackend/PostgreSQL-dir. Client delta, Room və ya Firestore ikinci wallet yaratmır. Alış krediti, oyun mükafatı, xərcləmə və bazar transferi eyni wallet/ledger ilə işləməlidir.
+- Müqavilə dəyişəndə backend və mobil uyğunluğunu, qayda versiyasını, revision/dedup, hesab izolyasiyası, retry və köhnə client davranışını yoxla; dəyişmiş API müqaviləsini sənədləşdir. Backend dəyişməsinə ehtiyac yoxdursa bunu yoxlama nəticəsində açıq qeyd et.
+- Əsas müqavilə: `docs/kotlin-compose-plan.md`, xüsusən 5-ci bölmə. Backend alış sərhədi: `/Users/mac/My Workspace/AppBackend/docs/wobbrik-billing.md`. Tam domain adapterinin hazır olduğunu yalnız kod və yoxlamalar bunu təsdiqləyəndə bildir.
