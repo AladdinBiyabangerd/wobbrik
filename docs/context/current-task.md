@@ -1,32 +1,37 @@
-# Atomic city placement handoff — 8 November 2026
+# Stage 3 live validation handoff — 8 November 2026
 
 ## Completed
-- Backend `feat/city-footprint-placement`: implementation `34c922b` completes migration 012, owned free parcel placement and atomic building/decor-copy place/move/replace/return. Existing BuyShop buys independent rights/copies; placement never charges again.
-- Read/HTTP/catalog contract and listing/sale/delete/purge cleanup implemented. Backend review: `/Users/mac/My Workspace/AppBackend/docs/reviews/2026-11-08-city-footprint-placement.md`; Wobbrik review: `docs/reviews/2026-11-08-city-footprint-placement.md`.
-- Wobbrik counterpart `feat/city-footprint-placement`, contract/PLAN commit `8c0a958`; no Android/UI code change.
+- Both placement feature histories merged with explicit user approval. Final recorded main tips: Wobbrik `ccd56f6`, AppBackend `25a1967`; both pushed to origin and verified 0 ahead / 0 behind.
+- Original Wobbrik worktree fast-forwarded to `ccd56f6`; main is checked out separately in `/Users/mac/My Workspace/Wobbrik-rail-icons`.
+- Debug APK `/Users/mac/Desktop/Wobbrik-ccd56f6-debug.apk` built from current code; assembleDebug and signature verification PASS. User installed/tested on phone and explicitly reported OK. This is user phone acceptance of this APK, not live online recovery proof.
 
 ## Current state
-- User authorized both main merges on 8 November. Wobbrik `cad922b` and backend `1eec2ef` preserve feature and inherited history. No push/deploy. Wobbrik main lives in `/Users/mac/My Workspace/Wobbrik-rail-icons`; original worktree remains on feature branch.
-- Backend main returns placement_enabled:true; mobile remains without placement integration. Stage 3 is still incomplete; this is a backend stage-4 subunit, not phase acceptance.
+- User explicitly selected stage 3 live gameplay, retry and recovery after process death as the next task.
+- APK has Firebase config but generated BACKEND_ORIGIN is empty. Live server/account validation has not been performed. No backend endpoint or deploy may be invented.
+- Backend placement is on main; Android placement integration and stage 3/4 acceptance remain incomplete.
+- This documentation-only branch is `docs/stage-three-live-validation-handoff`; no new main merge/push/deploy is included.
 
 ## Decisions
-- Existing paid land right → later free placement. Return/move preserves ownership, no refund. Base fixed at (0,0), quarter turn 0.
-- One final-state batch (1–100 changes), account lock/revision/dedup/receipt; connected/no-overlap parcel union, complete object containment and 10000-tick clearance. Position uses canonical decimal strings and required quarter turn 0–3.
-- Decoration IDs identify owned copies; buildings require typed accepted provenance/current content revision. No legacy geometry/backfill; return geometry-less membership before new layout validation. No new physics proof.
+- Continue canonical PLAN stage 3.4; no city UI or new design work in this unit.
+- AppBackend/PostgreSQL remains the authority. Preserve operation ID/revision/envelope on retry and account/epoch isolation.
+- Existing checkpoint→finish intent persistence limitation, cosmetic linkage and Room/outbox remain explicit open work; do not claim them complete from APK acceptance.
 
 ## Remaining work
-- Authorized main merges and local checks completed. Android placement client/renderer/navigation and device/live HTTP integration remain separate requested units; UI needs concrete approved design.
-- Stage 3 still needs live account/network/process recovery, final landing→checkpoint→finish checks, cosmetic selection linkage and Room/outbox; no completion claim.
+- Establish available authorized backend HTTPS origin, Firebase/account configuration and connected Android device/emulator; inspect local config without exposing credentials.
+- Validate real start→landing→checkpoint→accepted Ready→finish, lost response/exact retry, network interruption and process death/relaunch against real server state; verify no duplicate rewards and correct account isolation.
+- Fix evidenced failures in a dedicated feature/fix branch, review locally and document evidence/limits. Main merge needs separate OK; CI only on main. No deployment/Console changes implicitly authorized.
 
 ## Relevant files
-- AppBackend internal/wobbrik/city_{placement,catalog,footprints,geometry}.go; city.go; shop.go; internal/platform/wobbrik_{http,placement_test}.go; deletion.go.
-- AppBackend migrations/012_wobbrik_city_placement.sql; docs/wobbrik-game-api.md final placement section; scoped review above.
-- Wobbrik docs/PLAN.md, docs/kotlin-compose-plan.md, docs/context/current-task.md.
+- docs/PLAN.md; docs/stage-three-online-plan.md; docs/host-lifecycle-contract.md; docs/kotlin-compose-plan.md.
+- android-billing/README.md; app/build.gradle.kts; app/src/main/kotlin/com/aladdin/wobbrik/{WobbrikApplication,OnlineGame}.kt.
+- AcceptedEngineHost, AcceptedAttemptCommands, AcceptedAttemptRestore and core recovery/coordinator/journal implementations and tests.
+- AppBackend AGENTS.md, docs/context/current-task.md, docs/wobbrik-game-api.md and corresponding attempt handlers/tests.
+- Both repositories' docs/reviews/2026-11-08-city-footprint-placement.md for merge/check evidence.
 
 ## Checks performed
-- Wobbrik main `cad922b`: ./scripts/local-ci.sh PASS (1m 52s, 103 tasks). Backend main `1eec2ef`: full real-PostgreSQL race suite, vet and make build PASS. Documentation diff --check PASS. No fresh device/render/live Firebase check.
-- Real disposable PostgreSQL 18 / loopback 55439 / placement_test: full `go test -race -count=1 ./...` PASS; after final test/index additions focused city/parcel/return/read/HTTP suite PASS. `go vet ./...`, server build and diff --check PASS.
-- Local scoped diff review complete; no main CI. Wobbrik docs-only diff review; no Android build/render/device test in this unit.
+- Backend merged main: full race suite with disposable real PostgreSQL PASS; go vet, make build and diff --check PASS.
+- Wobbrik main CI PASS; final documentation merge rerun PASS (22s, 103 tasks). APK assembleDebug PASS (44s), apksigner verify PASS; user phone check OK.
+- No live Firebase/network/process-death validation yet. Backend origin in delivered APK is empty.
 
 ## Exact next step
-- Both authorized main merges and checks are complete. Await a separately scoped task for stage 3 live validation or Android placement integration; present the approved design before UI implementation. No phase acceptance, push or deploy is implied. Read the handoff from main in Wobbrik-rail-icons; the original feature worktree retains its historical handoff.
+- In a new chat, read this handoff, PLAN stage 3.4, online plan and lifecycle contract. Inspect only relevant auth/endpoint/device configuration and recovery paths, then establish a real-server/device validation route within existing authorization. Ask only for missing endpoint/access that cannot be found locally; never substitute fake tests for live evidence.
