@@ -2,11 +2,11 @@
 
 - Completed: server-owned six land and twelve decoration rectangle unions, quarter-turn union transform, positive-edge/no-overlap parcel predicate. No runtime caller/schema/API change yet.
 - Current state: backend `feat/city-footprint-placement`; Wobbrik `docs/city-placement-continuation`. Prior branch refs preserved. Main merge requires separate user OK; no merge/push/deploy/CI.
-- Decision pending: existing handoff explicitly leaves purchase/parcel transaction coupling undecided. Asked user whether purchased rights remain separate from later free placement (existing API compatible), or purchase and initial placement must be one transaction. Do not infer answer from footprint approval.
+- Decision confirmed by user: separate land purchase right, followed by free atomic parcel placement. Existing BuyShop acquisition stays separate; placement must require the owned right and must not charge again.
 - Remaining: copy ownership persistence, atomic place/move/replace/return, API/read contract and real PostgreSQL concurrency/rollback tests. Placement remains false. UI unchanged.
 - Relevant files: AppBackend internal/wobbrik/city_footprints{,_test}.go, city.go, shop.go, city_geometry.go; docs/wobbrik-game-api.md. Approved sizes: both footprint reviews; Wobbrik docs/kotlin-compose-plan.md.
 - Checks: `go test -race ./internal/wobbrik`, `go vet ./internal/wobbrik`, diff review and diff --check PASS. Pure geometry only; no PostgreSQL/state changes or DB tests. Toolchain restored from existing archive into /private/tmp/wobbrik-footprint-tools/go.
-- Exact next step: obtain coupling answer, then complete the backend transaction/schema/API unit on the existing feature branch; preserve main approval gate. Full task is not complete.
+- Exact next step: on backend feat/city-footprint-placement, implement migration 012 plus separate free parcel placement requiring an owned land right, decoration copy placement, typed building place/move/replace/return and matching reads/HTTP. Reuse Execute account locks/revision/dedup and existing geometry; preserve listing/transfer/delete cleanup and test real PostgreSQL retries/concurrency/rollback. Preserve main approval gate. Full task is not complete.
 
 # Typed geometry və footprint təklifi — 8 noyabr 2026
 
