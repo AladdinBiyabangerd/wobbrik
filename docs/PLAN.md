@@ -104,10 +104,11 @@ cihazda və canlı serverdə yoxlama aparılmış sayılmır.
 - [x] İlk pure həndəsə nüvəsi: integer tick, bina proyeksiyası, quarter-turn, pairwise boşluq və torpaq union containment (`AppBackend` branch `feat/city-geometry-kernel`, `6e949be`; API-yə qoşulmayıb və main-də deyil).
 - [x] Typed geometry/provenance müqaviləsi: yeni cəhd opt-in, engine→tick precision, server checkpoint qəbulu/finish persistence və Android wire/recovery uyğunluğu (`feat/typed-geometry-provenance`, hər iki repo; main-də deyil). Placement bağlı qalır.
 - [x] Torpaq və 12 dekorun ilkin footprint parametrləri istifadəçi tərəfindən təsdiqləndi (8 noyabr; dəqiq konturlar `reviews/2026-11-08-city-footprint-proposal.md`, texniki müqavilə `kotlin-compose-plan.md`). Server/mobile implementasiyası və placement aktivləşməsi deyil.
+- [x] Backend footprint/copy placement vahidi: ayrıca alınmış torpaq hüququndan pulsuz atomik parcel və bina/dekor place/move/replace/return; migration 012, server union/clearance yoxlaması və read/HTTP müqaviləsi (`feat/city-footprint-placement`, main-də deyil). Bu qeyd mobil şəhər axınının və mərhələ 3/4-ün qəbulu deyil.
 - [ ] Şəhərin təsdiqlənmiş plan və həcmli görünüşləri həyata keçirilsin.
 
 Serverdə mövcud API-lər bu mobil mərhələnin tamamlanması demək deyil.
-Yerləşdirmə hazırda bağlıdır; opaque checkpoint-dən etibarlı həndəsə uydurulmur.
+Yerləşdirmə main/mobil axında bağlıdır; backend feature branch-də typed geometry ilə aktivdir. Opaque checkpoint-dən etibarlı həndəsə uydurulmur.
 
 ## 5. Bazar və rekordlar — yekun Android axını tamamlanmayıb
 

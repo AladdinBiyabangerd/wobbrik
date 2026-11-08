@@ -165,7 +165,7 @@ AppBackend-də `GET /v1/apps/wobbrik/game/leaderboard` ümumi və cari Bakı hə
 
 İstifadəçi şəhər üçün yuxarıdan ikiölçülü x/y planını və eyni şəhərin həcmli görünüşünü seçib; dəqiq sahə, boşluq və dekorasiya ölçülərinin açıq saxlanmasını, yalnız onlardan asılı olmayan server hissəsinin tamamlanmasını istəyib. AppBackend `GET /game/city` ilə hesab üzrə şəhər üzvlüyünü, revision-u və bütün yerləşmiş binaların sakin cəmini verir; cəm overflow-suz dəqiq onluq string-dir. `POST /game/city/buildings/return` bina mülkiyyətini/hissələrini və aktiv elanı saxlayaraq onu inventara qaytarır; refund/XP vermir. Migration 010 şəhər üzvlüyünün real sahibə aidliyini və bina silinəndə təmizlənməsini qoruyur.
 
-Yerləşdirmə hələ aktiv deyil (`placement_enabled:false`). Aşağıdakı 8 noyabr həndəsə qərarı əvvəlki açıq koordinat/boşluq/dönmə statusunu əvəz edir; ərazi və dekorasiya footprint-ləri hələ tamamlanmayıb. Opaque structural-v1 snapshot-dan həndəsə uydurulmur. Dəqiq hazır API müqaviləsi `AppBackend/docs/wobbrik-game-api.md`-nin şəhər bölməsindədir.
+Main/mobil axında yerləşdirmə hələ aktiv deyil; aşağıdakı tarixi statusu 8 noyabr atomik placement əlavəsi backend feature branch üçün yeniləyir. Aşağıdakı 8 noyabr həndəsə qərarı əvvəlki açıq koordinat/boşluq/dönmə statusunu əvəz edir; ərazi və dekorasiya footprint-ləri hələ tamamlanmayıb. Opaque structural-v1 snapshot-dan həndəsə uydurulmur. Dəqiq hazır API müqaviləsi `AppBackend/docs/wobbrik-game-api.md`-nin şəhər bölməsindədir.
 
 ### Şəhər həndəsəsinin ilk domain vahidi — 8 noyabr 2026
 
@@ -214,3 +214,11 @@ Rəsmi mənbələr (3 noyabr 2026):
 - PostgreSQL vaxt funksiyalarının semantikası: https://www.postgresql.org/docs/current/functions-datetime.html#FUNCTIONS-DATETIME-CURRENT
 
 Dəqiq növbəti addım: yeni chatdə bu planı və docs/context/current-task.md-ni oxu; authority və DB qəbul vaxtı qərarları təsdiqlənib; ayrıca kod tapşırığı verilərsə yalnız offline mexanika prototipinin kiçik skeletindən başla. Bu plan özü kod icazəsi deyil.
+
+### Atomik placement müqaviləsi — 8 noyabr, feature branch
+
+AppBackend `feat/city-footprint-placement` migration 012 və `POST /v1/apps/wobbrik/game/city/placement` əlavə edir. Mövcud `shop/buy` torpaq hüququnu/dekor nüsxəsini ayrıca alır; yerləşdirmə pulsuzdur, wallet/refund yaratmır. Bir əmrdə 1–100 unikal `{kind,id,building_revision?,position}` dəyişiklik, `geometry_version:city-geometry-v1` və mövcud operation/revision/rules envelope istifadə olunur. `kind` land/building/decoration; dekor ID-si alınmış copy ID-dir. `position:{x_ticks:"440000",y_ticks:"0",quarter_turns:0}` place/move, açıq `position:null` return deməkdir; return+place eyni batch-də atomik replacement-dir. Bina üçün cari müsbət content revision tələb olunur.
+
+Koordinatlar canonical decimal string tick, ±1000000000; quarter_turns məcburi 0–3. Snap/rounding yoxdur. Son vəziyyət bütöv yoxlanır: parcel overlap yoxdur, bütün parcel-lər base-ə müsbət sərhədlərlə bağlıdır, obyektlər dəqiq land union daxilindədir və ayrı obyektlər arasında 10000 tick boşluq var. Parcel move/return yalnız qalan obyekt və əlaqə qaydalarını qoruyanda keçir; base (0,0,0) dəyişmir. Hüquq/nüsxə return-dən sonra qalır. Legacy bina placed edilmir; həndəsəsiz köhnə membership qaytarılana qədər layout əmri rədd edilir.
+
+`GET /city` backend feature-də `placement_enabled:true`, `geometry_version`, base daxil placed `parcels` və bina `position?` verir; `/decorations` nüsxə `position?` əlavə edir. `/sync.land` alınmış hüquqlar olaraq qalır. `/catalog.city_geometry` altı torpaq/on iki dekorun dəqiq local rectangle union-larını decimal string tick-lərlə verir. Köhnə client-lər additive sahələri ignore edə bilər; billing JSON/rules-v1/content revision dəyişmir. Əvvəl backend+migration, sonra ayrıca mobil placement client tələb olunur. Dəqiq schema/error/retry qaydaları AppBackend `docs/wobbrik-game-api.md`-nin son bölməsindədir. Main merge üçün ayrıca OK; deploy və UI icazəsi bu vahidə daxil deyil.
