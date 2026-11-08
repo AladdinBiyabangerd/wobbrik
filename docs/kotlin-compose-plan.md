@@ -181,6 +181,17 @@ Server qəbul edilmiş geometry-ni attempt/sequence/checkpoint operation/rules/e
 
 Placement bağlı qalır; torpaq/12 dekor footprint-ləri, atomik əmrlər və mobil şəhər renderer/naviqasiya ayrıca vahidlərdir. Typed müqavilənin tamamlanması tam şəhər funksiyasının və ya mərhələnin qəbulu deyil. Vəziyyət yalnız PLAN.md və aktiv handoff-da izlənir.
 
+
+### Torpaq və dekor footprint parametrləri — 8 noyabr 2026, təsdiqlənib
+
+İstifadəçi `docs/reviews/2026-11-08-city-footprint-proposal.md`-də təqdim edilmiş konkret torpaq/dekor ölçülərini təsdiqləyib. Həmin sənəd dəqiq konturlar, origin-lər, qiymətlər, nəticələr və yoxlama məhdudiyyətləri üçün istinaddır. Bu qərar əvvəlki açıq ölçü statusunu əvəz edir; implementasiyanın hazır olması demək deyil.
+
+1 vahid = 1000 tick; sahə modulu 110×110 vahiddir, məcburi grid/snap deyil. Başlanğıc torpaq 440×220 düzbucaqlıdır. `land_1`: 220×220; `land_2`: 330×220 bounding box-dan yuxarı sağ 110×110 çıxılmış L; `land_3`: 330×220; `land_4`: 440×220 bounding box-dan yuxarı sağ 110×110 çıxılmış L; `land_5`: 440×220. Düzbucaqlı olmayanlar istisna, qalanları düzbucaqlıdır. Sahələr 8/+4/+5/+6/+7/+8 düz bina ekvivalentidir, sərt say limiti deyil. Origin aşağı sol, x sağa/y yuxarı; başlanğıc world origin-dədir. Genişlənmənin yerini oyunçu seçir, quarter-turn dönmə mümkündür. Torpaqlar sahə üzrə üst-üstə düşmür, müsbət uzunluqlu ortaq sərhəd tələb olunur; künc təması kifayət deyil. Əlavə minimum sərhəd uzunluğu yoxdur (tick şkalasında minimum müsbət seqment 1 tick). Müstəqil XP/qiymət hüquqları dəyişmir; alış hüququ və parcel-in yerləşdirilməsi ayrı anlayışlardır.
+
+Dekor ölçüləri (vahid): Tək ağac 30×30; Ağac cütü 70×30; Kiçik ağaclıq 80×80; Tək skamya 40×20; Qarşılıqlı skamyalar 50×60; Skamyalı istirahət guşəsi 90×80; Tək küçə fənəri 10×10; Qoşa küçə fənəri 40×10; Fənər sırası 100×10; Qısa düz yol 100×30; Dönüş yol hissəsi 100×100 bounding box daxilində eni 30 olan L; Uzun düz yol 210×30. L-yol konturu aşağı-sol origin ilə `(0,0),(100,0),(100,30),(30,30),(30,100),(0,100)`; digər dekorlar tam düzbucaqlıdır. Dekor origin-i bounding box mərkəzidir; L-yol üçün bütün koordinatlardan 50 çıxılır. Qruplar bölünməyən tək nüsxədir. Qiymətlər kateqoriya üzrə 25/75/150 qalır.
+
+10 vahid pairwise boşluq bütün dekorlara, o cümlədən yollara tətbiq edilir: yol hissələri bitişmir. Fasiləsiz yol istisnası təsdiqlənməyib. L-yolun boş girintisi tutulmuş sahə deyil; real union istifadə edilir. Hazır artwork uyğunluğu/balans cihazda yoxlanmayıb. Placement bağlı qalır; server-owned footprint/copy ownership, atomik placement və mobil renderer/UI ayrıca işdir. Bu təsdiq main merge və UI implementasiyası üçün ayrıca tələb olunan OK-ları əvəz etmir.
+
 ## 6. Mərhələlər
 
 Mərhələ siyahısı və vəziyyəti: [PLAN.md](PLAN.md). Əvvəlki mətn: [archive/plan-history.md](archive/plan-history.md).

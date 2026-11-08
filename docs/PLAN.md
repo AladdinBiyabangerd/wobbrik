@@ -103,6 +103,7 @@ cihazda və canlı serverdə yoxlama aparılmış sayılmır.
 - [ ] Yerləşdirmə üçün həndəsə, ölçü və server yoxlama müqaviləsi tamamlansın.
 - [x] İlk pure həndəsə nüvəsi: integer tick, bina proyeksiyası, quarter-turn, pairwise boşluq və torpaq union containment (`AppBackend` branch `feat/city-geometry-kernel`, `6e949be`; API-yə qoşulmayıb və main-də deyil).
 - [x] Typed geometry/provenance müqaviləsi: yeni cəhd opt-in, engine→tick precision, server checkpoint qəbulu/finish persistence və Android wire/recovery uyğunluğu (`feat/typed-geometry-provenance`, hər iki repo; main-də deyil). Placement bağlı qalır.
+- [x] Torpaq və 12 dekorun ilkin footprint parametrləri istifadəçi tərəfindən təsdiqləndi (8 noyabr; dəqiq konturlar `reviews/2026-11-08-city-footprint-proposal.md`, texniki müqavilə `kotlin-compose-plan.md`). Server/mobile implementasiyası və placement aktivləşməsi deyil.
 - [ ] Şəhərin təsdiqlənmiş plan və həcmli görünüşləri həyata keçirilsin.
 
 Serverdə mövcud API-lər bu mobil mərhələnin tamamlanması demək deyil.

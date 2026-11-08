@@ -1,4 +1,12 @@
-# Typed geometry/provenance — 8 noyabr 2026
+# Typed geometry və footprint təklifi — 8 noyabr 2026
+
+## Son davam — footprint parametrləri təsdiqlənib
+- İstifadəçi torpaq formasını və 12 dekor ölçüsünü ilkin oyun parametrləri kimi seçib təsdiqə təqdim etməyə icazə verdi; konkret parametrləri sonradan “okeydir” cavabı ilə təsdiqlədi.
+- Hər iki main `git pull --ff-only origin main` ilə aktual yoxlanıldı. Android feature branch main ilə yeniləndi (`15f2551`); yalnız UI approval review konflikti main-in daha yeni qeydi ilə həll edildi. Backend feature artıq main-i ehtiva edirdi. Əvvəlki branch-lər qorundu; feature→main merge/push/deploy yoxdur.
+- Cari Android branch: `docs/city-footprint-proposal`, base `15f2551`. Backend kodu dəyişməyib; sənəd davamı `docs/city-footprint-parameters` branch-indədir.
+- Konkret təklif və dəqiq konturlar: `docs/reviews/2026-11-08-city-footprint-proposal.md`. Başlanğıc 440×220; genişlənmələr 110×110 modullardan 4/5/6/7/8 ekvivalent; 5 və 7 modul üçün L-forma. 12 dekorun ölçüləri həmin sənəddədir. Məcburi grid yoxdur. Yol üçün 10 vahid boşluq istisnası yoxdur, buna görə yol hissələri bitişmir. Torpaq/dekor müqaviləsi təsdiqlidir; alış/parcel transaction coupling hələ seçilməyib.
+- Yoxlamalar: bütün 6 parcel üçün nümunə bina sayı və pairwise 10 boşluq, ümumi 459800 vahid², dekor cəmi 1000 sikkə və L-yolun 5100 vahid² sahəsi PASS. Mövcud mobile-v1 tokenləri ilə statik ölçü sxemi render edildi və görüntüyə baxıldı; text/background, muted/surface, accent/surface-raised kontrastı PASS. İnteraktiv təqdimat üçün canvas hazırlandı; TypeScript yoxlaması PASS; runtime render ayrıca yoxlanmayıb. App UI/server kodu dəyişməyib; cihaz/live HTTP və hazır artwork uyğunluğu yoxlanmayıb. CI işlədilməyib.
+- **Exact next step:** təsdiqlənmiş parametrlər canonical `docs/kotlin-compose-plan.md` və AppBackend `docs/wobbrik-game-api.md`-yə yazılıb; uyğun backend domain/data footprint və atomik placement vahidini ayrıca feature branch-də davam et. Backend sənəd branch-i `docs/city-footprint-parameters`-dir. UI üçün ayrıca konkret dizayn approval-u və main üçün ayrıca OK tələbi saxlanır. Aşağıdakı typed geometry qeydləri əvvəlki vahidin vəziyyətidir.
 
 ## Completed
 - Backend və Android typed geometry müqaviləsi `feat/typed-geometry-provenance` branch-lərində tamamlandı; əvvəlki bütün branch ref-ləri saxlanıldı. Android base `e470a47`, backend base `6e949be`.
