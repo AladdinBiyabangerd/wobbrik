@@ -1,48 +1,44 @@
-# Home müqaviləsi tamamlandı — 7 noyabr 2026
+# Home rekord/XP UI — 8 noyabr 2026
 
 ## Completed
-- Birinci vahid: AppBackend rekord/XP intervalı müqaviləsi + mobil DTO uyğunluğu.
-- Backend feat/home-read-contract `8ec40ec` review edilib main-ə tarix saxlanılmaqla merge olundu (`7bd5463`). Sync və attempt-read eyni account lock altında best_floors integer, level_start_xp/next_level_xp decimal string verir.
-- Wobbrik feat/home-recovery-contract `8b1376f` main əsasında hazırlanıb review edildi və main-ə merge olundu (`8c1a0d7`); əvvəlki online implementasiya dolayı yolla main-ə daxil edilmədi.
-- Mobil AccountRecovery.bestFloors nullable Long, xpInterval nullable XpInterval(BigInteger start/next). Köhnə serverdə unavailable; malformed/partial/mismatched interval fail closed.
+- Backend/home DTO müqaviləsi əvvəlki vahiddə tamamlanıb; online branch-ə `8287f26` ilə inteqrasiya olunub.
+- `feat/home-record-xp-ui` / `a374db4`: home real `account.bestFloors` və `xpInterval` oxuyur. BigInteger fərqləri, render üçün DECIMAL64→Float; null → unavailable, lokal hədd/saxta sıfır yoxdur.
+- Təsdiqlənmiş crown asset runtime-a əlavə edilib. Debug fixture qaydaya uyğunlaşdırılıb; legacy/zero/max halları əlavə edilib.
+- Telefon və tablet renderləri təsdiqlənmiş home lövhələri ilə yanaşı müqayisə olunub; review yazılıb.
 
 ## Current state
-- Bu vahiddə UI dəyişməyib; rekord və XP barı hələ home-a bağlanmayıb.
-- Əvvəlki online ekran/Google guest link işi feat/stage-three-online-progression branch-ində qorunur; main-ə merge edilməyib. Müqavilə main-i bu branch-ə inteqrasiya etmək olar; əks istiqamətdə böyük merge etmə.
-- AppBackend main təmizdir; real DB suite keçib, disposable 55448 klasteri dayandırılıb. Deploy/push yoxdur.
-- Google provider/web client Console konfiqurasiyası, Room/outbox/fault proof işi açıqdır.
+- UI vahidi lokal review-dan sonra tarix saxlanılmaqla `feat/stage-three-online-progression`-a merge edilir. Main-ə dolayı online merge yoxdur; CI işlədilməyib.
+- Data binding implementasiya olunub, tam home dizayn uyğunluğu və canlı end-to-end qəbul tamamlanmayıb.
+- Backend dəyişikliyi tələb olunmur; mövcud sync/attempt-read müqaviləsi kifayətdir.
 
 ## Decisions
-- Rekord bütün tamamlanmış online nəticələrin maksimumudur; sub-ten/continued daxildir. Aktiv checkpoint/offline/inventar rekord deyil; satış/silmə rekordu azaltmır.
-- L intervalı: 25×L×(L−1) ≤ xp < 25×L×(L+1). MaxInt64 XP-də next=9223372052185252500; əvvəl BigInteger fərqi, sonra yalnız render payı float-a çevrilməlidir.
-- wobbrik-v1, XP/reward, revision/dedup receipt və vahid wallet dəyişməyib. Yeni schema lazım olmadı. Kiçik fixture query planı mövcud owner-prefix indeksindən istifadə etdi; load benchmark deyil.
-- Təsdiqlənmiş dizaynlar/tokenlər məcburidir. City placement bağlıdır, geometry ölçüləri açıqdır. SKU/Console/deploy/push ayrıca göstəriş tələb edir.
+- Rekord yalnız server recovery-dəndir; aktiv cəhd/inventar/offline rekord deyil.
+- XP mətni səviyyə daxilində qazanılmış/tələb olunan XP-dir. Account səhifəsində ümumi XP saxlanır.
+- SKU/Console/deploy/push yoxdur. Online branch-in main inteqrasiyası ayrıca tam review tələb edir.
 
 ## Remaining work
-1. Real rekord və XP barını təsdiqlənmiş telefon/tablet home-a bağla (növbəti vahid).
-2. Inventory API-dən dəqiq bina sayı, pagination/revision uyğunluğu.
-3. Real Parametrlər ekranı, preference/navigation.
-4. Tablet home Şəhərim read/navigation və rail runtime inteqrasiyası.
-- Tam oyun/domain adapteri, offline recovery/outbox və digər məlum borclar bu müqavilə işi ilə tamamlanmır.
+- Home-un təsdiqlənmiş dizaynla əvvəlki fərqləri: logo/hero/tipoqrafiya/boşluq/düymə effektləri; tablet rail və Şəhərim runtime girişi. Bunlar təsdiqlənmiş istisna deyil.
+- Canlı server sync/finish-dən sonra rekord və XP yenilənməsinin end-to-end yoxlaması; real cihaz, TalkBack, qısa landscape açıqdır.
+- 1.5 font scale-də əvvəlki Nailiyyətlər düyməsinin söz bölünməsi.
+- Inventory dəqiq total/pagination/revision, real Parametrlər, Room/outbox/fault proof, Google Console konfiqurasiyası ayrı vahidlərdir.
 
 ## Relevant files
-- docs/home-contract-audit.md; docs/reviews/2026-11-07-home-recovery-contract.md
-- android-billing/core/src/main/kotlin/appbackend/wobbrik/game/{RecoveryDtos,AttemptCoordinator}.kt
-- android-billing/core/src/test/kotlin/appbackend/wobbrik/game/RecoveryDtosTest.kt
-- android-billing/app/src/main/kotlin/com/aladdin/wobbrik/{OnlineGame,GameTokens}.kt (OnlineGame online branch-də)
-- docs/design/mobile-v1/{mobile-primary-v2.png,tokens.css}; docs/design/tablet-v1/{README.md,primary-landscape.png}; docs/design/game-tap-v2/
+- docs/reviews/2026-11-08-home-record-xp-ui.md; docs/home-contract-audit.md
+- android-billing/app/src/main/kotlin/com/aladdin/wobbrik/{OnlineGame,GameTokens}.kt
+- android-billing/app/src/debug/kotlin/com/aladdin/wobbrik/AccountPreviewActivity.kt
+- android-billing/app/src/main/res/drawable-nodpi/ui_crown.png
+- android-billing/core/src/main/kotlin/appbackend/wobbrik/game/RecoveryDtos.kt
+- docs/design/mobile-v1/{mobile-primary-v2.png,tokens.css}; docs/design/tablet-v1/{primary-landscape.png,portrait.png,README.md}
 - docs/kotlin-compose-plan.md §5; docs/stage-three-online-plan.md
-- /Users/mac/My Workspace/AppBackend/docs/{wobbrik-game-api.md,reviews/2026-11-07-home-read-contract.md,context/current-task.md}
 
 ## Checks performed
-- Wobbrik main `./scripts/local-ci.sh` PASS: 44 core + 45 engine testi, failure/error/skip yoxdur; Android/app assemble və lint PASS. Log=/private/tmp/wobbrik-home-contract-ci.log.
-- Backend go vet + native build PASS; real PostgreSQL 18.6 ilə full go test -race -count=1 -json ./... PASS: 79 əsas test (60 integration), alt testlərlə 101 PASS; test skip/failure yoxdur, 3 paket testsizdir.
-- Backend: zero/sub-ten/lower/higher/continued finish, finish/read race, retry/recovery, blocked/foreign, satış/silmə, izolyasiya və read mutation invariants. XP 0/49/50/149/150/MaxInt64 hər iki tərəfdə test edilib.
-- Backend log=/private/tmp/wobbrik-home-backend-tests.jsonl; query plan 4 row/2 shared hit/0.018 ms. Load/provider/device/deploy yoxlanmayıb.
-- Vizual dəyişiklik və render yoxdur; dizayna uyğunluq iddia edilmir.
+- Son koddan sonra :app:installDebug --offline PASS; /tmp/wobbrik-home-ui-build.log. CI deyil.
+- git diff --check PASS. Kontrast 13.00 / 8.22 / 11.45 PASS.
+- Emulator: 1080×2400 @420dpi, 1280×800 və 800×1280 @160dpi, font 1.0; legacy/zero və MaxInt64 font 1.5 renderlərinə baxıldı. Override-lar bərpa edilib.
+- Gitignored şəkillər docs/reviews/home-record-xp/ altındadır; phone-comparison.png və tablet-comparison.png yanaşı müqayisələrdir.
+- Frozen fixture renderi canlı backend sübutu deyil. Main CI işlədilməyib; əvvəlki main müqavilə CI nəticəsi bu UI vahidini əhatə etmir.
 
 ## Exact next step
-- Bu qeyd və home auditini oxu. Müqavilə main-i online branch-ə merge edildikdən sonra online branch-dən ayrıca feat/home-record-xp-ui branch yarat; əvvəlki online işi main-ə dolayı merge etmə.
-- ui-craft skill-i oxu, təsdiqlənmiş telefon/tablet şəkillərinə və mövcud tokenlərə bax. Mövcud home-da server bestFloors/xpInterval göstər; missing sahələrdə unavailable davranışını saxla.
-- Telefon və planşet renderini uyğun təsdiqlənmiş dizaynla yanaşı yoxla. Bu UI vahidini review et; online branch tarixinin main-ə inteqrasiyası ayrıca tam review tələb edir. CI yalnız main-də.
-- Main /Users/mac/My Workspace/Wobbrik-rail-icons worktree-sindədir; cari Wobbrik worktree online branch-də saxlanır.
+- Bu qeyd və review-u oxu. Yeni kiçik vahid kimi təsdiqlənmiş home dizaynına qalan vizual uyğunluq işini scope et; ui-craft ilə yalnız istinad edilən faylları yoxla. Tablet Şəhərim üçün real read/navigation sərhədini təsdiqlə, saxta axın yaratma.
+- Online branch tarixini main-ə daşımazdan əvvəl bütün online diff ayrıca review olunmalıdır; sonra main-də ./scripts/local-ci.sh.
+- Main worktree: /Users/mac/My Workspace/Wobbrik-rail-icons. Cari Wobbrik worktree online branch-də saxlanır.
