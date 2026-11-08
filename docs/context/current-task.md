@@ -1,3 +1,12 @@
+## Latest historical journal compatibility — 8 November 2026
+- Completed: historical b6a4f9b serializers/builders execute in test-only package; current reader/coordinator replays START/CHECKPOINT/FINISH verbatim. Invalid storage/rules/engine versions preserve bytes, block readiness/backend calls and replacement save.
+- Current state: branch `test/historical-journal-compatibility`; no production/UI/backend changes. Read-only isolated DB observation: same active attempt f73722ea-b54f-4985-9c7e-85a442c1d0a3 now sequence/floors 2, operations 3, ledger 2. External progress; no device controls or gameplay performed here. Preserve newest state, not old one-floor snapshot.
+- Decisions: JVM/fake-backend compatibility proof does not close live APK upgrade, modern backend legacy-snapshot acceptance or UI error handling. Temporary adapters do not test AtomicFile crash durability. Existing runtime remains immutable 79bfc12; separate AppBackend guest branch updated to main, tip 457ceff, without runtime restart.
+- Checks performed: focused HistoricalJournalCompatibilityTest + GameplayAdaptersTest PASS (6s); historical source exactness except documented package/import/header; diff whitespace/review. Final live snapshot read only; no live write, CI, merge/push/deploy.
+- Relevant files: `docs/reviews/2026-11-08-historical-journal-compatibility.md`; core test HistoricalJournalCompatibilityTest.kt and historical/{DiskAttemptJournal,GameplayWire}.kt; PLAN §3.4.
+- Remaining work: live disposable APK upgrade and unsupported-version UI; live account isolation/nonfree unlocks, linking, Room/outbox, full stage/visual/physical acceptance.
+- Exact next step: new bounded chat scopes account isolation/nonfree-unlock preflight under PLAN §3.4; recheck ownership/current DB and journal read-only, preserve active two-floor attempt. No implementation of another large feature in this chat.
+
 ## Latest remaining acceptance selection — 8 November 2026
 - Completed: read checkpoint review and PLAN §3.4; selected historical journal compatibility/safe rejection as next bounded acceptance unit.
 - Current state: branch `docs/legacy-journal-acceptance-selection`; isolated DB exactly equals retained final snapshot. Attempt `f73722ea-b54f-4985-9c7e-85a442c1d0a3` remains active at sequence/floors 1. Current journal file payload equals retained 35-byte tombstone; emulator-5582 reverse unchanged. Retained backend processes exist; fresh readiness not checked.
