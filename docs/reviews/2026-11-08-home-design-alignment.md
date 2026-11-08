@@ -49,3 +49,33 @@
 - Mobile-primary-v2, tablet portrait və primary-landscape ilə müqayisə: işarə və portret CTA düzülüşü düzəlib; sistem fontu təsdiqlənmiş istisnadır. Runtime asset detalları, dəqiq nisbətlər, ikon miqyası, fon/işıq effektləri və əlavə XP sətrinin kart hündürlüyünə təsiri hələ birəbir deyil. Tam dizayn qəbulu verilmir.
 - Böyük font renderində aşağı köməkçi məzmun scroll altındadır; bu capture scroll sonunu yoxlamır. Yeni lokal/real cihaz/TalkBack/canlı sync-start-finish yoxlaması aparılmayıb.
 - Şəhər/İnventar/Bazar bağlıdır; tam placement scope-u saxlanır və yerinə yetirilməyib. Main merge/CI/push/deploy yoxdur.
+
+## İkinci davam — proporsiya və miqyas düzəlişi, 8 noyabr 2026
+
+- Branch `feat/home-design-alignment`; baxış bazası `69bc4fd`. Yalnız bu davamın diff-i lokal yoxlanır; bütün online baza review edilmiş sayılmır.
+- Logo hündürlüyü artırıldı; geniş pəncərədə səhnə/panel eyni en payını alır, idarəetmə yuxarıdan hizalanır. Planşet başlıq/statistika/ikon/düymələr mövcud Title/Score/Target tokenləri ilə böyüdü; portret CTA-lar yenə yan-yana və eyni minimum hündürlükdədir. Böyük şriftdə ardıcıl təqdimat saxlanır.
+- XP rəqəmləri və BigInteger hesabı saxlanır. Kartın daxili boşluğu və XP mətni canonical CSS-dəki `--space-1`/`--type-caption` ilə yığcamlaşdırıldı; GameTokens həmin mövcud tokenləri ixrac edir. Material3 progress son nöqtəsi çıxarıldı. Əsas CTA üçün mövcud Text/Accent rənglərindən işıq gradienti tətbiq edildi.
+- Lokal source review: yeni domain/data qaydası yoxdur; snapshot/callback və auth authority dəyişmir. Rail minimum hədəfi 56dp, digər düymələr ən az 48dp-dir; data uzunluğunda FlowRow və scroll saxlanır. Bu təqdimat diff-i AppBackend dəyişikliyi tələb etmir; şəhər scope-u üçün bu nəticə tətbiq edilmir.
+- Fokuslu `:app:installDebug --offline` PASS (`/tmp/wobbrik-home-refinement-build.log`); ara build-də named/positional argument səhvi düzəldildikdən sonra son build keçdi. CI deyil. `git diff --check` PASS; Text/Surface 13.00, Muted/Surface 8.22, Background/Accent 11.45 PASS.
+- Son layout renderləri: 1080×2400 @420 font1.0; 1280×800 və 800×1280 @160 font1.0; 800×1280 @160 font1.5; MaxInt64 rekord/XP 1080×2400 @420 font1.5; 900×450 @240 font1.5. Error telefonda, loading geniş planşetdə. `refined-*.png` görüntülərinə və phone/landscape/portrait yan-yana müqayisələrinə baxıldı. Böyük şrift və max nümunələrdə scroll-dan sonra aşağı düymələr görünür; qısa landşaftda əlavə swipe-larla son Kolleksiya/Nailiyyətlər də yoxlandı (`refined-short-bottom.png`). Override-lar əvvəlki vəziyyətə qaytarıldı.
+- Tam vizual PASS deyil: şəhər/logo/ikon runtime detalları və səth effektləri nümunənin piksel eyniliyi deyil; XP nümunəyə əlavə real məlumatdır, onun kart hündürlüyünə təsiri tam yox olmur. Sistem fontu əvvəlki təsdiqlənmiş istisnadır. Şəhər/İnventar/Bazar hələ bağlıdır. Real cihaz/TalkBack/canlı auth-sync-finish yoxlanmayıb. Main merge/CI/push/deploy yoxdur.
+- İstifadəçi bu davamda home şəhərini təsdiqlənmiş lövhədən ayırmağı açıq təsdiqlədi. Built-in imagegen ilə şəffaf cutout hazırlanır; nəticə və Android inteqrasiyasının son yoxlaması aşağıda qeyd ediləcək. Bu icazə alternativ şəhər dizaynı icazəsi deyil.
+
+### Şəhər cutout namizədi — runtime-a qəbul edilmədi
+
+- İstifadəçinin lövhədən ayırma təsdiqi ilə built-in imagegen background-extraction çağırıldı; edit target `docs/design/mobile-v1/mobile-primary-v2.png`, yalnız soldakı home şəhəri, şəffaf fon, bütün bina/mərtəbə/mövqe/detal invariants saxlanılması tələb edildi. CLI/API fallback istifadə edilmədi.
+- Çıxış: `docs/reviews/home-design-alignment/home-city-imagegen-candidate.png` (gitignored QA). Generativ alət orijinal pikselləri qoruyan cutout əvəzinə yeni rekonstruksiya verdi; bu orijinal piksel cutout-u deyil. Baxıldı, runtime-a bağlanmadı; əvvəlki asset qorunur.
+- Piksel qoruyan lokal Python maskalaması üçün ayrıca sual göndərildi. İstifadəçi həmin üsulu ayrıca açıq təsdiqlədi; aşağıdakı piksel qoruyan çıxış bununla hazırlandı. Əvvəlki təsdiq tam şəhər scope-unu azaltmır.
+
+- Dəqiqləşdirmə: ilk baxışda “əlavə çətir” kimi qeyd edilmiş detal orijinalda da var; həmin konkret fərq iddiası yanlışdır və çıxarıldı. Generativ nəticənin original pixel extraction olmaması ayrı səbəb olaraq qalır.
+- Qəbul edilən texniki asset: `docs/design/account-assets-v1/home-city-cutout-v2.png` və eyni runtime PNG. Orijinal `(20,154,435,605)` crop, 415×451 RGBA; RGB üzrə ImageChops fərqi sıfır, alpha 0/255. Tünd/açıq fon QA baxıldı. Reproduksiya script-i source SHA256 yoxlayır; OpenCV runtime asılılığı yoxdur, committed alpha maskası + Pillow kifayətdir. Köhnə assetlər saxlanır. Bu ölçü mənbə lövhənin keyfiyyət həddidir, süni upscale edilmir.
+- HomeScreen yeni cutout-u oxuyur; portretdə intrinsic aspect ratio saxlanır. Bu real hesab şəhər renderer-i deyil.
+
+### Son cutout kodunun render və diff baxışı
+
+- İlk cutout renderi şəhəri intrinsic piksel ölçüsündə kiçik göstərirdi; `fitWidth` təqdimatı painter-in real aspect ratio-sundan hündürlük hesablayır. Bu tapıntı düzəldildi; son `:app:installDebug --offline` PASS (8s, 67 task; `/tmp/wobbrik-home-refinement-build.log`).
+- Son kodla bütün `refined-{phone,landscape,portrait,large,max,short,error,loading}.png` və large/max/short scroll renderləri yenidən çəkildi. Phone, landscape və portrait comparison faylları da yeniləndi və görüntülərə baxıldı. Şəhər artıq mənbə formasıdır, lakin aşağı resolution-un yumşaqlığı görünür. Portret normal planşetdə köməkçi düymələr ekran altına keçir; scroll qalır, böyük şrift nümunəsinin scroll sonunda hər ikisinə çatıldı. Qısa landşaftın son köməkçi düymə yoxlaması layout dəyişmədən əvvəlki `refined-short-bottom.png`-dədir; son kodun bir swipe renderi bütün scroll sonunu göstərmir.
+- Son source review: server binding, BigInteger XP hesabı, legacy null davranışı və callback-lər saxlanıb; alpha çıxışı üçün source hash və RGB invariantı yoxlanıb. Bu diff-də əlavə həll olunmamış funksional tapıntı görünmədi; bu bütün online bazanın auditi deyil. `git diff --check` və kontrast yenidən PASS. Source extractor yenidən PASS; runtime PNG dizayn çıxışı ilə eynidir.
+- Bu davam home artwork/layout vahidini irəlilədir, tam home dizayn qəbulu deyil. Tam şəhər yerləşdirməsi başlanmayıb və icra icazəsi qüvvədədir. AGENTS.md-dəki kontekst artımı qaydasına görə növbəti böyük backend/Android şəhər vahidi üçün handoff yeniləndi. Main merge/CI/remote push/deploy yoxdur.
+
+- Bu davamda lokal baxışdan keçmiş implementasiya commit-i: `44946d8` (`69bc4fd..44946d8`). Sonrakı review/handoff commit-i yalnız sənəddir; main gate işə salınmayıb.
