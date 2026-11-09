@@ -41,3 +41,11 @@ Branch `feat/room-cache` from main `d0ccbc3`. Scope: PLAN §3.4 / stage-three un
 - No API 24–29 instrumented run (only API 34 image available on 5586).
 - androidx.test runner 1.6.2 / ext-junit 1.2.1 are new test-only pins (implied by the instrumented-test decision).
 - No live backend run of the cache path (preview fixture + fakes only).
+
+## Main merge and CI (9 November 2026)
+- User-approved `--no-ff` merge of `feat/room-cache` into main: `f53eab3`.
+- `./scripts/local-ci.sh` on `f53eab3`: PASS (46s; 104 tasks, 103 executed). core 70 + engine 55 tests, 0 failures;
+  `:android`/`:app` assembleDebug + lintDebug 0 errors (17/8 warnings: newer-version notices for pinned libs plus pre-existing).
+- Pre-push secret scan clean; normal push `d0ccbc3..f53eab3` (origin/main == local main == `f53eab3`).
+- User approved the test-only pins androidx.test runner 1.6.2 / ext-junit 1.2.1. The landscape "Yenilə"
+  fold is handled by a separate design proposal (no UI code until approved).
