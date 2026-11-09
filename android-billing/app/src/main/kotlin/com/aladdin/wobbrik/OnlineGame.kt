@@ -169,14 +169,16 @@ internal fun AccountScreen(
                 Box(Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
                     Image(painterResource(R.drawable.wobbrik_logo), "Wobbrik", Modifier.widthIn(max = GameTokens.PanelWidth / 2).fillMaxWidth().height(GameTokens.Target), contentScale = ContentScale.Fit)
                 }
-                Surface(shape = RoundedCornerShape(GameTokens.CardRadius), color = GameTokens.Background,
+                // User decision (9 November): the three-pane layout drops the coin chip and profile button;
+                // "Ana ekran" in the action pane returns home, where both are shown.
+                if (!threePane) Surface(shape = RoundedCornerShape(GameTokens.CardRadius), color = GameTokens.Background,
                     border = BorderStroke(GameTokens.Hairline, GameTokens.Raised)) {
                     Row(Modifier.padding(GameTokens.Small), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
                         ArtIcon(R.drawable.ui_coin)
                         Text(snapshot?.coins?.toString() ?: "—", color = GameTokens.Text, fontWeight = FontWeight.Bold)
                     }
                 }
-                IconButton(onClick = { onPage(if (page == "account") "home" else "account") }, modifier = Modifier.size(GameTokens.Target).background(GameTokens.Raised, RoundedCornerShape(GameTokens.CardRadius))) {
+                if (!threePane) IconButton(onClick = { onPage(if (page == "account") "home" else "account") }, modifier = Modifier.size(GameTokens.Target).background(GameTokens.Raised, RoundedCornerShape(GameTokens.CardRadius))) {
                     Image(painterResource(R.drawable.ui_account), if (page == "account") "Ana ekran" else "Hesab", Modifier.size(GameTokens.Target - GameTokens.Gap))
                 }
             }
