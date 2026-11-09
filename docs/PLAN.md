@@ -10,7 +10,7 @@ Son yenilənmə: **8 noyabr 2026**.
 
 **Stack:** Android-only, Kotlin + Compose, minSdk 24 / targetSdk 36, Firebase Spark (yalnız Auth, Crashlytics, Remote Config; Blaze/Cloud Functions yoxdur), AppBackend (Go + PostgreSQL) pul və irəliləyişin əsas mənbəyi. Paket: `com.aladdin.wobbrik`.
 
-**Dizayn mənbələri (məcburi):** `docs/design/` — `mobile-v1`, `tablet-v1`, `tablet-rail-icons-v1`, `game-tap-v2`, `game-assets-v1`, `account-assets-v1`, `city-plan.png`, `city-view.png`. Dizayn uydurulmur; çatışmayan dizayn gözlənilir.
+**Dizayn mənbələri (məcburi):** `docs/design/` — `mobile-v1`, `tablet-v1`, `tablet-rail-icons-v1`, `game-tap-v2`, `game-assets-v1`, `account-assets-v1`, `city-plan.png`, `city-view.png`. Dizayn uydurulmur; çatışmayan dizayn gözlənilir. Bütün ekranlar en və hündürlük üzrə responsivdir: mətn, komponent, boşluq və illüstrasiya ölçüləri ekran ölçüsünə görə pillə ilə dəyişə bilər, əsas əməliyyatlar kəsilmir, yazılarda söz qırılmır (qayda: `AGENTS.md` → Visual work).
 
 **İş qaydası:** hər hissə ayrıca branch → lokal review → Aladdin OK verəndən sonra main-ə merge → lokal CI yalnız main-də. `google-services.json`, `local.properties`, `output/`, log və açarlar commit olunmur. Push/deploy/Console ayrıca göstərişlə.
 
