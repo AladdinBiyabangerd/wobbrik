@@ -54,5 +54,7 @@ class DiskAttemptJournal(private val file: (String) -> JournalFile) : AttemptJou
             command?.let { c -> it.writeUTF(c.operationId); it.writeLong(c.expectedRevision); it.writeUTF(c.route.name); it.writeUTF(c.envelope) }
         }
         file(key(uid)).replace(out.toByteArray())
+        // android.util.AtomicFile only logs some rename/delete failures; never report an uncommitted write.
+        check(read(uid) == command) { "Attempt journal write was not committed" }
     }
 }

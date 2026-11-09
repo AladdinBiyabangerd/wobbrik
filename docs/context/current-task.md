@@ -1,3 +1,12 @@
+## Latest AtomicFile crash matrix — 9 November 2026
+- Completed: `test/atomicfile-crash-matrix` from main `213c5db`. Added `AtomicFileCrashMatrixTest` (6 tests; 258 crash scenarios over API 24–29/30+ AtomicFile models + adapter mirror). Defect: AtomicFile only logs some commit failures, so save/remove could report success while the old state stayed. Fixed by read-back verification in `DiskAttemptJournal.write` (`4051e68`). Review: `docs/reviews/2026-11-09-atomicfile-crash-matrix.md`.
+- Current state: branch committed locally, not merged. `docs/incompatible-journal-main-ci` (main CI record) is also unmerged. No device/backend/UI touched.
+- Decisions: test code plus a minimal 2-line core fix; no Android-module change. A read-back mismatch surfaces as a generic error.
+- Remaining work: decide whether to replace platform AtomicFile on API 24–29 (first write leaves an unreadable file after a crash); real device kill/power-cut durability; billing journal not covered; merge needs user OK, then main local-ci.
+- Relevant files: core DiskAttemptJournal.kt, AtomicFileCrashMatrixTest.kt, android AndroidAttemptJournal.kt, review above, PLAN §3.4.
+- Checks performed: `:core:test --rerun` 60/0 failures, `:engine:test --rerun` 55/0, `:app:assembleDebug` PASS, pre-fix failure observed on both API models, `git diff --check` PASS. No branch CI.
+- Exact next step: user reviews the finding and approves merge of this branch (and the docs CI branch); separately decide on the API 24–29 first-write limitation.
+
 ## Latest main merge / CI — 9 November 2026
 - Completed: user-approved `--no-ff` merge of `fix/incompatible-journal-ux` into main (`213c5db`, main worktree `Wobbrik-rail-icons`); `./scripts/local-ci.sh` PASS (1m44s; engine 55 + core 54 tests, 0 failures; assemble/lint debug, 0 lint errors).
 - Current state: this record lives on `docs/incompatible-journal-main-ci`, not merged. No push or deploy. Retained 5582/attempt and shared 5554 untouched.
