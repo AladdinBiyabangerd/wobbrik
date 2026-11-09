@@ -30,6 +30,17 @@ Mockup-lar yalnız real `AccountPreviewActivity` renderlərindən (emulator-5586
 
 Tövsiyə: **A**. `tablet-v1/README.md` adaptiv qaydasına birbaşa uyğundur ("hündürlük azaldıqda köməkçi məzmun scroll olur; əsas əməl görünən idarəetmə sahəsində qalır"), illüstrasiya ölçüsünü və hesab iyerarxiyasını saxlayır, eyni qayda canlı Oyna problemini də həll edir. B ən mühafizəkar alternativdir.
 
+## Canlı Ready səhifəsi (istifadəçi sorğusu, 9 noyabr)
+
+Mənbə: `source/live-phone-landscape-top.png` və `-scrolled.png` (canlı Ready, emulator-5586). Yenidən yaratmaq: `uv run --with pillow --with numpy python compose_live.py`.
+
+- `live-current-phone-landscape.png`: cari vəziyyət — Oyna yarımçıq, Kolleksiya/Nailiyyətlər və Ana ekran qatın altında.
+- `live-option-a-phone-landscape.png`: A — Oyna | Ana ekran altda sabit sırada; başlıq, kart və Kolleksiya/Nailiyyətlər yuxarıda scroll olur.
+- `live-option-b-phone-landscape.png`: B — Oyna və Ana ekran sütunun başında; başlıq, kart və Kolleksiya/Nailiyyətlər altda (scroll).
+- `live-option-c-phone-landscape.png`: C — üç panel: kiçildilmiş "Hesab" illüstrasiyası | kart | Oyna, Kolleksiya/Nailiyyətlər, Ana ekran; scroll yoxdur.
+
+Tapıntı (mövcud defekt, keşdən asılı deyil): telefon landşaftında "Nailiyyətlər" düyməsinin yazısı iki sətrə bölünür ("Nailiyyətl / ər"). Mockup-lar real kəsiklərdən qurulduğu üçün bunu olduğu kimi göstərir; C-də görünür, A/B-də həmin sıra scroll zonasındadır. Düzəliş ayrıca qərar tələb edir.
+
 ## Açıq suallar / yoxlanmayanlar
 
 - A seçilərsə: canlı vəziyyətdə sabit sıra "Oyna | Ana ekran" olsunmu, yoxsa yalnız offline/bərpa vəziyyətinə tətbiq edilsin?
