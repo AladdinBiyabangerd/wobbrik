@@ -101,7 +101,10 @@ Fake regressiyalar və izolə renderlər canlı server/cihaz sübutu sayılmır.
 8 noyabr disposable APK yoxlaması: `e0af061` START journal-ı APK yenilənməsində
 (versionCode 1→2) eyni envelope ilə dedup bərpa edildi; uyğunsuz storage/rules/engine
 startup və retry-də baytları qorudu, sorğu göndərmədi. Ümumi “Bağlantı yoxdur”
-mesajı ayrıca UX açığıdır. Bu, bütün §3.4-ün və köhnə checkpoint/finish-in qəbulu deyil.
+mesajı əvəzinə təsdiqlənmiş “Cəhd bu versiyada bərpa edilmir” xəta/bərpa ekranı
+(`fix/incompatible-journal-ux`, main-də deyil) debug fixture renderləri ilə yoxlanıb;
+canlı Android journal bərpası ilə bu UI yoxlanmayıb ([review](reviews/2026-11-08-incompatible-journal-ux.md)).
+Bu, bütün §3.4-ün və köhnə checkpoint/finish-in qəbulu deyil.
 Sübut və sərhədlər: [APK journal review](reviews/2026-11-08-apk-journal-upgrade.md).
 
 ## 4. Kolleksiya, hissələr və şəhər — yekun Android axını tamamlanmayıb
