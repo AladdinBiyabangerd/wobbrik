@@ -2,38 +2,59 @@ package appbackend.wobbrik.game
 
 import org.junit.Assert.*
 import org.junit.Test
+import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
-import java.io.SyncFailedException
 
 /**
- * JVM crash/fault matrix for [DiskAttemptJournal] over in-memory models of `android.util.AtomicFile`
- * (API 24–29 `.bak` protocol and API 30+ `.new` + rename protocol, transcribed from AOSP
- * android10-release / android11-release) and of the `androidAttemptJournal` adapter.
+ * JVM crash/fault matrix for [DiskAttemptJournal] over the production [DurableJournalFile] with a
+ * fault-injecting in-memory [JournalFileSystem]. Models of the previous `android.util.AtomicFile`
+ * adapter (API 24–29 `.bak` and API 30+ `.new` protocols, transcribed from AOSP android10-release /
+ * android11-release) only produce leftover files for upgrade checks.
  * Model evidence only: it does not prove kernel, filesystem or flash durability on a device.
  */
 class AtomicFileCrashMatrixTest {
     /** Process death. An Error, so production `catch (Exception)` cannot swallow it. */
     private class Crash : Error("simulated process death")
 
-    /** Namespace operations are modelled as durable once done; file data is durable only after sync. */
-    private class Fs {
-        private val files = linkedMapOf<String, ByteArray>()
+    /** File data is durable only after sync; renames/deletes only after a directory sync (or not, per loss mode). */
+    private class Fs : JournalFileSystem {
+        private var files = linkedMapOf<String, ByteArray>()
+        private var durableNamespace = linkedMapOf<String, ByteArray>()
         private val unsynced = mutableSetOf<String>()
         var ops = 0
         var crashAt = -1
         private var dead = false
         var renameFails: (String, String) -> Boolean = { _, _ -> false }
+        var renameLies = false
         var deleteFails: (String) -> Boolean = { false }
         var writeFailsAfter: Int? = null
         var syncFails = false
+        var directorySyncFails = false
         var readDenied = false
+        var directorySyncs = 0
         private fun step() {
             if (dead) throw Crash()
             if (ops++ == crashAt) { dead = true; throw Crash() }
         }
-        fun exists(name: String): Boolean { step(); return name in files }
-        fun read(name: String): ByteArray? {
+        override fun exists(file: File): Boolean = has(file.path)
+        override fun read(file: File, limit: Int): ByteArray =
+            readOrNull(file.path)?.also { if (it.size > limit) throw IOException("Journal too large") } ?: throw FileNotFoundException(file.path)
+        override fun writeSynced(file: File, bytes: ByteArray) {
+            create(file.path); write(file.path, bytes)
+            if (!sync(file.path)) throw IOException("fsync failed")
+        }
+        override fun rename(from: File, to: File): Boolean = rename(from.path, to.path)
+        override fun delete(file: File): Boolean = delete(file.path)
+        override fun syncDirectory(directory: File) {
+            step()
+            if (directorySyncFails) throw IOException("directory fsync failed")
+            directorySyncs++
+            durableNamespace = LinkedHashMap(files)
+        }
+
+        fun has(name: String): Boolean { step(); return name in files }
+        fun readOrNull(name: String): ByteArray? {
             step()
             if (readDenied && name in files) throw FileNotFoundException("$name (Permission denied)")
             return files[name]?.copyOf()
@@ -42,11 +63,13 @@ class AtomicFileCrashMatrixTest {
             step()
             if (deleteFails(name)) return false
             unsynced -= name
-            return files.remove(name) != null
+            files.remove(name)
+            return true
         }
         fun rename(source: String, target: String): Boolean {
             step()
             if (renameFails(source, target) || source !in files) return false
+            if (renameLies) return true
             files[target] = files.remove(source)!!
             if (unsynced.remove(source)) unsynced += target else unsynced -= target
             return true
@@ -68,20 +91,27 @@ class AtomicFileCrashMatrixTest {
             }
         }
         fun sync(name: String): Boolean { step(); if (syncFails) return false; unsynced -= name; return true }
-        /** New process; with [keep], power loss keeps only that many bytes of never-synced data. */
-        fun restart(keep: ((Int) -> Int)? = null) {
+
+        /** New process. Power loss truncates never-synced data and may revert to the last synced directory. */
+        fun restart(loss: Loss = Loss.PROCESS_DEATH) {
             dead = false; crashAt = -1; ops = 0
-            if (keep != null) for (name in unsynced) files[name] = files.getValue(name).copyOf(keep(files.getValue(name).size))
+            if (loss.revertDirectory) files = LinkedHashMap(durableNamespace)
+            loss.keep?.let { keep -> for (name in unsynced) files[name]?.let { files[name] = it.copyOf(keep(it.size)) } }
             unsynced.clear()
+            durableNamespace = LinkedHashMap(files)
         }
-        fun clearFaults() { renameFails = { _, _ -> false }; deleteFails = { false }; writeFailsAfter = null; syncFails = false; readDenied = false }
+        fun clearFaults() {
+            renameFails = { _, _ -> false }; renameLies = false; deleteFails = { false }
+            writeFailsAfter = null; syncFails = false; directorySyncFails = false; readDenied = false
+        }
+        fun copy(): Fs = Fs().also { it.files = LinkedHashMap(files); it.durableNamespace = LinkedHashMap(files) }
         fun snapshot(): Map<String, List<Byte>> = files.mapValues { it.value.toList() }
         fun names(): Set<String> = files.keys.toSet()
         fun raw(name: String): ByteArray? = files[name]?.copyOf()
-        fun put(name: String, bytes: ByteArray) { files[name] = bytes.copyOf() }
+        fun put(name: String, bytes: ByteArray) { files[name] = bytes.copyOf(); durableNamespace = LinkedHashMap(files) }
     }
 
-    private interface Atomic {
+    private interface OldAtomic {
         val base: String
         fun startWrite(): String
         fun finishWrite(out: String)
@@ -89,54 +119,64 @@ class AtomicFileCrashMatrixTest {
         fun openRead(): ByteArray
     }
 
-    /** API 30+: write `.new`, rename into place. Sync, rename and delete failures are only logged. */
-    private class ModernAtomic(private val fs: Fs, override val base: String) : Atomic {
+    /** Previous adapter on API 30+: android.util.AtomicFile `.new` + rename; failures only logged. */
+    private class OldModernAtomic(private val fs: Fs, override val base: String) : OldAtomic {
         private val next = "$base.new"
         private val legacy = "$base.bak"
-        override fun startWrite(): String { if (fs.exists(legacy)) fs.rename(legacy, base); fs.create(next); return next }
+        override fun startWrite(): String { if (fs.has(legacy)) fs.rename(legacy, base); fs.create(next); return next }
         override fun finishWrite(out: String) { fs.sync(out); fs.rename(next, base) }
         override fun failWrite(out: String) { fs.sync(out); fs.delete(next) }
         override fun openRead(): ByteArray {
-            if (fs.exists(legacy)) fs.rename(legacy, base)
-            if (fs.exists(next) && fs.exists(base)) fs.delete(next)
-            return fs.read(base) ?: throw FileNotFoundException(base)
+            if (fs.has(legacy)) fs.rename(legacy, base)
+            if (fs.has(next) && fs.has(base)) fs.delete(next)
+            return fs.readOrNull(base) ?: throw FileNotFoundException(base)
         }
     }
 
-    /** API 24–29: move base to `.bak`, rewrite base, delete `.bak`. Rename/delete results are ignored. */
-    private class LegacyAtomic(private val fs: Fs, override val base: String) : Atomic {
+    /** Previous adapter on API 24–29: android.util.AtomicFile `.bak` protocol, base rewritten in place. */
+    private class OldLegacyAtomic(private val fs: Fs, override val base: String) : OldAtomic {
         private val backup = "$base.bak"
         override fun startWrite(): String {
-            if (fs.exists(base)) { if (!fs.exists(backup)) fs.rename(base, backup) else fs.delete(base) }
+            if (fs.has(base)) { if (!fs.has(backup)) fs.rename(base, backup) else fs.delete(base) }
             fs.create(base); return base
         }
         override fun finishWrite(out: String) { fs.sync(base); fs.delete(backup) }
         override fun failWrite(out: String) { fs.sync(base); fs.delete(base); fs.rename(backup, base) }
         override fun openRead(): ByteArray {
-            if (fs.exists(backup)) { fs.delete(base); fs.rename(backup, base) }
-            return fs.read(base) ?: throw FileNotFoundException(base)
+            if (fs.has(backup)) { fs.delete(base); fs.rename(backup, base) }
+            return fs.readOrNull(base) ?: throw FileNotFoundException(base)
         }
     }
 
-    private enum class Api { LEGACY_24_29, MODERN_30 }
-    private enum class Loss(val keep: ((Int) -> Int)?) { PROCESS_DEATH(null), POWER_LOSS_EMPTY({ 0 }), POWER_LOSS_HALF({ it / 2 }) }
+    private enum class Layout { DURABLE, OLD_ATOMICFILE_24_29, OLD_ATOMICFILE_30 }
+    enum class Loss(val keep: ((Int) -> Int)?, val revertDirectory: Boolean) {
+        PROCESS_DEATH(null, false), POWER_LOSS_EMPTY({ 0 }, false), POWER_LOSS_HALF({ it / 2 }, false),
+        POWER_LOSS_EMPTY_UNSYNCED_DIRECTORY({ 0 }, true), POWER_LOSS_HALF_UNSYNCED_DIRECTORY({ it / 2 }, true),
+    }
+    /** In-place rewrites by the old AtomicFile cannot be modelled by directory reverts. */
+    private val oldLosses = listOf(Loss.PROCESS_DEATH, Loss.POWER_LOSS_EMPTY, Loss.POWER_LOSS_HALF)
 
-    /** Mirrors the JournalFile adapter in android/.../AndroidAttemptJournal.kt. */
-    private fun journal(fs: Fs, api: Api) = DiskAttemptJournal { key ->
-        val file = if (api == Api.MODERN_30) ModernAtomic(fs, "$key.journal") else LegacyAtomic(fs, "$key.journal")
-        object : JournalFile {
-            override fun read(): ByteArray? = try { file.openRead() } catch (e: FileNotFoundException) {
-                if (fs.exists(file.base) || fs.exists("${file.base}.bak")) throw e
-                null
-            }
-            override fun replace(bytes: ByteArray) {
-                val out = file.startWrite()
-                try {
-                    fs.write(out, bytes)
-                    if (!fs.sync(out)) throw SyncFailedException("sync failed")
-                    file.finishWrite(out)
-                } catch (failure: Throwable) { file.failWrite(out); throw failure }
-            }
+    private val directory = File("/journal")
+    private fun journal(fs: Fs, layout: Layout) = DiskAttemptJournal { key ->
+        when (layout) {
+            Layout.DURABLE -> DurableJournalFile(directory, "$key.journal", fs)
+            else -> oldAdapter(fs, if (layout == Layout.OLD_ATOMICFILE_30) OldModernAtomic(fs, File(directory, "$key.journal").path)
+                                  else OldLegacyAtomic(fs, File(directory, "$key.journal").path))
+        }
+    }
+    /** The adapter that shipped before this branch (AndroidAttemptJournal over android.util.AtomicFile). */
+    private fun oldAdapter(fs: Fs, file: OldAtomic) = object : JournalFile {
+        override fun read(): ByteArray? = try { file.openRead() } catch (e: FileNotFoundException) {
+            if (fs.has(file.base) || fs.has("${file.base}.bak")) throw e
+            null
+        }
+        override fun replace(bytes: ByteArray) {
+            val out = file.startWrite()
+            try {
+                fs.write(out, bytes)
+                if (!fs.sync(out)) throw IOException("sync failed")
+                file.finishWrite(out)
+            } catch (failure: Throwable) { file.failWrite(out); throw failure }
         }
     }
 
@@ -159,26 +199,28 @@ class AtomicFileCrashMatrixTest {
     )
 
     private data class Outcome(val pending: AttemptCommand?, val unreadable: Boolean)
-    private fun recover(fs: Fs, api: Api): Outcome =
-        try { Outcome(journal(fs, api).pending(alice), false) } catch (_: UnreadableAttemptJournal) { Outcome(null, true) }
+    private fun recover(fs: Fs, layout: Layout): Outcome =
+        try { Outcome(journal(fs, layout).pending(alice), false) } catch (_: UnreadableAttemptJournal) { Outcome(null, true) }
 
-    private fun prepared(api: Api, case: Case): Fs {
+    private fun prepared(layout: Layout, case: Case): Fs {
         val fs = Fs()
-        val journal = journal(fs, api)
+        val journal = journal(fs, layout)
         journal.save(bob, bobCommand)
         case.setup(journal)
         fs.restart()
         return fs
     }
 
+    private fun base(uid: String) = File(directory, "${key(uid)}.journal").path
+
     private fun assertSameCommand(label: String, expected: AttemptCommand?, actual: AttemptCommand?) {
         assertEquals(label, expected, actual)
         assertEquals(label, expected?.envelope, actual?.envelope)
     }
 
-    /** After restart: exact old/new state (or a preserved unreadable file), stable on repeated recovery, bob untouched. */
-    private fun assertRecovered(label: String, fs: Fs, api: Api, case: Case, completed: Boolean, allowUnreadable: Boolean): Outcome {
-        val first = recover(fs, api)
+    /** Recovery through the production adapter: exact old/new state (or preserved unreadable bytes), stable, bob untouched. */
+    private fun assertRecovered(label: String, fs: Fs, case: Case, completed: Boolean, allowUnreadable: Boolean): Outcome {
+        val first = recover(fs, Layout.DURABLE)
         when {
             completed -> assertEquals(label, Outcome(case.after, false), first)
             first.unreadable -> assertTrue("$label unexpectedly unreadable", allowUnreadable)
@@ -186,140 +228,138 @@ class AtomicFileCrashMatrixTest {
         }
         first.pending?.let { assertSameCommand(label, if (it == case.after) case.after else case.before, it) }
         val stable = fs.snapshot()
+        if (!first.unreadable) assertTrue("$label leftovers ${fs.names()}", fs.names().none { it.endsWith(".new") || it.endsWith(".bak") })
         repeat(2) {
-            assertEquals(label, first, recover(fs, api))
+            assertEquals(label, first, recover(fs, Layout.DURABLE))
             assertEquals("$label repeated recovery mutated files", stable, fs.snapshot())
         }
-        assertSameCommand("$label bob", bobCommand, journal(fs, api).pending(bob))
+        assertSameCommand("$label bob", bobCommand, journal(fs, Layout.DURABLE).pending(bob))
         if (first.unreadable) {
-            assertThrows(UnreadableAttemptJournal::class.java) { journal(fs, api).save(alice, next) }
+            assertThrows(UnreadableAttemptJournal::class.java) { journal(fs, Layout.DURABLE).save(alice, next) }
             assertEquals("$label unreadable bytes must be preserved", stable, fs.snapshot())
         } else {
-            val journal = journal(fs, api)
+            val journal = journal(fs, Layout.DURABLE)
             first.pending?.let { journal.remove(alice, it) }
             journal.save(alice, next)
-            assertSameCommand("$label continuation", next, journal(fs, api).pending(alice))
+            assertSameCommand("$label continuation", next, journal(fs, Layout.DURABLE).pending(alice))
         }
         return first
     }
 
-    @Test fun crashAtEveryStepRecoversExactOldOrNewState() {
-        val findings = mutableListOf<String>()
+    @Test fun durableWriteSurvivesCrashAtEveryStepWithoutUnreadableState() {
         var scenarios = 0
-        for (api in Api.entries) for (case in cases) {
-            val total = prepared(api, case).let { fs -> case.action(journal(fs, api)); fs.ops }
+        for (case in cases) {
+            val total = prepared(Layout.DURABLE, case).let { fs -> case.action(journal(fs, Layout.DURABLE)); fs.ops }
             for (crashAt in 0..total) for (loss in Loss.entries) {
-                val fs = prepared(api, case)
+                val fs = prepared(Layout.DURABLE, case)
                 fs.crashAt = crashAt
-                val completed = try { case.action(journal(fs, api)); true } catch (_: Crash) { false }
+                val completed = try { case.action(journal(fs, Layout.DURABLE)); true } catch (_: Crash) { false }
                 assertEquals(crashAt == total, completed)
-                fs.restart(loss.keep)
-                val label = "$api/${case.name}/crash@$crashAt/$loss"
-                // Known API 24–29 limitation: the very first write has no backup to roll back to.
-                val outcome = assertRecovered(label, fs, api, case, completed, api == Api.LEGACY_24_29 && case.name == "first save")
-                if (outcome.unreadable) findings += label
+                fs.restart(loss)
+                // Same code on API 24–29 and 30+: no "unreadable although nothing was sent" outcome is allowed.
+                assertRecovered("DURABLE/${case.name}/crash@$crashAt/$loss", fs, case, completed, allowUnreadable = false)
                 scenarios++
             }
         }
-        println("crash matrix scenarios=$scenarios legacyFirstWriteUnreadable=${findings.size}: $findings")
-        assertTrue(findings.isNotEmpty()) // documents the limitation; see review
-        assertTrue(findings.none { it.startsWith("MODERN_30") })
+        println("durable crash matrix scenarios=$scenarios unreadable=0")
     }
 
-    @Test fun uncommittedWriteIsNeverReportedAsDurable() {
-        // API 30+ finishWrite only logs a failed `.new` -> base rename. API 24–29 finishWrite ignores a
-        // failed `.bak` delete, so the next read rolls back to the backup. Neither throws to the caller.
-        for (api in Api.entries) for (case in cases) {
-            val fs = prepared(api, case)
-            if (api == Api.MODERN_30) fs.renameFails = { source, _ -> source.endsWith(".new") }
-            else fs.deleteFails = { it.endsWith(".bak") }
-            val label = "$api/${case.name}"
-            val error = runCatching { case.action(journal(fs, api)) }.exceptionOrNull()
-            fs.clearFaults(); fs.restart()
-            val durable = recover(fs, api)
-            assertFalse(label, durable.unreadable)
-            if (error == null) assertSameCommand("$label reported success", case.after, durable.pending)
-            else {
-                assertTrue("$label: $error", error is IllegalStateException)
-                assertSameCommand(label, case.before, durable.pending)
-                case.action(journal(fs, api))
-                assertSameCommand("$label retry", case.after, journal(fs, api).pending(alice))
-            }
-            assertSameCommand("$label bob", bobCommand, journal(fs, api).pending(bob))
-        }
-    }
-
-    @Test fun legacyFailedBackupRenameLosesRollbackButNeverInventsState() {
-        // API 24–29 startWrite only logs a failed base -> `.bak` rename and then rewrites base in place.
-        val findings = mutableListOf<String>()
-        for (case in cases.drop(1)) {
-            val total = prepared(Api.LEGACY_24_29, case).let { fs ->
-                fs.renameFails = { _, target -> target.endsWith(".bak") }; case.action(journal(fs, Api.LEGACY_24_29)); fs.ops }
-            for (crashAt in 0 until total) for (loss in Loss.entries) {
-                val fs = prepared(Api.LEGACY_24_29, case)
-                fs.renameFails = { _, target -> target.endsWith(".bak") }
+    @Test fun upgradeReadsOldAtomicFileJournalsAndCrashLeftovers() {
+        val preexisting = mutableListOf<String>()
+        var scenarios = 0
+        for (layout in listOf(Layout.OLD_ATOMICFILE_24_29, Layout.OLD_ATOMICFILE_30)) for (case in cases) {
+            val total = prepared(layout, case).let { fs -> case.action(journal(fs, layout)); fs.ops }
+            for (crashAt in 0..total) for (loss in oldLosses) {
+                val fs = prepared(layout, case)
                 fs.crashAt = crashAt
-                assertThrows(Crash::class.java) { case.action(journal(fs, Api.LEGACY_24_29)) }
-                fs.clearFaults(); fs.restart(loss.keep)
-                val label = "LEGACY_24_29/${case.name}/no-backup/crash@$crashAt/$loss"
-                if (assertRecovered(label, fs, Api.LEGACY_24_29, case, false, true).unreadable) findings += label
+                val completed = try { case.action(journal(fs, layout)); true } catch (_: Crash) { false }
+                fs.restart(loss)
+                val label = "$layout→DURABLE/${case.name}/crash@$crashAt/$loss"
+                val old = recover(fs.copy(), layout)
+                // Damage the old API 24–29 adapter already wrote before the upgrade cannot be undone.
+                val outcome = assertRecovered(label, fs, case, completed, allowUnreadable = old.unreadable)
+                assertEquals("$label must read what the old adapter read", old, outcome)
+                if (outcome.unreadable) preexisting += label
+                scenarios++
             }
         }
-        println("legacy no-backup unreadable=${findings.size}: $findings")
-        assertTrue(findings.isNotEmpty())
+        println("upgrade scenarios=$scenarios preexistingOldLegacyDamage=${preexisting.size}: $preexisting")
+        assertTrue(preexisting.all { it.startsWith("OLD_ATOMICFILE_24_29→DURABLE/first save/") })
     }
 
-    @Test fun failedWriteOrSyncRollsBackAndRetrySucceeds() {
-        for (api in Api.entries) for (case in cases) for (fault in listOf("disk full", "sync")) {
-            val fs = prepared(api, case)
-            if (fault == "disk full") fs.writeFailsAfter = 7 else fs.syncFails = true
-            val label = "$api/${case.name}/$fault"
-            val error = runCatching { case.action(journal(fs, api)) }.exceptionOrNull()
-            assertTrue("$label: $error", error is IOException)
+    @Test fun failedOrUncommittedWritesAreReportedAndRetrySucceeds() {
+        val faults = listOf<Pair<String, (Fs) -> Unit>>(
+            "disk full" to { it.writeFailsAfter = 7 },
+            "file fsync" to { it.syncFails = true },
+            "rename refused" to { fs -> fs.renameFails = { source, _ -> source.endsWith(".new") } },
+            "rename reports success but did nothing" to { it.renameLies = true },
+            "directory fsync" to { it.directorySyncFails = true },
+        )
+        for (case in cases) for ((fault, inject) in faults) {
+            val fs = prepared(Layout.DURABLE, case)
+            inject(fs)
+            val label = "${case.name}/$fault"
+            val error = runCatching { case.action(journal(fs, Layout.DURABLE)) }.exceptionOrNull()
+            assertTrue("$label: $error", error is IOException || error is IllegalStateException)
             fs.clearFaults(); fs.restart()
-            assertEquals(label, Outcome(case.before, false), recover(fs, api))
-            assertTrue("$label leftover temp ${fs.names()}", fs.names().none { it.endsWith(".new") || it.endsWith(".bak") })
-            case.action(journal(fs, api))
-            assertSameCommand(label, case.after, journal(fs, api).pending(alice))
-            assertSameCommand(label, bobCommand, journal(fs, api).pending(bob))
+            val durable = recover(fs, Layout.DURABLE)
+            assertFalse(label, durable.unreadable)
+            // A directory fsync failure happens after the atomic rename: either state is safe to replay.
+            if (fault == "directory fsync") assertTrue(label, durable.pending == case.before || durable.pending == case.after)
+            else assertSameCommand(label, case.before, durable.pending)
+            assertTrue("$label leftovers ${fs.names()}", fs.names().none { it.endsWith(".new") || it.endsWith(".bak") })
+            if (durable.pending == case.before) case.action(journal(fs, Layout.DURABLE))
+            assertSameCommand("$label retry", case.after, journal(fs, Layout.DURABLE).pending(alice))
+            assertSameCommand("$label bob", bobCommand, journal(fs, Layout.DURABLE).pending(bob))
         }
     }
 
     @Test fun staleBackupAndTempFilesResolveToCommittedState() {
-        for (api in Api.entries) {
-            val fs = Fs()
-            journal(fs, api).save(alice, checkpoint)
-            val base = "${key(alice)}.journal"
-            val committed = fs.raw(base)!!
-            // Legacy crash leftover (also seen by API 30+ after an OS upgrade): backup is authoritative.
-            fs.put("$base.bak", committed); fs.put(base, committed.copyOf(5)); fs.restart()
-            assertSameCommand("$api bak", checkpoint, journal(fs, api).pending(alice))
-            assertFalse(fs.names().contains("$base.bak")); assertArrayEquals(committed, fs.raw(base))
-            // An uncommitted complete `.new` never wins over the base file.
-            val other = Fs().also { journal(it, api).save(alice, finish) }.raw(base)!!
-            fs.put("$base.new", other); fs.restart()
-            assertSameCommand("$api new", checkpoint, journal(fs, api).pending(alice))
-            if (api == Api.MODERN_30) assertFalse(fs.names().contains("$base.new"))
-        }
-        // API 30+: `.new` without base is an uncommitted first write, i.e. empty.
         val fs = Fs()
-        val base = "${key(alice)}.journal"
-        fs.put("$base.new", byteArrayOf(0, 0, 0, 1, 0)); fs.restart()
-        assertNull(journal(fs, Api.MODERN_30).pending(alice))
-        journal(fs, Api.MODERN_30).save(alice, start)
-        assertSameCommand("modern after orphan new", start, journal(fs, Api.MODERN_30).pending(alice))
+        journal(fs, Layout.DURABLE).save(alice, checkpoint)
+        val base = base(alice)
+        val committed = fs.raw(base)!!
+        // Old API 24–29 crash leftover: backup is the committed state, base is a partial rewrite.
+        fs.put("$base.bak", committed); fs.put(base, committed.copyOf(5))
+        assertSameCommand("bak", checkpoint, journal(fs, Layout.DURABLE).pending(alice))
+        assertEquals(setOf(base, base(bob)).filter { it == base }.toSet(), fs.names())
+        assertArrayEquals(committed, fs.raw(base))
+        // `.bak` without base (old adapter crashed between rename and create).
+        fs.put("$base.bak", committed); fs.put(base, ByteArray(0)); fs.restart()
+        assertSameCommand("bak only", checkpoint, journal(fs, Layout.DURABLE).pending(alice))
+        // A complete but uncommitted `.new` never wins.
+        val other = Fs().also { journal(it, Layout.DURABLE).save(alice, finish) }.raw(base)!!
+        fs.put("$base.new", other)
+        assertSameCommand("new", checkpoint, journal(fs, Layout.DURABLE).pending(alice))
+        assertEquals(setOf(base), fs.names())
+        // `.new` without base is an uncommitted first write, i.e. empty.
+        val orphan = Fs()
+        orphan.put("$base.new", byteArrayOf(0, 0, 0, 1, 0))
+        assertNull(journal(orphan, Layout.DURABLE).pending(alice))
+        assertTrue(orphan.names().isEmpty())
+        journal(orphan, Layout.DURABLE).save(alice, start)
+        assertSameCommand("after orphan new", start, journal(orphan, Layout.DURABLE).pending(alice))
+        assertTrue(orphan.directorySyncs > 0)
     }
 
-    @Test fun unreadableExistingFileIsNeverTreatedAsEmpty() {
-        for (api in Api.entries) {
-            val fs = Fs()
-            journal(fs, api).save(alice, start)
-            val before = fs.snapshot()
-            fs.readDenied = true
-            repeat(2) { assertThrows(UnreadableAttemptJournal::class.java) { journal(fs, api).pending(alice) } }
-            assertThrows(UnreadableAttemptJournal::class.java) { journal(fs, api).save(alice, next) }
-            assertEquals(before, fs.snapshot())
-        }
+    @Test fun unreadableOrUnresolvableFileIsNeverTreatedAsEmpty() {
+        val fs = Fs()
+        journal(fs, Layout.DURABLE).save(alice, start)
+        val before = fs.snapshot()
+        fs.readDenied = true
+        repeat(2) { assertThrows(UnreadableAttemptJournal::class.java) { journal(fs, Layout.DURABLE).pending(alice) } }
+        assertThrows(UnreadableAttemptJournal::class.java) { journal(fs, Layout.DURABLE).save(alice, next) }
+        assertEquals(before, fs.snapshot())
+        fs.clearFaults()
+        // A backup that cannot be restored blocks instead of exposing the partial base.
+        val base = base(alice)
+        fs.put("$base.bak", fs.raw(base)!!); fs.put(base, byteArrayOf(1))
+        fs.renameFails = { source, _ -> source.endsWith(".bak") }
+        val stuck = fs.snapshot()
+        repeat(2) { assertThrows(UnreadableAttemptJournal::class.java) { journal(fs, Layout.DURABLE).pending(alice) } }
+        assertEquals(stuck, fs.snapshot())
+        fs.clearFaults()
+        assertSameCommand("after restore", start, journal(fs, Layout.DURABLE).pending(alice))
     }
 
     private fun key(uid: String) = java.security.MessageDigest.getInstance("SHA-256")

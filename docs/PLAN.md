@@ -99,9 +99,12 @@ ilə dəyişmədən drain olunur. Yeni draft server snapshot-u və ya ikinci out
 Fake regressiyalar və izolə renderlər canlı server/cihaz sübutu sayılmır.
 9 noyabr AtomicFile crash matrisi (`test/atomicfile-crash-matrix`, main-də deyil): API 24–29 və
 30+ AtomicFile modelləri üzərində 258 JVM ssenarisi köhnə/yeni vəziyyəti dəqiq bərpa etdi;
-AtomicFile-ın yalnız log etdiyi commit xətası üçün read-back düzəlişi edildi. API 24–29-da ilk
-yazının crash-i oxunmayan (qorunan) fayl qoyur — qərar tələb edir. Cihaz durability sübutu deyil
-([review](reviews/2026-11-09-atomicfile-crash-matrix.md)).
+AtomicFile-ın yalnız log etdiyi commit xətası üçün read-back düzəlişi edildi
+([review](reviews/2026-11-09-atomicfile-crash-matrix.md)). API 24–29 ilk yazı boşluğu
+`fix/legacy-atomicfile-first-write`-də (main-də deyil) bütün API-lərdə temp+fsync+rename+qovluq
+fsync ilə bağlandı; köhnə `.bak`/`.new` qalıqları oxunur. JVM-də 250 durable + 258 upgrade ssenarisi,
+0 “göndərilməyib, amma bloklanıb” halı. Cihaz durability sübutu deyil
+([review](reviews/2026-11-09-legacy-atomicfile-first-write.md)).
 
 8 noyabr disposable APK yoxlaması: `e0af061` START journal-ı APK yenilənməsində
 (versionCode 1→2) eyni envelope ilə dedup bərpa edildi; uyğunsuz storage/rules/engine

@@ -1,3 +1,12 @@
+## Latest legacy AtomicFile first-write fix — 9 November 2026
+- Completed: `fix/legacy-atomicfile-first-write` (from `test/atomicfile-crash-matrix`). New core `DurableJournalFile` (temp `.new` → fsync → rename → directory fsync; resolves old AtomicFile `.bak`/`.new`); Android adapter uses it on all APIs (`Os.fsync` directory, EINVAL tolerated). Crash matrix runs the production class. Review: `docs/reviews/2026-11-09-legacy-atomicfile-first-write.md`.
+- Current state: commits 2c7b034, 645511d, 012088d plus a docs commit, not merged. Unmerged branch stack: `docs/incompatible-journal-main-ci`, `test/atomicfile-crash-matrix`, this branch. No device/backend/UI touched.
+- Decisions: own durable adapter instead of platform/androidx AtomicFile; same file names and format; read-back verification kept. Old API 24–29 partial-base damage written before the upgrade stays unreadable (preserved) because it cannot be told apart from corruption; the app is unreleased.
+- Remaining work: device/emulator proof (kill/power-cut/APK upgrade over old leftovers on API 24–29 and 30+), directory fsync behaviour on real devices, billing journal not covered; user OK to merge, then main local-ci (expect `current-task.md` top-entry conflicts between the unmerged docs branches).
+- Relevant files: core DurableJournalFile.kt, DiskAttemptJournal.kt, AtomicFileCrashMatrixTest.kt, DurableJournalFileTest.kt; android AndroidAttemptJournal.kt; PLAN §3.4.
+- Checks performed: core 61 + engine 55 tests (`--rerun`, 0 failures); durable matrix 250 scenarios with 0 unreadable; upgrade matrix 258; 3 mutation checks caught; `:app:assembleDebug` and `:android:lintDebug` (0 errors) PASS; `git diff --check` PASS. No branch CI.
+- Exact next step: user reviews and approves merging the three branches in order; then run `./scripts/local-ci.sh` on main. Optionally a disposable-emulator kill/upgrade check on an API 24–29 image (never 5582/5554).
+
 ## Latest AtomicFile crash matrix — 9 November 2026
 - Completed: `test/atomicfile-crash-matrix` from main `213c5db`. Added `AtomicFileCrashMatrixTest` (6 tests; 258 crash scenarios over API 24–29/30+ AtomicFile models + adapter mirror). Defect: AtomicFile only logs some commit failures, so save/remove could report success while the old state stayed. Fixed by read-back verification in `DiskAttemptJournal.write` (`4051e68`). Review: `docs/reviews/2026-11-09-atomicfile-crash-matrix.md`.
 - Current state: branch committed locally, not merged. `docs/incompatible-journal-main-ci` (main CI record) is also unmerged. No device/backend/UI touched.
