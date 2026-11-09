@@ -69,3 +69,15 @@ Rule followed: responsive sizing rule (branch `docs/responsive-rule`, `f70da31`,
 - Kolleksiya has no side-menu entry (design decision for the user).
 - Emulator 5586 was stopped twice during rendering by something outside the render scripts (one qemu gRPC
   abort, one clean shutdown); renders were recaptured and every PNG checked non-empty.
+
+## Update 9 November — Kolleksiya in the side menu
+User decision: "Kolleksiyanı da əlavə et yan menyuda".
+- Home side menu (tablet and short landscape) now has 7 items: Ana ekran, Şəhərim, İnventar, Bazar,
+  Kolleksiya, Nailiyyətlər, Hesab. Kolleksiya uses the existing `ui_medal` icon and opens `collection`
+  (same screen as the old centre button; checked by tapping it on tablet landscape).
+- Short rail: item size from height, now 32–56dp (one token step lower than before so 7 fit at 640×360dp);
+  the 48dp minimum interactive size is turned off only in the short rail, so the highlight no longer
+  spills past the rail. Short-rail items below 48dp are a known accessibility trade-off (small phone ≈34dp).
+- Renders (5586, viewed): phone/small/font 2.0 landscape, phone landscape offline, tablet landscape 1.0/2.0,
+  tablet portrait 1.0/2.0 — all 7 items visible, nothing cut off. Home phone portrait: 0 px diff.
+- Checks: assembleDebug, `test` (0 failures), lint 0 errors / 17 warnings.

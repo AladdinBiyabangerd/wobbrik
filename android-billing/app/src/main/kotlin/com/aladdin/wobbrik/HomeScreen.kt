@@ -248,21 +248,28 @@ internal fun HomeButton(label: String, icon: Int? = null, primary: Boolean = fal
 
 @Composable
 private fun HomeRail(onPage: (String) -> Unit, shortHeight: androidx.compose.ui.unit.Dp? = null) {
-    // Short windows: no top offset and items sized so all six fit (never below 40dp).
-    val item = shortHeight?.let { ((it - GameTokens.Small * 2 - GameTokens.Quarter * 5) / 6).coerceIn(GameTokens.Target - GameTokens.Small, GameTokens.Target + GameTokens.Small) }
+    val items = listOf(Triple(R.drawable.ui_home, "Ana ekran", "home"), Triple(R.drawable.ui_city, "Şəhərim", "city"),
+        Triple(R.drawable.ui_inventory, "İnventar", "inventory"), Triple(R.drawable.ui_market, "Bazar", "market"),
+        // User decision (9 November): Kolleksiya joins the menu since Home with a side menu has no centre button for it.
+        Triple(R.drawable.ui_medal, "Kolleksiya", "collection"), Triple(R.drawable.ui_trophy, "Nailiyyətlər", "achievements"),
+        Triple(R.drawable.ui_account, "Hesab", "account"))
+    // Short windows: no top offset and items sized from the height so all fit (token steps 32–56dp).
+    val item = shortHeight?.let { ((it - GameTokens.Small * 2 - GameTokens.Quarter * (items.size - 1)) / items.size)
+        .coerceIn(GameTokens.Target - GameTokens.Gap, GameTokens.Target + GameTokens.Small) }
     Surface(if (item == null) Modifier.width(GameTokens.Target + GameTokens.Inset).padding(top = GameTokens.Target) else Modifier.width(item + GameTokens.Gap).fillMaxHeight(),
         shape = RoundedCornerShape(GameTokens.CardRadius), color = GameTokens.Surface,
         border = BorderStroke(GameTokens.Hairline, GameTokens.Raised)) {
         Column(Modifier.verticalScroll(rememberScrollState()).padding(GameTokens.Small),
             verticalArrangement = if (item == null) Arrangement.spacedBy(GameTokens.Small) else Arrangement.spacedBy(GameTokens.Quarter, Alignment.CenterVertically)) {
-            listOf(Triple(R.drawable.ui_home, "Ana ekran", "home"), Triple(R.drawable.ui_city, "Şəhərim", "city"),
-                Triple(R.drawable.ui_inventory, "İnventar", "inventory"), Triple(R.drawable.ui_market, "Bazar", "market"),
-                Triple(R.drawable.ui_trophy, "Nailiyyətlər", "achievements"), Triple(R.drawable.ui_account, "Hesab", "account"))
-                .forEach { (icon, label, page) ->
+            // Short rail: items are sized from the height, so do not inflate them to 48dp (the highlight would spill past the rail).
+            androidx.compose.runtime.CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides
+                if (item == null) LocalMinimumInteractiveComponentSize.current else androidx.compose.ui.unit.Dp.Unspecified) {
+            items.forEach { (icon, label, page) ->
                     IconButton(onClick = { onPage(page) }, enabled = page != "inventory" && page != "market" && page != "city",
                         modifier = Modifier.size(item ?: (GameTokens.Target + GameTokens.Small)).background(if (page == "home") GameTokens.Accent else GameTokens.Surface,
                             RoundedCornerShape(GameTokens.ControlRadius))) { Image(painterResource(icon), label, Modifier.size(item?.times(0.75f) ?: GameTokens.Target), contentScale = ContentScale.Fit) }
                 }
+            }
         }
     }
 }
