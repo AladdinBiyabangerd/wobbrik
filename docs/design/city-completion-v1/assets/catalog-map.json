@@ -1,0 +1,133 @@
+{
+  "status": "design candidates; nominal cells only, pixel crops and anchors not verified",
+  "columns": 3,
+  "rows": 4,
+  "atlases": [
+    "decor-isometric.png",
+    "decor-plan.png"
+  ],
+  "items": [
+    {
+      "id": "decor_tree_1",
+      "name": "Tək ağac",
+      "row": 0,
+      "column": 0,
+      "footprint_bounds": [
+        30,
+        30
+      ]
+    },
+    {
+      "id": "decor_tree_2",
+      "name": "Ağac cütü",
+      "row": 0,
+      "column": 1,
+      "footprint_bounds": [
+        70,
+        30
+      ]
+    },
+    {
+      "id": "decor_tree_3",
+      "name": "Kiçik ağaclıq",
+      "row": 0,
+      "column": 2,
+      "footprint_bounds": [
+        80,
+        80
+      ]
+    },
+    {
+      "id": "decor_bench_1",
+      "name": "Tək skamya",
+      "row": 1,
+      "column": 0,
+      "footprint_bounds": [
+        40,
+        20
+      ]
+    },
+    {
+      "id": "decor_bench_2",
+      "name": "Qarşılıqlı skamyalar",
+      "row": 1,
+      "column": 1,
+      "footprint_bounds": [
+        50,
+        60
+      ]
+    },
+    {
+      "id": "decor_bench_3",
+      "name": "Skamyalı istirahət guşəsi",
+      "row": 1,
+      "column": 2,
+      "footprint_bounds": [
+        90,
+        80
+      ]
+    },
+    {
+      "id": "decor_streetlight_1",
+      "name": "Tək küçə fənəri",
+      "row": 2,
+      "column": 0,
+      "footprint_bounds": [
+        10,
+        10
+      ]
+    },
+    {
+      "id": "decor_streetlight_2",
+      "name": "Qoşa küçə fənəri",
+      "row": 2,
+      "column": 1,
+      "footprint_bounds": [
+        40,
+        10
+      ]
+    },
+    {
+      "id": "decor_streetlight_3",
+      "name": "Fənər sırası",
+      "row": 2,
+      "column": 2,
+      "footprint_bounds": [
+        100,
+        10
+      ]
+    },
+    {
+      "id": "decor_road_1",
+      "name": "Qısa düz yol",
+      "row": 3,
+      "column": 0,
+      "footprint_bounds": [
+        100,
+        30
+      ]
+    },
+    {
+      "id": "decor_road_2",
+      "name": "Dönüş yol hissəsi",
+      "row": 3,
+      "column": 1,
+      "footprint_bounds": [
+        100,
+        100
+      ]
+    },
+    {
+      "id": "decor_road_3",
+      "name": "Uzun düz yol",
+      "row": 3,
+      "column": 2,
+      "footprint_bounds": [
+        210,
+        30
+      ]
+    }
+  ],
+  "existing_68_parts": "../../finish-cosmetics-v1/assets/catalog-map.json",
+  "runtime_68_verified_crops": "../../../../android-billing/app/src/main/assets/finish/catalog-map.json"
+}
