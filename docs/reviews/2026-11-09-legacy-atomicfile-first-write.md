@@ -50,6 +50,15 @@ On API 24–29, `android.util.AtomicFile` rewrites the base file in place. A fir
 - Mutation sanity: removing the directory fsync, writing the base in place, or skipping `.bak` restore each made the matrix fail. The production file was restored and checked byte-for-byte.
 - Full `:core:test --rerun`: 61 tests and `:engine:test --rerun`: 55 tests, all with 0 failures/errors/skips. `:app:assembleDebug` PASS. `:android:lintDebug`: 0 errors, the same 3 existing warnings, none in the changed file. `git diff --check` PASS. Full diff from `43d3ad1` reviewed. No branch CI.
 
+## Merge and main CI — 9 November 2026
+
+- With the user's explicit OK, three branches were merged into `main` with `--no-ff` in the `Wobbrik-rail-icons` main worktree. The existing stash there was left untouched.
+  - `docs/incompatible-journal-main-ci` → `d2ff660`
+  - `test/atomicfile-crash-matrix` → `da08eed`. There was one conflict in `docs/context/current-task.md` top entries; it was resolved by keeping both entries newest-first, with nothing dropped.
+  - `fix/legacy-atomicfile-first-write` → `5b31e0f`, no conflicts.
+- `./scripts/local-ci.sh` on `main` `5b31e0f`: PASS, `BUILD SUCCESSFUL in 28s` (103 tasks, 37 executed). `:core:test` 61 and `:engine:test` 55 tests ran, with 0 failures/errors/skips. `:android`/`:app` `assembleDebug` and `lintDebug` passed. Lint: 0 errors, 3 warnings (android) and 17 (app), none blocking.
+- No push or deploy.
+
 ## Not proven
 
 - This is JVM simulation, not device proof. Not covered:
