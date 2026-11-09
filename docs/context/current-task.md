@@ -1,3 +1,9 @@
+## Latest journal durability main merge / CI — 9 November 2026
+- Completed: user-approved `--no-ff` merges into main: `d2ff660` (docs/incompatible-journal-main-ci), `da08eed` (test/atomicfile-crash-matrix; current-task conflict resolved newest-first, nothing lost) and `5b31e0f` (fix/legacy-atomicfile-first-write). `./scripts/local-ci.sh` on `5b31e0f` PASS (28s; core 61 + engine 55 tests, 0 failures; assemble/lint debug, 0 lint errors).
+- Current state: this record is on `docs/journal-durability-main-ci`, not merged. No push or deploy. Retained 5582/attempt, shared 5554 and AppBackend untouched.
+- Remaining work: device/emulator durability proof for the durable journal (API 24–29 and 30+); other PLAN §3.4 items unchanged.
+- Exact next step: merging this docs branch needs the user's OK; otherwise pick the next §3.4 unit in a new bounded chat.
+
 ## Latest legacy AtomicFile first-write fix — 9 November 2026
 - Completed: `fix/legacy-atomicfile-first-write` (from `test/atomicfile-crash-matrix`). New core `DurableJournalFile` (temp `.new` → fsync → rename → directory fsync; resolves old AtomicFile `.bak`/`.new`); Android adapter uses it on all APIs (`Os.fsync` directory, EINVAL tolerated). Crash matrix runs the production class. Review: `docs/reviews/2026-11-09-legacy-atomicfile-first-write.md`.
 - Current state: commits 2c7b034, 645511d, 012088d plus a docs commit, not merged. Unmerged branch stack: `docs/incompatible-journal-main-ci`, `test/atomicfile-crash-matrix`, this branch. No device/backend/UI touched.
