@@ -174,6 +174,41 @@ class AuthenticatedRecoveryOwnerTest {
         } finally { f.close() }
     }
 
+    @Test fun unreadableJournalPublishesSpecificErrorAndRetryCannotUseStaleReady() = runBlocking {
+        val sessions = AccountSessions { "token" }
+        val scope = CoroutineScope(SupervisorJob() + Dispatchers.Unconfined)
+        var bytes: ByteArray? = null
+        var writes = 0
+        val journal = DiskAttemptJournal { object : JournalFile {
+            override fun read() = bytes
+            override fun replace(value: ByteArray) { writes++; bytes = value }
+        } }
+        var calls = 0
+        val backend = object : AttemptBackend {
+            override suspend fun sync(session: BillingSession): GameSnapshot { calls++; return snapshot(session.uid) }
+            override suspend fun submit(session: BillingSession, command: AttemptCommand) { calls++ }
+            override suspend fun catalog(session: BillingSession): RecoveryCatalog? { calls++; return null }
+        }
+        val owner = AuthenticatedRecoveryOwner(sessions, backend, journal, scope)
+        try {
+            owner.onAuthChanged("alice"); yield()
+            val oldReady = owner.state.value as AuthenticatedRecoveryOwner.State.Ready
+            journal.save("alice", GameplayWire.start("retained", oldReady.snapshot.revision))
+            bytes = bytes!!.copyOf().also { it[3] = 2 }
+            val retained = bytes!!.copyOf()
+            val callsBefore = calls
+            val writesBefore = writes
+            repeat(2) {
+                owner.onForeground(); yield()
+                assertTrue((owner.state.value as AuthenticatedRecoveryOwner.State.Error).cause is UnreadableAttemptJournal)
+                assertFalse(owner.submit(oldReady) { error("Stale Ready must not build a new command") })
+                assertArrayEquals(retained, bytes)
+                assertEquals(callsBefore, calls)
+                assertEquals(writesBefore, writes)
+            }
+        } finally { scope.cancel() }
+    }
+
     companion object {
         private fun snapshot(uid: String) = GameSnapshot("wobbrik-v1", 0, if (uid == "alice") 1 else 2, 0, null)
     }

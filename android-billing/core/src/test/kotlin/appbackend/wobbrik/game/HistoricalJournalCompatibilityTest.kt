@@ -60,7 +60,7 @@ class HistoricalJournalCompatibilityTest {
     }
     @Test fun unsupportedVersionsPreserveBytesAndSendNothing() = runBlocking {
         // Deliberately invalid mutations, not claimed historical formats.
-        for (variant in listOf("storage", "rules", "engine")) {
+        for (variant in listOf("storage", "rules", "engine", "truncated", "identity")) {
             val root = Files.createTempDirectory("invalid-journal").toFile()
             try {
                 old(root).save("alice", commands().first())
@@ -68,7 +68,9 @@ class HistoricalJournalCompatibilityTest {
                 val invalid = when (variant) {
                     "storage" -> original.copyOf().also { it[3] = 2 }
                     "rules" -> String(original, Charsets.ISO_8859_1).replace("wobbrik-v1", "wobbrik-v9").toByteArray(Charsets.ISO_8859_1)
-                    else -> String(original, Charsets.ISO_8859_1).replace("wobbrik-structural-v1", "wobbrik-structural-v9").toByteArray(Charsets.ISO_8859_1)
+                    "engine" -> String(original, Charsets.ISO_8859_1).replace("wobbrik-structural-v1", "wobbrik-structural-v9").toByteArray(Charsets.ISO_8859_1)
+                    "identity" -> String(original, Charsets.ISO_8859_1).replace("alice", "other").toByteArray(Charsets.ISO_8859_1)
+                    else -> original.copyOf(3)
                 }
                 assertFalse(original.contentEquals(invalid)); file.writeBytes(invalid)
                 var calls = 0
@@ -77,10 +79,14 @@ class HistoricalJournalCompatibilityTest {
                     override suspend fun sync(session: BillingSession): GameSnapshot { calls++; error("Unexpected sync") }
                 }
                 val coordinator = AttemptCoordinator(sessions, backend, current(root))
-                try { coordinator.recover(); fail("Accepted $variant") } catch (_: IllegalArgumentException) { }
+                repeat(2) {
+                    try { coordinator.recover(); fail("Accepted $variant") } catch (_: UnreadableAttemptJournal) { }
+                    assertFalse(coordinator.ready()); assertEquals(0, calls)
+                    assertArrayEquals(invalid, file.readBytes())
+                }
                 assertFalse(coordinator.ready()); assertEquals(0, calls)
                 assertArrayEquals(invalid, file.readBytes())
-                assertThrows(IllegalArgumentException::class.java) { current(root).save("alice", GameplayWire.start("replacement", 7)) }
+                assertThrows(UnreadableAttemptJournal::class.java) { current(root).save("alice", GameplayWire.start("replacement", 7)) }
                 assertArrayEquals(invalid, file.readBytes())
             } finally { root.deleteRecursively() }
         }

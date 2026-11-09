@@ -2,12 +2,16 @@ package appbackend.wobbrik.game
 
 import java.io.*
 import java.security.MessageDigest
+import java.util.concurrent.CancellationException
 
 /** Atomic storage must fsync writes before replacement and retain old data on failed writes. */
 interface JournalFile {
     fun read(): ByteArray?
     fun replace(bytes: ByteArray)
 }
+
+/** Local storage/format failure; retry must preserve the original bytes and never dispatch. */
+class UnreadableAttemptJournal(cause: Exception) : IllegalArgumentException("Saved attempt journal cannot be read by this version", cause)
 
 /** One application-scoped instance; never open a second writer for the same directory. */
 class DiskAttemptJournal(private val file: (String) -> JournalFile) : AttemptJournal {
@@ -26,7 +30,14 @@ class DiskAttemptJournal(private val file: (String) -> JournalFile) : AttemptJou
         require(uid.isNotBlank())
         return MessageDigest.getInstance("SHA-256").digest(uid.toByteArray(Charsets.UTF_8)).joinToString("") { "%02x".format(it) }
     }
-    private fun read(uid: String): AttemptCommand? {
+    private fun read(uid: String): AttemptCommand? = try {
+        decode(uid)
+    } catch (cancelled: CancellationException) {
+        throw cancelled
+    } catch (failure: Exception) {
+        throw UnreadableAttemptJournal(failure)
+    }
+    private fun decode(uid: String): AttemptCommand? {
         val bytes = file(key(uid)).read() ?: return null
         require(bytes.size <= 140000) { "Journal too large" }
         return DataInputStream(ByteArrayInputStream(bytes)).use { input ->
