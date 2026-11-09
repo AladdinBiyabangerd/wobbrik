@@ -58,6 +58,18 @@ class AcceptedAttemptCommands(
         GameplayWire.finish(operationId(), snapshot.revision, accepted.attemptId, accepted.sequence, parts.toMap())
     }
 
+    /**
+     * User policy (9 November 2026): leaving an open attempt mid-game deletes it on the server
+     * (no result, no building, no later resume). Never after a loss: a lost attempt keeps its
+     * last accepted state for the cosmetic finish. The host also refuses while a local loss
+     * draft is being finished. No refund or clawback: accepted checkpoint rewards stay.
+     */
+    fun abandon(expected: AuthenticatedRecoveryOwner.State.Ready): Boolean = recovery.submit(expected) { snapshot ->
+        val accepted = active(expected)
+        require(!accepted.terminal) { "A lost attempt is kept for its finish, never abandoned" }
+        GameplayWire.abandon(operationId(), snapshot.revision, accepted.attemptId, accepted.sequence)
+    }
+
     private fun active(expected: AuthenticatedRecoveryOwner.State.Ready): AcceptedAttemptRestore.Result.Paused =
         (AcceptedAttemptRestore.from(expected) as? AcceptedAttemptRestore.Result.Paused)
             ?: error("A supported accepted active attempt is required")

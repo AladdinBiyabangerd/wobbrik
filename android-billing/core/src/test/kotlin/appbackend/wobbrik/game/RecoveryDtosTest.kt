@@ -73,6 +73,9 @@ class RecoveryDtosTest {
         assertEquals(5L, (cp.result as AttemptResult.Checkpointed).coins)
         val finish = RecoveryDtos.attemptReceipt(receipt("""{"attempt_id":"a","floors":2,"coins":0,"residents":0,"base_value":0,"max_price":0}"""), AttemptCommand.Route.FINISH)
         assertNull((finish.result as AttemptResult.Finished).resultId)
+        val abandon = RecoveryDtos.attemptReceipt(receipt("""{"attempt_id":"a","floors":12}"""), AttemptCommand.Route.ABANDON)
+        assertEquals(AttemptResult.Abandoned("a", 12), abandon.result)
+        assertThrows(Exception::class.java) { RecoveryDtos.attemptReceipt(receipt("""{"floors":12}"""), AttemptCommand.Route.ABANDON) }
         assertThrows(Exception::class.java) { RecoveryDtos.attemptReceipt(receipt("""{"attempt_id":"a"}"""), AttemptCommand.Route.CHECKPOINT) }
         assertThrows(IllegalArgumentException::class.java) { GameplayWire.checkpoint("c", 1, "a", 1, 0, 0, 0, "{}") }
         assertThrows(IllegalArgumentException::class.java) { GameplayWire.checkpoint("c", 1, "a", 1, 1, 0, 2, "{}") }

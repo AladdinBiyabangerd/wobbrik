@@ -34,6 +34,16 @@ object GameplayWire {
             put("parts", buildJsonObject { parts.toSortedMap().forEach { (k, v) -> put(k, v) } })
         })
     }
+    /**
+     * User policy (9 November 2026): leaving an open attempt mid-game closes it on the server
+     * with no result and no building. Sequence is the last accepted checkpoint sequence.
+     */
+    fun abandon(id: String, revision: Long, attempt: String, sequence: Long): AttemptCommand {
+        require(attempt.isNotBlank() && sequence >= 0)
+        return command(id, revision, AttemptCommand.Route.ABANDON, buildJsonObject {
+            put("attempt_id", attempt); put("sequence", sequence)
+        })
+    }
     fun validate(command: AttemptCommand) {
         val root = Json.parseToJsonElement(command.envelope).jsonObject
         require(root.keys == setOf("operation_id", "expected_revision", "rules_version", "request"))
@@ -43,6 +53,7 @@ object GameplayWire {
         val rebuilt = when (command.route) {
             AttemptCommand.Route.START -> { require(r.string("engine_version") == "wobbrik-structural-v1"); start(command.operationId, command.expectedRevision, r["geometry_version"]?.jsonPrimitive?.content) }
             AttemptCommand.Route.CHECKPOINT -> checkpoint(command.operationId, command.expectedRevision, r.string("attempt_id"), r.number("sequence"), r.number("floors"), r.number("precise"), r.number("rescues"), r.getValue("snapshot").toString(), r["geometry"]?.let { CityFloorGeometry.parse(it.jsonObject) })
+            AttemptCommand.Route.ABANDON -> abandon(command.operationId, command.expectedRevision, r.string("attempt_id"), r.number("sequence"))
             AttemptCommand.Route.FINISH -> finish(command.operationId, command.expectedRevision, r.string("attempt_id"), r.number("sequence"), r.getValue("parts").jsonObject.mapValues { (_, v) -> v.jsonPrimitive.also { require(it.isString) }.content })
         }
         require(Json.parseToJsonElement(rebuilt.envelope) == root) { "Unexpected command fields" }

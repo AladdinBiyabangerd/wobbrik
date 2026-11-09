@@ -1,4 +1,5 @@
-// Historical test-only source from b6a4f9b. Only package/imports changed.
+// Historical test-only source from b6a4f9b. Only package/imports changed, plus the ABANDON
+// branch required by the shared enum (9 November 2026): that version had no abandon route.
 package appbackend.wobbrik.game.historical
 
 import appbackend.wobbrik.game.*
@@ -46,6 +47,7 @@ object GameplayWire {
             AttemptCommand.Route.START -> { require(r.string("engine_version") == "wobbrik-structural-v1"); start(command.operationId, command.expectedRevision) }
             AttemptCommand.Route.CHECKPOINT -> checkpoint(command.operationId, command.expectedRevision, r.string("attempt_id"), r.number("sequence"), r.number("floors"), r.number("precise"), r.number("rescues"), r.getValue("snapshot").toString())
             AttemptCommand.Route.FINISH -> finish(command.operationId, command.expectedRevision, r.string("attempt_id"), r.number("sequence"), r.getValue("parts").jsonObject.mapValues { (_, v) -> v.jsonPrimitive.also { require(it.isString) }.content })
+            AttemptCommand.Route.ABANDON -> throw IllegalArgumentException("No abandon route in this version")
         }
         require(Json.parseToJsonElement(rebuilt.envelope) == root) { "Unexpected command fields" }
     }

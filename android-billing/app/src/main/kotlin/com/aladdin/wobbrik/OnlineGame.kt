@@ -67,13 +67,40 @@ internal fun OnlineGame(app: WobbrikApplication) {
             state = canonical
             cached = configured?.recovery?.cached?.value
             host.onFrame(now, canonical as? AuthenticatedRecoveryOwner.State.Ready)
+            // Restart/abandon policy (9 November 2026): a left mid-game attempt is abandoned on the next Ready.
+            host.enforceLeave(canonical as? AuthenticatedRecoveryOwner.State.Ready)
             hostState = host.snapshot()
         }
     }
     BackHandler(page != "home") { host.pause(); page = "home" }
     val ready = state as? AuthenticatedRecoveryOwner.State.Ready
     val restore = AcceptedAttemptRestore.from(state ?: AuthenticatedRecoveryOwner.State.SignedOut)
-    if (page == "game" && ready != null && hostState.scene != null) {
+    // Restart/abandon policy (user decision, 9 November 2026): leaving the game page by any route
+    // (Back, "Menyuya qayıt", finish picker back) leaves the attempt. The host keeps a loss for its
+    // finish and abandons an open mid-game attempt. A "game" page restored after process death was
+    // left when the app closed: go home; Play then abandons that attempt instead of resuming it.
+    LaunchedEffect(page) {
+        if (page != "game") host.leave(state as? AuthenticatedRecoveryOwner.State.Ready)
+        else if (!host.snapshot().playing) page = "home"
+    }
+    // Play pressed while an attempt from a closed app was still open: start once it is abandoned.
+    var startAfterDiscard by remember(configured) { mutableStateOf(false) }
+    LaunchedEffect(startAfterDiscard, state) {
+        if (!startAfterDiscard) return@LaunchedEffect
+        val current = state
+        when {
+            current is AuthenticatedRecoveryOwner.State.Error -> startAfterDiscard = false
+            current is AuthenticatedRecoveryOwner.State.Ready -> when (AcceptedAttemptRestore.from(current)) {
+                AcceptedAttemptRestore.Result.NoAttempt, is AcceptedAttemptRestore.Result.Finished -> {
+                    startAfterDiscard = false
+                    if (configured?.commands?.start(current) == true) { host.enter(); page = "game" }
+                }
+                else -> if (!host.leavePending()) startAfterDiscard = false
+            }
+            else -> Unit
+        }
+    }
+    if (page == "game" && hostState.playing && ready != null && hostState.scene != null) {
         if (hostState.choosingFinish) FinishCosmeticScreen(hostState, ready,
             onSelect = { category, id -> host.selectPart(ready, category, id) },
             onConfirm = { host.confirmFinish(ready) }, onBack = { page = "home" })
@@ -102,13 +129,16 @@ internal fun OnlineGame(app: WobbrikApplication) {
         onPlay = if (ready != null && restore !is AcceptedAttemptRestore.Result.Blocked) ({
             when (restore) {
                 AcceptedAttemptRestore.Result.NoAttempt, is AcceptedAttemptRestore.Result.Finished -> {
-                    if (configured?.commands?.start(ready) == true) page = "game"
+                    if (configured?.commands?.start(ready) == true) { host.enter(); page = "game" }
                 }
-                is AcceptedAttemptRestore.Result.Paused -> { page = "game" }
+                // Only a loss is resumable (its cosmetic finish). An open attempt is never resumed.
+                is AcceptedAttemptRestore.Result.Paused ->
+                    if (restore.terminal || hostState.choosingFinish) { host.enter(); page = "game" }
+                    else if (host.discardOpen(ready)) startAfterDiscard = true
                 else -> Unit
             }
         }) else null,
-        active = restore is AcceptedAttemptRestore.Result.Paused,
+        active = restore is AcceptedAttemptRestore.Result.Paused && (restore.terminal || hostState.choosingFinish),
         onLinkGoogle = if (guest && configured != null && activity != null && !linking) ({
             linking = true
             linkMessage = null

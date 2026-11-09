@@ -104,6 +104,14 @@ class GameplayAdaptersTest {
         val checkpoint = GameplayWire.checkpoint("cp", 1, "op", 1, 10, 2, 0, "{\"x\":1}")
         GameplayWire.validate(checkpoint)
         GameplayWire.validate(GameplayWire.finish("finish", 2, "op", 1, setOf("wall", "window", "entrance", "roof", "lighting").associateWith { "free_$it" }))
+        // Restart/abandon policy (9 November 2026): exact two-field abandon request.
+        val abandon = GameplayWire.abandon("ab", 3, "op", 1)
+        GameplayWire.validate(abandon)
+        assertEquals("""{"attempt_id":"op","sequence":1}""", kotlinx.serialization.json.Json.parseToJsonElement(abandon.envelope).let { (it as kotlinx.serialization.json.JsonObject).getValue("request").toString() })
+        assertThrows(Exception::class.java) { GameplayWire.validate(abandon.copy(route = AttemptCommand.Route.FINISH)) }
+        assertThrows(Exception::class.java) { GameplayWire.validate(abandon.copy(envelope = abandon.envelope.replace("\"sequence\":1", "\"sequence\":1,\"floors\":3"))) }
+        assertThrows(IllegalArgumentException::class.java) { GameplayWire.abandon("ab", 3, "", 1) }
+        assertThrows(IllegalArgumentException::class.java) { GameplayWire.abandon("ab", 3, "op", -1) }
         assertThrows(Exception::class.java) { GameplayWire.snapshot("""{"rules_version":"wobbrik-v1","revision":"0","coins":0,"xp":0,"attempt":null,"server_time":"2026-11-05T00:00:00Z","first_online_at":"2026-11-05T00:00:00Z","grace_until":"2026-11-05T20:00:00Z","level":1,"rescues":0,"achievements":[],"unlocks":[],"land":[],"part_progress":[]}""") }
     }
 }
