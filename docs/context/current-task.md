@@ -1,3 +1,8 @@
+## Latest main merge / CI — 9 November 2026
+- Completed: user-approved `--no-ff` merge of `fix/incompatible-journal-ux` into main (`213c5db`, main worktree `Wobbrik-rail-icons`); `./scripts/local-ci.sh` PASS (1m44s; engine 55 + core 54 tests, 0 failures; assemble/lint debug, 0 lint errors).
+- Current state: this record lives on `docs/incompatible-journal-main-ci`, not merged. No push or deploy. Retained 5582/attempt and shared 5554 untouched.
+- Exact next step: merging this docs branch needs the user's OK. Next unit: `test/atomicfile-crash-matrix`.
+
 ## Latest incompatible journal UX — 9 November 2026
 - Completed: branch `fix/incompatible-journal-ux` (from d9ecf84). Typed `UnreadableAttemptJournal` at the DiskAttemptJournal read boundary; OnlineGame maps only that type to the approved “Cəhd bu versiyada bərpa edilmir” JournalRecoveryScreen (Yenidən yoxla / Ana ekrana qayıt) and blocked Home; debug preview fixture; focused regressions. Remaining presentation checks done: small 720×1280@360 font 2.0 scroll/both actions reachable, and phone landscape final capture. No layout fix needed. Review: `docs/reviews/2026-11-08-incompatible-journal-ux.md`.
 - Current state: branch committed locally, not merged/pushed. Own render AVD `JournalUxRender` (emulator-5586, ignored output/journal-ux-render/avd) was used for renders and shut down after them. Retained 5582/attempt f73722ea-b54f-4985-9c7e-85a442c1d0a3 and shared 5554 not touched. AppBackend not touched (no backend change needed).
