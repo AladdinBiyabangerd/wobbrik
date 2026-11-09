@@ -35,6 +35,7 @@ internal fun HomeScreen(snapshot: GameSnapshot?, active: Boolean, onPlay: (() ->
         .safeDrawingPadding().padding(GameTokens.Gap)) {
         val tablet = maxWidth >= GameTokens.MediumWidth
         val wide = maxWidth > maxHeight
+        val windowHeight = maxHeight
         // Responsive rule: a wide but short window (phone landscape) gets its own compact tier.
         // Phone portrait and tablet keep the approved layout below unchanged.
         if (tablet && wide && maxHeight < GameTokens.CompactHeight) {
@@ -66,6 +67,13 @@ internal fun HomeScreen(snapshot: GameSnapshot?, active: Boolean, onPlay: (() ->
                     HomeArt(Modifier.weight(1f).fillMaxHeight())
                     HomeControls(snapshot, active, onPlay, onPage, status, onRetry, journalBlocked, tablet, true, false,
                         Modifier.weight(1f).align(Alignment.Top).padding(top = GameTokens.Gap).verticalScroll(rememberScrollState()))
+                } else if (tablet) Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+                    // Responsive rule, tablet portrait: the illustration takes only the height the controls leave,
+                    // so Oyna and Şəhərim are never cut off; controls scroll only past 65% (very large fonts).
+                    HomeArt(Modifier.fillMaxWidth().weight(1f))
+                    HomeControls(snapshot, active, onPlay, onPage, status, onRetry, journalBlocked, tablet, tablet, tablet,
+                        Modifier.fillMaxWidth().heightIn(max = windowHeight * 0.65f).verticalScroll(rememberScrollState()))
                 } else Column(Modifier.weight(1f).verticalScroll(rememberScrollState()),
                     horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
                     if (!tablet) HomeHeading()
@@ -77,7 +85,7 @@ internal fun HomeScreen(snapshot: GameSnapshot?, active: Boolean, onPlay: (() ->
     }
 }
 
-/** Mockup v3: logo and coin sit above the art, so title, stats and Oyna start at the top of the right pane. */
+/** Approved v3 (9 November): logo and coin sit above the art, so title, stats and Oyna start at the top of the right pane. */
 @Composable
 private fun ShortHome(snapshot: GameSnapshot?, active: Boolean, onPlay: (() -> Unit)?, onPage: (String) -> Unit,
                       status: String?, onRetry: () -> Unit, journalBlocked: Boolean, height: androidx.compose.ui.unit.Dp) {
@@ -183,26 +191,16 @@ private fun HomeControls(snapshot: GameSnapshot?, active: Boolean, onPlay: (() -
             HomeButton(large = tablet, label = if (active) "Cəhdə qayıt" else "Oyna", primary = true, showPlayIcon = true, enabled = onPlay != null, compact = compact, onClick = { onPlay?.invoke() })
             if (tablet) HomeButton(large = tablet, label = "Şəhərim", icon = R.drawable.ui_city, enabled = false, onClick = { onPage("city") })
         }
-        if (compact) BoxWithConstraints(Modifier.fillMaxWidth()) {
-            // Side by side only when both labels fit on one line in half the width; otherwise stack (never break words).
-            val measurer = androidx.compose.ui.text.rememberTextMeasurer()
-            val style = LocalTextStyle.current.copy(fontSize = GameTokens.Body, fontWeight = FontWeight.Bold)
-            val label = with(androidx.compose.ui.platform.LocalDensity.current) {
-                listOf("Kolleksiya", "Nailiyyətlər").maxOf { measurer.measure(it, style).size.width }.toDp() }
-            val half = (maxWidth - GameTokens.Small) / 2
-            if (label + GameTokens.Gap * 2 + GameTokens.Small * 3 > half) Column(verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+        // User decision (9 November): layouts with the side menu (tablet, short landscape) show only Oyna here;
+        // the secondary entries stay in the side menu / account page. Phone portrait keeps both buttons.
+        if (!tablet && !compact) {
+            if (androidx.compose.ui.platform.LocalDensity.current.fontScale > 1f) {
                 HomeButton(label = "Kolleksiya", icon = R.drawable.ui_medal, onClick = { onPage("collection") })
                 HomeButton(label = "Nailiyyətlər", icon = R.drawable.ui_trophy, onClick = { onPage("achievements") })
             } else Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
                 HomeButton(label = "Kolleksiya", icon = R.drawable.ui_medal, modifier = Modifier.weight(1f), onClick = { onPage("collection") })
                 HomeButton(label = "Nailiyyətlər", icon = R.drawable.ui_trophy, modifier = Modifier.weight(1f), onClick = { onPage("achievements") })
             }
-        } else if (androidx.compose.ui.platform.LocalDensity.current.fontScale > 1f) {
-            HomeButton(large = tablet, label = "Kolleksiya", icon = R.drawable.ui_medal, onClick = { onPage("collection") })
-            HomeButton(large = tablet, label = "Nailiyyətlər", icon = R.drawable.ui_trophy, onClick = { onPage("achievements") })
-        } else Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-            HomeButton(large = tablet, label = "Kolleksiya", icon = R.drawable.ui_medal, modifier = Modifier.weight(1f), onClick = { onPage("collection") })
-            HomeButton(large = tablet, label = "Nailiyyətlər", icon = R.drawable.ui_trophy, modifier = Modifier.weight(1f), onClick = { onPage("achievements") })
         }
     }
 }

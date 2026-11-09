@@ -170,7 +170,7 @@ internal fun AccountScreen(
         // Type tier: compact (Hint) in short wide windows, regular (Title) elsewhere.
         val titleSize = if (threePane) GameTokens.Hint else GameTokens.Title
         Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(GameTokens.Gap)) {
-            // Mockup v3: three-pane moves the logo into the hero pane, so there is no header row.
+            // Approved v3 (9 November): three-pane moves the logo into the hero pane, so there is no header row.
             if (!threePane) Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(GameTokens.Small), verticalAlignment = Alignment.CenterVertically) {
                 Box(Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
                     Image(painterResource(R.drawable.wobbrik_logo), "Wobbrik", Modifier.widthIn(max = GameTokens.PanelWidth / 2).fillMaxWidth().height(GameTokens.Target), contentScale = ContentScale.Fit)
