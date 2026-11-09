@@ -31,6 +31,7 @@ import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import appbackend.wobbrik.game.UnreadableAttemptJournal
+import appbackend.wobbrik.game.GameSnapshot
 import appbackend.wobbrik.game.AuthenticatedRecoveryOwner
 import com.aladdin.wobbrik.engine.*
 import kotlinx.coroutines.launch
@@ -49,6 +50,8 @@ internal fun OnlineGame(app: WobbrikApplication) {
     var state by remember(configured) {
         mutableStateOf(configured?.recovery?.state?.value, referentialEqualityPolicy())
     }
+    // Display-only last accepted snapshot of the current uid; never a capability.
+    var cached by remember(configured) { mutableStateOf<GameSnapshot?>(null) }
     var page by rememberSaveable { mutableStateOf("home") }
     val host = app.engineHost
     var hostState by remember { mutableStateOf(host.snapshot()) }
@@ -61,6 +64,7 @@ internal fun OnlineGame(app: WobbrikApplication) {
         while (true) withFrameNanos { now ->
             val canonical = configured?.recovery?.state?.value
             state = canonical
+            cached = configured?.recovery?.cached?.value
             host.onFrame(now, canonical as? AuthenticatedRecoveryOwner.State.Ready)
             hostState = host.snapshot()
         }
@@ -120,7 +124,8 @@ internal fun OnlineGame(app: WobbrikApplication) {
         }) else null,
         linking = linking,
         linkMessage = linkMessage,
-        journalBlocked = journalBlocked)
+        journalBlocked = journalBlocked,
+        cached = if (ready == null && account is WobbrikApplication.AccountState.Session) cached else null)
 }
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -138,13 +143,15 @@ internal fun AccountScreen(
     linking: Boolean = false,
     linkMessage: String? = null,
     journalBlocked: Boolean = false,
+    // Shown in the existing value slots only; Play, commands and status still follow [ready].
+    cached: GameSnapshot? = null,
 ) {
     var journalDetailsClosed by rememberSaveable(journalBlocked) { mutableStateOf(false) }
     if (journalBlocked && (!journalDetailsClosed || page != "home")) {
         JournalRecoveryScreen(onRetry, onHome = { journalDetailsClosed = true; onPage("home") })
         return
     }
-    val snapshot = ready?.snapshot
+    val snapshot = ready?.snapshot ?: cached
     if (page == "home") {
         HomeScreen(snapshot, active, if (journalBlocked) null else onPlay, onPage, status, onRetry, journalBlocked)
         return

@@ -15,6 +15,8 @@ class AuthenticatedRecoveryOwner(
     private val scope: CoroutineScope,
     // Called under the owner lock before publication; must be synchronous and non-reentrant.
     private val onStateChanged: (State) -> Unit = {},
+    // Display-only; never consulted for Ready, submit or the journal.
+    private val cache: SnapshotCache? = null,
 ) {
     sealed interface State {
         data object SignedOut : State
@@ -27,6 +29,9 @@ class AuthenticatedRecoveryOwner(
     private val lock = Any()
     private val mutableState = MutableStateFlow<State>(State.SignedOut)
     val state: StateFlow<State> = mutableState.asStateFlow()
+    private val mutableCached = MutableStateFlow<GameSnapshot?>(null)
+    /** Last accepted snapshot of the current account for display while not Ready; null otherwise unknown. */
+    val cached: StateFlow<GameSnapshot?> = mutableCached.asStateFlow()
     private var work: Job? = null
     private var generation = 0L
 
@@ -36,8 +41,23 @@ class AuthenticatedRecoveryOwner(
         work?.cancel()
         work = null
         sessions.onAuthChanged(uid)
+        mutableCached.value = null
         publishLocked(if (uid == null) State.SignedOut else State.Recovering)
-        if (uid != null) recoverLocked()
+        if (uid != null) {
+            loadCachedLocked(uid)
+            recoverLocked()
+        }
+    }
+
+    private fun loadCachedLocked(uid: String) {
+        val cache = cache ?: return
+        val epoch = generation
+        scope.launch {
+            val value = try { cache.lastKnown(uid) } catch (cancelled: CancellationException) { throw cancelled } catch (_: Exception) { null }
+            synchronized(lock) {
+                if (epoch == generation && sessions.current()?.uid == uid && mutableCached.value == null) mutableCached.value = value
+            }
+        }
     }
 
     /** Coalesces overlapping foreground events; a later event retries after any failure. */
@@ -75,12 +95,16 @@ class AuthenticatedRecoveryOwner(
                 val snapshot = action(session)
                 val catalog = backend.catalog(session)
                 ensureActive()
-                synchronized(lock) {
+                val published = synchronized(lock) {
                     if (epoch == generation && sessions.current() == session && coordinator.ready()) {
                         work = null // Ready observers may dispatch the next durable command.
+                        mutableCached.value = snapshot
                         publishLocked(State.Ready(snapshot, catalog, session.uid))
-                    }
+                        true
+                    } else false
                 }
+                // Cache failures never affect gameplay; only accepted, published snapshots are written.
+                if (published) try { cache?.accepted(session.uid, snapshot) } catch (cancelled: CancellationException) { throw cancelled } catch (_: Exception) { }
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (failure: Exception) {

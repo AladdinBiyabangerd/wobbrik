@@ -10,6 +10,7 @@ import appbackend.wobbrik.game.AuthenticatedRecoveryOwner
 import appbackend.wobbrik.game.GameplayHttpBackend
 import appbackend.wobbrik.game.UrlConnectionGameplayTransport
 import appbackend.wobbrik.game.androidAttemptJournal
+import appbackend.wobbrik.game.androidSnapshotCache
 import com.aladdin.wobbrik.engine.AcceptedEngineHost
 import com.aladdin.wobbrik.engine.AcceptedAttemptCommands
 import com.google.firebase.FirebaseApp
@@ -108,6 +109,7 @@ class WobbrikApplication : Application(), DefaultLifecycleObserver {
         val owner = AuthenticatedRecoveryOwner(
             sessions, GameplayHttpBackend(sessions, transport), androidAttemptJournal(this), recoveryScope,
             onStateChanged = engineHost::onRecoveryChanged,
+            cache = androidSnapshotCache(this),
         )
         val commands = AcceptedAttemptCommands(owner)
         engineHost.bind(commands)

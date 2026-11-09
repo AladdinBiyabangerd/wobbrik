@@ -1,3 +1,12 @@
+## Latest Room snapshot cache — 9 November 2026
+- Completed: `feat/room-cache` from main `d0ccbc3` (plan decision merged and pushed). Core `SnapshotCache` (exact validated `/sync` body per app+uid; newer revision wins, same-revision balance update accepted, foreign rules/unparsable rows dropped); recovery owner writes only after publishing an accepted Ready and exposes `cached` for the current uid. Android Room 2.7.2 + KSP 2.1.10-1.0.31 `cached_snapshot` (PK app_id+uid, noBackupFilesDir, destructive migration). App fills existing value slots from the cache while not Ready. Review: `docs/reviews/2026-11-09-room-snapshot-cache.md`.
+- Current state: branch committed locally, not merged or pushed. No CI on the branch. AppBackend, 5554, 5582 and retained attempt untouched.
+- Decisions: cache stores the raw server body (re-parsed by the wire parser), not a separate codec; cache never feeds Ready/submit/journal; failures in the cache are swallowed. androidx.test runner 1.6.2 / ext-junit 1.2.1 added for instrumented tests (needs user confirmation as pins).
+- Remaining work: user review; phone-landscape account pages with cached values push "Yenilə" below the fold (reachable by scroll) — user decision; Home keeps the status view (only the coin chip fills) while not Ready; API 24 instrumented run not done.
+- Relevant files: core SnapshotCache.kt, AuthenticatedRecoveryOwner.kt, RecoveryDtos.kt, AttemptCoordinator.kt; android RoomSnapshotCache.kt, CachedSnapshotDaoTest.kt; app OnlineGame.kt, WobbrikApplication.kt, AccountPreviewActivity.kt.
+- Checks performed: core 70 (9 new) + engine tests, 0 failures; 2 mutation checks caught; instrumented 2/2 on emulator-5586 (API 34); `:android`/`:app` assembleDebug + lintDebug 0 errors; renders on 5586 (phone portrait/landscape); `git diff --check`.
+- Exact next step: user reviews and approves merging `feat/room-cache`; then `./scripts/local-ci.sh` on main.
+
 ## Latest Room role decision — 9 November 2026
 - Completed: user decision B ("fayl journal outbox qalsın, Room yalnız cache"). Plan text amended on `docs/room-cache-plan`: PLAN §3.4, stage-three-online-plan unit 3, kotlin-compose-plan Room/core-data lines, `.cursor/context/architecture.md`. The AtomicFile→Room pending-command migration requirement is removed; "same revision accepts new server balance" is kept. Main `ee97189` (journal durability record merged, local CI PASS, pushed to origin).
 - Current state: docs branch committed locally, not merged or pushed. No code, build or dependency changes.
