@@ -27,6 +27,8 @@ internal object GameTokens {
     // Expanded breakpoint from tablet-v1; pause panel width matches game-tap framing.
     val MediumWidth = 600.dp
     val ExpandedWidth = 840.dp
+    // Window height class boundary: below it a wide window uses the three-pane account layout.
+    val CompactHeight = 480.dp
     val PanelWidth = 360.dp
     val PanelElevation = 12.dp
     val Caption = 12.sp // --type-caption

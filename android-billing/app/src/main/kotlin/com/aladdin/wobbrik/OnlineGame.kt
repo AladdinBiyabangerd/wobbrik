@@ -30,6 +30,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import appbackend.wobbrik.game.UnreadableAttemptJournal
 import appbackend.wobbrik.game.GameSnapshot
 import appbackend.wobbrik.game.AuthenticatedRecoveryOwner
@@ -157,41 +158,51 @@ internal fun AccountScreen(
         return
     }
     BoxWithConstraints(Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(GameTokens.Surface, GameTokens.Background)))
-        .safeDrawingPadding().padding(GameTokens.Inset)) {
+        .safeDrawingPadding()) {
+        // Responsive rule: short wide windows use the compact spacing/type tier.
+        val compactOuter = maxWidth > maxHeight && maxHeight < GameTokens.CompactHeight
+        BoxWithConstraints(Modifier.fillMaxSize().padding(if (compactOuter) GameTokens.Gap else GameTokens.Inset)) {
         val controlsMaxHeight = maxHeight / 2
         val expanded = maxWidth >= GameTokens.ExpandedWidth
         val wide = maxWidth > maxHeight
+        // Approved design C2 (docs/design/account-landscape-actions-v1): short wide windows (phone landscape).
+        val threePane = wide && maxHeight < GameTokens.CompactHeight
+        // Type tier: compact (Hint) in short wide windows, regular (Title) elsewhere.
+        val titleSize = if (threePane) GameTokens.Hint else GameTokens.Title
         Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(GameTokens.Gap)) {
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(GameTokens.Small), verticalAlignment = Alignment.CenterVertically) {
+            // Approved v3 (9 November): three-pane moves the logo into the hero pane, so there is no header row.
+            if (!threePane) Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(GameTokens.Small), verticalAlignment = Alignment.CenterVertically) {
                 Box(Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
                     Image(painterResource(R.drawable.wobbrik_logo), "Wobbrik", Modifier.widthIn(max = GameTokens.PanelWidth / 2).fillMaxWidth().height(GameTokens.Target), contentScale = ContentScale.Fit)
                 }
-                Surface(shape = RoundedCornerShape(GameTokens.CardRadius), color = GameTokens.Background,
+                // User decision (9 November): the three-pane layout drops the coin chip and profile button;
+                // "Ana ekran" in the action pane returns home, where both are shown.
+                if (!threePane) Surface(shape = RoundedCornerShape(GameTokens.CardRadius), color = GameTokens.Background,
                     border = BorderStroke(GameTokens.Hairline, GameTokens.Raised)) {
                     Row(Modifier.padding(GameTokens.Small), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
                         ArtIcon(R.drawable.ui_coin)
                         Text(snapshot?.coins?.toString() ?: "—", color = GameTokens.Text, fontWeight = FontWeight.Bold)
                     }
                 }
-                IconButton(onClick = { onPage(if (page == "account") "home" else "account") }, modifier = Modifier.size(GameTokens.Target).background(GameTokens.Raised, RoundedCornerShape(GameTokens.CardRadius))) {
+                if (!threePane) IconButton(onClick = { onPage(if (page == "account") "home" else "account") }, modifier = Modifier.size(GameTokens.Target).background(GameTokens.Raised, RoundedCornerShape(GameTokens.CardRadius))) {
                     Image(painterResource(R.drawable.ui_account), if (page == "account") "Ana ekran" else "Hesab", Modifier.size(GameTokens.Target - GameTokens.Gap))
                 }
             }
             val hero: @Composable (Modifier) -> Unit = { modifier ->
-                Column(modifier, horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(GameTokens.Gap)) {
-                    if (status == null) Text(when(page) { "account" -> "Hesab"; "achievements" -> "Nailiyyətlər"; "collection" -> "Kolleksiya"; else -> "Öz şəhərini qur" }, fontSize = GameTokens.Title, fontWeight = FontWeight.Bold, color = GameTokens.Text)
+                Column(modifier, horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(if (threePane) GameTokens.Small else GameTokens.Gap)) {
+                    if (threePane) Image(painterResource(R.drawable.wobbrik_logo), "Wobbrik", Modifier.fillMaxWidth().height(GameTokens.Target), contentScale = ContentScale.Fit)
+                    if (status == null) Text(when(page) { "account" -> "Hesab"; "achievements" -> "Nailiyyətlər"; "collection" -> "Kolleksiya"; else -> "Öz şəhərini qur" }, fontSize = titleSize, fontWeight = FontWeight.Bold, color = GameTokens.Text)
                     Image(painterResource(if (status == "Bağlantı yoxdur") R.drawable.recovery_hero else if (page == "account") R.drawable.account_hero else R.drawable.home_city),
                         if (page == "account") "İnşaatçı və şəhər" else "Wobbrik şəhəri",
                         Modifier.fillMaxWidth().weight(1f), contentScale = ContentScale.Fit)
                 }
             }
-            val controls: @Composable (Modifier) -> Unit = { modifier ->
-                Column(modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(GameTokens.Gap), horizontalAlignment = Alignment.CenterHorizontally) {
+            val info: @Composable ColumnScope.() -> Unit = {
                     if (page == "account") Text(if ((account as? WobbrikApplication.AccountState.Session)?.anonymous == true) "Qonaq inşaatçı" else "İnşaatçı",
-                        color = GameTokens.Text, fontSize = GameTokens.Title, fontWeight = FontWeight.Bold)
+                        color = GameTokens.Text, fontSize = titleSize, fontWeight = FontWeight.Bold)
                     if (snapshot != null) Surface(shape = RoundedCornerShape(GameTokens.CardRadius), color = GameTokens.Surface,
                         border = BorderStroke(GameTokens.Hairline, GameTokens.Raised)) {
-                        Column(Modifier.fillMaxWidth().padding(GameTokens.Gap), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+                        Column(Modifier.fillMaxWidth().padding(if (threePane) GameTokens.Small + GameTokens.Quarter else GameTokens.Gap), verticalArrangement = Arrangement.spacedBy(if (threePane) GameTokens.Quarter else GameTokens.Small)) {
                             FlowRow(horizontalArrangement = Arrangement.spacedBy(GameTokens.Gap),
                                 verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
                                 Row(verticalAlignment = Alignment.CenterVertically,
@@ -243,28 +254,45 @@ internal fun AccountScreen(
                     if (snapshot?.attempt?.active == false) {
                         Text("Cəhd bitdi · ${snapshot.attempt?.floors} mərtəbə", color = GameTokens.Text, fontWeight = FontWeight.Bold)
                     }
+            }
+            val secondary: @Composable (String, Int, String, Modifier) -> Unit = { label, icon, target, modifier ->
+                Button(onClick = { onPage(target) }, modifier = modifier.heightIn(min = GameTokens.Target), shape = RoundedCornerShape(GameTokens.ControlRadius), colors = ButtonDefaults.buttonColors(containerColor = GameTokens.Raised)) {
+                    ArtIcon(icon)
+                    Text(label, color = GameTokens.Text)
+                }
+            }
+            // stacked: full-width Kolleksiya/Nailiyyətlər so no label wraps in the narrow action pane.
+            val actions: @Composable ColumnScope.(Boolean) -> Unit = { stacked ->
                     if (status != null) {
-                        Text(status, color = GameTokens.Text, fontSize = GameTokens.Title, fontWeight = FontWeight.Bold)
+                        Text(status, color = GameTokens.Text, fontSize = titleSize, fontWeight = FontWeight.Bold,
+                            // Centre only in the narrow three-pane action column, where the status can wrap.
+                            textAlign = if (stacked) TextAlign.Center else null)
                         if (status == "Hesab və cəhd bərpa olunur…") {
                             CircularProgressIndicator(color = GameTokens.Accent)
                         }
                         OnlineAction("Yenilə", true, onClick = onRetry)
                     }
                     if (status == null) OnlineAction(if (active) "Cəhdə qayıt" else "Oyna", true, enabled = onPlay != null, onClick = { onPlay?.invoke() })
-                    if (status == null) Row(horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-                        Button(onClick = { onPage("collection") }, modifier = Modifier.weight(1f).heightIn(min = GameTokens.Target), shape = RoundedCornerShape(GameTokens.ControlRadius), colors = ButtonDefaults.buttonColors(containerColor = GameTokens.Raised)) {
-                            ArtIcon(R.drawable.ui_medal)
-                            Text("Kolleksiya", color = GameTokens.Text)
-                        }
-                        Button(onClick = { onPage("achievements") }, modifier = Modifier.weight(1f).heightIn(min = GameTokens.Target), shape = RoundedCornerShape(GameTokens.ControlRadius), colors = ButtonDefaults.buttonColors(containerColor = GameTokens.Raised)) {
-                            ArtIcon(R.drawable.ui_trophy)
-                            Text("Nailiyyətlər", color = GameTokens.Text)
-                        }
+                    if (status == null && stacked) Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+                        secondary("Kolleksiya", R.drawable.ui_medal, "collection", Modifier.fillMaxWidth())
+                        secondary("Nailiyyətlər", R.drawable.ui_trophy, "achievements", Modifier.fillMaxWidth())
+                    } else if (status == null) Row(horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+                        secondary("Kolleksiya", R.drawable.ui_medal, "collection", Modifier.weight(1f))
+                        secondary("Nailiyyətlər", R.drawable.ui_trophy, "achievements", Modifier.weight(1f))
                     }
                     if (page != "home") OnlineAction("Ana ekran", false, onClick = { onPage("home") })
+            }
+            val controls: @Composable (Modifier) -> Unit = { modifier ->
+                Column(modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(GameTokens.Gap), horizontalAlignment = Alignment.CenterHorizontally) {
+                    info()
+                    actions(false)
                 }
             }
-            if (wide) Row(Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(GameTokens.Inset), verticalAlignment = Alignment.CenterVertically) {
+            if (threePane) Row(Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(GameTokens.Gap)) {
+                hero(Modifier.weight(1f).fillMaxHeight())
+                CenteredPane(Modifier.weight(1f), GameTokens.Small) { info() }
+                CenteredPane(Modifier.weight(1f), GameTokens.Small) { actions(true) }
+            } else if (wide) Row(Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(GameTokens.Inset), verticalAlignment = Alignment.CenterVertically) {
                 hero(Modifier.weight(if (expanded) 2f else 1f).fillMaxHeight())
                 controls(Modifier.weight(1f))
             } else {
@@ -272,6 +300,17 @@ internal fun AccountScreen(
                 controls(Modifier.fillMaxWidth().heightIn(max = controlsMaxHeight))
             }
         }
+        }
+    }
+}
+
+/** Vertically centred pane; scrolls only when its content is taller than the pane (e.g. large fonts). */
+@Composable
+private fun CenteredPane(modifier: Modifier, spacing: androidx.compose.ui.unit.Dp = GameTokens.Gap, content: @Composable ColumnScope.() -> Unit) {
+    BoxWithConstraints(modifier.fillMaxHeight()) {
+        Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).heightIn(min = maxHeight),
+            verticalArrangement = Arrangement.spacedBy(spacing, Alignment.CenterVertically),
+            horizontalAlignment = Alignment.CenterHorizontally, content = content)
     }
 }
 
