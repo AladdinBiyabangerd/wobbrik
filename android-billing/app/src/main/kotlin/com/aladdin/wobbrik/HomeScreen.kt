@@ -30,7 +30,7 @@ import java.math.MathContext
 /** Decorative city artwork never substitutes for the player's server city. */
 @Composable
 internal fun HomeScreen(snapshot: GameSnapshot?, active: Boolean, onPlay: (() -> Unit)?, onPage: (String) -> Unit,
-                        status: String? = null, onRetry: () -> Unit = {}) {
+                        status: String? = null, onRetry: () -> Unit = {}, journalBlocked: Boolean = false) {
     BoxWithConstraints(Modifier.fillMaxSize().background(Brush.radialGradient(listOf(GameTokens.Surface, GameTokens.Background)))
         .safeDrawingPadding().padding(GameTokens.Gap)) {
         val tablet = maxWidth >= GameTokens.MediumWidth
@@ -58,13 +58,13 @@ internal fun HomeScreen(snapshot: GameSnapshot?, active: Boolean, onPlay: (() ->
                 if (wide) Row(Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(GameTokens.Gap),
                     verticalAlignment = Alignment.CenterVertically) {
                     HomeArt(Modifier.weight(1f).fillMaxHeight())
-                    HomeControls(snapshot, active, onPlay, onPage, status, onRetry, tablet, true, false,
+                    HomeControls(snapshot, active, onPlay, onPage, status, onRetry, journalBlocked, tablet, true, false,
                         Modifier.weight(1f).align(Alignment.Top).padding(top = GameTokens.Gap).verticalScroll(rememberScrollState()))
                 } else Column(Modifier.weight(1f).verticalScroll(rememberScrollState()),
                     horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
                     if (!tablet) HomeHeading()
                     HomeArt(Modifier.fillMaxWidth(), fitWidth = true)
-                    HomeControls(snapshot, active, onPlay, onPage, status, onRetry, tablet, tablet, tablet, Modifier.fillMaxWidth())
+                    HomeControls(snapshot, active, onPlay, onPage, status, onRetry, journalBlocked, tablet, tablet, tablet, Modifier.fillMaxWidth())
                 }
             }
         }
@@ -103,7 +103,7 @@ private fun HomeHeadingMark(mirrored: Boolean = false) {
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun HomeControls(snapshot: GameSnapshot?, active: Boolean, onPlay: (() -> Unit)?, onPage: (String) -> Unit,
-                         status: String?, onRetry: () -> Unit, tablet: Boolean, heading: Boolean, portraitTablet: Boolean, modifier: Modifier) {
+                         status: String?, onRetry: () -> Unit, journalBlocked: Boolean, tablet: Boolean, heading: Boolean, portraitTablet: Boolean, modifier: Modifier) {
     Column(modifier, verticalArrangement = Arrangement.spacedBy(GameTokens.Gap)) {
         if (heading) HomeHeading(large = tablet)
         if (status != null || snapshot == null) {
@@ -112,7 +112,8 @@ private fun HomeControls(snapshot: GameSnapshot?, active: Boolean, onPlay: (() -
             if (status == null || status == "Hesab və cəhd bərpa olunur…") {
                 CircularProgressIndicator(color = GameTokens.Accent)
             }
-            HomeButton(large = tablet, label = "Yenilə", primary = true, onClick = onRetry)
+            if (journalBlocked) Text(JournalRecoveryCopy.Description, color = GameTokens.Muted, fontSize = GameTokens.Body)
+            HomeButton(large = tablet, label = if (journalBlocked) JournalRecoveryCopy.Retry else "Yenilə", primary = true, onClick = onRetry)
             return@Column
         }
         Surface(shape = RoundedCornerShape(GameTokens.CardRadius), color = GameTokens.Surface,
@@ -169,7 +170,7 @@ private fun HomeIcon(icon: Int, description: String? = null, large: Boolean = fa
     Modifier.size(if (large) GameTokens.Target else GameTokens.Gap * 2), contentScale = ContentScale.Fit)
 
 @Composable
-private fun HomeButton(label: String, icon: Int? = null, primary: Boolean = false, showPlayIcon: Boolean = false, enabled: Boolean = true, large: Boolean = false,
+internal fun HomeButton(label: String, icon: Int? = null, primary: Boolean = false, showPlayIcon: Boolean = false, enabled: Boolean = true, large: Boolean = false,
                        modifier: Modifier = Modifier.fillMaxWidth(), onClick: () -> Unit) {
     Button(onClick, modifier = modifier.heightIn(min = if (large && primary) GameTokens.Target * 2 else if (large) GameTokens.Target + GameTokens.Inset else if (primary) GameTokens.Target + GameTokens.Gap else GameTokens.Target)
             .background(Brush.verticalGradient(if (primary) listOf(lerp(GameTokens.Accent, GameTokens.Text, 1f - GameTokens.DimOpacity), GameTokens.Accent) else listOf(GameTokens.Raised, GameTokens.Surface)), RoundedCornerShape(GameTokens.CardRadius))

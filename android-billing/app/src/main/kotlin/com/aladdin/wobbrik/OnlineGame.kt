@@ -30,6 +30,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import appbackend.wobbrik.game.UnreadableAttemptJournal
 import appbackend.wobbrik.game.AuthenticatedRecoveryOwner
 import com.aladdin.wobbrik.engine.*
 import kotlinx.coroutines.launch
@@ -74,10 +75,12 @@ internal fun OnlineGame(app: WobbrikApplication) {
         else AcceptedScene(hostState, ready, host, onHome = { page = "home" })
         return
     }
+    val journalBlocked = (state as? AuthenticatedRecoveryOwner.State.Error)?.cause is UnreadableAttemptJournal
     val error = account is WobbrikApplication.AccountState.Error || state is AuthenticatedRecoveryOwner.State.Error
     val status = when {
         app.bootstrap is WobbrikApplication.Bootstrap.MissingFirebase -> "Firebase konfiqurasiyası yoxdur"
         app.bootstrap is WobbrikApplication.Bootstrap.MissingBackendOrigin -> "Server ünvanı konfiqurasiya edilməyib"
+        journalBlocked -> JournalRecoveryCopy.Title
         error -> "Bağlantı yoxdur"
         ready == null -> "Hesab və cəhd bərpa olunur…"
         restore is AcceptedAttemptRestore.Result.Blocked -> "Cəhd bu versiyada bərpa edilə bilmir"
@@ -116,7 +119,8 @@ internal fun OnlineGame(app: WobbrikApplication) {
             }
         }) else null,
         linking = linking,
-        linkMessage = linkMessage)
+        linkMessage = linkMessage,
+        journalBlocked = journalBlocked)
 }
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -133,10 +137,16 @@ internal fun AccountScreen(
     onLinkGoogle: (() -> Unit)? = null,
     linking: Boolean = false,
     linkMessage: String? = null,
+    journalBlocked: Boolean = false,
 ) {
+    var journalDetailsClosed by rememberSaveable(journalBlocked) { mutableStateOf(false) }
+    if (journalBlocked && (!journalDetailsClosed || page != "home")) {
+        JournalRecoveryScreen(onRetry, onHome = { journalDetailsClosed = true; onPage("home") })
+        return
+    }
     val snapshot = ready?.snapshot
     if (page == "home") {
-        HomeScreen(snapshot, active, onPlay, onPage, status, onRetry)
+        HomeScreen(snapshot, active, if (journalBlocked) null else onPlay, onPage, status, onRetry, journalBlocked)
         return
     }
     BoxWithConstraints(Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(GameTokens.Surface, GameTokens.Background)))
