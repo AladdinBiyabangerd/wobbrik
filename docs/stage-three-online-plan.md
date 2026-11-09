@@ -9,7 +9,7 @@ mərhələnin tamamlandığını bildirmir.
   davamlı command, exact retry və receipt-dən sonra sync var.
 - AuthenticatedRecoveryOwner: auth/foreground recovery və exact Ready instance
   ilə dispatch var. RecoveryDtos server XP, sikkə və nailiyyətləri oxuyur.
-- AndroidAttemptJournal no-backup AtomicFile istifadə edir; Room deyil.
+- AndroidAttemptJournal no-backup qovluqda `DurableJournalFile` (temp + fsync + rename) istifadə edir; 9 noyabrdan bu yeganə outbox-dur, Room deyil.
 - AcceptedAttemptCommands start/checkpoint/terminal finish göndərə bilir.
 - AcceptedEngineHost server checkpoint-i paused bərpa edir, frame/drop/resume bağlıdır.
 - MainActivity ayrıca offline PracticeEngine göstərir. WobbrikApplication Firebase
@@ -28,10 +28,13 @@ mərhələnin tamamlandığını bildirmir.
    Token alınmasını backend sync uğuru sayma. Ready/Recovering/Error, explicit
    start/resume və server progression göstər. Aktiv cəhdi restart ilə silmə:
    abandon müqaviləsi yoxdur. Guest link UID-ni saxlasın; hesab balansları toplanmasın.
-3. **Room keş/outbox.** Account-scoped cache və exact command outbox-u vahid
-   coordinator-a bağla. AtomicFile pending command üçün itkisiz migration hazırla;
-   iki aktiv journal yaratma. Room wallet authority deyil. Eyni revision-da
-   yeni server balansını da qəbul et: billing domain revision-u artırmır.
+3. **Room keşi.** 9 noyabr qərarı (B): exact command outbox davamlı fayl journal-ı
+   (`DurableJournalFile`) olaraq qalır və Room-a köçürülmür; migration tələb olunmur.
+   Room yalnız hesab (app + uid) üzrə qəbul edilmiş server snapshot-larının oxu keşidir:
+   ikinci journal/outbox yaratma, keşdən əmr/pul/mülkiyyət qərarı vermə. Room wallet
+   authority deyil; keş yalnız server cavabı ilə yazılır və hesab/login dəyişəndə
+   həmin hesabdan kənarda göstərilmir. Eyni revision-da yeni server balansını da qəbul
+   et: billing domain revision-u artırmır.
 4. **İnteqrasiya sübutu.** Cavab itkisi, commit sonrası timeout, proses ölümü,
    şəbəkə fasiləsi, login epoch və iki cihaz revision yarışı yoxlanılsın.
    XP/sikkə/nailiyyət təkrarlanmasın; restore son server checkpoint-i olsun.
@@ -62,4 +65,4 @@ və vahid 2 bağlanmayıb. Review: `docs/reviews/2026-11-05-online-screens.md`.
 Google hesabı ilə qonağı eyni UID-də link etmək seçilib; credential UI/binding
 və təsdiqlənmiş dizaynla qalan uyğunluq işləri növbəti addımdır. Konfiqurasiya,
 fixture renderi və fake engine testləri real auth/backend sübutu sayılmır.
-Room/outbox və fault proof ayrıca vahid 3/4-dür.
+Room keşi və fault proof ayrıca vahid 3/4-dür (outbox fayl journal-ında qalır, 9 noyabr qərarı B).

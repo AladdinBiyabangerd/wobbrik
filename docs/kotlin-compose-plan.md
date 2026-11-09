@@ -21,7 +21,7 @@ Minimum Android 7.0 (`minSdk 24`), hədəf Android 16 (`targetSdk 36`), `compile
 - Compose ekranlar və HUD, Canvas oyun səhnəsi və şəhərin çəkilməsi üçün. Android-dən asılı olmayan Kotlin modulu tarazlıq, eniş, xilasetmə, çətinlik və cəhd vəziyyətini idarə edir.
 - Firebase Auth kimlik mənbəyidir. AppBackend Firebase ID tokenindən app + UID-ni müəyyənləşdirir. Ayrı Firebase layihəsi və Android paket allowlist-i saxlanılır.
 - Təsdiqlənib: iqtisadiyyat, hesab üzrə oyun irəliləyişi, bina mülkiyyəti, inventar və bazar üçün PostgreSQL əsas mənbədir. Firebase Spark Auth və lazım olarsa pul/mülkiyyət daşımayan profil məlumatlarına xidmət etsin. Şəhərin bina/dekorasiya yerləşdirməsi PostgreSQL-də revision ilə saxlanılsın; offline yalnız keş göstərilsin. Firestore bu modeldə oyun bazası üçün məcburi deyil.
-- Room server snapshot-ları, yarımçıq cəhdin lokal köməkçi qeydi və eyni identifikatorla retry edilən gözləyən sorğular üçündür. DataStore səs/vibrasiya/dil kimi cihaz seçimləri üçündür. Lokal pul dəyişməsi server hüququ yaratmır.
+- Room hesab üzrə server snapshot-larının oxu keşidir. 9 noyabr qərarı (B): eyni identifikatorla retry edilən gözləyən əmrlərin yeganə outbox-u davamlı fayl journal-ı (`DurableJournalFile`) qalır; Room ikinci journal/outbox deyil. DataStore səs/vibrasiya/dil kimi cihaz seçimləri üçündür. Lokal pul dəyişməsi server hüququ yaratmır.
 - Firestore/PostgreSQL ikili yazısını bir tranzaksiya saymırıq. Gələcək Firestore oxu proyeksiyası lazımdırsa outbox ilə revision-lu surət olacaq; pul və alış qərarlarında həmin surət əsas götürülməyəcək.
 
 ### Vahid əsas mənbə təklifinin dəqiq sərhədi
@@ -53,7 +53,7 @@ Bu siyahıda fayl mövcudluğu təsdiqlənib; bütün faylların tam davranış 
 
 - PlayBillingBackend.kt: məhsul sorğusu, checkout, pending və retry yanaşması faydalıdır. Wobbrik-də əvvəl backend billing/identity, sonra setObfuscatedAccountId və Play checkout, sonra server verify tələb olunur. Cihaz hüquq/sikkə verməyəcək və ack/consume etməyəcək; bunlar AppBackend-də çatdırılma commit-indən sonradır.
 - BoardCanvas.kt və BoardCamera.kt: koordinat çevirməsi, Canvas qatları və toxunuş ayırımı öyrəniləcək. Arrowz-un tap-away lövhəsi, zoom hədləri və animasiya modeli Wobbrik qülləsinə uyğun hazır mühərrik deyil.
-- Room/DAO/repository pattern: keş və outbox üçün istifadə edilə bilər; RoomCoinWallet əsas pul mənbəyi kimi götürülməyəcək.
+- Room/DAO/repository pattern: yalnız server snapshot keşi üçün (outbox fayl journal-ındadır, 9 noyabr B); RoomCoinWallet əsas pul mənbəyi kimi götürülməyəcək.
 - AnalyticsTracker və hadisə interfeysləri: razılıq mexanizmi saxlanır, hadisə adları və parametrlər Wobbrik üçün seçilir. Token, email və alış payload-ı analitikaya göndərilmir.
 - Dizayn sistemi: tokenlərin ayrılması və uyğunlaşan ekran quruluşu üsulu faydalıdır; Arrowz Neon rəngləri, ikonları və maskotu avtomatik götürülmür. Wobbrik tokenləri ayrıca hazırlanacaq.
 
@@ -72,7 +72,7 @@ Bu siyahıda fayl mövcudluğu təsdiqlənib; bütün faylların tam davranış 
 - engine: GameState, command/event, sabit zaman addımı, crane/fall/landing, tarazlıq və engine versiyası; Android/Compose/Firebase asılılığı yoxdur.
 - app və feature/game: lifecycle, toxunuş, Canvas renderer, kamera, HUD, səs/haptic. feature/city, collection, shop, market, account, leaderboard sonrakı mərhələlərdə.
 - core/model və catalog: sabit hissə ID-ləri, bina/geometriya modeli və kataloq versiyası. Müştərinin kataloqu görüntü üçündür; qiymət/çəki və mükafat hesabı serverdə ayrıca əsasdır.
-- core/data: AppBackend client, Room keş/outbox, repository və server revision uzlaşdırması.
+- core/data: AppBackend client, Room snapshot keşi, fayl journal outbox-u, repository və server revision uzlaşdırması.
 - core/auth, ads, billing: SDK sərhədləri; feature-lər provider detalları və server sirrlərini bilmir.
 
 ## 4. Oyun dövrü və bərpa

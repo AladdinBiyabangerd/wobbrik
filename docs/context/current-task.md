@@ -1,3 +1,12 @@
+## Latest Room role decision — 9 November 2026
+- Completed: user decision B ("fayl journal outbox qalsın, Room yalnız cache"). Plan text amended on `docs/room-cache-plan`: PLAN §3.4, stage-three-online-plan unit 3, kotlin-compose-plan Room/core-data lines, `.cursor/context/architecture.md`. The AtomicFile→Room pending-command migration requirement is removed; "same revision accepts new server balance" is kept. Main `ee97189` (journal durability record merged, local CI PASS, pushed to origin).
+- Current state: docs branch committed locally, not merged or pushed. No code, build or dependency changes.
+- Decisions: `DurableJournalFile` is the single outbox. Room is an app+uid-scoped read cache of accepted server snapshots: never a wallet, never a command source, never a second journal.
+- Remaining work: user OK for this docs branch; Room/KSP version pins need approval before `feat/room-cache`; units 3/4 and other §3.4 items as listed in PLAN.
+- Relevant files: PLAN §3.4, docs/stage-three-online-plan.md, docs/kotlin-compose-plan.md, .cursor/context/architecture.md.
+- Checks performed: documentation diff review and `git diff --check`. No CI (docs branch).
+- Exact next step: after merge approval and version pin approval, start `feat/room-cache` in a new bounded chat.
+
 ## Latest journal durability main merge / CI — 9 November 2026
 - Completed: user-approved `--no-ff` merges into main: `d2ff660` (docs/incompatible-journal-main-ci), `da08eed` (test/atomicfile-crash-matrix; current-task conflict resolved newest-first, nothing lost) and `5b31e0f` (fix/legacy-atomicfile-first-write). `./scripts/local-ci.sh` on `5b31e0f` PASS (28s; core 61 + engine 55 tests, 0 failures; assemble/lint debug, 0 lint errors).
 - Current state: this record is on `docs/journal-durability-main-ci`, not merged. No push or deploy. Retained 5582/attempt, shared 5554 and AppBackend untouched.
