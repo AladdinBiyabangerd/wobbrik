@@ -91,7 +91,7 @@ object RecoveryDtos {
         val account = AccountRecovery(r.time("server_time"), r.time("first_online_at"), r.time("grace_until"),
             r.n("level"), r.n("rescues"), r.ids("achievements"), r.ids("unlocks"), r.ids("land"), progress,
             r["best_floors"]?.let { r.n("best_floors") }, r.xpInterval(r.n("xp"), r.n("level")))
-        return GameSnapshot(r.s("rules_version"), r.n("revision"), r.n("coins"), r.n("xp"), attempt, account)
+        return GameSnapshot(r.s("rules_version"), r.n("revision"), r.n("coins"), r.n("xp"), attempt, account).also { it.wire = body }
     }
     fun receipt(body: String): OperationReceipt {
         val r = root(body)
