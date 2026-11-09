@@ -5,6 +5,11 @@
 - Checks performed: renders on emulator-5586 (phone landscape live/offline/recovering/achievements, small landscape, font 2.0, portrait/tablet pixel-identical); app lint 0 errors; core 70 + engine 55 tests.
 - Exact next step: user reviews renders and decides the small-height options; then merge approval.
 
+## Latest Room cache main merge / CI — 9 November 2026
+- Completed: `feat/room-cache` merged `--no-ff` as `f53eab3`; `./scripts/local-ci.sh` PASS (core 70 + engine 55, 0 failures; lint 0 errors); pushed `d0ccbc3..f53eab3`.
+- Current state: this record is on `docs/room-cache-main-ci`, not merged. Test pins runner 1.6.2 / ext-junit 1.2.1 approved.
+- Exact next step: user reviews the offline-account "Yenilə" layout design proposal (`design/` branch); UI code only after approval.
+
 ## Latest Room snapshot cache — 9 November 2026
 - Completed: `feat/room-cache` from main `d0ccbc3` (plan decision merged and pushed). Core `SnapshotCache` (exact validated `/sync` body per app+uid; newer revision wins, same-revision balance update accepted, foreign rules/unparsable rows dropped); recovery owner writes only after publishing an accepted Ready and exposes `cached` for the current uid. Android Room 2.7.2 + KSP 2.1.10-1.0.31 `cached_snapshot` (PK app_id+uid, noBackupFilesDir, destructive migration). App fills existing value slots from the cache while not Ready. Review: `docs/reviews/2026-11-09-room-snapshot-cache.md`.
 - Current state: branch committed locally, not merged or pushed. No CI on the branch. AppBackend, 5554, 5582 and retained attempt untouched.
