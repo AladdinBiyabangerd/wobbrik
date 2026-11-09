@@ -92,6 +92,7 @@ Ekranda görünən oyun hələ ayrıca offline məşqdir. Onlayn hostun input-u 
 - [ ] Room yalnız hesab üzrə server snapshot keşi kimi qoşulsun (plan vahid 3). 9 noyabr qərarı (B):
   gözləyən əmrlər üçün yeganə outbox davamlı fayl journal-ı (`DurableJournalFile`) qalır; Room
   ikinci journal/outbox və wallet authority deyil, journal Room-a köçürülmür.
+  Status (9 noyabr): `feat/room-cache`-də implementasiya edildi və lokal yoxlandı; merge gözləyir.
 
 **Məhdudiyyət:** checkpoint və finish ayrıca journal əmrləridir. Terminal server
 checkpoint-i və hesab/cəhd üzrə lokal kosmetik draft seçim niyyətini bərpa edir;
