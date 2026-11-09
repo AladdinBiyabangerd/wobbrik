@@ -86,15 +86,26 @@ Ekranda görünən oyun hələ ayrıca offline məşqdir. Onlayn hostun input-u 
 - [x] Təsdiq gözlənərkən (`waiting`), xətada və bərpada input bağlanır.
 - [ ] Retry və reconciliation-dan sonra yalnız düzgün qəbul edilmiş vəziyyətdən davam — fake test var; live device/DB açıqdır.
 - [ ] Son eniş → checkpoint → yeni Ready → finish yekun axında live yoxlanılsın.
-- [ ] Finish üçün kosmetik hissə seçimi kataloq və hesabın açdığı hissələrlə əlaqələndirilsin.
+- [x] Finish kosmetik seçimi versiyalı server kataloqu və cari hesabın unlock-larına bağlandı (`feat/finish-cosmetics`); durable draft və explicit təsdiq var. Canlı yoxlama və vizual qəbul istifadəçidədir, main-ə merge edilməyib.
 - [x] Explicit resume/drop ilə onlayn input açılır; restart/abandon hələ bağlıdır.
 - [ ] Google guest link UI yazılıb; live Console web client + provider yoxlaması açıqdır.
 - [ ] Room keş/outbox hələ AtomicFile journal-dadır (plan vahid 3).
 
-**Məhdudiyyət:** hər əmr ayrıca davamlıdır. Checkpoint ilə finish arasındakı niyyət
-avtomatik saxlanmır; həmin arada proses bağlanarsa, bərpadan sonra explicit finish
-yenidən tələb olunur. Testlərdə server müqaviləsini təqlid edən fake istifadə olunub;
-cihazda və canlı serverdə yoxlama aparılmış sayılmır.
+**Məhdudiyyət:** checkpoint və finish ayrıca journal əmrləridir. Terminal server
+checkpoint-i və hesab/cəhd üzrə lokal kosmetik draft seçim niyyətini bərpa edir;
+mərtəbə əlavə etməyən miss də qəbul edilmiş progress ilə tutuşdurulur. Finish
+avtomatik göndərilmir: açıq təsdiq tələb edir. Pending envelope əvvəlki ID/revision
+ilə dəyişmədən drain olunur. Yeni draft server snapshot-u və ya ikinci outbox deyil.
+Fake regressiyalar və izolə renderlər canlı server/cihaz sübutu sayılmır.
+
+8 noyabr disposable APK yoxlaması: `e0af061` START journal-ı APK yenilənməsində
+(versionCode 1→2) eyni envelope ilə dedup bərpa edildi; uyğunsuz storage/rules/engine
+startup və retry-də baytları qorudu, sorğu göndərmədi. Ümumi “Bağlantı yoxdur”
+mesajı əvəzinə təsdiqlənmiş “Cəhd bu versiyada bərpa edilmir” xəta/bərpa ekranı
+(`fix/incompatible-journal-ux`, main-də deyil) debug fixture renderləri ilə yoxlanıb;
+canlı Android journal bərpası ilə bu UI yoxlanmayıb ([review](reviews/2026-11-08-incompatible-journal-ux.md)).
+Bu, bütün §3.4-ün və köhnə checkpoint/finish-in qəbulu deyil.
+Sübut və sərhədlər: [APK journal review](reviews/2026-11-08-apk-journal-upgrade.md).
 
 ## 4. Kolleksiya, hissələr və şəhər — yekun Android axını tamamlanmayıb
 

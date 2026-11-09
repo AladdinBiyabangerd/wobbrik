@@ -26,7 +26,13 @@ class AcceptedAttemptCommandsTest {
         var nextId = 0
         var scope = CoroutineScope(SupervisorJob() + Dispatchers.Unconfined)
         val sessions = AccountSessions { "token" }
-        val host = AcceptedEngineHost()
+        var draftFailure = false
+        val drafts = mutableMapOf<Pair<String, String>, FinishDraft>()
+        val store = object : FinishDraftStore {
+            override fun read(uid: String, attemptId: String) = drafts[uid to attemptId]
+            override fun write(uid: String, attemptId: String, draft: FinishDraft) { check(!draftFailure); drafts[uid to attemptId] = draft }
+        }
+        val host = AcceptedEngineHost(store)
         fun journal() = DiskAttemptJournal { key -> object : JournalFile {
             val file = File(root, key)
             override fun read(): ByteArray? = if (file.exists()) file.readBytes() else null
@@ -38,6 +44,10 @@ class AcceptedAttemptCommandsTest {
             }
         } }
         val backend = object : AttemptBackend {
+            override suspend fun catalog(session: BillingSession) = RecoveryCatalog("wobbrik-v1", "wobbrik-structural-v1",
+                FinishCosmetics.categories.flatMap { category -> listOf(
+                    CatalogItem("base_6_$category", category, category, "free", 0, null, null),
+                    CatalogItem("paid_$category", category, category, "paid", 0, null, null)) }, emptyList())
             override suspend fun sync(session: BillingSession): GameSnapshot {
                 check(!syncFailure) { "sync offline" }
                 return records.getOrPut(session.uid) { GameSnapshot("wobbrik-v1", 0, 0, 0, null) }
@@ -165,12 +175,81 @@ class AcceptedAttemptCommandsTest {
             freshHost.bind(f.commands)
             freshHost.onRecoveryChanged(f.ready())
             assertFalse(freshHost.resume())
-            assertTrue(freshHost.reconcileTerminal()); yield()
-            assertFalse(freshHost.reconcileTerminal())
+            assertTrue(freshHost.snapshot().choosingFinish)
+            assertEquals(2, f.sent.size) // recovery must never auto-finish
+            assertTrue(freshHost.confirmFinish(f.ready())); yield()
+            assertFalse(freshHost.confirmFinish(f.ready()))
             assertNull(f.ready().snapshot.attempt)
             assertEquals(listOf(AttemptCommand.Route.START, AttemptCommand.Route.CHECKPOINT, AttemptCommand.Route.FINISH),
                 f.sent.map { it.second.route })
             assertEquals(1L, f.ready().snapshot.coins)
+        }
+    }
+
+
+    @Test fun zeroFloorMissAndSelectionSurviveHostRestartAndLostFinishResponse() = runBlocking {
+        Fixture().use { f ->
+            f.login(); yield()
+            f.commands.start(f.ready()); yield()
+            val initial = f.ready()
+            val attempt = initial.snapshot.attempt!!
+            f.store.write("alice", attempt.id, FinishDraft(terminalZero(), parts))
+            val host = AcceptedEngineHost(f.store).also { it.bind(f.commands); it.onRecoveryChanged(initial) }
+            assertTrue(host.snapshot().choosingFinish)
+            assertFalse(host.resume(initial))
+            assertFalse(host.selectPart(initial.copy(), "wall", "base_6_wall"))
+            assertFalse(host.selectPart(initial, "wall", "paid_wall"))
+            assertTrue(host.selectPart(initial, "wall", "base_6_wall"))
+            f.afterCommit = { throw java.io.IOException("lost finish response") }
+            assertTrue(host.confirmFinish(initial)); yield()
+            val pending = f.journal().pending("alice")!!
+            assertEquals(AttemptCommand.Route.FINISH, pending.route)
+            assertFalse(host.confirmFinish(initial))
+            f.afterCommit = {}
+            f.recreate(); yield()
+            assertEquals(pending, f.sent.last().second)
+            assertNull(f.journal().pending("alice"))
+            assertNull(f.ready().snapshot.attempt)
+            assertEquals(2, f.receipts.size) // start + exactly one finish
+            val other = initial.copy(accountKey = "bob")
+            host.onRecoveryChanged(other)
+            assertFalse(host.snapshot().choosingFinish)
+            host.onRecoveryChanged(initial)
+            assertTrue(host.snapshot().choosingFinish)
+            assertEquals(parts, host.snapshot().finishParts)
+            assertFalse(host.selectPart(other, "wall", "base_6_wall"))
+        }
+    }
+
+    @Test fun failedDraftWriteKeepsSelectionAndDoesNotDispatchFinish() = runBlocking {
+        Fixture().use { f ->
+            f.host.bind(f.commands)
+            f.login(); yield(); f.commands.start(f.ready()); yield()
+            f.commands.checkpoint(f.ready(), landed(true)); yield()
+            val ready = f.ready()
+            f.draftFailure = true
+            assertFalse(f.host.selectPart(ready, "wall", "base_6_wall"))
+            assertTrue(f.host.snapshot().finishStorageError)
+            assertFalse(f.host.confirmFinish(ready))
+            assertFalse(f.host.snapshot().waiting)
+            assertEquals(2, f.sent.size)
+            assertNull(f.journal().pending("alice"))
+            f.draftFailure = false
+            assertTrue(f.host.confirmFinish(ready)); yield()
+            assertNull(f.ready().snapshot.attempt)
+        }
+    }
+
+    @Test fun staleLocalTerminalCannotReplaceNewAcceptedProgress() = runBlocking {
+        Fixture().use { f ->
+            f.login(); yield(); f.commands.start(f.ready()); yield()
+            val id = f.ready().snapshot.attempt!!.id
+            f.store.write("alice", id, FinishDraft(terminalZero(), parts))
+            f.commands.checkpoint(f.ready(), landed()); yield()
+            val fresh = AcceptedEngineHost(f.store)
+            fresh.onRecoveryChanged(f.ready())
+            assertFalse(fresh.snapshot().choosingFinish)
+            assertEquals(1, fresh.snapshot().scene!!.floors.size)
         }
     }
 
@@ -238,7 +317,7 @@ class AcceptedAttemptCommandsTest {
             val old = f.ready()
             assertFalse(f.commands.start(old.copy()))
             f.login("bob"); yield()
-            assertEquals(old, f.ready())
+            assertEquals(old.snapshot, f.ready().snapshot)
             assertFalse(f.commands.start(old))
             f.login(); yield()
             assertFalse(f.commands.start(old))

@@ -1,0 +1,960 @@
+{
+  "columns": 4,
+  "items": [
+    {
+      "atlas": "wall-atlas.webp",
+      "category": "wall",
+      "column": 0,
+      "crop": [
+        22,
+        83,
+        270,
+        189
+      ],
+      "id": "base_1_wall",
+      "name": "Əhəngdaşı divar",
+      "row": 0
+    },
+    {
+      "atlas": "wall-atlas.webp",
+      "category": "wall",
+      "column": 1,
+      "crop": [
+        336,
+        83,
+        270,
+        189
+      ],
+      "id": "base_2_wall",
+      "name": "Kərpic hörgü",
+      "row": 0
+    },
+    {
+      "atlas": "wall-atlas.webp",
+      "category": "wall",
+      "column": 2,
+      "crop": [
+        649,
+        83,
+        270,
+        189
+      ],
+      "id": "base_3_wall",
+      "name": "Suvaq fasad",
+      "row": 0
+    },
+    {
+      "atlas": "wall-atlas.webp",
+      "category": "wall",
+      "column": 3,
+      "crop": [
+        963,
+        83,
+        270,
+        189
+      ],
+      "id": "base_4_wall",
+      "name": "Panel fasad",
+      "row": 0
+    },
+    {
+      "atlas": "wall-atlas.webp",
+      "category": "wall",
+      "column": 0,
+      "crop": [
+        22,
+        397,
+        270,
+        188
+      ],
+      "id": "base_5_wall",
+      "name": "Taxta üzlük",
+      "row": 1
+    },
+    {
+      "atlas": "wall-atlas.webp",
+      "category": "wall",
+      "column": 1,
+      "crop": [
+        336,
+        397,
+        270,
+        189
+      ],
+      "id": "base_6_wall",
+      "name": "Beton fasad",
+      "row": 1
+    },
+    {
+      "atlas": "wall-atlas.webp",
+      "category": "wall",
+      "column": 2,
+      "crop": [
+        649,
+        397,
+        270,
+        189
+      ],
+      "id": "coins_wall_1",
+      "name": "İncə suvaq",
+      "row": 1
+    },
+    {
+      "atlas": "wall-atlas.webp",
+      "category": "wall",
+      "column": 3,
+      "crop": [
+        963,
+        397,
+        269,
+        189
+      ],
+      "id": "coins_wall_2",
+      "name": "Naxışlı kərpic",
+      "row": 1
+    },
+    {
+      "atlas": "wall-atlas.webp",
+      "category": "wall",
+      "column": 0,
+      "crop": [
+        23,
+        710,
+        269,
+        189
+      ],
+      "id": "coins_wall_3",
+      "name": "Mozaika üzlük",
+      "row": 2
+    },
+    {
+      "atlas": "wall-atlas.webp",
+      "category": "wall",
+      "column": 1,
+      "crop": [
+        336,
+        710,
+        270,
+        189
+      ],
+      "id": "reward_wall_1",
+      "name": "Zolaqlı suvaq",
+      "row": 2
+    },
+    {
+      "atlas": "wall-atlas.webp",
+      "category": "wall",
+      "column": 2,
+      "crop": [
+        650,
+        710,
+        269,
+        189
+      ],
+      "id": "reward_wall_2",
+      "name": "Çınqıl üzlük",
+      "row": 2
+    },
+    {
+      "atlas": "wall-atlas.webp",
+      "category": "wall",
+      "column": 3,
+      "crop": [
+        963,
+        710,
+        269,
+        189
+      ],
+      "id": "reward_wall_3",
+      "name": "Həndəsi relyef",
+      "row": 2
+    },
+    {
+      "atlas": "wall-atlas.webp",
+      "category": "wall",
+      "column": 0,
+      "crop": [
+        22,
+        1024,
+        270,
+        189
+      ],
+      "id": "paid_wall_1",
+      "name": "Mirvari keramika",
+      "row": 3
+    },
+    {
+      "atlas": "window-atlas.webp",
+      "category": "window",
+      "column": 0,
+      "crop": [
+        52,
+        23,
+        221,
+        271
+      ],
+      "id": "base_1_window",
+      "name": "Tağlı pəncərə",
+      "row": 0
+    },
+    {
+      "atlas": "window-atlas.webp",
+      "category": "window",
+      "column": 1,
+      "crop": [
+        364,
+        26,
+        214,
+        264
+      ],
+      "id": "base_2_window",
+      "name": "Çərçivəli pəncərə",
+      "row": 0
+    },
+    {
+      "atlas": "window-atlas.webp",
+      "category": "window",
+      "column": 2,
+      "crop": [
+        644,
+        47,
+        278,
+        226
+      ],
+      "id": "base_3_window",
+      "name": "Geniş pəncərə",
+      "row": 0
+    },
+    {
+      "atlas": "window-atlas.webp",
+      "category": "window",
+      "column": 3,
+      "crop": [
+        956,
+        87,
+        278,
+        177
+      ],
+      "id": "base_4_window",
+      "name": "Lent pəncərə",
+      "row": 0
+    },
+    {
+      "atlas": "window-atlas.webp",
+      "category": "window",
+      "column": 0,
+      "crop": [
+        49,
+        338,
+        224,
+        267
+      ],
+      "id": "base_5_window",
+      "name": "Bölməli pəncərə",
+      "row": 1
+    },
+    {
+      "atlas": "window-atlas.webp",
+      "category": "window",
+      "column": 1,
+      "crop": [
+        365,
+        337,
+        212,
+        254
+      ],
+      "id": "base_6_window",
+      "name": "Metal çərçivəli pəncərə",
+      "row": 1
+    },
+    {
+      "atlas": "window-atlas.webp",
+      "category": "window",
+      "column": 2,
+      "crop": [
+        659,
+        335,
+        251,
+        264
+      ],
+      "id": "coins_window_1",
+      "name": "İkiqanadlı pəncərə",
+      "row": 1
+    },
+    {
+      "atlas": "window-atlas.webp",
+      "category": "window",
+      "column": 3,
+      "crop": [
+        980,
+        346,
+        230,
+        249
+      ],
+      "id": "coins_window_2",
+      "name": "Künc pəncərə",
+      "row": 1
+    },
+    {
+      "atlas": "window-atlas.webp",
+      "category": "window",
+      "column": 0,
+      "crop": [
+        45,
+        643,
+        229,
+        268
+      ],
+      "id": "coins_window_3",
+      "name": "Vitraj pəncərə",
+      "row": 2
+    },
+    {
+      "atlas": "window-atlas.webp",
+      "category": "window",
+      "column": 1,
+      "crop": [
+        333,
+        647,
+        272,
+        257
+      ],
+      "id": "reward_window_1",
+      "name": "Jalüzlü pəncərə",
+      "row": 2
+    },
+    {
+      "atlas": "window-atlas.webp",
+      "category": "window",
+      "column": 2,
+      "crop": [
+        649,
+        655,
+        269,
+        250
+      ],
+      "id": "reward_window_2",
+      "name": "Tağlı qoşa pəncərə",
+      "row": 2
+    },
+    {
+      "atlas": "window-atlas.webp",
+      "category": "window",
+      "column": 3,
+      "crop": [
+        964,
+        649,
+        257,
+        257
+      ],
+      "id": "reward_window_3",
+      "name": "Dairəvi panorama",
+      "row": 2
+    },
+    {
+      "atlas": "window-atlas.webp",
+      "category": "window",
+      "column": 0,
+      "crop": [
+        41,
+        956,
+        227,
+        270
+      ],
+      "id": "paid_window_1",
+      "name": "Kristal çərçivə",
+      "row": 3
+    },
+    {
+      "atlas": "window-atlas.webp",
+      "category": "window",
+      "column": 1,
+      "crop": [
+        337,
+        953,
+        261,
+        275
+      ],
+      "id": "precision_frame",
+      "name": "Dəqiqlik çərçivəsi",
+      "row": 3
+    },
+    {
+      "atlas": "entrance-atlas.webp",
+      "category": "entrance",
+      "column": 0,
+      "crop": [
+        46,
+        21,
+        231,
+        272
+      ],
+      "id": "base_1_entrance",
+      "name": "Daş giriş",
+      "row": 0
+    },
+    {
+      "atlas": "entrance-atlas.webp",
+      "category": "entrance",
+      "column": 1,
+      "crop": [
+        349,
+        13,
+        231,
+        280
+      ],
+      "id": "base_2_entrance",
+      "name": "Dəmir balkon",
+      "row": 0
+    },
+    {
+      "atlas": "entrance-atlas.webp",
+      "category": "entrance",
+      "column": 2,
+      "crop": [
+        657,
+        9,
+        252,
+        288
+      ],
+      "id": "base_3_entrance",
+      "name": "Açıq eyvan",
+      "row": 0
+    },
+    {
+      "atlas": "entrance-atlas.webp",
+      "category": "entrance",
+      "column": 3,
+      "crop": [
+        985,
+        15,
+        243,
+        279
+      ],
+      "id": "base_4_entrance",
+      "name": "Şüşəli giriş",
+      "row": 0
+    },
+    {
+      "atlas": "entrance-atlas.webp",
+      "category": "entrance",
+      "column": 0,
+      "crop": [
+        24,
+        332,
+        255,
+        276
+      ],
+      "id": "base_5_entrance",
+      "name": "Taxta veranda",
+      "row": 1
+    },
+    {
+      "atlas": "entrance-atlas.webp",
+      "category": "entrance",
+      "column": 1,
+      "crop": [
+        354,
+        329,
+        234,
+        272
+      ],
+      "id": "base_6_entrance",
+      "name": "Metal giriş",
+      "row": 1
+    },
+    {
+      "atlas": "entrance-atlas.webp",
+      "category": "entrance",
+      "column": 2,
+      "crop": [
+        662,
+        331,
+        240,
+        275
+      ],
+      "id": "coins_entrance_1",
+      "name": "Sadə məhəccərli balkon",
+      "row": 1
+    },
+    {
+      "atlas": "entrance-atlas.webp",
+      "category": "entrance",
+      "column": 3,
+      "crop": [
+        975,
+        323,
+        246,
+        283
+      ],
+      "id": "coins_entrance_2",
+      "name": "Oyma giriş",
+      "row": 1
+    },
+    {
+      "atlas": "entrance-atlas.webp",
+      "category": "entrance",
+      "column": 0,
+      "crop": [
+        38,
+        643,
+        235,
+        276
+      ],
+      "id": "coins_entrance_3",
+      "name": "Sütunlu portal",
+      "row": 2
+    },
+    {
+      "atlas": "entrance-atlas.webp",
+      "category": "entrance",
+      "column": 1,
+      "crop": [
+        350,
+        643,
+        234,
+        275
+      ],
+      "id": "reward_entrance_1",
+      "name": "Çiçəkli eyvan",
+      "row": 2
+    },
+    {
+      "atlas": "entrance-atlas.webp",
+      "category": "entrance",
+      "column": 2,
+      "crop": [
+        666,
+        643,
+        235,
+        275
+      ],
+      "id": "reward_entrance_2",
+      "name": "Torlu giriş",
+      "row": 2
+    },
+    {
+      "atlas": "entrance-atlas.webp",
+      "category": "entrance",
+      "column": 3,
+      "crop": [
+        979,
+        641,
+        234,
+        281
+      ],
+      "id": "reward_entrance_3",
+      "name": "Qəfəs naxışlı balkon",
+      "row": 2
+    },
+    {
+      "atlas": "entrance-atlas.webp",
+      "category": "entrance",
+      "column": 0,
+      "crop": [
+        39,
+        952,
+        235,
+        285
+      ],
+      "id": "paid_entrance_1",
+      "name": "Filigran portal",
+      "row": 3
+    },
+    {
+      "atlas": "entrance-atlas.webp",
+      "category": "entrance",
+      "column": 1,
+      "crop": [
+        350,
+        957,
+        240,
+        283
+      ],
+      "id": "balance_entry",
+      "name": "Tarazlıq nişanlı giriş",
+      "row": 3
+    },
+    {
+      "atlas": "roof-atlas-v2.webp",
+      "category": "roof",
+      "column": 0,
+      "crop": [
+        17,
+        107,
+        279,
+        178
+      ],
+      "id": "base_1_roof",
+      "name": "Düz parapet dam",
+      "row": 0
+    },
+    {
+      "atlas": "roof-atlas-v2.webp",
+      "category": "roof",
+      "column": 1,
+      "crop": [
+        323,
+        43,
+        284,
+        240
+      ],
+      "id": "base_2_roof",
+      "name": "Maili kirəmit dam",
+      "row": 0
+    },
+    {
+      "atlas": "roof-atlas-v2.webp",
+      "category": "roof",
+      "column": 2,
+      "crop": [
+        633,
+        82,
+        283,
+        200
+      ],
+      "id": "base_3_roof",
+      "name": "Yastı terras dam",
+      "row": 0
+    },
+    {
+      "atlas": "roof-atlas-v2.webp",
+      "category": "roof",
+      "column": 3,
+      "crop": [
+        944,
+        66,
+        291,
+        218
+      ],
+      "id": "base_4_roof",
+      "name": "Texniki düz dam",
+      "row": 0
+    },
+    {
+      "atlas": "roof-atlas-v2.webp",
+      "category": "roof",
+      "column": 0,
+      "crop": [
+        13,
+        390,
+        290,
+        186
+      ],
+      "id": "base_5_roof",
+      "name": "İkiyamaclı dam",
+      "row": 1
+    },
+    {
+      "atlas": "roof-atlas-v2.webp",
+      "category": "roof",
+      "column": 1,
+      "crop": [
+        323,
+        392,
+        286,
+        184
+      ],
+      "id": "base_6_roof",
+      "name": "Metal örtüklü dam",
+      "row": 1
+    },
+    {
+      "atlas": "roof-atlas-v2.webp",
+      "category": "roof",
+      "column": 2,
+      "crop": [
+        629,
+        341,
+        311,
+        235
+      ],
+      "id": "coins_roof_1",
+      "name": "Saçaqlı dam",
+      "row": 1
+    },
+    {
+      "atlas": "roof-atlas-v2.webp",
+      "category": "roof",
+      "column": 3,
+      "crop": [
+        940,
+        371,
+        298,
+        204
+      ],
+      "id": "coins_roof_2",
+      "name": "Mansard dam",
+      "row": 1
+    },
+    {
+      "atlas": "roof-atlas-v2.webp",
+      "category": "roof",
+      "column": 0,
+      "crop": [
+        17,
+        641,
+        287,
+        218
+      ],
+      "id": "coins_roof_3",
+      "name": "Pilləli tac dam",
+      "row": 2
+    },
+    {
+      "atlas": "roof-atlas-v2.webp",
+      "category": "roof",
+      "column": 1,
+      "crop": [
+        326,
+        707,
+        301,
+        233
+      ],
+      "id": "reward_roof_1",
+      "name": "Kənar haşiyəli dam",
+      "row": 2
+    },
+    {
+      "atlas": "roof-atlas-v2.webp",
+      "category": "roof",
+      "column": 2,
+      "crop": [
+        627,
+        655,
+        313,
+        204
+      ],
+      "id": "reward_roof_2",
+      "name": "Şüşəli dam örtüyü",
+      "row": 2
+    },
+    {
+      "atlas": "roof-atlas-v2.webp",
+      "category": "roof",
+      "column": 3,
+      "crop": [
+        940,
+        684,
+        300,
+        174
+      ],
+      "id": "reward_roof_3",
+      "name": "Dalğalı dam örtüyü",
+      "row": 2
+    },
+    {
+      "atlas": "roof-atlas-v2.webp",
+      "category": "roof",
+      "column": 0,
+      "crop": [
+        15,
+        941,
+        286,
+        242
+      ],
+      "id": "paid_roof_1",
+      "name": "Şüşə tac",
+      "row": 3
+    },
+    {
+      "atlas": "roof-atlas-v2.webp",
+      "category": "roof",
+      "column": 1,
+      "crop": [
+        325,
+        940,
+        283,
+        238
+      ],
+      "id": "summit_crown",
+      "name": "Zirvə tacı",
+      "row": 3
+    },
+    {
+      "atlas": "lighting-atlas.webp",
+      "category": "lighting",
+      "column": 0,
+      "crop": [
+        100,
+        24,
+        119,
+        270
+      ],
+      "id": "base_1_lighting",
+      "name": "Giriş fənəri",
+      "row": 0
+    },
+    {
+      "atlas": "lighting-atlas.webp",
+      "category": "lighting",
+      "column": 1,
+      "crop": [
+        369,
+        45,
+        204,
+        222
+      ],
+      "id": "base_2_lighting",
+      "name": "Divar fənəri",
+      "row": 0
+    },
+    {
+      "atlas": "lighting-atlas.webp",
+      "category": "lighting",
+      "column": 2,
+      "crop": [
+        651,
+        43,
+        265,
+        223
+      ],
+      "id": "base_3_lighting",
+      "name": "Eyvan işığı",
+      "row": 0
+    },
+    {
+      "atlas": "lighting-atlas.webp",
+      "category": "lighting",
+      "column": 3,
+      "crop": [
+        995,
+        25,
+        209,
+        267
+      ],
+      "id": "base_4_lighting",
+      "name": "Giriş işıq zolağı",
+      "row": 0
+    },
+    {
+      "atlas": "lighting-atlas.webp",
+      "category": "lighting",
+      "column": 0,
+      "crop": [
+        44,
+        332,
+        232,
+        274
+      ],
+      "id": "base_5_lighting",
+      "name": "Veranda fənəri",
+      "row": 1
+    },
+    {
+      "atlas": "lighting-atlas.webp",
+      "category": "lighting",
+      "column": 1,
+      "crop": [
+        353,
+        356,
+        241,
+        225
+      ],
+      "id": "base_6_lighting",
+      "name": "Sənaye divar lampası",
+      "row": 1
+    },
+    {
+      "atlas": "lighting-atlas.webp",
+      "category": "lighting",
+      "column": 2,
+      "crop": [
+        670,
+        359,
+        226,
+        233
+      ],
+      "id": "coins_lighting_1",
+      "name": "Qoşa giriş lampası",
+      "row": 1
+    },
+    {
+      "atlas": "lighting-atlas.webp",
+      "category": "lighting",
+      "column": 3,
+      "crop": [
+        964,
+        370,
+        262,
+        176
+      ],
+      "id": "coins_lighting_2",
+      "name": "Karniz işığı",
+      "row": 1
+    },
+    {
+      "atlas": "lighting-atlas.webp",
+      "category": "lighting",
+      "column": 0,
+      "crop": [
+        53,
+        654,
+        206,
+        249
+      ],
+      "id": "coins_lighting_3",
+      "name": "Naxışlı fasad işığı",
+      "row": 2
+    },
+    {
+      "atlas": "lighting-atlas.webp",
+      "category": "lighting",
+      "column": 1,
+      "crop": [
+        347,
+        664,
+        246,
+        195
+      ],
+      "id": "reward_lighting_1",
+      "name": "Qapıüstü lampa",
+      "row": 2
+    },
+    {
+      "atlas": "lighting-atlas.webp",
+      "category": "lighting",
+      "column": 2,
+      "crop": [
+        739,
+        643,
+        95,
+        272
+      ],
+      "id": "reward_lighting_2",
+      "name": "Şaquli işıq zolağı",
+      "row": 2
+    },
+    {
+      "atlas": "lighting-atlas.webp",
+      "category": "lighting",
+      "column": 3,
+      "crop": [
+        995,
+        654,
+        204,
+        236
+      ],
+      "id": "reward_lighting_3",
+      "name": "Ulduz naxışlı işıq",
+      "row": 2
+    },
+    {
+      "atlas": "lighting-atlas.webp",
+      "category": "lighting",
+      "column": 0,
+      "crop": [
+        90,
+        963,
+        142,
+        274
+      ],
+      "id": "paid_lighting_1",
+      "name": "İşıq şəlaləsi",
+      "row": 3
+    }
+  ],
+  "rows": 4,
+  "rules_version": "wobbrik-v1",
+  "status": "runtime atlas map; bounds derived from alpha body"
+}

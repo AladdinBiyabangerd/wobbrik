@@ -1,9 +1,10 @@
 package com.aladdin.wobbrik.engine
 
 import appbackend.wobbrik.game.AuthenticatedRecoveryOwner
+import appbackend.wobbrik.game.FinishCosmetics
 
 /** Application-owned online physics boundary. Owns only accepted online physics; dispatch always occurs outside its monitor. */
-class AcceptedEngineHost {
+class AcceptedEngineHost(private val drafts: FinishDraftStore? = null) {
     data class Snapshot(
         val restore: AcceptedAttemptRestore.Result = AcceptedAttemptRestore.Result.Unavailable,
         val foreground: Boolean = false,
@@ -11,6 +12,9 @@ class AcceptedEngineHost {
         val scene: PracticeState? = null,
         val waiting: Boolean = false,
         val cameraX: Double = 0.0,
+        val finishParts: Map<String, String> = emptyMap(),
+        val choosingFinish: Boolean = false,
+        val finishStorageError: Boolean = false,
     ) {
         val inputEnabled: Boolean get() = foreground && !waiting && scene?.paused == false && scene.phase != Phase.FINISHED
     }
@@ -27,12 +31,24 @@ class AcceptedEngineHost {
     @Synchronized fun onRecoveryChanged(state: AuthenticatedRecoveryOwner.State) {
         engine = null
         ready = state as? AuthenticatedRecoveryOwner.State.Ready
-        current = current.copy(restore = AcceptedAttemptRestore.Result.Unavailable, previousFrameNanos = null, scene = null, waiting = false)
+        current = current.copy(restore = AcceptedAttemptRestore.Result.Unavailable, previousFrameNanos = null, scene = null, waiting = false, finishParts = emptyMap(), choosingFinish = false, finishStorageError = false)
         val restored = AcceptedAttemptRestore.from(state)
         if (restored is AcceptedAttemptRestore.Result.Paused) {
             engine = PracticeEngine().also { it.restore(restored.checkpoint); it.pause() }
         }
         current = current.copy(restore = restored, scene = engine?.state)
+        if (restored is AcceptedAttemptRestore.Result.Paused) {
+            val expected = ready ?: return
+            val draft = expected.accountKey?.let { drafts?.read(it, restored.attemptId) }
+            // A local miss is reusable only against exactly the accepted progress it ended.
+            val terminal = draft?.terminal?.takeIf { sameProgress(it, restored.checkpoint) }
+                ?: restored.checkpoint.takeIf { restored.terminal }
+            if (terminal != null) {
+                engine = PracticeEngine().also { it.restore(terminal); it.pause() }
+                val parts = expected.catalog?.let { FinishCosmetics.selection(it, expected.snapshot, draft?.parts.orEmpty()) }.orEmpty()
+                current = current.copy(scene = engine?.state, choosingFinish = true, finishParts = parts)
+            }
+        }
     }
 
     /** Foreground never implicitly resumes an accepted attempt. */
@@ -79,7 +95,15 @@ class AcceptedEngineHost {
                 if (before.phase == Phase.FALLING && live.state.phase != Phase.FALLING) {
                     live.pause()
                     current = current.copy(scene = live.state, waiting = true, previousFrameNanos = null)
-                    return@synchronized Triple(ready ?: return, live.checkpoint(), commands ?: return)
+                    val expectedReady = ready ?: return
+                    val proposal = live.checkpoint()
+                    if (proposal.state.phase == Phase.FINISHED) {
+                        saveDraft(expectedReady, FinishDraft(proposal))
+                        current = current.copy(choosingFinish = true, finishParts = expectedReady.catalog?.let {
+                            FinishCosmetics.selection(it, expectedReady.snapshot, emptyMap())
+                        }.orEmpty())
+                    }
+                    return@synchronized Triple(expectedReady, proposal, commands ?: return)
                 }
             }
             current = current.copy(scene = live.state)
@@ -88,14 +112,16 @@ class AcceptedEngineHost {
         dispatch?.let { (expected, proposal, sender) ->
             val accepted = expected.snapshot.attempt ?: return
             if (proposal.state.floors.size.toLong() > accepted.floors) sender.checkpoint(expected, proposal)
-            else sender.finish(expected, proposal, DEFAULT_PARTS)
+            else synchronized(this) {
+                if (ready === expected) current = current.copy(waiting = false)
+            }
         }
     }
 
     @Synchronized fun resume(expected: AuthenticatedRecoveryOwner.State.Ready? = null): Boolean {
         if (expected == null || expected !== ready || commands == null || !current.foreground || current.waiting) return false
         val restored = current.restore as? AcceptedAttemptRestore.Result.Paused ?: return false
-        if (restored.terminal) return false
+        if (restored.terminal || current.choosingFinish) return false
         val live = engine ?: return false
         live.resume()
         current = current.copy(scene = live.state, previousFrameNanos = null)
@@ -107,29 +133,53 @@ class AcceptedEngineHost {
         return (engine?.drop() == true).also { current = current.copy(scene = engine?.state) }
     }
 
-    /** Called after Ready publication, never from the synchronous invalidation callback.
-     * FINISHED in the accepted checkpoint is the durable finish intent, including
-     * process death between checkpoint and finish. Base parts are always free.
-     */
-    fun reconcileTerminal(): Boolean {
+    @Synchronized fun selectPart(expected: AuthenticatedRecoveryOwner.State.Ready, category: String, id: String): Boolean {
+        if (ready !== expected || !current.choosingFinish || current.waiting) return false
+        val catalog = expected.catalog ?: return false
+        val item = catalog.items.firstOrNull { it.id == id && it.category == category } ?: return false
+        if (!FinishCosmetics.available(item, expected.snapshot)) return false
+        val terminal = engine?.checkpoint() ?: return false
+        val parts = current.finishParts + (category to id)
+        if (!saveDraft(expected, FinishDraft(terminal, parts))) return false
+        current = current.copy(finishParts = parts)
+        return true
+    }
+
+    fun confirmFinish(expected: AuthenticatedRecoveryOwner.State.Ready): Boolean {
         val dispatch = synchronized(this) {
-            val restored = current.restore as? AcceptedAttemptRestore.Result.Paused ?: return false
-            if (!restored.terminal || current.waiting) return false
-            val expected = ready ?: return false
+            if (ready !== expected || !current.choosingFinish || current.waiting) return false
+            val catalog = expected.catalog ?: return false
+            if (!FinishCosmetics.valid(catalog, expected.snapshot, current.finishParts)) return false
             val sender = commands ?: return false
+            val terminal = engine?.checkpoint() ?: return false
+            if (!saveDraft(expected, FinishDraft(terminal, current.finishParts))) return false
             current = current.copy(waiting = true)
-            Triple(expected, restored.checkpoint, sender)
+            Triple(sender, terminal, current.finishParts.toMap())
         }
-        val sent = dispatch.third.finish(dispatch.first, dispatch.second, DEFAULT_PARTS)
+        val sent = dispatch.first.finish(expected, dispatch.second, dispatch.third)
         if (!sent) synchronized(this) {
-            if (ready === dispatch.first) current = current.copy(waiting = false)
+            if (ready === expected) current = current.copy(waiting = false)
         }
         return sent
     }
 
-    companion object {
-        private val DEFAULT_PARTS = setOf("wall", "window", "entrance", "roof", "lighting")
-            .associateWith { "base_6_$it" }
+    private fun saveDraft(expected: AuthenticatedRecoveryOwner.State.Ready, draft: FinishDraft): Boolean {
+        val uid = expected.accountKey ?: return drafts == null
+        val attempt = expected.snapshot.attempt ?: return false
+        return try {
+            drafts?.write(uid, attempt.id, draft)
+            current = current.copy(finishStorageError = false)
+            true
+        } catch (_: Exception) {
+            // Keep terminal physics paused and expose a retryable selection error; never send on failed confirm.
+            current = current.copy(finishStorageError = true)
+            false
+        }
     }
+
+    private fun sameProgress(a: EngineCheckpoint, b: EngineCheckpoint): Boolean =
+        a.version == b.version && a.rules == b.rules && a.state.phase == Phase.FINISHED && a.state.floors == b.state.floors &&
+            a.state.perfectLandings == b.state.perfectLandings && a.state.balance.rescues == b.state.balance.rescues
+
     // Restart/abandon intentionally have no binding: there is no approved server policy/API.
 }

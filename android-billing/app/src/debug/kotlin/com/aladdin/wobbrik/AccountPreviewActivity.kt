@@ -8,6 +8,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import appbackend.wobbrik.game.*
 
 /** Frozen server-shaped presentation fixture. No authentication or command dispatch. */
@@ -33,7 +35,9 @@ class AccountPreviewActivity : ComponentActivity() {
             MaterialTheme(colorScheme = darkColorScheme(primary = GameTokens.Accent,
                 onPrimary = GameTokens.Background, surface = GameTokens.Surface, onSurface = GameTokens.Text,
                 background = GameTokens.Background, onBackground = GameTokens.Text)) {
-                val page = intent.getStringExtra("page") ?: "home"
+                val journalBlocked = intent.getBooleanExtra("journalBlocked", false)
+                var previewPage by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(intent.getStringExtra("page") ?: "home") }
+                val page = previewPage
                 if (page == "game" || page == "pause") {
                     val gameReady = ready.copy(snapshot = ready.snapshot.copy(attempt = ServerAttempt("fixture", true, 0, null)))
                     val host = androidx.compose.runtime.remember {
@@ -41,9 +45,9 @@ class AccountPreviewActivity : ComponentActivity() {
                     }
                     val view = host.snapshot()
                     AcceptedScene(view.copy(scene = view.scene?.copy(paused = page == "pause")), gameReady, host, {})
-                } else AccountScreen(intent.getStringExtra("page") ?: "home", if (intent.getBooleanExtra("unavailable", false)) null else previewReady,
-                    WobbrikApplication.AccountState.Session(true), intent.getStringExtra("status"), {}, {},
-                    if (intent.getBooleanExtra("unavailable", false)) null else ({}), false)
+                } else AccountScreen(page, if (journalBlocked || intent.getBooleanExtra("unavailable", false)) null else previewReady,
+                    WobbrikApplication.AccountState.Session(true), if (journalBlocked) JournalRecoveryCopy.Title else intent.getStringExtra("status"), { previewPage = it }, {},
+                    if (journalBlocked || intent.getBooleanExtra("unavailable", false)) null else ({}), false, journalBlocked = journalBlocked)
             }
         }
     }

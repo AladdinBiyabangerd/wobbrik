@@ -14,12 +14,14 @@ class AuthenticatedRecoveryOwnerTest {
         val calls = mutableListOf<BillingSession>()
         var sync: suspend (BillingSession) -> GameSnapshot = { snapshot(it.uid) }
         var submit: suspend () -> Unit = {}
+        var catalog: suspend (BillingSession) -> RecoveryCatalog? = { null }
         val journal = object : AttemptJournal {
             override fun pending(uid: String) = pending[uid]
             override fun save(uid: String, command: AttemptCommand) { pending[uid] = command }
             override fun remove(uid: String, command: AttemptCommand) { check(pending.remove(uid, command)) }
         }
         val backend = object : AttemptBackend {
+            override suspend fun catalog(session: BillingSession) = this@Fixture.catalog(session)
             override suspend fun sync(session: BillingSession): GameSnapshot {
                 calls += session
                 return this@Fixture.sync(session)
@@ -30,6 +32,23 @@ class AuthenticatedRecoveryOwnerTest {
         val owner = AuthenticatedRecoveryOwner(sessions, backend, journal, scope, notifications::add)
         fun ready() = (owner.state.value as AuthenticatedRecoveryOwner.State.Ready).snapshot
         fun close() = scope.cancel()
+    }
+
+    @Test fun delayedCatalogCannotPublishAcrossSameUidEpoch() = runBlocking {
+        val f = Fixture()
+        try {
+            val gate = CompletableDeferred<Unit>()
+            val oldCatalog = RecoveryCatalog("wobbrik-v1", "wobbrik-structural-v1", emptyList(), emptyList())
+            f.catalog = { withContext(NonCancellable) { gate.await() }; oldCatalog }
+            f.owner.onAuthChanged("alice"); yield()
+            assertTrue(f.owner.state.value is AuthenticatedRecoveryOwner.State.Recovering)
+            f.catalog = { oldCatalog.copy(items = listOf(CatalogItem("new", "new", "wall", "free", 0, null, null))) }
+            f.owner.onAuthChanged("alice"); yield()
+            gate.complete(Unit); yield()
+            val ready = f.owner.state.value as AuthenticatedRecoveryOwner.State.Ready
+            assertEquals("alice", ready.accountKey)
+            assertEquals("new", ready.catalog!!.items.single().id)
+        } finally { f.close() }
     }
 
     @Test fun invalidationNotifiesSynchronouslyEvenWhenFlowWouldConflate() = runBlocking {
@@ -153,6 +172,41 @@ class AuthenticatedRecoveryOwnerTest {
             assertEquals(command, f.pending["alice"])
             assertTrue(f.calls.isEmpty())
         } finally { f.close() }
+    }
+
+    @Test fun unreadableJournalPublishesSpecificErrorAndRetryCannotUseStaleReady() = runBlocking {
+        val sessions = AccountSessions { "token" }
+        val scope = CoroutineScope(SupervisorJob() + Dispatchers.Unconfined)
+        var bytes: ByteArray? = null
+        var writes = 0
+        val journal = DiskAttemptJournal { object : JournalFile {
+            override fun read() = bytes
+            override fun replace(value: ByteArray) { writes++; bytes = value }
+        } }
+        var calls = 0
+        val backend = object : AttemptBackend {
+            override suspend fun sync(session: BillingSession): GameSnapshot { calls++; return snapshot(session.uid) }
+            override suspend fun submit(session: BillingSession, command: AttemptCommand) { calls++ }
+            override suspend fun catalog(session: BillingSession): RecoveryCatalog? { calls++; return null }
+        }
+        val owner = AuthenticatedRecoveryOwner(sessions, backend, journal, scope)
+        try {
+            owner.onAuthChanged("alice"); yield()
+            val oldReady = owner.state.value as AuthenticatedRecoveryOwner.State.Ready
+            journal.save("alice", GameplayWire.start("retained", oldReady.snapshot.revision))
+            bytes = bytes!!.copyOf().also { it[3] = 2 }
+            val retained = bytes!!.copyOf()
+            val callsBefore = calls
+            val writesBefore = writes
+            repeat(2) {
+                owner.onForeground(); yield()
+                assertTrue((owner.state.value as AuthenticatedRecoveryOwner.State.Error).cause is UnreadableAttemptJournal)
+                assertFalse(owner.submit(oldReady) { error("Stale Ready must not build a new command") })
+                assertArrayEquals(retained, bytes)
+                assertEquals(callsBefore, calls)
+                assertEquals(writesBefore, writes)
+            }
+        } finally { scope.cancel() }
     }
 
     companion object {

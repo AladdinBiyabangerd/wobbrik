@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.asStateFlow
 /** One application-owned coordinator/journal for recovery and all attempt mutations. */
 class AuthenticatedRecoveryOwner(
     private val sessions: AccountSessions,
-    backend: AttemptBackend,
+    private val backend: AttemptBackend,
     journal: AttemptJournal,
     private val scope: CoroutineScope,
     // Called under the owner lock before publication; must be synchronous and non-reentrant.
@@ -19,7 +19,7 @@ class AuthenticatedRecoveryOwner(
     sealed interface State {
         data object SignedOut : State
         data object Recovering : State
-        data class Ready(val snapshot: GameSnapshot) : State
+        data class Ready(val snapshot: GameSnapshot, val catalog: RecoveryCatalog? = null, val accountKey: String? = null) : State
         data class Error(val cause: Exception) : State
     }
 
@@ -73,11 +73,12 @@ class AuthenticatedRecoveryOwner(
         work = scope.launch(start = CoroutineStart.LAZY) {
             try {
                 val snapshot = action(session)
+                val catalog = backend.catalog(session)
                 ensureActive()
                 synchronized(lock) {
                     if (epoch == generation && sessions.current() == session && coordinator.ready()) {
                         work = null // Ready observers may dispatch the next durable command.
-                        publishLocked(State.Ready(snapshot))
+                        publishLocked(State.Ready(snapshot, catalog, session.uid))
                     }
                 }
             } catch (cancelled: CancellationException) {

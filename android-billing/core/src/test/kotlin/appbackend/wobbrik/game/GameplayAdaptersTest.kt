@@ -80,6 +80,23 @@ class GameplayAdaptersTest {
         })
         try { backend.sync(original); fail() } catch (_: AccountChanged) { }
     }
+    @Test fun catalogIsAuthenticatedVersionCheckedAndEpochGuarded() = runBlocking {
+        val f = Fixture()
+        val body = """{"rules_version":"wobbrik-v1","engine_version":"wobbrik-structural-v1","items":[],"land_offers":[]}"""
+        var response = body
+        var switchEpoch = false
+        val backend = GameplayHttpBackend(f.sessions, GameplayTransport { path, token, request ->
+            assertEquals("catalog", path); assertEquals("fresh-${f.tokens}", token); assertNull(request)
+            if (switchEpoch) f.session = BillingSession("alice", "epoch-2")
+            GameplayResponse(200, response)
+        })
+        assertEquals("wobbrik-v1", backend.catalog(f.session!!).rulesVersion)
+        response = body.replace("wobbrik-v1", "wobbrik-v2")
+        try { backend.catalog(f.session!!); fail() } catch (_: IllegalArgumentException) { }
+        response = body; switchEpoch = true
+        try { backend.catalog(f.session!!); fail() } catch (_: AccountChanged) { }
+    }
+
     @Test fun metadataMismatchAndUnexpectedFieldsAreRejected() {
         val c = GameplayWire.start("op", 0)
         assertThrows(IllegalArgumentException::class.java) { GameplayWire.validate(c.copy(operationId = "other")) }

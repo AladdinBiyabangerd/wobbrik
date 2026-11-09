@@ -73,7 +73,9 @@ ownership unit. Full online gameplay and a complete domain adapter remain pendin
 state. Signed-out/recovering/error exposes no attempt. An absent attempt and a
 finished attempt are distinct outcomes; neither creates a local online attempt.
 An active zero-sequence attempt may initialize fresh physics only with zero counters
-and no checkpoint. Positive sequences require positive floors, sequence <= floors,
+and no checkpoint (`null` or the server initial empty JSON object `{}`). Nonempty
+objects, arrays and malformed snapshots are rejected even at sequence zero.
+Positive sequences require positive floors, sequence <= floors,
 and `decodeAccepted` matching all three server counters. Unsupported or malformed
 snapshots fail closed. Restored physics is always paused with tick accumulation reset;
 the future host must also reset its monotonic frame clock before explicit resume.
@@ -130,11 +132,19 @@ its input is never routed into online commands.
   Definitive revision conflict clears that rejected command, syncs, exposes Error
   and requires recovery/new explicit intent; it never silently rebases or retries
   as a new operation. Other failures preserve the original pending command.
-- Multi-stage checkpoint→finish intent is not automatically durable as a whole.
-  Each admitted command is journaled separately. After a crash between them, the
-  accepted terminal checkpoint restores paused and requires explicit finish again.
-  A terminal miss after the last accepted checkpoint may restore that last physics
-  boundary after process death, per the existing accepted-checkpoint contract.
+- Checkpoint and finish remain separate journal operations. An accepted terminal
+  checkpoint reopens the cosmetic picker, never automatically finishes. A local,
+  app-private account/attempt draft retains terminal misses with no added floor and
+  selected part IDs across restart. Reuse requires matching checkpoint/rules,
+  immutable accepted floors and precise/rescue counters; it grants no progress.
+  A crash before an extra-floor checkpoint reaches the wire journal still falls
+  back to the accepted boundary; an unaccepted draft is never promoted to progress.
+- Recovery drains any pending command verbatim before publishing Ready/catalog or
+  accepting a new selection. Confirm validates exactly five category IDs against
+  the authenticated wobbrik-v1/structural-v1 catalog and current-account unlocks;
+  free items are implicit. Failed local selection writes retain paused physics,
+  expose an error and do not dispatch a finish. Auth epochs revoke stale callbacks.
+  Back/menu preserves both the active attempt and pending command.
 
 No backend API/DTO/schema/rules version changes are needed: the integration uses
 existing structural-v1 requests and the unified PostgreSQL wallet/ledger. Server
