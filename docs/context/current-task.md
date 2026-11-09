@@ -1,3 +1,12 @@
+## Latest AtomicFile crash matrix — 9 November 2026
+- Completed: `test/atomicfile-crash-matrix` from main `213c5db`. Added `AtomicFileCrashMatrixTest` (6 tests; 258 crash scenarios over API 24–29/30+ AtomicFile models + adapter mirror). Defect: AtomicFile only logs some commit failures, so save/remove could report success while the old state stayed. Fixed by read-back verification in `DiskAttemptJournal.write` (`4051e68`). Review: `docs/reviews/2026-11-09-atomicfile-crash-matrix.md`.
+- Current state: branch committed locally, not merged. `docs/incompatible-journal-main-ci` (main CI record) is also unmerged. No device/backend/UI touched.
+- Decisions: test code plus a minimal 2-line core fix; no Android-module change. A read-back mismatch surfaces as a generic error.
+- Remaining work: decide whether to replace platform AtomicFile on API 24–29 (first write leaves an unreadable file after a crash); real device kill/power-cut durability; billing journal not covered; merge needs user OK, then main local-ci.
+- Relevant files: core DiskAttemptJournal.kt, AtomicFileCrashMatrixTest.kt, android AndroidAttemptJournal.kt, review above, PLAN §3.4.
+- Checks performed: `:core:test --rerun` 60/0 failures, `:engine:test --rerun` 55/0, `:app:assembleDebug` PASS, pre-fix failure observed on both API models, `git diff --check` PASS. No branch CI.
+- Exact next step: user reviews the finding and approves merge of this branch (and the docs CI branch); separately decide on the API 24–29 first-write limitation.
+
 ## Latest incompatible journal UX — 9 November 2026
 - Completed: branch `fix/incompatible-journal-ux` (from d9ecf84). Typed `UnreadableAttemptJournal` at the DiskAttemptJournal read boundary; OnlineGame maps only that type to the approved “Cəhd bu versiyada bərpa edilmir” JournalRecoveryScreen (Yenidən yoxla / Ana ekrana qayıt) and blocked Home; debug preview fixture; focused regressions. Remaining presentation checks done: small 720×1280@360 font 2.0 scroll/both actions reachable, and phone landscape final capture. No layout fix needed. Review: `docs/reviews/2026-11-08-incompatible-journal-ux.md`.
 - Current state: branch committed locally, not merged/pushed. Own render AVD `JournalUxRender` (emulator-5586, ignored output/journal-ux-render/avd) was used for renders and shut down after them. Retained 5582/attempt f73722ea-b54f-4985-9c7e-85a442c1d0a3 and shared 5554 not touched. AppBackend not touched (no backend change needed).

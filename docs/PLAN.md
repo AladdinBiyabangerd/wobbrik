@@ -97,6 +97,11 @@ mərtəbə əlavə etməyən miss də qəbul edilmiş progress ilə tutuşdurulu
 avtomatik göndərilmir: açıq təsdiq tələb edir. Pending envelope əvvəlki ID/revision
 ilə dəyişmədən drain olunur. Yeni draft server snapshot-u və ya ikinci outbox deyil.
 Fake regressiyalar və izolə renderlər canlı server/cihaz sübutu sayılmır.
+9 noyabr AtomicFile crash matrisi (`test/atomicfile-crash-matrix`, main-də deyil): API 24–29 və
+30+ AtomicFile modelləri üzərində 258 JVM ssenarisi köhnə/yeni vəziyyəti dəqiq bərpa etdi;
+AtomicFile-ın yalnız log etdiyi commit xətası üçün read-back düzəlişi edildi. API 24–29-da ilk
+yazının crash-i oxunmayan (qorunan) fayl qoyur — qərar tələb edir. Cihaz durability sübutu deyil
+([review](reviews/2026-11-09-atomicfile-crash-matrix.md)).
 
 8 noyabr disposable APK yoxlaması: `e0af061` START journal-ı APK yenilənməsində
 (versionCode 1→2) eyni envelope ilə dedup bərpa edildi; uyğunsuz storage/rules/engine
