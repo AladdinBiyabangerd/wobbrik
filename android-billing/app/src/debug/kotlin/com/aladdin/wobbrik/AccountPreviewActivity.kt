@@ -47,7 +47,8 @@ class AccountPreviewActivity : ComponentActivity() {
                     AcceptedScene(view.copy(scene = view.scene?.copy(paused = page == "pause")), gameReady, host, {})
                 } else AccountScreen(page, if (journalBlocked || intent.getBooleanExtra("unavailable", false)) null else previewReady,
                     WobbrikApplication.AccountState.Session(true), if (journalBlocked) JournalRecoveryCopy.Title else intent.getStringExtra("status"), { previewPage = it }, {},
-                    if (journalBlocked || intent.getBooleanExtra("unavailable", false)) null else ({}), false, journalBlocked = journalBlocked)
+                    if (journalBlocked || intent.getBooleanExtra("unavailable", false)) null else ({}), false, journalBlocked = journalBlocked,
+                    cached = if (intent.getBooleanExtra("cached", false)) previewReady.snapshot else null)
             }
         }
     }
