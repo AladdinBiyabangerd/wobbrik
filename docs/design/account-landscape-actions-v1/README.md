@@ -1,6 +1,6 @@
 # Hesab səhifəsi — telefon landşaftında görünən əməl (təklif, 9 noyabr 2026)
 
-Status: **təklif, təsdiqlənməyib.** UI kodu yazılmayıb; implementasiya istifadəçinin seçdiyi variantın açıq təsdiqindən sonra ayrıca branch-də başlayır.
+Status: **Variant C, düzəliş c2 təsdiqləndi** (istifadəçi, 9 noyabr 2026: "C düzəlişi təsdiq, implementasiyaya başla"). İmplementasiya mənbəyi: `c2-live-phone-landscape.png` və `c2-offline-phone-landscape.png`. A, B və ilk C (yan-yana Kolleksiya/Nailiyyətlər) təsdiqlənməyib.
 
 ## Problem
 
