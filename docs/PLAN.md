@@ -144,6 +144,36 @@ Sübut və sərhədlər: [APK journal review](reviews/2026-11-08-apk-journal-upg
 - [x] Backend footprint/copy placement vahidi: ayrıca alınmış torpaq hüququndan pulsuz atomik parcel və bina/dekor place/move/replace/return; migration 012, server union/clearance yoxlaması və read/HTTP müqaviləsi (`feat/city-footprint-placement`, main-də deyil). Bu qeyd mobil şəhər axınının və mərhələ 3/4-ün qəbulu deyil.
 - [ ] Şəhərin təsdiqlənmiş plan və həcmli görünüşləri həyata keçirilsin.
 
+### Şəhərdə binanın görünüşü — vizual siyasət (istifadəçi qərarı, 9 noyabr 2026)
+
+Bu, qərarlaşdırılmış siyasətdir; kodda hələ tətbiq edilməyib. İmplementasiyası 4-cü mərhələnin (şəhər
+planı/həcmli görünüşlər və yerləşdirmə UI) bir hissəsidir; yuxarıdakı 4-cü mərhələ bəndləri bu qeydlə
+tamamlanmış sayılmır.
+
+1. **Əhatə.** Siyasət yalnız şəhərdə yerləşdirməyə (placement) və şəhər UI-da yerləşdirilmiş binaya
+   baxışa aiddir. Canlı oyun (oyun içi) görünüşünə aid deyil: istifadəçinin düzəlişinə görə oyun
+   içindəki hazırkı görünüş qaydasındadır və olduğu kimi saxlanılır. Bu siyasətə görə canlı oyun
+   vizualları dəyişdirilmir.
+2. **Formaya sadiqlik.** Oyunçu oyunda qüllə tikdikdən sonra yerləşdirmə yerindəki (və baxışdakı) bina
+   onun real tikdiyi əyriliyə, meylə və mərtəbə ofsetləri yığınına çox böyük ölçüdə bənzəməlidir.
+   Formanın mənbəyi oyun həndəsəsidir (mərtəbə ofsetləri, en, istiqamət); bu forma şəhərdə
+   yerləşdirməyə və baxışa ötürülür, itirilmir və düz qutuya “düzəldilmir”.
+3. **Təqdimat.** Yerləşdirmədə və baxışda bina oyun içindəki sadə bloklu görünüş kimi deyil, düzgün
+   dizayn edilmiş UI binası kimi görünməlidir: möhkəm, həcmli, dolğun həcmli. Pəncərələr, dam, divarlar
+   və bu kimi bitirmə elementləri bu şəhər UI təqdimatına aiddir.
+4. **Geyindirmə.** Hissələr, fasad/dam örtükləri və digər bəzəklər binanın real formasının üzərinə
+   oturmalıdır — maketə paltar geyindirmək kimi. Onlar real silueti və səthləri (meyllər və ofsetlər
+   daxil) bürüyür; qutunun üstünə atılmış düz düzbucaqlı “dəri” olmamalıdır.
+5. **Vizual niyyət və dizayn mənbələri.** İstifadəçi (9 noyabr, 23:04) çatda göstərilən izah
+   maketlərinin istədiyi vizual niyyəti tam ifadə etdiyini təsdiqləyib. Həmin maketlər yalnız anlamaq
+   üçün illüstrasiyadır: rəsmi təsdiqlənmiş dizayn mənbəyi deyil, `docs/design/`-ə əlavə edilmir və
+   `city-plan.png`/`city-view.png`-ni əvəz etmir. Təsdiqlənmiş şəhər vizual referansları
+   `docs/design/city-plan.png` və `docs/design/city-view.png` olaraq qalır. İmplementasiya istifadəçinin
+   4-cü mərhələ üçün çatışmayan dizaynları və ölçüləndikdə dağılmayan yüksək keyfiyyətli rasterləri
+   hazırlamasını gözləyir. Eyni dizaynın 3–5 ölçü variantı istənilmir.
+6. **Texnologiya.** 3D mühərrik hələ təsdiqlənməyib; kamera döndürmənin texniki realizasiyası hələ
+   yoxlanmayıb (mövcud qeydlər qüvvədədir). Burada yalnız vizual tələb qeyd olunur; mühərrik seçilmir.
+
 Serverdə mövcud API-lər bu mobil mərhələnin tamamlanması demək deyil.
 Backend main-də yerləşdirmə typed geometry ilə aktivdir; mobil placement axını hələ inteqrasiya edilməyib. Opaque checkpoint-dən etibarlı həndəsə uydurulmur.
 
@@ -180,6 +210,13 @@ Backend main-də yerləşdirmə typed geometry ilə aktivdir; mobil placement ax
   uduzanda (uduzmadan əvvəlki son qəbul edilmiş uğurlu vəziyyət) və oyunçu oyunu özü bitirəndə
   (kosmetik seçim + açıq təsdiq + finish) olur. Abandon API, refund, finish-as-abandon icad edilmir;
   offline məşq restart-ı lokaldır. İmplementasiya §3.4-dədir (`feat/restart-abandon`, merge gözləyir).
+- [x] Şəhərdə binanın görünüşü (9 noyabr, istifadəçi qərarı): yalnız şəhərdə yerləşdirmə və baxış üçün
+  bina oyunda real tikilən əyriliyə/meylə/ofsetlərə çox böyük ölçüdə bənzəyir (forma oyun həndəsəsindən
+  gəlir, düz qutuya çevrilmir), dolğun həcmli dizayn edilmiş UI binası kimi görünür (pəncərə, dam,
+  divar) və hissələr/örtüklər real formanın üzərinə maketə paltar kimi geyindirilir. Canlı oyun
+  görünüşü dəyişmir. Təsdiqlənmiş referanslar `city-plan.png`/`city-view.png` qalır; çat maketləri
+  dizayn mənbəyi deyil; 3D mühərrik seçilmir. Ətraflı: §4 “Şəhərdə binanın görünüşü”. İmplementasiya
+  4-cü mərhələdədir, dizayn/rasterləri gözləyir.
 - [ ] Continued cəhdin fizikasının stabilləşdirilməsi necə işləyəcək?
 - [ ] Hesab konflikti, refund və hesab silmə/retention siyasətləri dəqiqləşdirilsin.
 

@@ -11,4 +11,8 @@ Yaşıl, üzvi formalı ada; bağlar, ağaclar, cığırlar, fəvvarə; rəngli 
 
 Şəkillər konseptdir: bina sayı, mərtəbə sayı, ölçü və qiymət üzrə məhsul qaydası yaratmır. Plan koordinatları ilə həcmli təqdimat eyni server şəhər vəziyyətindən alınmalıdır. Kamera döndürmənin texniki realizasiyası və performansı hələ yoxlanmayıb; ayrıca 3D mühərrik seçimi təsdiqlənmir.
 
+9 noyabr 2026: şəhərdə yerləşdirmə və baxışda binanın forması/həcmi/geyindirilməsi üzrə vizual siyasət
+[PLAN.md §4 “Şəhərdə binanın görünüşü”](../PLAN.md)-dadır. Çatda göstərilən izah maketləri dizayn mənbəyi
+deyil və bu qovluğa əlavə edilmir; bu iki referans qüvvədə qalır.
+
 Hazır tətbiq token faylı yoxdur. Implementasiyada tokenlər mərkəzləşdirilməli, kontrast ölçülməli və telefon/planşet, portret/landşaft pəncərələrində render edilərək baxılmalıdır. Bu təmizlikdə ekran kodu, yeni dizayn və cihaz renderi yaradılmayıb.
