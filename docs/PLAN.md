@@ -89,7 +89,9 @@ Ekranda görünən oyun hələ ayrıca offline məşqdir. Onlayn hostun input-u 
 - [x] Finish kosmetik seçimi versiyalı server kataloqu və cari hesabın unlock-larına bağlandı (`feat/finish-cosmetics`); durable draft və explicit təsdiq var. Canlı yoxlama və vizual qəbul istifadəçidədir, main-ə merge edilməyib.
 - [x] Explicit resume/drop ilə onlayn input açılır; restart/abandon hələ bağlıdır.
 - [ ] Google guest link UI yazılıb; live Console web client + provider yoxlaması açıqdır.
-- [ ] Room keş/outbox hələ AtomicFile journal-dadır (plan vahid 3).
+- [ ] Room yalnız hesab üzrə server snapshot keşi kimi qoşulsun (plan vahid 3). 9 noyabr qərarı (B):
+  gözləyən əmrlər üçün yeganə outbox davamlı fayl journal-ı (`DurableJournalFile`) qalır; Room
+  ikinci journal/outbox və wallet authority deyil, journal Room-a köçürülmür.
 
 **Məhdudiyyət:** checkpoint və finish ayrıca journal əmrləridir. Terminal server
 checkpoint-i və hesab/cəhd üzrə lokal kosmetik draft seçim niyyətini bərpa edir;
