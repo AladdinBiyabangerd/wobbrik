@@ -226,6 +226,49 @@ class AtomicFileCrashMatrixTest {
         assertTrue(findings.none { it.startsWith("MODERN_30") })
     }
 
+    @Test fun uncommittedWriteIsNeverReportedAsDurable() {
+        // API 30+ finishWrite only logs a failed `.new` -> base rename. API 24–29 finishWrite ignores a
+        // failed `.bak` delete, so the next read rolls back to the backup. Neither throws to the caller.
+        for (api in Api.entries) for (case in cases) {
+            val fs = prepared(api, case)
+            if (api == Api.MODERN_30) fs.renameFails = { source, _ -> source.endsWith(".new") }
+            else fs.deleteFails = { it.endsWith(".bak") }
+            val label = "$api/${case.name}"
+            val error = runCatching { case.action(journal(fs, api)) }.exceptionOrNull()
+            fs.clearFaults(); fs.restart()
+            val durable = recover(fs, api)
+            assertFalse(label, durable.unreadable)
+            if (error == null) assertSameCommand("$label reported success", case.after, durable.pending)
+            else {
+                assertTrue("$label: $error", error is IllegalStateException)
+                assertSameCommand(label, case.before, durable.pending)
+                case.action(journal(fs, api))
+                assertSameCommand("$label retry", case.after, journal(fs, api).pending(alice))
+            }
+            assertSameCommand("$label bob", bobCommand, journal(fs, api).pending(bob))
+        }
+    }
+
+    @Test fun legacyFailedBackupRenameLosesRollbackButNeverInventsState() {
+        // API 24–29 startWrite only logs a failed base -> `.bak` rename and then rewrites base in place.
+        val findings = mutableListOf<String>()
+        for (case in cases.drop(1)) {
+            val total = prepared(Api.LEGACY_24_29, case).let { fs ->
+                fs.renameFails = { _, target -> target.endsWith(".bak") }; case.action(journal(fs, Api.LEGACY_24_29)); fs.ops }
+            for (crashAt in 0 until total) for (loss in Loss.entries) {
+                val fs = prepared(Api.LEGACY_24_29, case)
+                fs.renameFails = { _, target -> target.endsWith(".bak") }
+                fs.crashAt = crashAt
+                assertThrows(Crash::class.java) { case.action(journal(fs, Api.LEGACY_24_29)) }
+                fs.clearFaults(); fs.restart(loss.keep)
+                val label = "LEGACY_24_29/${case.name}/no-backup/crash@$crashAt/$loss"
+                if (assertRecovered(label, fs, Api.LEGACY_24_29, case, false, true).unreadable) findings += label
+            }
+        }
+        println("legacy no-backup unreadable=${findings.size}: $findings")
+        assertTrue(findings.isNotEmpty())
+    }
+
     @Test fun failedWriteOrSyncRollsBackAndRetrySucceeds() {
         for (api in Api.entries) for (case in cases) for (fault in listOf("disk full", "sync")) {
             val fs = prepared(api, case)
