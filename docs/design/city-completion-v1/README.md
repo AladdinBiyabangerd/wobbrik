@@ -3,7 +3,7 @@
 Status: **istifadəçi baxışı üçün təklif; təsdiqlənmiş dizaynları əvəz etmir**. Branch `docs/missing-city-designs-v1`. Built-in imagegen; promptlar `prompts.json`. Hər vəziyyət bir kompozisiyada verilir, eyni ekranın cihaz ölçüsü variantları hazırlanmayıb. Bunlar Android build renderləri deyil.
 
 - [Kolleksiya və altı başlanğıc üslubu](01-collection.png).
-- [68 hissə: seçim → açılma → tətbiq](02-parts-flow.png).
+- [68 hissə: seçim → açılma → tətbiq — düzəliş v2](02-parts-flow-v2.png).
 - [12 dekor: seçim/alış → yerləşdirmə → redaktə](03-decoration-flow.png).
 - [Bina detalı: sakin, dəyər, hissələr](04-building-detail.png).
 - [Ərazi: seçim → yer seçimi → alış təsdiqi](05-land-purchase.png).
@@ -12,6 +12,56 @@ Status: **istifadəçi baxışı üçün təklif; təsdiqlənmiş dizaynları ə
 Mənbələr: `../city-plan.png`, `../city-view.png`, `../mobile-v1/inventory-market-v2.png`; tokenlər `../mobile-v1/tokens.css` və tətbiqin `GameTokens.kt` faylı. Köhnə nümunənin uydurma rəng adları hissə kataloqu deyil; hissə lövhəsi kanonik divar adlarına düzəldilib. Altı pulsuz üslub game-plan §23-ə əsaslanır.
 
 ## Raster mənbələri və ölçülənmə
+
+### 9 noyabr — ikinci raster baxışı
+
+Branch `docs/city-raster-floor-qa`; built-in imagegen ilə ayrıca versiyalar hazırlandı,
+köhnə lövhələr və mənbələr dəyişdirilmədi. Bu düzəlişlər də istifadəçi təsdiqini gözləyən təklifdir.
+
+- [Altı üslub v2](assets/starting-buildings-v2.png): 1536×1024. Altısında da giriş daxil
+  10 mərtəbə əl ilə sayılıb; dam ayrıca sayılmır. [Nömrəli yoxlama](qa/starting-buildings-v2-floor-count.png).
+- [Dekor plan v2](assets/decor-plan-v2.png) və [həcmli dekor v2](assets/decor-isometric-v2.png):
+  hər biri 1086×1448. Eyni 12 ID və obyekt sayı saxlanıb. Geniş halo azaldılıb.
+- Hər üçü navy və açıq `--text` fonunda kompozisiya edilib və görüntülərə baxılıb:
+  [binalar](qa/starting-buildings-v2-dark-light.png), [plan](qa/decor-plan-v2-dark-light.png),
+  [həcmli dekor](qa/decor-isometric-v2-dark-light.png). Mənbələrin RGB kanallarındakı
+  görünən fon alpha tətbiq ediləndə görünmür; təkcə RGB önizləməsi alpha sübutu deyil.
+- [Piksel hesabatı](qa/raster-report.json): SHA-256, alpha paylanması, hər sprite üçün
+  alpha≥8 görünən sərhəd, native piksel ölçüsü və density 1/2/3/4 üçün böyütməsiz dp həddi.
+  **Bu atlaslar bərabər 3×4 hüceyrələrə kəsilə bilməz**: uzun yol nominal sütunu keçir.
+  Hesabat açıq yoxlama regionlarından istifadə edir; alpha 1–7 qalıqları bbox-dan kənarda qala bilər.
+  Bunlar runtime crop/anchor müqaviləsi deyil; ground anchor qəsdən `null`-dır.
+- Təkrar yoxlama: Pillow olan Python ilə `python qa/check_rasters.py` (bu qovluqdan).
+  Script yalnız QA şəkilləri/JSON yazır, mənbə rastrını dəyişmir. Promptlar: [v2](qa/prompts-v2.json).
+
+**Hissə lövhəsi düzəlişi:** [02-parts-flow-v2.png](02-parts-flow-v2.png) ayrıca
+saxlanıb. Sağ önizləmədə giriş + 9 üst mərtəbə = 10; damdakı kiçik dormer ayrıca
+mərtəbə deyil. Krem suvaq, düzbucaqlı pəncərələr və əvvəlki bənövşəyi dam saxlanıb.
+[Nömrəli QA](qa/02-parts-flow-v2-floor-count.png) və JSON floor center qeydləri mövcuddur.
+Bütün lövhə alpha255-dir. Bu, real cəhd həndəsəsi və Android renderi sübutu deyil.
+Köhnə `02-parts-flow.png` tarixçə üçün saxlanıb; yeni təklif linki v2-dir.
+
+**Qalan bloklar:** 01/04/06 ekran lövhələrinin əlavə imagegen düzəlişləri yenə bütün
+thumbnail/hero-larda dəqiq 10 sayını saxlamadı. 04-də son konkret səviyyə-silmə cəhdi
+11 mərtəbəni saxladı; 01-də hero artıq səviyyə aldı; 06-da thumbnail-lər qısaldı və
+şəhərə əlavə binalar çəkildi. Bu cəhdlər yekun kimi seçilmədi. 05-də kvadrat düzəlişi
+konturu yığcamlaşdırdı, amma dəqiq 1:1 nisbət/iki vəziyyətin eyniliyi alınmadı.
+Yol düzəlişi də dəqiq nisbət sınağından keçmədi; əvvəlki v2 mənbə saxlanıb.
+01/03/04/05/06 əsas linkləri əvvəlki lövhələrə aparır, bütün dəst tamamlanmayıb.
+
+İstifadəçi qərarı: **yalnız imagegen**. Python/Pillow mənbə rasterinin redaktəsində
+istifadə edilməyib; yalnız QA ölçmə, marker və fon kompozisiyaları üçündür.
+Yeni bədii üslub təklif edilmir. Son promptlar: [v3](qa/prompts-v3.json),
+[v4](qa/prompts-v4.json). Dəqiq say/formanı pozan cəhdlər qəbul edilmiş dizayn deyil.
+
+Yolların raster nisbəti və L girintisi təsdiqlənmiş 100×30 / 100×100–30 / 210×30
+collision həndəsəsi ilə dəqiq üst-üstə düşmür. Bina ground anchor-ları, səthə geyindirilən
+modullar, metadata üzrə ayrıca sprite çıxarışı və renderer miqyası hələ açıqdır.
+V2-lər keyfiyyətli kiçik önizləmə namizədidir; böyük şəhər zoom-u üçün production-ready deyil.
+Məsələn, təxminən 240×490px bina crop-u density 3-də yalnız təxminən 80×163dp-dir;
+tam ekran bina üçün bunu böyütmək yeni detal yaratmaz. Dəqiq hədlər JSON-dadır.
+05-də `land_1`-in 220×220 kvadrat konturuna uyğunluğu əvvəlki kimi açıqdır.
+Tətbiq/cihaz renderi və mərhələ 4 implementasiyası başlanmayıb.
 
 - `assets/decor-isometric.png`: 1086×1448 RGBA, 3×4, 12 dekorun həcmli mənbələri.
 - `assets/decor-plan.png`: 1536×1024 RGBA, 3×4, eyni 12 dekorun yuxarıdan görünüşü. Bunlar fərqli kamera görünüşləridir, cihaz ölçüsü variantları deyil.

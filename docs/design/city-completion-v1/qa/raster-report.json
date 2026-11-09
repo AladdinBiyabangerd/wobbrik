@@ -1,0 +1,1320 @@
+{
+  "status": "candidate QA; alpha8 bounds exclude low-alpha noise; no runtime certification",
+  "atlases": [
+    {
+      "file": "assets/starting-buildings-v2.png",
+      "size": [
+        1536,
+        1024
+      ],
+      "sha256": "1e68b8797f9b0891cacd81487c688accc59373c41055c045d7817a7361af0b52",
+      "alpha_zero": 945663,
+      "alpha_1_to_7": 74224,
+      "alpha_8_to_249": 55846,
+      "alpha_250_to_255": 497131,
+      "sprites": [
+        {
+          "id": "old_town",
+          "inspection_region": [
+            0,
+            0,
+            512,
+            512
+          ],
+          "visible_bounds_alpha8": [
+            169,
+            5,
+            415,
+            504
+          ],
+          "native_size": [
+            246,
+            499
+          ],
+          "max_dp_at_density": {
+            "1": [
+              246.0,
+              499.0
+            ],
+            "2": [
+              123.0,
+              249.5
+            ],
+            "3": [
+              82.0,
+              166.3
+            ],
+            "4": [
+              61.5,
+              124.8
+            ]
+          },
+          "ground_anchor": null,
+          "runtime_ready": false,
+          "manual_floor_centers_y": [
+            65,
+            110,
+            155,
+            198,
+            240,
+            282,
+            325,
+            365,
+            408,
+            447
+          ],
+          "manual_floor_count": 10
+        },
+        {
+          "id": "brick",
+          "inspection_region": [
+            512,
+            0,
+            1024,
+            512
+          ],
+          "visible_bounds_alpha8": [
+            628,
+            5,
+            882,
+            512
+          ],
+          "native_size": [
+            254,
+            507
+          ],
+          "max_dp_at_density": {
+            "1": [
+              254.0,
+              507.0
+            ],
+            "2": [
+              127.0,
+              253.5
+            ],
+            "3": [
+              84.7,
+              169.0
+            ],
+            "4": [
+              63.5,
+              126.8
+            ]
+          },
+          "ground_anchor": null,
+          "runtime_ready": false,
+          "manual_floor_centers_y": [
+            70,
+            115,
+            160,
+            205,
+            250,
+            290,
+            330,
+            370,
+            410,
+            455
+          ],
+          "manual_floor_count": 10
+        },
+        {
+          "id": "coast",
+          "inspection_region": [
+            1024,
+            0,
+            1536,
+            512
+          ],
+          "visible_bounds_alpha8": [
+            1099,
+            5,
+            1375,
+            502
+          ],
+          "native_size": [
+            276,
+            497
+          ],
+          "max_dp_at_density": {
+            "1": [
+              276.0,
+              497.0
+            ],
+            "2": [
+              138.0,
+              248.5
+            ],
+            "3": [
+              92.0,
+              165.7
+            ],
+            "4": [
+              69.0,
+              124.2
+            ]
+          },
+          "ground_anchor": null,
+          "runtime_ready": false,
+          "manual_floor_centers_y": [
+            70,
+            115,
+            160,
+            205,
+            250,
+            290,
+            330,
+            370,
+            410,
+            455
+          ],
+          "manual_floor_count": 10
+        },
+        {
+          "id": "modern",
+          "inspection_region": [
+            0,
+            512,
+            512,
+            1024
+          ],
+          "visible_bounds_alpha8": [
+            166,
+            521,
+            427,
+            1018
+          ],
+          "native_size": [
+            261,
+            497
+          ],
+          "max_dp_at_density": {
+            "1": [
+              261.0,
+              497.0
+            ],
+            "2": [
+              130.5,
+              248.5
+            ],
+            "3": [
+              87.0,
+              165.7
+            ],
+            "4": [
+              65.2,
+              124.2
+            ]
+          },
+          "ground_anchor": null,
+          "runtime_ready": false,
+          "manual_floor_centers_y": [
+            590,
+            630,
+            672,
+            714,
+            755,
+            797,
+            838,
+            880,
+            920,
+            965
+          ],
+          "manual_floor_count": 10
+        },
+        {
+          "id": "garden",
+          "inspection_region": [
+            512,
+            512,
+            1024,
+            1024
+          ],
+          "visible_bounds_alpha8": [
+            627,
+            512,
+            893,
+            1020
+          ],
+          "native_size": [
+            266,
+            508
+          ],
+          "max_dp_at_density": {
+            "1": [
+              266.0,
+              508.0
+            ],
+            "2": [
+              133.0,
+              254.0
+            ],
+            "3": [
+              88.7,
+              169.3
+            ],
+            "4": [
+              66.5,
+              127.0
+            ]
+          },
+          "ground_anchor": null,
+          "runtime_ready": false,
+          "manual_floor_centers_y": [
+            590,
+            632,
+            674,
+            716,
+            758,
+            800,
+            842,
+            884,
+            925,
+            965
+          ],
+          "manual_floor_count": 10
+        },
+        {
+          "id": "workshop",
+          "inspection_region": [
+            1024,
+            512,
+            1536,
+            1024
+          ],
+          "visible_bounds_alpha8": [
+            1108,
+            513,
+            1382,
+            1017
+          ],
+          "native_size": [
+            274,
+            504
+          ],
+          "max_dp_at_density": {
+            "1": [
+              274.0,
+              504.0
+            ],
+            "2": [
+              137.0,
+              252.0
+            ],
+            "3": [
+              91.3,
+              168.0
+            ],
+            "4": [
+              68.5,
+              126.0
+            ]
+          },
+          "ground_anchor": null,
+          "runtime_ready": false,
+          "manual_floor_centers_y": [
+            580,
+            622,
+            664,
+            706,
+            748,
+            790,
+            832,
+            874,
+            916,
+            965
+          ],
+          "manual_floor_count": 10
+        }
+      ]
+    },
+    {
+      "file": "assets/decor-plan-v2.png",
+      "size": [
+        1086,
+        1448
+      ],
+      "sha256": "814704abf0abee1de605717007cca06aa4b4d1dc4619bb53c559867a8b3362f5",
+      "alpha_zero": 1104178,
+      "alpha_1_to_7": 46018,
+      "alpha_8_to_249": 39183,
+      "alpha_250_to_255": 383149,
+      "sprites": [
+        {
+          "id": "decor_tree_1",
+          "inspection_region": [
+            0,
+            0,
+            300,
+            380
+          ],
+          "visible_bounds_alpha8": [
+            56,
+            119,
+            262,
+            319
+          ],
+          "native_size": [
+            206,
+            200
+          ],
+          "max_dp_at_density": {
+            "1": [
+              206.0,
+              200.0
+            ],
+            "2": [
+              103.0,
+              100.0
+            ],
+            "3": [
+              68.7,
+              66.7
+            ],
+            "4": [
+              51.5,
+              50.0
+            ]
+          },
+          "ground_anchor": null,
+          "runtime_ready": false
+        },
+        {
+          "id": "decor_tree_2",
+          "inspection_region": [
+            300,
+            0,
+            660,
+            380
+          ],
+          "visible_bounds_alpha8": [
+            334,
+            130,
+            628,
+            302
+          ],
+          "native_size": [
+            294,
+            172
+          ],
+          "max_dp_at_density": {
+            "1": [
+              294.0,
+              172.0
+            ],
+            "2": [
+              147.0,
+              86.0
+            ],
+            "3": [
+              98.0,
+              57.3
+            ],
+            "4": [
+              73.5,
+              43.0
+            ]
+          },
+          "ground_anchor": null,
+          "runtime_ready": false
+        },
+        {
+          "id": "decor_tree_3",
+          "inspection_region": [
+            660,
+            0,
+            1086,
+            380
+          ],
+          "visible_bounds_alpha8": [
+            701,
+            45,
+            1028,
+            344
+          ],
+          "native_size": [
+            327,
+            299
+          ],
+          "max_dp_at_density": {
+            "1": [
+              327.0,
+              299.0
+            ],
+            "2": [
+              163.5,
+              149.5
+            ],
+            "3": [
+              109.0,
+              99.7
+            ],
+            "4": [
+              81.8,
+              74.8
+            ]
+          },
+          "ground_anchor": null,
+          "runtime_ready": false
+        },
+        {
+          "id": "decor_bench_1",
+          "inspection_region": [
+            0,
+            380,
+            300,
+            760
+          ],
+          "visible_bounds_alpha8": [
+            50,
+            518,
+            272,
+            645
+          ],
+          "native_size": [
+            222,
+            127
+          ],
+          "max_dp_at_density": {
+            "1": [
+              222.0,
+              127.0
+            ],
+            "2": [
+              111.0,
+              63.5
+            ],
+            "3": [
+              74.0,
+              42.3
+            ],
+            "4": [
+              55.5,
+              31.8
+            ]
+          },
+          "ground_anchor": null,
+          "runtime_ready": false
+        },
+        {
+          "id": "decor_bench_2",
+          "inspection_region": [
+            300,
+            380,
+            650,
+            760
+          ],
+          "visible_bounds_alpha8": [
+            360,
+            488,
+            593,
+            694
+          ],
+          "native_size": [
+            233,
+            206
+          ],
+          "max_dp_at_density": {
+            "1": [
+              233.0,
+              206.0
+            ],
+            "2": [
+              116.5,
+              103.0
+            ],
+            "3": [
+              77.7,
+              68.7
+            ],
+            "4": [
+              58.2,
+              51.5
+            ]
+          },
+          "ground_anchor": null,
+          "runtime_ready": false
+        },
+        {
+          "id": "decor_bench_3",
+          "inspection_region": [
+            650,
+            380,
+            1086,
+            760
+          ],
+          "visible_bounds_alpha8": [
+            675,
+            413,
+            1049,
+            728
+          ],
+          "native_size": [
+            374,
+            315
+          ],
+          "max_dp_at_density": {
+            "1": [
+              374.0,
+              315.0
+            ],
+            "2": [
+              187.0,
+              157.5
+            ],
+            "3": [
+              124.7,
+              105.0
+            ],
+            "4": [
+              93.5,
+              78.8
+            ]
+          },
+          "ground_anchor": null,
+          "runtime_ready": false
+        },
+        {
+          "id": "decor_streetlight_1",
+          "inspection_region": [
+            0,
+            760,
+            300,
+            1050
+          ],
+          "visible_bounds_alpha8": [
+            102,
+            858,
+            210,
+            966
+          ],
+          "native_size": [
+            108,
+            108
+          ],
+          "max_dp_at_density": {
+            "1": [
+              108.0,
+              108.0
+            ],
+            "2": [
+              54.0,
+              54.0
+            ],
+            "3": [
+              36.0,
+              36.0
+            ],
+            "4": [
+              27.0,
+              27.0
+            ]
+          },
+          "ground_anchor": null,
+          "runtime_ready": false
+        },
+        {
+          "id": "decor_streetlight_2",
+          "inspection_region": [
+            300,
+            760,
+            630,
+            1050
+          ],
+          "visible_bounds_alpha8": [
+            336,
+            857,
+            559,
+            964
+          ],
+          "native_size": [
+            223,
+            107
+          ],
+          "max_dp_at_density": {
+            "1": [
+              223.0,
+              107.0
+            ],
+            "2": [
+              111.5,
+              53.5
+            ],
+            "3": [
+              74.3,
+              35.7
+            ],
+            "4": [
+              55.8,
+              26.8
+            ]
+          },
+          "ground_anchor": null,
+          "runtime_ready": false
+        },
+        {
+          "id": "decor_streetlight_3",
+          "inspection_region": [
+            630,
+            760,
+            1086,
+            1050
+          ],
+          "visible_bounds_alpha8": [
+            648,
+            865,
+            1054,
+            950
+          ],
+          "native_size": [
+            406,
+            85
+          ],
+          "max_dp_at_density": {
+            "1": [
+              406.0,
+              85.0
+            ],
+            "2": [
+              203.0,
+              42.5
+            ],
+            "3": [
+              135.3,
+              28.3
+            ],
+            "4": [
+              101.5,
+              21.2
+            ]
+          },
+          "ground_anchor": null,
+          "runtime_ready": false
+        },
+        {
+          "id": "decor_road_1",
+          "inspection_region": [
+            0,
+            1050,
+            300,
+            1448
+          ],
+          "visible_bounds_alpha8": [
+            34,
+            1197,
+            280,
+            1277
+          ],
+          "native_size": [
+            246,
+            80
+          ],
+          "max_dp_at_density": {
+            "1": [
+              246.0,
+              80.0
+            ],
+            "2": [
+              123.0,
+              40.0
+            ],
+            "3": [
+              82.0,
+              26.7
+            ],
+            "4": [
+              61.5,
+              20.0
+            ]
+          },
+          "ground_anchor": null,
+          "runtime_ready": false
+        },
+        {
+          "id": "decor_road_2",
+          "inspection_region": [
+            300,
+            1050,
+            580,
+            1448
+          ],
+          "visible_bounds_alpha8": [
+            329,
+            1125,
+            559,
+            1349
+          ],
+          "native_size": [
+            230,
+            224
+          ],
+          "max_dp_at_density": {
+            "1": [
+              230.0,
+              224.0
+            ],
+            "2": [
+              115.0,
+              112.0
+            ],
+            "3": [
+              76.7,
+              74.7
+            ],
+            "4": [
+              57.5,
+              56.0
+            ]
+          },
+          "ground_anchor": null,
+          "runtime_ready": false
+        },
+        {
+          "id": "decor_road_3",
+          "inspection_region": [
+            580,
+            1050,
+            1086,
+            1448
+          ],
+          "visible_bounds_alpha8": [
+            604,
+            1203,
+            1054,
+            1273
+          ],
+          "native_size": [
+            450,
+            70
+          ],
+          "max_dp_at_density": {
+            "1": [
+              450.0,
+              70.0
+            ],
+            "2": [
+              225.0,
+              35.0
+            ],
+            "3": [
+              150.0,
+              23.3
+            ],
+            "4": [
+              112.5,
+              17.5
+            ]
+          },
+          "ground_anchor": null,
+          "runtime_ready": false
+        }
+      ]
+    },
+    {
+      "file": "assets/decor-isometric-v2.png",
+      "size": [
+        1086,
+        1448
+      ],
+      "sha256": "502ad17c3881325fbe3097479beb705cd016df537edc6fae270741de793470ec",
+      "alpha_zero": 1073194,
+      "alpha_1_to_7": 79187,
+      "alpha_8_to_249": 50418,
+      "alpha_250_to_255": 369729,
+      "sprites": [
+        {
+          "id": "decor_tree_1",
+          "inspection_region": [
+            0,
+            0,
+            300,
+            380
+          ],
+          "visible_bounds_alpha8": [
+            65,
+            100,
+            256,
+            339
+          ],
+          "native_size": [
+            191,
+            239
+          ],
+          "max_dp_at_density": {
+            "1": [
+              191.0,
+              239.0
+            ],
+            "2": [
+              95.5,
+              119.5
+            ],
+            "3": [
+              63.7,
+              79.7
+            ],
+            "4": [
+              47.8,
+              59.8
+            ]
+          },
+          "ground_anchor": null,
+          "runtime_ready": false
+        },
+        {
+          "id": "decor_tree_2",
+          "inspection_region": [
+            300,
+            0,
+            660,
+            380
+          ],
+          "visible_bounds_alpha8": [
+            341,
+            111,
+            629,
+            337
+          ],
+          "native_size": [
+            288,
+            226
+          ],
+          "max_dp_at_density": {
+            "1": [
+              288.0,
+              226.0
+            ],
+            "2": [
+              144.0,
+              113.0
+            ],
+            "3": [
+              96.0,
+              75.3
+            ],
+            "4": [
+              72.0,
+              56.5
+            ]
+          },
+          "ground_anchor": null,
+          "runtime_ready": false
+        },
+        {
+          "id": "decor_tree_3",
+          "inspection_region": [
+            660,
+            0,
+            1086,
+            380
+          ],
+          "visible_bounds_alpha8": [
+            695,
+            49,
+            1035,
+            367
+          ],
+          "native_size": [
+            340,
+            318
+          ],
+          "max_dp_at_density": {
+            "1": [
+              340.0,
+              318.0
+            ],
+            "2": [
+              170.0,
+              159.0
+            ],
+            "3": [
+              113.3,
+              106.0
+            ],
+            "4": [
+              85.0,
+              79.5
+            ]
+          },
+          "ground_anchor": null,
+          "runtime_ready": false
+        },
+        {
+          "id": "decor_bench_1",
+          "inspection_region": [
+            0,
+            380,
+            300,
+            760
+          ],
+          "visible_bounds_alpha8": [
+            64,
+            490,
+            271,
+            670
+          ],
+          "native_size": [
+            207,
+            180
+          ],
+          "max_dp_at_density": {
+            "1": [
+              207.0,
+              180.0
+            ],
+            "2": [
+              103.5,
+              90.0
+            ],
+            "3": [
+              69.0,
+              60.0
+            ],
+            "4": [
+              51.8,
+              45.0
+            ]
+          },
+          "ground_anchor": null,
+          "runtime_ready": false
+        },
+        {
+          "id": "decor_bench_2",
+          "inspection_region": [
+            300,
+            380,
+            650,
+            760
+          ],
+          "visible_bounds_alpha8": [
+            340,
+            497,
+            635,
+            640
+          ],
+          "native_size": [
+            295,
+            143
+          ],
+          "max_dp_at_density": {
+            "1": [
+              295.0,
+              143.0
+            ],
+            "2": [
+              147.5,
+              71.5
+            ],
+            "3": [
+              98.3,
+              47.7
+            ],
+            "4": [
+              73.8,
+              35.8
+            ]
+          },
+          "ground_anchor": null,
+          "runtime_ready": false
+        },
+        {
+          "id": "decor_bench_3",
+          "inspection_region": [
+            650,
+            380,
+            1086,
+            760
+          ],
+          "visible_bounds_alpha8": [
+            681,
+            431,
+            1045,
+            711
+          ],
+          "native_size": [
+            364,
+            280
+          ],
+          "max_dp_at_density": {
+            "1": [
+              364.0,
+              280.0
+            ],
+            "2": [
+              182.0,
+              140.0
+            ],
+            "3": [
+              121.3,
+              93.3
+            ],
+            "4": [
+              91.0,
+              70.0
+            ]
+          },
+          "ground_anchor": null,
+          "runtime_ready": false
+        },
+        {
+          "id": "decor_streetlight_1",
+          "inspection_region": [
+            0,
+            760,
+            300,
+            1050
+          ],
+          "visible_bounds_alpha8": [
+            96,
+            836,
+            213,
+            1026
+          ],
+          "native_size": [
+            117,
+            190
+          ],
+          "max_dp_at_density": {
+            "1": [
+              117.0,
+              190.0
+            ],
+            "2": [
+              58.5,
+              95.0
+            ],
+            "3": [
+              39.0,
+              63.3
+            ],
+            "4": [
+              29.2,
+              47.5
+            ]
+          },
+          "ground_anchor": null,
+          "runtime_ready": false
+        },
+        {
+          "id": "decor_streetlight_2",
+          "inspection_region": [
+            300,
+            760,
+            630,
+            1050
+          ],
+          "visible_bounds_alpha8": [
+            368,
+            802,
+            558,
+            1025
+          ],
+          "native_size": [
+            190,
+            223
+          ],
+          "max_dp_at_density": {
+            "1": [
+              190.0,
+              223.0
+            ],
+            "2": [
+              95.0,
+              111.5
+            ],
+            "3": [
+              63.3,
+              74.3
+            ],
+            "4": [
+              47.5,
+              55.8
+            ]
+          },
+          "ground_anchor": null,
+          "runtime_ready": false
+        },
+        {
+          "id": "decor_streetlight_3",
+          "inspection_region": [
+            630,
+            760,
+            1086,
+            1050
+          ],
+          "visible_bounds_alpha8": [
+            672,
+            802,
+            1047,
+            1025
+          ],
+          "native_size": [
+            375,
+            223
+          ],
+          "max_dp_at_density": {
+            "1": [
+              375.0,
+              223.0
+            ],
+            "2": [
+              187.5,
+              111.5
+            ],
+            "3": [
+              125.0,
+              74.3
+            ],
+            "4": [
+              93.8,
+              55.8
+            ]
+          },
+          "ground_anchor": null,
+          "runtime_ready": false
+        },
+        {
+          "id": "decor_road_1",
+          "inspection_region": [
+            0,
+            1050,
+            300,
+            1448
+          ],
+          "visible_bounds_alpha8": [
+            29,
+            1209,
+            288,
+            1301
+          ],
+          "native_size": [
+            259,
+            92
+          ],
+          "max_dp_at_density": {
+            "1": [
+              259.0,
+              92.0
+            ],
+            "2": [
+              129.5,
+              46.0
+            ],
+            "3": [
+              86.3,
+              30.7
+            ],
+            "4": [
+              64.8,
+              23.0
+            ]
+          },
+          "ground_anchor": null,
+          "runtime_ready": false
+        },
+        {
+          "id": "decor_road_2",
+          "inspection_region": [
+            300,
+            1050,
+            610,
+            1448
+          ],
+          "visible_bounds_alpha8": [
+            328,
+            1123,
+            598,
+            1369
+          ],
+          "native_size": [
+            270,
+            246
+          ],
+          "max_dp_at_density": {
+            "1": [
+              270.0,
+              246.0
+            ],
+            "2": [
+              135.0,
+              123.0
+            ],
+            "3": [
+              90.0,
+              82.0
+            ],
+            "4": [
+              67.5,
+              61.5
+            ]
+          },
+          "ground_anchor": null,
+          "runtime_ready": false
+        },
+        {
+          "id": "decor_road_3",
+          "inspection_region": [
+            610,
+            1050,
+            1086,
+            1448
+          ],
+          "visible_bounds_alpha8": [
+            623,
+            1209,
+            1067,
+            1301
+          ],
+          "native_size": [
+            444,
+            92
+          ],
+          "max_dp_at_density": {
+            "1": [
+              444.0,
+              92.0
+            ],
+            "2": [
+              222.0,
+              46.0
+            ],
+            "3": [
+              148.0,
+              30.7
+            ],
+            "4": [
+              111.0,
+              23.0
+            ]
+          },
+          "ground_anchor": null,
+          "runtime_ready": false
+        }
+      ]
+    }
+  ],
+  "boards": [
+    {
+      "file": "02-parts-flow-v2.png",
+      "size": [
+        1704,
+        923
+      ],
+      "sha256": "f9cccf969a1da6c0d26e45993a30e8e0a30e75fe4ad5cb1fb1a90c6f6eb42516",
+      "right_hero_manual_floor_centers_y": [
+        145,
+        177,
+        208,
+        240,
+        272,
+        304,
+        336,
+        368,
+        400,
+        448
+      ],
+      "manual_floor_count": 10,
+      "roof_dormer_excluded": true,
+      "runtime_ready": false
+    }
+  ]
+}
