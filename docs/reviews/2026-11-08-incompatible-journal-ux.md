@@ -35,6 +35,11 @@ Read `ui-craft`; located `GameTokens.kt` and `docs/design/mobile-v1/tokens.css` 
 - Still unverified: manual TalkBack/keyboard navigation, physical devices, other locales, small-screen landscape, and live Android journal/network recovery with this UI. Renders are debug-fixture presentation only.
 - Private renders: ignored `output/journal-ux-render/n9-*.png` (+ UI dumps); logs `output/journal-ux-2026-11-09-*.log`. No commands to 5582 or 5554.
 
+## Merge and main CI — 9 November 2026
+
+- With the user's explicit OK, `fix/incompatible-journal-ux` was merged into `main` with `--no-ff`, which preserves the branch history (merge `213c5db`). Main is checked out in the `Wobbrik-rail-icons` worktree. That worktree was clean, and its existing stash was not touched. The merge also brought in the branch's earlier unmerged docs/test base commits (`e595702`…`d9ecf84`, 18 commits).
+- `./scripts/local-ci.sh` on `main` at `213c5db`: PASS, `BUILD SUCCESSFUL in 1m 44s` (103 tasks, 36 executed). The run covered `:engine:test` (55 tests), `:core:test` (54 tests), all with 0 failures/errors/skips, plus `:android`/`:app` `assembleDebug` and `lintDebug`. Lint reported 0 errors, with 3 warnings (android) and 17 warnings (app), none blocking. No push or deploy.
+
 ## Boundaries
 
 No commands were sent to retained emulator 5582 or shared emulator 5554; no install, restart, sign-out, reverse, file/journal or DB mutation there. A fresh separate `JournalUxRender` AVD/serial 5586 is used only for presentation checks. No backend source/runtime/schema/API/rules change is needed: this is local error classification/presentation; AppBackend authority and exact pending-envelope recovery are unchanged. No live recovery upgrade rerun, AtomicFile crash matrix, physical-device or full-stage acceptance is implied. No merge, push, deploy, Console change or main CI.
