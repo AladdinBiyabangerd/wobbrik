@@ -83,6 +83,11 @@ class AcceptedAttemptCommandsTest {
                             check(old.attempt!!.sequence == number("sequence"))
                             null // /sync returns only active attempts.
                         }
+                        AttemptCommand.Route.ABANDON -> {
+                            val a = old.attempt!!
+                            check(a.active && string("attempt_id") == a.id && a.sequence == number("sequence"))
+                            null // Abandoned: no result/building; /sync returns only active attempts.
+                        }
                     }
                     val reward = if (command.route == AttemptCommand.Route.CHECKPOINT) attempt!!.floors - old.attempt!!.floors else 0
                     records[session.uid] = old.copy(revision = old.revision + 1, attempt = attempt,
@@ -279,6 +284,7 @@ class AcceptedAttemptCommandsTest {
                 AttemptCommand.Route.START -> f.commands.start(f.ready())
                 AttemptCommand.Route.CHECKPOINT -> f.commands.checkpoint(f.ready(), landed(true))
                 AttemptCommand.Route.FINISH -> f.commands.finish(f.ready(), landed(true), parts)
+                AttemptCommand.Route.ABANDON -> f.commands.abandon(f.ready())
             }
             yield()
             assertTrue(f.owner.state.value is AuthenticatedRecoveryOwner.State.Error)
@@ -420,6 +426,153 @@ class AcceptedAttemptCommandsTest {
             assertThrows(IllegalStateException::class.java) { f.commands.checkpoint(f.ready(), landed()) }
             assertThrows(IllegalStateException::class.java) { f.commands.finish(f.ready(), terminalZero(), parts) }
             assertTrue(f.sent.isEmpty())
+        }
+    }
+
+    // Restart/abandon policy (user decision, 9 November 2026).
+    private fun routes(f: Fixture) = f.sent.map { it.second.route }
+
+    @Test fun leavingOpenAttemptMidGameAbandonsItWithoutRefundAndFreesStart() = runBlocking {
+        Fixture().use { f ->
+            f.host.bind(f.commands)
+            f.login(); yield()
+            assertTrue(f.commands.start(f.ready())); yield()
+            f.host.enter()
+            assertTrue(f.commands.checkpoint(f.ready(), landed())); yield()
+            assertEquals(1L, f.ready().snapshot.coins)
+            assertTrue(f.host.snapshot().playing)
+            assertTrue(f.host.leave(f.ready())); yield()
+            assertFalse(f.host.snapshot().playing)
+            assertEquals(AttemptCommand.Route.ABANDON, f.sent.last().second.route)
+            val request = Json.parseToJsonElement(f.sent.last().second.envelope).jsonObject.getValue("request").jsonObject
+            assertEquals(1L, request.getValue("sequence").jsonPrimitive.long)
+            assertNull(f.ready().snapshot.attempt)
+            assertEquals(1L, f.ready().snapshot.coins) // accepted checkpoint rewards stay; no refund/clawback
+            f.host.enforceLeave(f.ready())
+            assertFalse(f.host.leavePending())
+            assertEquals(1, routes(f).count { it == AttemptCommand.Route.ABANDON })
+            assertTrue(f.commands.start(f.ready())); yield()
+            assertTrue(f.ready().snapshot.attempt!!.active)
+        }
+    }
+
+    @Test fun lossIsKeptOnLeaveAndItsFinishPickerStaysResumable() = runBlocking {
+        Fixture().use { f ->
+            f.host.bind(f.commands)
+            f.login(); yield()
+            f.commands.start(f.ready()); yield()
+            f.host.enter()
+            f.commands.checkpoint(f.ready(), landed(true)); yield()
+            assertTrue(f.host.snapshot().choosingFinish)
+            assertFalse(f.host.leave(f.ready()))
+            f.host.enforceLeave(f.ready()); yield()
+            assertFalse(routes(f).contains(AttemptCommand.Route.ABANDON))
+            assertTrue(f.ready().snapshot.attempt!!.active)
+            assertThrows(IllegalArgumentException::class.java) { f.commands.abandon(f.ready()) }
+            assertFalse(f.host.discardOpen(f.ready()))
+            f.host.enter()
+            assertTrue(f.host.confirmFinish(f.ready())); yield()
+            assertEquals(AttemptCommand.Route.FINISH, routes(f).last())
+        }
+    }
+
+    @Test fun zeroFloorLocalMissIsKeptOnLeave() = runBlocking {
+        Fixture().use { f ->
+            f.login(); yield()
+            f.commands.start(f.ready()); yield()
+            f.store.write("alice", f.ready().snapshot.attempt!!.id, FinishDraft(terminalZero(), parts))
+            val host = AcceptedEngineHost(f.store).also { it.bind(f.commands); it.onRecoveryChanged(f.ready()) }
+            host.enter()
+            assertFalse(host.leave(f.ready()))
+            assertFalse(host.discardOpen(f.ready()))
+            yield()
+            assertEquals(listOf(AttemptCommand.Route.START), routes(f))
+        }
+    }
+
+    @Test fun leaveWhileCheckpointInFlightDecidesOnNextReady() = runBlocking {
+        Fixture().use { f ->
+            f.host.bind(f.commands)
+            f.login(); yield()
+            f.commands.start(f.ready()); yield()
+            f.host.enter()
+            val gate = CompletableDeferred<Unit>()
+            f.beforeCommit = { gate.await() }
+            assertTrue(f.commands.checkpoint(f.ready(), landed())); yield()
+            assertTrue(f.owner.state.value is AuthenticatedRecoveryOwner.State.Recovering)
+            assertTrue(f.host.leave(null))
+            assertTrue(f.host.leavePending())
+            f.beforeCommit = {}
+            gate.complete(Unit); yield()
+            f.host.enforceLeave(f.ready()); yield()
+            assertEquals(AttemptCommand.Route.ABANDON, routes(f).last())
+            assertNull(f.ready().snapshot.attempt)
+        }
+    }
+
+    @Test fun lossLandingInFlightIsNotAbandonedByAnEarlierLeave() = runBlocking {
+        Fixture().use { f ->
+            f.host.bind(f.commands)
+            f.login(); yield()
+            f.commands.start(f.ready()); yield()
+            f.host.enter()
+            val gate = CompletableDeferred<Unit>()
+            f.beforeCommit = { gate.await() }
+            f.commands.checkpoint(f.ready(), landed(true)); yield()
+            assertTrue(f.host.leave(null))
+            f.beforeCommit = {}
+            gate.complete(Unit); yield()
+            f.host.enforceLeave(f.ready()); yield()
+            assertFalse(f.host.leavePending())
+            assertFalse(routes(f).contains(AttemptCommand.Route.ABANDON))
+            assertTrue(f.host.snapshot().choosingFinish)
+        }
+    }
+
+    @Test fun appClosedMidGameIsNotResumedAndIsAbandonedOnlyWhenPlayIsPressed() = runBlocking {
+        Fixture().use { f ->
+            f.login(); yield()
+            f.commands.start(f.ready()); yield()
+            f.commands.checkpoint(f.ready(), landed()); yield()
+            f.recreate(); yield() // process death: the new host never entered this attempt
+            val host = AcceptedEngineHost(f.store).also { it.bind(f.commands); it.onRecoveryChanged(f.ready()) }
+            assertFalse(host.snapshot().playing)
+            assertFalse(host.leave(f.ready())) // launching alone abandons nothing (another device may be playing)
+            host.enforceLeave(f.ready()); yield()
+            assertFalse(routes(f).contains(AttemptCommand.Route.ABANDON))
+            assertFalse(host.discardOpen(f.ready().copy()))
+            assertTrue(host.discardOpen(f.ready())); yield()
+            assertEquals(AttemptCommand.Route.ABANDON, routes(f).last())
+            assertNull(f.ready().snapshot.attempt)
+            host.onRecoveryChanged(f.ready())
+            host.enforceLeave(f.ready())
+            assertFalse(host.leavePending())
+        }
+    }
+
+    @Test fun leftAttemptIsNeverAbandonedForAnotherAccountOrAfterReentry() = runBlocking {
+        Fixture().use { f ->
+            f.host.bind(f.commands)
+            f.login(); yield()
+            f.commands.start(f.ready()); yield()
+            f.host.enter()
+            val alice = f.ready()
+            val gate = CompletableDeferred<Unit>()
+            f.beforeCommit = { gate.await() }
+            f.commands.checkpoint(alice, landed()); yield()
+            assertTrue(f.host.leave(null))
+            f.host.enter() // re-entered before the abandon could go out
+            assertFalse(f.host.leavePending())
+            f.beforeCommit = {}
+            gate.complete(Unit); yield()
+            f.host.enforceLeave(f.ready()); yield()
+            assertFalse(routes(f).contains(AttemptCommand.Route.ABANDON))
+            assertTrue(f.host.leave(null)) // left, abandon not yet dispatched
+            val bob = f.ready().copy(accountKey = "bob")
+            f.host.onRecoveryChanged(bob)
+            f.host.enforceLeave(bob)
+            assertFalse(f.host.leavePending())
+            assertFalse(routes(f).contains(AttemptCommand.Route.ABANDON))
         }
     }
 }

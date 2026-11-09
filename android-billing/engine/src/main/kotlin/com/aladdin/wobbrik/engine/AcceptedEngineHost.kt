@@ -15,6 +15,8 @@ class AcceptedEngineHost(private val drafts: FinishDraftStore? = null) {
         val finishParts: Map<String, String> = emptyMap(),
         val choosingFinish: Boolean = false,
         val finishStorageError: Boolean = false,
+        /** The player entered this attempt in this process; app-scoped, so it survives rotation but not process death. */
+        val playing: Boolean = false,
     ) {
         val inputEnabled: Boolean get() = foreground && !waiting && scene?.paused == false && scene.phase != Phase.FINISHED
     }
@@ -22,6 +24,11 @@ class AcceptedEngineHost(private val drafts: FinishDraftStore? = null) {
     private var engine: PracticeEngine? = null
     private var ready: AuthenticatedRecoveryOwner.State.Ready? = null
     private var commands: AcceptedAttemptCommands? = null
+    /** Last accepted open attempt (account key, attempt ID); survives Recovering for a leave. */
+    private var lastOpen: Pair<String?, String>? = null
+    /** Open attempt the player left; abandoned once a Ready confirms it is still open and not lost. */
+    private var leaving: Pair<String?, String>? = null
+    private var leaveTriedFor: AuthenticatedRecoveryOwner.State.Ready? = null
 
     @Synchronized fun bind(commands: AcceptedAttemptCommands) { this.commands = commands }
     private var current = Snapshot()
@@ -37,6 +44,7 @@ class AcceptedEngineHost(private val drafts: FinishDraftStore? = null) {
             engine = PracticeEngine().also { it.restore(restored.checkpoint); it.pause() }
         }
         current = current.copy(restore = restored, scene = engine?.state)
+        if (restored is AcceptedAttemptRestore.Result.Paused) lastOpen = ready?.accountKey to restored.attemptId
         if (restored is AcceptedAttemptRestore.Result.Paused) {
             val expected = ready ?: return
             val draft = expected.accountKey?.let { drafts?.read(it, restored.attemptId) }
@@ -181,5 +189,80 @@ class AcceptedEngineHost(private val drafts: FinishDraftStore? = null) {
         a.version == b.version && a.rules == b.rules && a.state.phase == Phase.FINISHED && a.state.floors == b.state.floors &&
             a.state.perfectLandings == b.state.perfectLandings && a.state.balance.rescues == b.state.balance.rescues
 
-    // Restart/abandon intentionally have no binding: there is no approved server policy/API.
+    /** The player opened the game page for the current attempt (Play / resume a loss picker). */
+    @Synchronized fun enter() {
+        leaving = null
+        current = current.copy(playing = true)
+    }
+
+    /**
+     * User policy (9 November 2026): leaving an open attempt mid-game (Home, Back, menu) deletes
+     * it. A loss is kept: its cosmetic picker stays resumable and is never abandoned.
+     * Returns true when an abandon was scheduled.
+     */
+    fun leave(expected: AuthenticatedRecoveryOwner.State.Ready? = null): Boolean {
+        val scheduled = synchronized(this) {
+            pauseAndReset()
+            val wasPlaying = current.playing
+            current = current.copy(playing = false)
+            if (!wasPlaying || current.choosingFinish) return false
+            leaving = when (val r = current.restore) {
+                is AcceptedAttemptRestore.Result.Paused -> if (r.terminal) null else ready?.accountKey to r.attemptId
+                // Recovering (e.g. a checkpoint in flight): decide on the next Ready for the same attempt.
+                AcceptedAttemptRestore.Result.Unavailable -> lastOpen
+                else -> null
+            }
+            leaveTriedFor = null
+            leaving != null
+        }
+        if (scheduled) enforceLeave(expected)
+        return scheduled
+    }
+
+    /**
+     * Play while an open attempt from an earlier process (app closed mid-game) is still on the
+     * server: abandon it first, never resume it. False when there is nothing to abandon.
+     */
+    fun discardOpen(expected: AuthenticatedRecoveryOwner.State.Ready): Boolean {
+        val scheduled = synchronized(this) {
+            if (ready !== expected || current.playing || current.choosingFinish) return false
+            val r = current.restore as? AcceptedAttemptRestore.Result.Paused ?: return false
+            if (r.terminal) return false
+            leaving = expected.accountKey to r.attemptId
+            leaveTriedFor = null
+            true
+        }
+        enforceLeave(expected)
+        return scheduled
+    }
+
+    /** True while a left attempt still awaits its abandon. */
+    @Synchronized fun leavePending(): Boolean = leaving != null
+
+    /**
+     * Called every frame. Dispatches at most one abandon per Ready capability, outside the monitor,
+     * and only for the same account/attempt that was left, still open, not lost and not re-entered.
+     */
+    fun enforceLeave(expected: AuthenticatedRecoveryOwner.State.Ready?) {
+        val sender = synchronized(this) {
+            val target = leaving ?: return
+            if (expected == null || expected !== ready) return
+            val r = current.restore
+            if (r !is AcceptedAttemptRestore.Result.Paused || target != (expected.accountKey to r.attemptId) ||
+                r.terminal || current.choosingFinish) {
+                leaving = null // Abandoned, finished, lost, or another account/attempt: nothing to delete.
+                return
+            }
+            if (current.playing || current.waiting || leaveTriedFor === expected) return
+            val sender = commands ?: return
+            leaveTriedFor = expected
+            engine?.pause()
+            current = current.copy(waiting = true, previousFrameNanos = null, scene = engine?.state)
+            sender
+        }
+        // Runs in the frame loop: a refused or invalid dispatch must never crash the app; the next Ready retries.
+        if (!runCatching { sender.abandon(expected!!) }.getOrDefault(false)) synchronized(this) {
+            if (ready === expected) current = current.copy(waiting = false)
+        }
+    }
 }

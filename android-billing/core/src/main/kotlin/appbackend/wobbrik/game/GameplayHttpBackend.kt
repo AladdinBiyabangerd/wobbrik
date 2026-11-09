@@ -47,7 +47,7 @@ class UrlConnectionGameplayTransport(origin: String) : GameplayTransport {
         require(it.path.isNullOrEmpty() || it.path == "/")
     }.toString().trimEnd('/')
     override suspend fun request(path: String, bearer: String, body: String?): GameplayResponse = withContext(Dispatchers.IO) {
-        require(path in setOf("sync", "catalog", "attempts/start", "attempts/checkpoint", "attempts/finish"))
+        require(path in setOf("sync", "catalog", "attempts/start", "attempts/checkpoint", "attempts/finish", "attempts/abandon"))
         val suffix = if (path == "catalog") "catalog?rules_version=wobbrik-v1" else path
         val connection = URI("$base/v1/apps/wobbrik/game/$suffix").toURL().openConnection() as HttpURLConnection
         try {

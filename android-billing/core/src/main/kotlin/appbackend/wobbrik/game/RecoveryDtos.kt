@@ -17,6 +17,8 @@ sealed interface AttemptResult {
     data class Checkpointed(val xp: Long, val level: Long, val rescues: Long, val granted: List<String>, val coins: Long) : AttemptResult
     data class Finished(val attemptId: String, val resultId: String?, val buildingId: String?, val floors: Long,
         val coins: Long, val residents: Long, val baseValue: Long, val maxPrice: Long) : AttemptResult
+    /** Closed without a result or building; checkpoint rewards already credited stay. */
+    data class Abandoned(val attemptId: String, val floors: Long) : AttemptResult
 }
 data class AttemptReceipt(val revision: Long, val acceptedAt: String, val result: AttemptResult)
 data class OperationReceipt(val revision: Long, val acceptedAt: String, val result: JsonObject)
@@ -104,6 +106,7 @@ object RecoveryDtos {
             AttemptCommand.Route.CHECKPOINT -> AttemptResult.Checkpointed(r.n("xp"), r.n("level"), r.n("rescues"), r.ids("granted"), r.n("coins"))
             AttemptCommand.Route.FINISH -> AttemptResult.Finished(r.s("attempt_id"), r["result_id"]?.let { r.s("result_id") },
                 r["building_id"]?.let { r.s("building_id") }, r.n("floors"), r.n("coins"), r.n("residents"), r.n("base_value"), r.n("max_price"))
+            AttemptCommand.Route.ABANDON -> AttemptResult.Abandoned(r.s("attempt_id"), r.n("floors"))
         }
         return AttemptReceipt(receipt.revision, receipt.acceptedAt, result)
     }

@@ -16,8 +16,10 @@ Verified against AppBackend `internal/wobbrik/attempts.go`, `finish.go`,
 - Finish closes the active attempt at its accepted sequence, creates a result
   (including below ten floors), and creates a building at ten or more floors.
   Finish itself does not credit wallet/progression; checkpoint already does that.
-- No abandon/restart endpoint exists. Local restart, logout, process death and menu
-  navigation cannot close a server attempt or delete its pending journal command.
+- Abandon (AppBackend `feat/wobbrik-attempt-abandon`, migration 017, not yet deployed):
+  `POST /attempts/abandon {attempt_id, sequence}` closes the caller's active attempt at its last
+  accepted sequence as `abandoned`: no result, no building, no wallet/progression write, no refund
+  or clawback. `/sync` then returns `attempt:null`. Logout and process death alone still close nothing.
 
 ## Host rules within the existing contract
 
@@ -27,7 +29,7 @@ Pending operations retain their exact envelope, operation ID and revision across
 network failure, navigation and auth transitions. Never replace a pending command
 with a restart or a fresh start. A finished attempt must not be restored as active.
 
-Online restart/abandon stays unbound in code. Product policy (user decision, 9 November 2026):
+Product policy (user decision, 9 November 2026), implemented on `feat/restart-abandon`:
 
 - If the player leaves an open attempt mid-game (Home, Back, or closing the app), the attempt is
   deleted and not kept: no result and no building are created, and there is no later
@@ -37,12 +39,25 @@ Online restart/abandon stays unbound in code. Product policy (user decision, 9 N
   floors are complete, cosmetic selection and explicit confirm, then finish.
 - Do not invent an abandon API, refunds, or treat finish as abandon. Offline practice restart stays local.
 
-The current server has no endpoint that closes or deletes an open attempt, and the current host
-keeps the attempt and pending command on Back/menu (see below). How the policy is realised is a
-separate implementation unit; if it needs a server change, that change needs its own approval. A server change would need
-its own revision/dedup, account isolation, migration and old-client tests. Do not
-invent refunds, clawbacks, forfeiture or finish-as-abandon in the mobile adapter.
-Offline practice restart remains local and must never be routed to online finish.
+Implementation (9 November 2026; branches not merged, server not deployed):
+
+- Server: the existing API could not express the policy (finish always writes a result and a
+  building at >=10 floors; an attempt left active blocks every later start), so AppBackend
+  `feat/wobbrik-attempt-abandon` adds the abandon route above, with revision/dedup, account
+  isolation, migration and old-client (`/sync` never returns `abandoned`) tests.
+- Client: `AttemptCommand.Route.ABANDON`, `GameplayWire.abandon`, transport allowlist
+  `attempts/abandon`, `AcceptedAttemptCommands.abandon` (refuses a terminal attempt).
+- Host: `AcceptedEngineHost.enter/leave/discardOpen/enforceLeave`. `playing` is app-process scoped
+  (survives rotation, not process death). Leaving the game page by any route while playing an open
+  attempt schedules an abandon for that account+attempt; it is sent on the next Ready that still shows
+  the same open, non-terminal attempt that is not in the finish picker, once per Ready, outside the
+  monitor and after any pending checkpoint drains. A loss (terminal checkpoint or local loss draft)
+  is never abandoned; its finish picker remains the only "Cəhdə qayıt".
+- App closed mid-game (process death): the restored "game" page goes home and the attempt is not
+  resumed. App launch alone abandons nothing (another device may be playing it); Play abandons it,
+  then starts a new attempt.
+- Android background without process death is not leaving. No confirm dialog, refund, clawback,
+  forfeiture or finish-as-abandon. Offline practice restart remains local and is never routed online.
 
 ## Selected next small unit: application-scoped authenticated recovery owner
 
@@ -155,11 +170,10 @@ its input is never routed into online commands.
   the authenticated wobbrik-v1/structural-v1 catalog and current-account unlocks;
   free items are implicit. Failed local selection writes retain paused physics,
   expose an error and do not dispatch a finish. Auth epochs revoke stale callbacks.
-  Back/menu preserves both the active attempt and pending command (current implementation;
-  the 9 November leave-mid-game policy above is not implemented yet).
+  Back/menu on an open mid-game attempt abandons it per the 9 November policy (pending commands
+  drain first); in the finish picker it keeps the loss.
 
-No backend API/DTO/schema/rules version changes are needed: the integration uses
-existing structural-v1 requests and the unified PostgreSQL wallet/ledger. Server
-physics proof, continuation stabilization, final scene/navigation and the restart/abandon policy
-implementation remain outstanding; live origin/device verification is not required (user decision,
+Apart from the abandon route (migration 017), the integration uses existing structural-v1
+requests and the unified PostgreSQL wallet/ledger. Server physics proof, continuation
+stabilization and final scene/navigation remain outstanding; live origin/device verification is not required (user decision,
 9 November 2026). Input is deliberately still locked.
