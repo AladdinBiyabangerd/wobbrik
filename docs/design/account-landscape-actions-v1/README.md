@@ -41,6 +41,14 @@ Mənbə: `source/live-phone-landscape-top.png` və `-scrolled.png` (canlı Ready
 
 Tapıntı (mövcud defekt, keşdən asılı deyil): telefon landşaftında "Nailiyyətlər" düyməsinin yazısı iki sətrə bölünür ("Nailiyyətl / ər"). Mockup-lar real kəsiklərdən qurulduğu üçün bunu olduğu kimi göstərir; C-də görünür, A/B-də həmin sıra scroll zonasındadır. Düzəliş ayrıca qərar tələb edir.
 
+## Seçim: Variant C, düzəliş c2 (istifadəçi, 9 noyabr)
+
+İstifadəçi C-ni seçdi, şərt: heç bir düymə yazısı sətrə bölünməməli ("Nailiyyətlər" qırılmamalıdır). Düzəliş (`compose_c2.py`):
+
+- `c2-live-phone-landscape.png`: sağ paneldə Oyna, Kolleksiya, Nailiyyətlər, Ana ekran — hamısı panelin tam enində alt-alta; Kolleksiya/Nailiyyətlər yan-yana deyil. Onların ikon+yazı pikselləri eyni 420dpi / font 1.0 canlı portret renderindən (`source/live-phone-portrait.png`, yazılar bir sətirdə) götürülüb; yazı ölçüsü və düymə üslubu dəyişməyib. Aralıq: Oyna→16dp→Kolleksiya→8dp→Nailiyyətlər→16dp→Ana ekran; 4 düymə 411dp hündürlüyə scroll-suz sığır.
+- `c2-offline-phone-landscape.png`: eyni üç panel həndəsəsi; status, Yenilə, Ana ekran (onlar əvvəl də bir sətirdə idi).
+- İllüstrasiya və kart panelləri C ilə eynidir. Bütün yazılara tam ölçüdə baxılıb: heç biri bölünmür/kəsilmir.
+
 ## Açıq suallar / yoxlanmayanlar
 
 - A seçilərsə: canlı vəziyyətdə sabit sıra "Oyna | Ana ekran" olsunmu, yoxsa yalnız offline/bərpa vəziyyətinə tətbiq edilsin?
