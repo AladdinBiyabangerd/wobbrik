@@ -35,6 +35,9 @@ mərhələnin tamamlandığını bildirmir.
    authority deyil; keş yalnız server cavabı ilə yazılır və hesab/login dəyişəndə
    həmin hesabdan kənarda göstərilmir. Eyni revision-da yeni server balansını da qəbul
    et: billing domain revision-u artırmır.
+   Təsdiqlənmiş pinlər (9 noyabr): Room 2.7.2, KSP 2.1.10-1.0.31. DAO testləri izolə
+   emulyatorda instrumented işləyir (5554/5582 yox). Keş dəyərləri canlı dəyər kimi
+   göstərilir; yeni UI elementi/mətni yoxdur. Oyun/əmr yalnız canlı server Ready ilə açılır.
 4. **İnteqrasiya sübutu.** Cavab itkisi, commit sonrası timeout, proses ölümü,
    şəbəkə fasiləsi, login epoch və iki cihaz revision yarışı yoxlanılsın.
    XP/sikkə/nailiyyət təkrarlanmasın; restore son server checkpoint-i olsun.
