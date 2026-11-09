@@ -27,9 +27,19 @@ Pending operations retain their exact envelope, operation ID and revision across
 network failure, navigation and auth transitions. Never replace a pending command
 with a restart or a fresh start. A finished attempt must not be restored as active.
 
-Online restart/abandon stays unbound. Product decisions still required: whether
-abandon is supported, whether an abandoned attempt creates a result/building, and
-how already credited checkpoint rewards are treated. A server change would need
+Online restart/abandon stays unbound in code. Product policy (user decision, 9 November 2026):
+
+- If the player leaves an open attempt mid-game (Home, Back, or closing the app), the attempt is
+  deleted and not kept: no result and no building are created, and there is no later
+  "Cəhdə qayıt".
+- A save happens only in two cases: (1) the player loses — the last accepted successful state from
+  before the loss is kept; (2) the player finishes the game themselves — the existing flow: after the
+  floors are complete, cosmetic selection and explicit confirm, then finish.
+- Do not invent an abandon API, refunds, or treat finish as abandon. Offline practice restart stays local.
+
+The current server has no endpoint that closes or deletes an open attempt, and the current host
+keeps the attempt and pending command on Back/menu (see below). How the policy is realised is a
+separate implementation unit; if it needs a server change, that change needs its own approval. A server change would need
 its own revision/dedup, account isolation, migration and old-client tests. Do not
 invent refunds, clawbacks, forfeiture or finish-as-abandon in the mobile adapter.
 Offline practice restart remains local and must never be routed to online finish.
@@ -83,8 +93,9 @@ Terminal active snapshots remain terminal; continued attempts remain blocked unt
 stabilization is specified. This boundary does not authorize input or issue commands.
 It is connected to the application-owned `AcceptedEngineHost`, but not to the visible offline practice scene.
 
-User deferred live origin/device verification on 5 November 2026. This removes that
-check as a prerequisite for this implementation work, not as a release requirement.
+User deferred live origin/device verification on 5 November 2026. On 9 November 2026 the user
+closed live game-flow validation (landing → checkpoint → Ready → finish, retry, process death,
+live device/DB): it is not required and is not tracked as open work.
 
 ## Application-owned engine host
 
@@ -144,9 +155,11 @@ its input is never routed into online commands.
   the authenticated wobbrik-v1/structural-v1 catalog and current-account unlocks;
   free items are implicit. Failed local selection writes retain paused physics,
   expose an error and do not dispatch a finish. Auth epochs revoke stale callbacks.
-  Back/menu preserves both the active attempt and pending command.
+  Back/menu preserves both the active attempt and pending command (current implementation;
+  the 9 November leave-mid-game policy above is not implemented yet).
 
 No backend API/DTO/schema/rules version changes are needed: the integration uses
 existing structural-v1 requests and the unified PostgreSQL wallet/ledger. Server
-physics proof, continuation stabilization, final scene/navigation and live origin/
-device verification remain outstanding. Input is deliberately still locked.
+physics proof, continuation stabilization, final scene/navigation and the restart/abandon policy
+implementation remain outstanding; live origin/device verification is not required (user decision,
+9 November 2026). Input is deliberately still locked.

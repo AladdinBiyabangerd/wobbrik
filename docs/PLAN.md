@@ -84,10 +84,18 @@ Ekranda görünən oyun hələ ayrıca offline məşqdir. Onlayn hostun input-u 
 - [x] Host settled landing-də checkpoint/finish göndərir; UI OnlineGame ilə bağlıdır
   (`feat/stage-three-online-progression`, hələ main-də deyil).
 - [x] Təsdiq gözlənərkən (`waiting`), xətada və bərpada input bağlanır.
-- [ ] Retry və reconciliation-dan sonra yalnız düzgün qəbul edilmiş vəziyyətdən davam — fake test var; live device/DB açıqdır.
-- [ ] Son eniş → checkpoint → yeni Ready → finish yekun axında live yoxlanılsın.
-- [x] Finish kosmetik seçimi versiyalı server kataloqu və cari hesabın unlock-larına bağlandı (`feat/finish-cosmetics`); durable draft və explicit təsdiq var. Canlı yoxlama və vizual qəbul istifadəçidədir, main-ə merge edilməyib.
-- [x] Explicit resume/drop ilə onlayn input açılır; restart/abandon hələ bağlıdır.
+- [x] Retry və reconciliation-dan sonra yalnız düzgün qəbul edilmiş vəziyyətdən davam — fake testlə yoxlanıb; canlı device/DB yoxlaması istifadəçi qərarı ilə (9 noyabr) tələb olunmur.
+- [x] Son eniş → checkpoint → yeni Ready → finish axını: canlı oyun axını yoxlaması istifadəçi qərarı ilə (9 noyabr) tələb olunmur və açıq iş sayılmır.
+- [x] Finish kosmetik seçimi versiyalı server kataloqu və cari hesabın unlock-larına bağlandı (`feat/finish-cosmetics`); durable draft və explicit təsdiq var. Vizual qəbul istifadəçidədir (canlı yoxlama tələb olunmur), main-ə merge edilməyib.
+- [x] Explicit resume/drop ilə onlayn input açılır; restart/abandon hələ heç bir əmələ bağlanmayıb.
+- [ ] Restart/abandon siyasəti (istifadəçi qərarı, 9 noyabr) implementasiya olunsun: oyunçu açıq cəhdi oyunun
+  ortasında tərk edərsə (Home, Geri və ya tətbiqi bağlamaq) cəhd silinir və saxlanmır — nəticə və bina
+  yaranmır, sonradan “Cəhdə qayıt” olmur. Saxlama yalnız iki halda olur: (1) oyunçu uduzur — uduzmadan
+  əvvəlki son qəbul edilmiş uğurlu vəziyyət saxlanır; (2) oyunçu oyunu özü bitirir — mövcud axın:
+  mərtəbələr tamamlandıqdan sonra kosmetik seçim, açıq təsdiq, sonra finish. Abandon API, refund və
+  ya finish-as-abandon icad edilmir; offline məşq restart-ı lokal qalır. Serverdə açıq cəhdi
+  bağlayan/silən endpoint yoxdur; bunun necə həyata keçiriləcəyi ayrıca implementasiya vahididir və
+  server dəyişikliyi lazım olarsa ayrıca təsdiq tələb edir.
 - [ ] Google guest link UI yazılıb; live Console web client + provider yoxlaması açıqdır.
 - [ ] Room yalnız hesab üzrə server snapshot keşi kimi qoşulsun (plan vahid 3). 9 noyabr qərarı (B):
   gözləyən əmrlər üçün yeganə outbox davamlı fayl journal-ı (`DurableJournalFile`) qalır; Room
@@ -157,16 +165,20 @@ Backend main-də yerləşdirmə typed geometry ilə aktivdir; mobil placement ax
 - [ ] Telefon və planşet renderləri dizaynla yanaşı müqayisə edilsin.
 - [ ] Portret, landşaft, dəyişən pəncərə və şrift miqyası yoxlanılsın.
 - [ ] Səs, haptic və əlçatanlıq tamamlanılsın.
-- [ ] Canlı oyun, performans və buraxılış yoxlamaları keçirilsin.
+- [ ] Performans və buraxılış yoxlamaları keçirilsin (canlı oyun axını yoxlaması istifadəçi qərarı ilə, 9 noyabr, tələb olunmur).
 - [ ] Deploy və mağaza buraxılışı üçün ayrıca göstəriş alınsın.
 
 ## Açıq qərarlar
 
-- [ ] Restart/abandon siyasəti: server cəhdini necə bağlayacaq və hansı nəticəni yaradacaq?
+- [x] Restart/abandon siyasəti (9 noyabr, istifadəçi qərarı): oyunun ortasında tərk edilən açıq cəhd
+  (Home, Geri, tətbiqi bağlamaq) silinir — nəticə/bina yox, sonradan “Cəhdə qayıt” yox. Saxlama yalnız
+  uduzanda (uduzmadan əvvəlki son qəbul edilmiş uğurlu vəziyyət) və oyunçu oyunu özü bitirəndə
+  (kosmetik seçim + açıq təsdiq + finish) olur. Abandon API, refund, finish-as-abandon icad edilmir;
+  offline məşq restart-ı lokaldır. Server tərəfində necə həyata keçiriləcəyi §3.4-də açıq işdir.
 - [ ] Continued cəhdin fizikasının stabilləşdirilməsi necə işləyəcək?
 - [ ] Hesab konflikti, refund və hesab silmə/retention siyasətləri dəqiqləşdirilsin.
 
-Bu qərarlar özbaşına seçilmir. Onlayn restart/abandon hazırda heç bir əmələ bağlanmayıb.
+Bu qərarlar özbaşına seçilmir. Restart/abandon siyasəti qərarlaşdırılıb, amma onlayn restart/abandon hazırda heç bir əmələ bağlanmayıb.
 
 ## Mənbələr və davam
 
@@ -179,5 +191,5 @@ Yeni chat üçün prompt:
 
 > `docs/context/current-task.md` və `docs/PLAN.md` oxu. 3.4-cü addımı —
 > AcceptedEngineHost və AcceptedAttemptCommands əsasında onlayn simulyasiya və eniş
-> təsdiqi dövrünü qur. Təhlükəsiz axın yoxlanana qədər input kilidli, restart/abandon
-> açıq qalsın. Tamamlanan işlərə uyğun checklist-i yenilə.
+> təsdiqi dövrünü qur. Təhlükəsiz axın yoxlanana qədər input kilidli; restart/abandon yalnız
+> 9 noyabr siyasətinə uyğun (tərk = cəhd silinir; saxlama yalnız uduzanda və öz finish-də). Tamamlanan işlərə uyğun checklist-i yenilə.

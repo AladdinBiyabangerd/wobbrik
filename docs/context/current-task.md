@@ -1,3 +1,11 @@
+## Latest restart/abandon policy (plan) — 9 November 2026
+- Completed: user approved recording the restart/abandon policy. Docs branch `docs/restart-abandon-policy` from local main `7470c4f`: PLAN open decision closed with the policy, new §3.4 implementation line, `docs/host-lifecycle-contract.md` policy section.
+- Policy: leaving an open attempt mid-game (Home, Back, closing the app) deletes it — no result, no building, no later "Cəhdə qayıt". Saves only on (1) loss — last accepted successful state before the loss — and (2) the player's own finish (floors complete → cosmetic selection → explicit confirm → finish, existing flow). No abandon API, refunds or finish-as-abandon; offline practice restart stays local.
+- User decision (9 November): live game-flow validation (landing → checkpoint → Ready → finish, retry, process death, live device/DB) is not required and is not open work.
+- Current state: docs branch committed locally, not merged or pushed. No code changes. Local main `7470c4f` (room-cache CI record merge) not pushed.
+- Remaining work: implementation unit for the policy; the server has no endpoint to close/delete an open attempt and the current host keeps the attempt on Back/menu, so any server change needs separate approval.
+- Exact next step: user reviews the wording; merge after OK.
+
 ## Latest account landscape three-pane (design C2) — 9 November 2026
 - Completed: user approved C2; recorded on `design/account-landscape-actions` (`28d7602`), merged into `feat/account-landscape-three-pane` (from main `f53eab3`). `efd51e5` implements the three-pane account layout for wide windows below 480dp height. Review: `docs/reviews/2026-11-09-account-landscape-three-pane.md`. Then `104f62d` (coin/profile removed in three-pane), `e55f7b2` (approved v3 responsive tier: account logo in hero pane, Home short-landscape layout) and `3d5e998` (side-menu Home shows only Oyna; tablet portrait fits). Not merged.
 - Current state: branch committed locally, not merged or pushed; `docs/room-cache-main-ci` still unmerged.
