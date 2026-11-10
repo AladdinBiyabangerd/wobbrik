@@ -68,10 +68,11 @@ an anonymous account or add sign-in UI. ID tokens come from the current Firebase
 user on each request (SDK refresh enabled), with account/epoch guards around I/O.
 Process foreground retries recovery; Activity recreation does not create writers.
 
-Supply the actual AppBackend HTTPS origin through the Gradle property
-`wobbrik.backendOrigin` (for example in user-local `~/.gradle/gradle.properties`).
+The AppBackend HTTPS origin is configured in `gradle.properties` as
+`https://appsbackend.up.railway.app`. Override `wobbrik.backendOrigin` with
+`-P` or user-local `~/.gradle/gradle.properties` for local testing.
 Only an HTTPS origin is accepted; no path, credentials, query or fragment. No
-production endpoint is assumed. The existing git-excluded `app/google-services.json`
+additional endpoint is inferred. The existing git-excluded `app/google-services.json`
 selects Firebase. Without either configuration the application reports
 `MissingFirebase` / `MissingBackendOrigin` through `WobbrikApplication.bootstrap`
 and does not start recovery. Invalid nonempty origins fail explicitly.
