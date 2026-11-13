@@ -53,7 +53,7 @@ object InventoryReads {
 }
 
 /** One refresh owns its pages. Different city revisions are rejected, never unioned. */
-class InventoryRepository(private val backend: GameplayHttpBackend) {
+class InventoryRepository(private val backend: GameplayReads) {
     suspend fun page(session: BillingSession, cursor: String? = null) =
         InventoryReads.inventory(backend.read(session, "inventory" + query(cursor)))
     suspend fun building(session: BillingSession, id: String): OwnedBuilding {

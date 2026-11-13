@@ -20,7 +20,11 @@ object AcceptedAttemptRestore {
 
     fun from(recovery: AuthenticatedRecoveryOwner.State): Result {
         if (recovery !is AuthenticatedRecoveryOwner.State.Ready) return Result.Unavailable
-        val snapshot = recovery.snapshot
+        return fromSnapshot(recovery.snapshot)
+    }
+
+    /** Validation only; a parsed snapshot does not create a Ready/input capability. */
+    fun fromSnapshot(snapshot: appbackend.wobbrik.game.GameSnapshot): Result {
         if (snapshot.rulesVersion != "wobbrik-v1") return Result.Blocked(Reason.UNSUPPORTED_VERSION)
         val attempt = snapshot.attempt ?: return Result.NoAttempt
         if (!attempt.active) return Result.Finished(attempt.id)

@@ -7,6 +7,26 @@ import org.junit.Assert.*
 import org.junit.Test
 
 class AuthenticatedRecoveryOwnerTest {
+    @Test fun foregroundKeepsExactActiveCapabilityWithoutNetworkButReloginRevokesIt() = runBlocking {
+        val f = Fixture()
+        try {
+            f.sync = { snapshot(it.uid).copy(attempt = ServerAttempt("active", true, 0, null)) }
+            f.owner.onAuthChanged("alice"); yield()
+            val ready = f.owner.state.value as AuthenticatedRecoveryOwner.State.Ready
+            f.notifications.clear()
+            f.sync = { throw java.io.IOException("offline") }
+            repeat(3) { f.owner.onForeground() }
+            yield()
+            assertSame(ready, f.owner.state.value)
+            assertTrue(f.notifications.isEmpty())
+            assertEquals(1, f.calls.size)
+            // Same UID is still a new login epoch, never offline permission reuse.
+            f.owner.onAuthChanged("alice"); yield()
+            assertTrue(f.owner.state.value is AuthenticatedRecoveryOwner.State.Error)
+            assertFalse(f.owner.submit(ready) { error("Stale builder must not run") })
+        } finally { f.close() }
+    }
+
     private class Fixture {
         val sessions = AccountSessions { "token" }
         val scope = CoroutineScope(SupervisorJob() + Dispatchers.Unconfined)

@@ -26,7 +26,7 @@ import androidx.compose.ui.semantics.contentDescription
 import appbackend.wobbrik.game.OwnedBuilding
 
 @Composable
-internal fun CityHeader(population: String?, onHome: () -> Unit) {
+internal fun CityHeader(population: String?, onHome: () -> Unit, cached: Boolean = false) {
     val largeFont = LocalDensity.current.fontScale > 1f
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
@@ -76,7 +76,11 @@ internal fun CityHeader(population: String?, onHome: () -> Unit) {
             }
         }
     }
-    if (population != null) Text("Əhali: $population", color = GameTokens.Muted, fontSize = GameTokens.Body)
+    if (population != null) Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+        Text("Əhali: $population", color = GameTokens.Muted, fontSize = GameTokens.Body)
+        if (cached) Text("Keş", color = GameTokens.Muted, fontSize = GameTokens.Caption,
+            modifier = Modifier.semantics { contentDescription = "Saxlanmış məlumat · yalnız baxış" })
+    }
 }
 
 @Composable

@@ -26,7 +26,7 @@ data class CatalogItem(val id: String, val name: String, val category: String, v
     val weight: Long, val price: Long?, val views: Long?)
 data class LandOffer(val id: String, val requiredXp: Long, val price: Long)
 data class RecoveryCatalog(val rulesVersion: String, val engineVersion: String,
-    val items: List<CatalogItem>, val landOffers: List<LandOffer>)
+    val items: List<CatalogItem>, val landOffers: List<LandOffer>, val wire: String? = null)
 
 /** Additive response fields are tolerated; required recovery fields fail closed. No local grants. */
 object RecoveryDtos {
@@ -121,6 +121,6 @@ object RecoveryDtos {
             LandOffer(i.s("id"), i.n("required_xp"), i.n("price"))
         }
         require(items.map { it.id }.distinct().size == items.size && land.map { it.id }.distinct().size == land.size)
-        return RecoveryCatalog(r.s("rules_version"), r.s("engine_version"), items, land)
+        return RecoveryCatalog(r.s("rules_version"), r.s("engine_version"), items, land, body)
     }
 }

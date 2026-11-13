@@ -7,6 +7,6 @@
 - Mövcud pinlər: Gradle 8.13, AGP 8.13.0, Kotlin/Compose plugin 2.1.10, Compose UI/foundation 1.7.6, Material3 1.3.1, Firebase BOM 33.7.0. Mənbə: `android-billing/{build.gradle.kts,app/build.gradle.kts,gradle/wrapper/gradle-wrapper.properties}`; bu xülasə re-pin icazəsi deyil.
 - Backend: `/Users/mac/My Workspace/AppBackend`; Firebase Auth → app/UID identity, AppBackend/PostgreSQL → qəbul edilmiş oyun vəziyyəti, progression, wallet/ledger, mülkiyyət, inventar/bazar/şəhər.
 - Room hesab üzrə server snapshot oxu keşidir; exact retry outbox davamlı fayl journal-ı (`DurableJournalFile`) qalır (9 noyabr qərarı B); DataStore cihaz seçimləri üçündür. Hazır olub-olmadığını aktiv branch-də yoxla; iki aktiv journal və ya ikinci wallet yaratma.
-- UI/naviqasiya state/domain/data sərhədlərini çağırır; debug fixture canlı backend sübutu deyil. Offline yalnız məşq/cache-dir.
+- UI/naviqasiya state/domain/data sərhədlərini çağırır; debug fixture canlı backend sübutu deyil. 13 noyabr son qərarı: offline nəticələr sonradan serverə göndərilməlidir; terminal intent növbəsi/recovery replay, sessiyaya bağlı lokal Play və accepted snapshot+kataloq/revision-scoped read-only baxış keşi branch-də var. Cache/yerli nəticə authority və Ready deyil; wire command üçün sole journal saxlanır.
 - Lifecycle və onlayn inteqrasiya: `docs/PLAN.md` §3; mərhələlər §1, server §2, şəhər §7.
 - Telefon/planşet, portret/landşaft və dəyişən pəncərə ölçüsü dəstəklənir. Locale siyahısını təxmin etmə; tapşırıqda plan/resurs və təsdiqlənmiş tələbləri yoxla.

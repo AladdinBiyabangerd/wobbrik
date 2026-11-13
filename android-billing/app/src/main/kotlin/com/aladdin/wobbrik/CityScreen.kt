@@ -23,6 +23,13 @@ import kotlinx.coroutines.CancellationException
 @Composable
 internal fun CityScreen(configured: WobbrikApplication.Bootstrap.Configured,
     ready: AuthenticatedRecoveryOwner.State.Ready, onHome: () -> Unit, onInventory: () -> Unit) {
+    CityScreen(configured, AccountView(ReadOnlyAccount(requireNotNull(ready.accountKey), ready.snapshot, requireNotNull(ready.catalog)), ready), onHome, onInventory)
+}
+
+@Composable
+internal fun CityScreen(configured: WobbrikApplication.Bootstrap.Configured,
+    ready: AccountView, onHome: () -> Unit, onInventory: () -> Unit, lifeTimeSeconds: Double? = null) {
+    var fromCache by remember { mutableStateOf(ready.ready == null) }
     var scene by remember { mutableStateOf<CityScene?>(null) }
     var failed by remember { mutableStateOf(false) }
     var retry by remember { mutableIntStateOf(0) }
@@ -30,9 +37,9 @@ internal fun CityScreen(configured: WobbrikApplication.Bootstrap.Configured,
         scene = null; failed = false
         try {
             val session = requireNotNull(configured.sessions.current())
-            check(session.uid == ready.accountKey && configured.recovery.state.value === ready)
-            val loaded = configured.cityScene.load(session)
-            check(configured.sessions.current() == session && configured.recovery.state.value === ready)
+            check(ready.current(configured, session))
+            val loaded = configured.views?.read(ready, session, "city", onCached = { fromCache = true }) { CitySceneRepository(it).load(session) } ?: configured.cityScene.load(session)
+            check(ready.current(configured, session))
             scene = loaded
         } catch (cancelled: CancellationException) { throw cancelled }
         catch (failure: Exception) {
@@ -41,12 +48,12 @@ internal fun CityScreen(configured: WobbrikApplication.Bootstrap.Configured,
         }
     }
     BackHandler(onBack = onHome)
-    CityContent(scene, failed, { retry++ }, onHome, onInventory)
+    CityContent(scene, failed, { retry++ }, onHome, onInventory, lifeTimeSeconds = lifeTimeSeconds, cached = fromCache)
 }
 
 @Composable
 internal fun CityContent(scene: CityScene?, failed: Boolean, onRetry: () -> Unit,
-    onHome: () -> Unit, onInventory: () -> Unit, lifeTimeSeconds: Double? = null) {
+    onHome: () -> Unit, onInventory: () -> Unit, lifeTimeSeconds: Double? = null, cached: Boolean = false) {
     var selected by remember(scene) { mutableStateOf<String?>(null) }
     var focused by remember(scene) { mutableStateOf(false) }
     BackHandler(focused) { focused = false }
@@ -81,7 +88,7 @@ internal fun CityContent(scene: CityScene?, failed: Boolean, onRetry: () -> Unit
         val tallPortrait = maxHeight > maxWidth * 2 && LocalDensity.current.fontScale <= 1f
         val sceneHeight = if (tallPortrait) maxWidth else maxHeight
         Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(GameTokens.Small, Alignment.CenterVertically)) {
-            CityHeader(scene?.membership?.population?.toString(), onHome)
+            CityHeader(scene?.membership?.population?.toString(), onHome, cached = cached)
             BoxWithConstraints(Modifier.weight(1f, fill = !tallPortrait).fillMaxWidth().heightIn(max = sceneHeight)) {
                 val visible = if (focused && chosen != null) listOf(chosen) else buildings
                 val sceneBounds = if (focused && chosen != null) emptyList() else

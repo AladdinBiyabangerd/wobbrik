@@ -8,7 +8,7 @@ import org.json.JSONObject
 import java.security.MessageDigest
 
 /** App-private, account/attempt-scoped UI intent. AttemptJournal remains the sole wire outbox. */
-internal class AndroidFinishDraftStore(context: Context) : FinishDraftStore {
+internal class AndroidFinishDraftStore(context: Context, private val pending: com.aladdin.wobbrik.engine.PendingGameResults? = null) : FinishDraftStore {
     private val preferences = context.getSharedPreferences("finish-cosmetics-v1", Context.MODE_PRIVATE)
     private fun key(uid: String, attemptId: String): String = MessageDigest.getInstance("SHA-256")
         .digest("${uid.length}:$uid:$attemptId".toByteArray(Charsets.UTF_8)).joinToString("") { "%02x".format(it) }
@@ -30,5 +30,18 @@ internal class AndroidFinishDraftStore(context: Context) : FinishDraftStore {
         check(preferences.edit().putString(key(uid, attemptId), json.toString()).commit()) {
             "Finish selection could not be persisted"
         }
+        retain(uid, attemptId, draft)
+    }
+
+    /** Import an older terminal draft only for the server's current active attempt. */
+    fun stageExisting(uid: String, attemptId: String) {
+        read(uid, attemptId)?.let { retain(uid, attemptId, it) }
+    }
+
+    private fun retain(uid: String, attemptId: String, draft: FinishDraft) {
+        val terminal = draft.terminal.copy(tickUnits = 0, state = draft.terminal.state.copy(paused = true))
+        pending?.enqueue(uid, com.aladdin.wobbrik.engine.PendingGameResult(
+            java.util.UUID.nameUUIDFromBytes("terminal:$attemptId".toByteArray(Charsets.UTF_8)).toString(),
+            terminal, draft.parts, attemptId, started = true))
     }
 }

@@ -235,6 +235,21 @@ class AcceptedAttemptCommandsTest {
             f.host.onPause()
             f.host.onFrame(Long.MAX_VALUE)
             assertFalse(f.host.drop())
+            // Returning without internet must preserve the unsubmitted floor and falling/
+            // crane state. Lifecycle pause still requires an explicit resume and new clock.
+            val pausedScene = f.host.snapshot().scene
+            f.syncFailure = true
+            f.host.onForeground()
+            f.owner.onForeground(); yield()
+            assertSame(old, f.ready())
+            assertEquals(pausedScene, f.host.snapshot().scene)
+            assertFalse(f.host.snapshot().inputEnabled)
+            assertNull(f.host.snapshot().previousFrameNanos)
+            assertTrue(f.host.resume(old))
+            f.host.onFrame(1, old)
+            assertEquals(pausedScene!!.floors, f.host.snapshot().scene!!.floors)
+            assertEquals(1, f.sent.size)
+            f.syncFailure = false
             f.login("bob"); yield()
             assertNull(f.host.snapshot().scene)
         }
@@ -378,6 +393,29 @@ class AcceptedAttemptCommandsTest {
             assertNull(f.journal().pending("alice"))
             f.draftFailure = false
             assertTrue(f.host.confirmFinish(ready)); yield()
+            assertNull(f.ready().snapshot.attempt)
+        }
+    }
+
+    @Test fun failedTerminalDraftSurvivesSameUidReloginWithoutSendingUnstoredResult() = runBlocking {
+        Fixture().use { f ->
+            f.host.bind(f.commands)
+            f.login(); yield(); f.commands.start(f.ready()); yield()
+            f.commands.checkpoint(f.ready(), landed(true)); yield()
+            val before = f.ready()
+            val terminal = f.host.snapshot().scene
+            f.draftFailure = true
+            assertFalse(f.host.confirmFinish(before))
+            val sends = f.sent.size
+            f.login(); yield()
+            assertNotSame(before, f.ready())
+            assertEquals(terminal, f.host.snapshot().scene)
+            assertTrue(f.host.snapshot().choosingFinish)
+            assertFalse(f.host.confirmFinish(before))
+            assertFalse(f.host.confirmFinish(f.ready()))
+            assertEquals(sends, f.sent.size)
+            f.draftFailure = false
+            assertTrue(f.host.confirmFinish(f.ready())); yield()
             assertNull(f.ready().snapshot.attempt)
         }
     }

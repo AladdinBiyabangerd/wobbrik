@@ -44,6 +44,8 @@ class AttemptCoordinator(
     private val sessions: Sessions,
     private val backend: AttemptBackend,
     private val journal: AttemptJournal,
+    // Persist domain intent acknowledgement before the sole wire journal can be cleared.
+    private val onCommitted: (BillingSession, AttemptCommand) -> Unit = { _, _ -> },
 ) {
     private val mutex = Mutex()
     @Volatile private var accepted: Pair<BillingSession, GameSnapshot>? = null
@@ -95,6 +97,8 @@ class AttemptCoordinator(
             refresh(session)
             throw conflict // Caller must make a new decision; never silently rebase a mutation.
         }
+        stillCurrent(session)
+        onCommitted(session, command)
         stillCurrent(session)
         // A receipt may be historical. Always sync, including at an equal revision (billing).
         val result = backend.sync(session)

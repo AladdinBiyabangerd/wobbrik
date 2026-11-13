@@ -15,7 +15,11 @@ fun interface GameplayTransport {
 data class GameplayResponse(val status: Int, val body: String)
 class GameplayHttpError(val status: Int, val code: String?) : IOException("Gameplay request failed: $status ${code.orEmpty()}")
 
-class GameplayHttpBackend(private val sessions: Sessions, private val transport: GameplayTransport) : AttemptBackend {
+fun interface GameplayReads {
+    suspend fun read(session: BillingSession, path: String): String
+}
+
+class GameplayHttpBackend(private val sessions: Sessions, private val transport: GameplayTransport) : AttemptBackend, GameplayReads {
     override suspend fun catalog(session: BillingSession): RecoveryCatalog = RecoveryDtos.catalog(request(session, "catalog", null))
     override suspend fun sync(session: BillingSession): GameSnapshot = GameplayWire.snapshot(request(session, "sync", null))
     override suspend fun submit(session: BillingSession, command: AttemptCommand) {
@@ -40,7 +44,7 @@ class GameplayHttpBackend(private val sessions: Sessions, private val transport:
             else -> RecoveryDtos.attemptReceipt(body, command.route)
         }
     }
-    internal suspend fun read(session: BillingSession, path: String): String = request(session, path, null)
+    override suspend fun read(session: BillingSession, path: String): String = request(session, path, null)
     private suspend fun request(session: BillingSession, path: String, body: String?): String {
         current(session)
         val token = sessions.idToken(session)

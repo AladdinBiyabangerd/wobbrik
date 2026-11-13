@@ -59,7 +59,7 @@ internal fun MobileHomeScreen(snapshot: GameSnapshot?, active: Boolean, onPlay: 
                 }
             }
         }
-        MobileHomeNavbar(active = active, enabled = accepted && onPlay != null,
+        MobileHomeNavbar(active = active, enabled = !journalBlocked && onPlay != null,
             onPlay = { onPlay?.invoke() }, onPage = onPage)
     }
 }

@@ -33,7 +33,7 @@ import appbackend.wobbrik.game.*
 import kotlinx.coroutines.CancellationException
 
 /** Equal snapshots from a new login must still discard the old destination state. */
-internal class InventoryReadKey(private val ready: AuthenticatedRecoveryOwner.State.Ready) {
+internal class InventoryReadKey(private val ready: Any) {
     override fun equals(other: Any?) = other is InventoryReadKey && ready === other.ready
     override fun hashCode() = System.identityHashCode(ready)
 }
@@ -43,6 +43,15 @@ internal class InventoryReadKey(private val ready: AuthenticatedRecoveryOwner.St
 internal fun InventoryScreen(configured: WobbrikApplication.Bootstrap.Configured,
     ready: AuthenticatedRecoveryOwner.State.Ready, selected: String?, onSelectBuilding: (String?) -> Unit, onHome: () -> Unit, onParts: (String?) -> Unit,
     onDecorations: () -> Unit, onLand: () -> Unit) {
+    InventoryScreen(configured, AccountView(appbackend.wobbrik.game.ReadOnlyAccount(requireNotNull(ready.accountKey), ready.snapshot, requireNotNull(ready.catalog)), ready), selected, onSelectBuilding, onHome, onParts, onDecorations, onLand)
+}
+
+@Composable
+internal fun InventoryScreen(configured: WobbrikApplication.Bootstrap.Configured,
+    ready: AccountView, selected: String?, onSelectBuilding: (String?) -> Unit, onHome: () -> Unit, onParts: (String?) -> Unit,
+    onDecorations: () -> Unit, onLand: () -> Unit) {
+    var fromCache by remember(ready) { mutableStateOf(ready.ready == null) }
+    val canMutate = ready.ready != null && !fromCache
     val sizing = mobileUiSizing()
     val largeFont = LocalDensity.current.fontScale > 1f
     var retry by remember { mutableIntStateOf(0) }
@@ -59,17 +68,19 @@ internal fun InventoryScreen(configured: WobbrikApplication.Bootstrap.Configured
         loading = true; failed = false
         try {
             val session = requireNotNull(configured.sessions.current())
-            check(session.uid == ready.accountKey && configured.recovery.state.value === ready)
+            check(ready.current(configured, session))
             if (selected == null) {
-                val page = configured.inventory.page(session, cursor)
-                check(configured.sessions.current() == session && configured.recovery.state.value === ready)
+                val page = configured.views?.read(ready, session, "inventory-${cursor.orEmpty()}", onCached = { fromCache = true }) { appbackend.wobbrik.game.InventoryRepository(it).page(session, cursor) } ?: configured.inventory.page(session, cursor)
+                check(ready.current(configured, session))
                 buildings = if (cursor == null) page.buildings else (buildings + page.buildings).distinctBy { it.id }
                 next = page.next
             } else {
                 detail = null; city = null
-                val building = configured.inventory.building(session, requireNotNull(selected))
-                val membership = configured.inventory.city(session)
-                check(configured.sessions.current() == session && configured.recovery.state.value === ready)
+                val (building, membership) = configured.views?.read(ready, session, "detail-$selected", onCached = { fromCache = true }) { reader ->
+                    val repository = appbackend.wobbrik.game.InventoryRepository(reader)
+                    repository.building(session, requireNotNull(selected)) to repository.city(session)
+                } ?: (configured.inventory.building(session, requireNotNull(selected)) to configured.inventory.city(session))
+                check(ready.current(configured, session))
                 detail = building; city = membership
             }
         } catch (cancelled: CancellationException) { throw cancelled }
@@ -109,13 +120,13 @@ internal fun InventoryScreen(configured: WobbrikApplication.Bootstrap.Configured
                 color = GameTokens.Text, fontSize = sizing.heading, fontWeight = FontWeight.Bold)
             if (selected == null) {
                 if (sizing.portrait) {
-                    InventoryToolbar(largeFont, { onParts(null) }, onDecorations, onLand)
+                    InventoryToolbar(largeFont, { onParts(null) }, onDecorations, onLand, enabled = canMutate)
                     Text("Binalar", Modifier.padding(top = GameTokens.Small, bottom = GameTokens.Quarter),
                         color = GameTokens.Text, fontSize = GameTokens.Hint, fontWeight = FontWeight.Bold)
                 } else {
-                    InventoryButton("Hissələr · Mağaza") { onParts(null) }
-                    InventoryButton("Dekor") { onDecorations() }
-                    InventoryButton("Ərazi alışı") { onLand() }
+                    InventoryButton("Hissələr · Mağaza", enabled = canMutate) { onParts(null) }
+                    InventoryButton("Dekor", enabled = canMutate) { onDecorations() }
+                    InventoryButton("Ərazi alışı", enabled = canMutate) { onLand() }
                     Row(Modifier.fillMaxWidth().background(GameTokens.Raised, RoundedCornerShape(GameTokens.CardRadius))
                         .padding(GameTokens.Small), verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
@@ -153,11 +164,13 @@ internal fun InventoryScreen(configured: WobbrikApplication.Bootstrap.Configured
                 if (!loading && !sizing.portrait) TextButton(onClick = { cursor = null; buildings = emptyList(); next = null; retry++ }) { Text("Yenilə", color = GameTokens.Accent) }
             } else if (detail != null) {
                 BuildingDetail(requireNotNull(detail), city, ready.catalog, Modifier.weight(1f))
-                InventoryButton("Bina görünüşü") { onParts(detail?.id) }
-                TextButton(onClick = { deleteCandidate = detail }, modifier = Modifier.fillMaxWidth().heightIn(min = GameTokens.Target)) {
-                    Text("Binanı sil", color = GameTokens.Danger)
+                InventoryButton(if (fromCache) "Yalnız baxış" else "Bina görünüşü", enabled = canMutate) { onParts(detail?.id) }
+                TextButton(enabled = canMutate, onClick = { deleteCandidate = detail }, modifier = Modifier.fillMaxWidth().heightIn(min = GameTokens.Target)) {
+                    Text("Binanı sil", color = if (canMutate) GameTokens.Danger else GameTokens.Muted)
                 }
             } else Spacer(Modifier.weight(1f))
+            if (fromCache && selected == null) Text("Keş · yalnız baxış", color = GameTokens.Muted, fontSize = GameTokens.Caption,
+                modifier = Modifier.semantics { contentDescription = "Saxlanmış məlumat · yalnız baxış" })
             if (loading) Row(horizontalArrangement = Arrangement.spacedBy(GameTokens.Small), verticalAlignment = Alignment.CenterVertically) {
                 CircularProgressIndicator(Modifier.size(GameTokens.Inset), color = GameTokens.Accent)
                 Text("Yüklənir…", color = GameTokens.Muted)
@@ -168,13 +181,13 @@ internal fun InventoryScreen(configured: WobbrikApplication.Bootstrap.Configured
             }
             if (sizing.portrait) HomeButton(if (selected == null) "Ana ekran" else "İnventara qayıt",
                 icon = if (selected == null) R.drawable.ui_home else null, onClick = back)
-            else InventoryButton(if (selected == null) "Ana ekran" else "İnventara qayıt", back)
+            else InventoryButton(if (selected == null) "Ana ekran" else "İnventara qayıt", onClick = back)
         }
     }
     deleteCandidate?.let { candidate ->
         BuildingDeleteConfirmation(onDismiss = { deleteCandidate = null }, onConfirm = {
             deleteCandidate = null
-            if (deletion.confirmedDelete(ready, candidate)) {
+            if (canMutate && ready.ready?.let { deletion.confirmedDelete(it, candidate) } == true) {
                 // Ready is revoked during submission. The next Ready remount reads server inventory.
                 onSelectBuilding(null); cursor = null
             }
@@ -341,29 +354,29 @@ internal fun BuildingPreview(building: OwnedBuilding, modifier: Modifier) {
 }
 
 @Composable
-private fun InventoryButton(label: String, onClick: () -> Unit) {
-    HomeButton(label = label, primary = true, compact = true, onClick = onClick)
+private fun InventoryButton(label: String, enabled: Boolean = true, onClick: () -> Unit) {
+    HomeButton(label = label, primary = true, compact = true, enabled = enabled, onClick = onClick)
 }
 
 
 @Composable
-private fun InventoryToolbar(largeFont: Boolean, onParts: () -> Unit, onDecorations: () -> Unit, onLand: () -> Unit) {
+private fun InventoryToolbar(largeFont: Boolean, onParts: () -> Unit, onDecorations: () -> Unit, onLand: () -> Unit, enabled: Boolean = true) {
     if (largeFont) Column(verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
         Row(horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-            InventoryToolbarEntry("Hissələr", null, Modifier.weight(1f), onParts)
-            InventoryToolbarEntry("Dekor", null, Modifier.weight(1f), onDecorations)
+            InventoryToolbarEntry("Hissələr", null, Modifier.weight(1f), enabled, onParts)
+            InventoryToolbarEntry("Dekor", null, Modifier.weight(1f), enabled, onDecorations)
         }
-        InventoryToolbarEntry("Ərazi", null, Modifier.fillMaxWidth(), onLand)
+        InventoryToolbarEntry("Ərazi", null, Modifier.fillMaxWidth(), enabled, onLand)
     } else Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-        InventoryToolbarEntry("Hissələr", R.drawable.ui_inventory, Modifier.weight(1f), onParts)
-        InventoryToolbarEntry("Dekor", R.drawable.ui_city, Modifier.weight(1f), onDecorations)
-        InventoryToolbarEntry("Ərazi", R.drawable.ui_home, Modifier.weight(1f), onLand)
+        InventoryToolbarEntry("Hissələr", R.drawable.ui_inventory, Modifier.weight(1f), enabled, onParts)
+        InventoryToolbarEntry("Dekor", R.drawable.ui_city, Modifier.weight(1f), enabled, onDecorations)
+        InventoryToolbarEntry("Ərazi", R.drawable.ui_home, Modifier.weight(1f), enabled, onLand)
     }
 }
 
 @Composable
-private fun InventoryToolbarEntry(label: String, icon: Int?, modifier: Modifier, onClick: () -> Unit) {
-    Surface(onClick = onClick, modifier = modifier.heightIn(min = GameTokens.Target),
+private fun InventoryToolbarEntry(label: String, icon: Int?, modifier: Modifier, enabled: Boolean, onClick: () -> Unit) {
+    Surface(onClick = onClick, enabled = enabled, modifier = modifier.heightIn(min = GameTokens.Target),
         shape = RoundedCornerShape(GameTokens.ControlRadius), color = GameTokens.Raised) {
         Row(Modifier.padding(GameTokens.Small), verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(GameTokens.Quarter, Alignment.CenterHorizontally)) {
