@@ -28,15 +28,14 @@ internal fun DrawScope.drawGameScene(state: PracticeState, art: SceneArt, motion
     if (size.width <= 0f || size.height <= 0f) return
     val floorWidth = PracticeRulesV1.FLOOR_WIDTH.toFloat()
     val floorHeight = PracticeRulesV1.FLOOR_HEIGHT.toFloat()
-    val atlas = art.atlases[gameAtlasStyle(parts)]
-    val wall = cosmetics[parts["wall"]]
+    val selectedParts = if (parts.isEmpty()) listOf("wall", "window", "entrance", "lighting", "roof").associateWith { "base_1_$it" } else parts
+    val style = gameAtlasStyle(selectedParts)
+    val atlas = art.atlases.getValue(style)
     // Full native aspect and measured eave depth, specific to each atlas.
     // Presentation pitch only; accepted floor bases and collision remain 30 engine units.
-    val artHeight = atlas?.floor?.let { it.size.height.toFloat() / it.size.width }
-        ?: wall?.let { it.size.height.toFloat() / it.size.width } ?: (597f / 1064f)
-    val depth = atlas?.let { it.depth / it.floor.size.width }
-        ?: if (wall != null) 38f / 270f else 207f / 1064f
-    val pitch = floorWidth * (atlas?.let { it.pitch / it.floor.size.width } ?: (artHeight - depth))
+    val artHeight = atlas.floor.size.height.toFloat() / atlas.floor.size.width
+    val depth = atlas.depth / atlas.floor.size.width
+    val pitch = floorWidth * atlas.pitch / atlas.floor.size.width
     val projection = pitch / floorHeight
     val top = state.floors.size * floorHeight
     val camera = motion.cameraUnits
@@ -70,20 +69,12 @@ internal fun DrawScope.drawGameScene(state: PracticeState, art: SceneArt, motion
         // Keep every visible connecting floor, including ones below the camera anchor.
         if (p.y >= -width && upper <= size.height + width) {
             rotate(degrees, p) {
-                if (atlas != null) {
+                if (style.startsWith("modular")) {
+                    drawModularFloor(atlas.floor, cosmetics, art.atlases, selectedParts, p.x - width / 2, upper, width, groundFloor)
+                } else {
                     val cell = if (groundFloor) atlas.ground else atlas.floor
                     sprite(cell.image, cell.origin.x, cell.origin.y, cell.size.width, cell.size.height,
                         p.x - width / 2, upper, width)
-                } else if (wall == null) sprite(art.floor, 233, 258, 1064, 597, p.x - width / 2, upper, width)
-                else {
-                    drawImage(wall.image, srcOffset = wall.origin, srcSize = wall.size,
-                        dstOffset = IntOffset((p.x - width / 2).roundToInt(), upper.roundToInt()),
-                        dstSize = IntSize(width.roundToInt().coerceAtLeast(1), (width * artHeight).roundToInt().coerceAtLeast(1)))
-                    if (!groundFloor) sprite(cosmetics[parts["window"]], p.x - width * .2f, upper + width * .12f, width * .4f, width * .35f)
-                    if (groundFloor) {
-                        sprite(cosmetics[parts["entrance"]], p.x - width * .2f, p.y - width * .4f, width * .4f, width * .4f)
-                        sprite(cosmetics[parts["lighting"]], p.x + width * .25f, p.y - width * .35f, width * .15f, width * .25f)
-                    }
                 }
             }
         }
@@ -102,17 +93,10 @@ internal fun DrawScope.drawGameScene(state: PracticeState, art: SceneArt, motion
             (state.floors.lastOrNull()?.baseY?.plus(4.0) ?: -30.0))
         // The guide sits just above the open top; it is never a collision rectangle.
         val guide = Path().apply {
-            if (atlas != null) {
-                atlas.topAnchors.forEachIndexed { index, anchor ->
-                    val x = target.x - width / 2 + width * anchor.x / atlas.floor.size.width
-                    val y = target.y - width * artHeight + width * anchor.y / atlas.floor.size.width
-                    if (index == 0) moveTo(x, y) else lineTo(x, y)
-                }
-            } else {
-                moveTo(target.x - width / 2, target.y - width * (artHeight - depth))
-                lineTo(target.x - width * .22f, target.y - width * artHeight)
-                lineTo(target.x + width / 2, target.y - width * artHeight)
-                lineTo(target.x + width * .24f, target.y - width * (artHeight - depth))
+            atlas.topAnchors.forEachIndexed { index, anchor ->
+                val x = target.x - width / 2 + width * anchor.x / atlas.floor.size.width
+                val y = target.y - width * artHeight + width * anchor.y / atlas.floor.size.width
+                if (index == 0) moveTo(x, y) else lineTo(x, y)
             }
             close()
         }
@@ -148,12 +132,9 @@ internal fun DrawScope.drawGameScene(state: PracticeState, art: SceneArt, motion
         val p = Offset(landing.x, landing.y + (suspendedY - landing.y) * fallFraction)
         if (state.phase == Phase.SWINGING) {
             val angle = Math.toRadians(motion.loadDegrees.toDouble()).toFloat()
-            val anchors = if (atlas != null) atlas.topAnchors.map {
+            val anchors = atlas.topAnchors.map {
                 (it.x / atlas.floor.size.width - .5f) to (-artHeight + it.y / atlas.floor.size.width)
             }
-                else if (wall == null) listOf(-.48f to -.43f, -.22f to -.55f, .24f to -.4f, .48f to -.51f)
-                else listOf(-.46f to (-artHeight + .10f), -.38f to (-artHeight + .04f),
-                    .34f to (-artHeight + .18f), .47f to (-artHeight + .11f))
             for ((dx, dy) in anchors) {
                 val anchor = Offset(width * dx, width * dy)
                 val rotated = Offset(anchor.x * cos(angle) - anchor.y * sin(angle),
@@ -168,14 +149,23 @@ internal fun DrawScope.drawGameScene(state: PracticeState, art: SceneArt, motion
         val last = state.floors.last()
         val p = point(last.centerX, last.baseY)
         rotate(motion.towerDegrees, island) {
-            if (atlas != null) {
+            if (style.startsWith("modular")) {
+                val roofId = selectedParts["roof"]
+                val approvedRoof = when(roofId) {
+                    "base_1_roof" -> art.atlases["purple"]?.roof
+                    "base_2_roof" -> art.atlases["teal"]?.roof
+                    else -> null
+                }
+                if (approvedRoof != null) sprite(approvedRoof.image, approvedRoof.origin.x, approvedRoof.origin.y,
+                    approvedRoof.size.width, approvedRoof.size.height, p.x-width/2,
+                    p.y-width*(artHeight-depth)-width*approvedRoof.size.height/approvedRoof.size.width, width)
+                else drawModularRoof(cosmetics[roofId], roofId, p.x-width/2,p.y-width*(artHeight-depth),width)
+            } else {
                 val cell = atlas.roof
                 // Cap replaces the exposed top plane, sharing its front eave baseline.
                 sprite(cell.image, cell.origin.x, cell.origin.y, cell.size.width, cell.size.height,
                     p.x - width / 2, p.y - width * (artHeight - depth) - width * cell.size.height / cell.size.width, width)
-            } else if (cosmetics[parts["roof"]] != null) roof(cosmetics[parts["roof"]], p.x - width / 2, p.y - width * (artHeight - depth), width)
-            else sprite(art.roof, 229, 121, 1308, 641, p.x - width / 2,
-                p.y - width * (artHeight - depth) - width * 641 / 1308, width)
+            }
         }
     }
 }

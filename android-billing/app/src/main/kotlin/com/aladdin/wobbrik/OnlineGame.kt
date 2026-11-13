@@ -384,7 +384,7 @@ private fun CenteredPane(modifier: Modifier, spacing: androidx.compose.ui.unit.D
 internal fun AcceptedScene(view: AcceptedEngineHost.Snapshot, ready: AuthenticatedRecoveryOwner.State.Ready,
                           host: AcceptedEngineHost, onHome: () -> Unit) {
     val scene = view.scene ?: return
-    val cosmeticArt = rememberCosmeticArt()
+    val cosmeticArt = rememberCosmeticArt() + rememberGameWindowArt()
     val art = SceneArt(ImageBitmap.imageResource(R.drawable.game_floor), ImageBitmap.imageResource(R.drawable.game_crane),
         ImageBitmap.imageResource(R.drawable.inventory_garden), ImageBitmap.imageResource(R.drawable.game_roof), ImageBitmap.imageResource(R.drawable.game_cloud), rememberGameAtlases())
     val motion = remember(ready) { SceneMotion() }

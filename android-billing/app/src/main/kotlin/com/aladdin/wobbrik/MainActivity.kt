@@ -70,6 +70,8 @@ internal fun PracticeGame(
     engine: PracticeEngine,
     renderOnly: Boolean = false,
     previewMotion: SceneMotion? = null,
+    previewParts: Map<String, String> = emptyMap(),
+    previewObserver: ((PracticeState) -> Unit)? = null,
     frameTiming: FrameTiming = remember { FrameTiming() },
 ) {
     // Coordinates are read in the draw phase; HUD only observes discrete changes.
@@ -87,10 +89,12 @@ internal fun PracticeGame(
         ImageBitmap.imageResource(R.drawable.game_floor), ImageBitmap.imageResource(R.drawable.game_crane),
         ImageBitmap.imageResource(R.drawable.inventory_garden), ImageBitmap.imageResource(R.drawable.game_roof),
         ImageBitmap.imageResource(R.drawable.game_cloud), rememberGameAtlases())
+    val previewCosmetics = rememberCosmeticArt() + rememberGameWindowArt()
     val density = LocalDensity.current
     var hudHeight by remember { mutableStateOf(GameTokens.Target + GameTokens.Inset) }
     fun publish() {
         snapshot.value = engine.state
+        if (BuildConfig.DEBUG) previewObserver?.invoke(engine.state)
         count = engine.state.floors.size
         best = max(best, count)
         finished = engine.state.phase == Phase.FINISHED
@@ -162,7 +166,7 @@ internal fun PracticeGame(
                     interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }) {
                     if (engine.drop()) learned = true
                     publish()
-                }) { motionFrame; drawGameScene(snapshot.value, art, motion) }
+                }) { motionFrame; drawGameScene(snapshot.value, art, motion, previewCosmetics, previewParts) }
             Row(Modifier.fillMaxWidth().safeDrawingPadding()
                 .onSizeChanged { hudHeight = with(density) { it.height.toDp() } }.padding(GameTokens.Inset),
                 horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Top) {
