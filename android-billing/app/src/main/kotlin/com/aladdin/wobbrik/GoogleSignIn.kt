@@ -10,14 +10,10 @@ import androidx.credentials.exceptions.NoCredentialException
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.firebase.auth.AuthCredential
-import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.auth.GoogleAuthProvider
 
-/**
- * Obtains a Google ID token for linking the current anonymous Firebase user in place.
- * Never signs in over the guest; collision must not adopt another wallet UID.
- */
-internal object GoogleGuestLink {
+/** Obtains the Google credential for the required Firebase sign-in. */
+internal object GoogleSignIn {
     fun serverClientId(context: Context): String {
         BuildConfig.GOOGLE_WEB_CLIENT_ID.trim().takeIf { it.isNotEmpty() }?.let { return it }
         val id = context.resources.getIdentifier("default_web_client_id", "string", context.packageName)
@@ -46,8 +42,6 @@ internal object GoogleGuestLink {
     fun userMessage(failure: Throwable): String? = when (failure) {
         is GetCredentialCancellationException -> null
         is NoCredentialException -> "Cihazda Google hesabı tapılmadı"
-        is FirebaseAuthUserCollisionException ->
-            "Bu Google hesabı artıq başqa oyun hesabına bağlıdır"
-        else -> failure.message?.takeIf { it.isNotBlank() } ?: "Google bağlantısı alınmadı"
+        else -> "Google ilə giriş alınmadı. Yenidən cəhd et."
     }
 }

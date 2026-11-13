@@ -38,7 +38,9 @@ class AccountPreviewActivity : ComponentActivity() {
                 val journalBlocked = intent.getBooleanExtra("journalBlocked", false)
                 var previewPage by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(intent.getStringExtra("page") ?: "home") }
                 val page = previewPage
-                if (page == "game" || page == "pause") {
+                if (page == "signin") {
+                    GoogleEntryScreen(false, intent.getStringExtra("status"), true, {})
+                } else if (page == "game" || page == "pause") {
                     val gameReady = ready.copy(snapshot = ready.snapshot.copy(attempt = ServerAttempt("fixture", true, 0, null)))
                     val host = androidx.compose.runtime.remember {
                         AcceptedEngineHost().also { it.onRecoveryChanged(gameReady); it.onForeground() }
@@ -46,7 +48,7 @@ class AccountPreviewActivity : ComponentActivity() {
                     val view = host.snapshot()
                     AcceptedScene(view.copy(scene = view.scene?.copy(paused = page == "pause")), gameReady, host, {})
                 } else AccountScreen(page, if (journalBlocked || intent.getBooleanExtra("unavailable", false)) null else previewReady,
-                    WobbrikApplication.AccountState.Session(true), if (journalBlocked) JournalRecoveryCopy.Title else intent.getStringExtra("status"), { previewPage = it }, {},
+                    if (journalBlocked) JournalRecoveryCopy.Title else intent.getStringExtra("status"), { previewPage = it }, {},
                     if (journalBlocked || intent.getBooleanExtra("unavailable", false)) null else ({}), false, journalBlocked = journalBlocked,
                     cached = if (intent.getBooleanExtra("cached", false)) previewReady.snapshot else null)
             }
