@@ -11,3 +11,11 @@ From `android-billing` with Java21:
 6 host tests: overview/focus at 360×640 font1/2 and 390×844 font1; empty, error, Home city navigation. 9 PNGs use explicitly synthetic geometry and ownership fixture, never a shipped demo adapter. Viewport/crop source pixels are production code. Contact and comparison sheets are QA composites, not app renders. Full design acceptance, terrain/decor/liveness, real auth/backend runtime, actual insets and TalkBack are not certified here. The fixture output path is workspace-absolute; adjust on another host.
 
 Terrain/decor continuation: `CityTerrainRenderTest` adds 9 tests for production terrain union/materials, decor catalog/road turns, empty terrain, portrait font scaling and focus/return. Its screenshots live in `../../city-terrain-visual/`. Run with the same init script and `--tests '*CityTerrainRenderTest' --tests '*CityTerrainGeometryTest'`; details/limitations: `../../2026-11-13-phase4-city-terrain-decor.md`.
+
+City chrome continuation (`8b4a6a4` base): current harness writes under
+`../../city-chrome-visual/{city-scene-visual,city-terrain-visual}/` to preserve older evidence.
+`CityRenderTest` now has 9 tests, adding 320×568dp at font2, loading and navigation/view callbacks.
+It measures actual inventory label line bounds against its laid-out width (rather than
+`hasVisualOverflow`, which flags the wider no-wrap paragraph even for fitting text).
+Run the same command with both `--tests '*CityRenderTest' --tests '*CityTerrainRenderTest'`
+for 18 host tests. Review: `../../2026-11-13-phase4-city-chrome.md`.

@@ -40,8 +40,11 @@ class CityRenderTest {
    }
   }
   compose.waitForIdle()
-  compose.onNodeWithText("Ana ekran").assertIsDisplayed()
+  compose.onNodeWithContentDescription("Ana ekran").assertIsDisplayed()
   compose.onNodeWithText("İnventar").assertIsDisplayed()
+  val layouts = mutableListOf<androidx.compose.ui.text.TextLayoutResult>()
+  compose.onNodeWithText("İnventar", useUnmergedTree = true).performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.GetTextLayoutResult) { it(layouts) }
+  org.junit.Assert.assertTrue("Inventory label must fit: " + layouts.map { "${it.size} right=${it.getLineRight(0)}" }, layouts.isNotEmpty() && layouts.all { layout -> (0 until layout.lineCount).all { line -> layout.getLineRight(line) <= layout.size.width + 1 && layout.getLineLeft(line) >= -1 } })
   capture(name)
   if (data != null && data.buildings.isNotEmpty()) {
    val actions = compose.onNodeWithContentDescription("Bina b1:", substring = true)
@@ -53,7 +56,7 @@ class CityRenderTest {
   }
  }
  private fun capture(name: String) {
-  val file=File("/Users/mac/My Workspace/Wobbrik/docs/reviews/city-scene-visual/$name.png")
+  val file=File("/Users/mac/My Workspace/Wobbrik/docs/reviews/city-chrome-visual/city-scene-visual/$name.png")
   file.parentFile!!.mkdirs()
   compose.runOnUiThread {
    val view=compose.activity.window.decorView
@@ -72,6 +75,21 @@ class CityRenderTest {
  @Test fun small()=render(1f,"city-360-font1")
  @Test fun largeFont()=render(2f,"city-360-font2")
  @Test @Config(qualifiers="w390dp-h844dp-xxhdpi") fun normal()=render(1f,"city-390-font1")
+ @Test @Config(qualifiers="w320dp-h568dp-xxhdpi") fun narrowLargeFont()=render(2f,"city-320-font2")
+ @Test fun navigationAndView() {
+  var home = 0; var inventory = 0
+  compose.setContent { CityContent(scene,false,{}, { home++ }, { inventory++ }) }
+  compose.onNodeWithText("Bazar").assertIsNotEnabled()
+  compose.onNodeWithText("İnventar").performClick()
+  compose.onNodeWithContentDescription("Ana ekran").performClick()
+  org.junit.Assert.assertEquals(1,home)
+  org.junit.Assert.assertEquals(1,inventory)
+  compose.onNodeWithText("Bax").performClick()
+  compose.onNodeWithText("Bina görünüşü").assertIsDisplayed()
+  compose.onNodeWithText("Geri").performClick()
+  compose.onNodeWithText("Binaya bax").assertIsDisplayed()
+ }
+ @Test fun loading()=render(2f,"city-loading",null)
  @Test fun empty()=render(1f,"city-empty",scene.copy(buildings=emptyList()))
  @Test fun error()=render(2f,"city-error",null,true)
 }

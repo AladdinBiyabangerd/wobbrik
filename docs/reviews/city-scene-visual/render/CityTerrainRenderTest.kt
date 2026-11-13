@@ -42,12 +42,12 @@ class CityTerrainRenderTest {
    CompositionLocalProvider(LocalDensity provides Density(density.density,font)) { CityContent(data,false,{}, {}, {}) }
   }
   compose.waitForIdle()
-  compose.onNodeWithText("Ana ekran").assertIsDisplayed()
+  compose.onNodeWithContentDescription("Ana ekran").assertIsDisplayed()
   compose.onNodeWithText("İnventar").assertIsDisplayed()
   capture(name)
  }
  private fun capture(name:String) {
-  val file=File("/Users/mac/My Workspace/Wobbrik/docs/reviews/city-terrain-visual/$name.png")
+  val file=File("/Users/mac/My Workspace/Wobbrik/docs/reviews/city-chrome-visual/city-terrain-visual/$name.png")
   file.parentFile!!.mkdirs()
   compose.runOnUiThread {
    val v=compose.activity.window.decorView
@@ -62,10 +62,10 @@ class CityTerrainRenderTest {
  @Test fun noPlacedDecor()=render(scene.copy(buildings=emptyList(),decorations=emptyList()),1f,"land-only")
  @Test fun focusAndReturn() {
   render(scene,1f,"overview-before-focus")
-  compose.onNodeWithText("Binaya bax").performClick()
+  compose.onNodeWithText("Bax").performClick()
   compose.waitForIdle()
   capture("focus")
-  compose.onAllNodesWithText("Şəhər görünüşü")[1].performClick()
+  compose.onNodeWithText("Geri").performClick()
   compose.waitForIdle()
   capture("returned-overview")
  }

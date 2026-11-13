@@ -14,7 +14,6 @@ import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.font.FontWeight
 import appbackend.wobbrik.game.*
 import kotlinx.coroutines.CancellationException
 
@@ -63,9 +62,7 @@ internal fun CityContent(scene: CityScene?, failed: Boolean, onRetry: () -> Unit
     val chosen = buildings.firstOrNull { it.source.building.id == selected }
     Column(Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(GameTokens.Surface, GameTokens.Background)))
         .safeDrawingPadding().padding(GameTokens.Gap), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-        Text("Şəhərim", color = GameTokens.Text, fontSize = GameTokens.Title, fontWeight = FontWeight.Bold)
-        Text("Şəhər görünüşü", color = GameTokens.Accent, fontSize = GameTokens.Body)
-        if (scene != null) Text("Əhali: ${scene.membership.population}", color = GameTokens.Muted)
+        CityHeader(scene?.membership?.population?.toString(), onHome)
         BoxWithConstraints(Modifier.weight(1f).fillMaxWidth()) {
             val visible = if (focused && chosen != null) listOf(chosen) else buildings
             val sceneBounds = if (focused && chosen != null) emptyList() else
@@ -124,16 +121,13 @@ internal fun CityContent(scene: CityScene?, failed: Boolean, onRetry: () -> Unit
                 if (unavailableDecor > 0) Text("$unavailableDecor dekorun qrafikası mövcud deyil", color = GameTokens.Muted)
                 val unavailable = scene.buildings.size - buildings.size
                 if (unavailable > 0) Text("$unavailable binanın mövqeyi, həndəsəsi və ya qrafikası mövcud deyil", color = GameTokens.Muted)
-                if (chosen != null) Text("${chosen.source.building.floors} mərtəbə · ${chosen.source.building.residents} sakin", color = GameTokens.Text)
-                if (scene.buildings.isNotEmpty()) HomeButton(label = if (focused) "Şəhər görünüşü" else "Binaya bax", enabled = buildings.isNotEmpty(),
-                    primary = true, compact = true, onClick = {
-                        if (selected == null) selected = buildings.lastOrNull()?.source?.building?.id
-                        focused = !focused
-                    })
             }
         }
-        HomeButton(label = "İnventar", compact = true, onClick = onInventory)
-        HomeButton(label = "Ana ekran", compact = true, onClick = onHome)
+        CityViewPanel(chosen?.source?.building, focused, buildings.isNotEmpty()) {
+            if (selected == null) selected = buildings.lastOrNull()?.source?.building?.id
+            focused = !focused
+        }
+        CityNavigation(onInventory)
     }
 }
 
