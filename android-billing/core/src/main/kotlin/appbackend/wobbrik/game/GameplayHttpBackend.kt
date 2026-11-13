@@ -100,5 +100,5 @@ class UrlConnectionGameplayTransport(origin: String) : GameplayTransport {
 
 /** Keep authenticated GET paths constrained; IDs/cursors cannot escape the game API. */
 internal fun allowedReadPath(path: String): Boolean =
-    Regex("(?:inventory|city)\\?limit=20(?:&cursor=[A-Za-z0-9_-]{1,128})?").matches(path) ||
+    Regex("(?:inventory|city|decorations)\\?limit=20(?:&cursor=[A-Za-z0-9_-]{1,128})?").matches(path) ||
         Regex("buildings/[A-Za-z0-9_-]{1,128}").matches(path)

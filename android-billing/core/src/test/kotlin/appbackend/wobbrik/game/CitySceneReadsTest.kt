@@ -30,6 +30,7 @@ class CitySceneReadsTest {
         val sessions = AccountSessions { "token" }; sessions.onAuthChanged("alice")
         var cityCalls = 0
         val backend = GameplayHttpBackend(sessions, GameplayTransport { path, _, body ->
+            require(allowedReadPath(path)) { "Production transport rejects $path" }
             assertNull(body)
             GameplayResponse(200, when {
                 path.startsWith("city?") -> { cityCalls++; city(entries = member()) }
@@ -40,6 +41,13 @@ class CitySceneReadsTest {
         val result = CitySceneRepository(backend).load(requireNotNull(sessions.current()))
         assertEquals(1, result.buildings.size); assertEquals(1, result.decorations.size)
         assertEquals("d-1", result.decorations.single().copy.id); assertEquals(2, cityCalls)
+    }
+    @Test fun decorationReadPathsAreBoundedIncludingPagination() {
+        assertTrue(allowedReadPath("decorations?limit=20"))
+        assertTrue(allowedReadPath("decorations?limit=20&cursor=d-1"))
+        listOf("decorations", "decorations?limit=100", "decorations?limit=20&uid=other",
+            "decorations?limit=20&cursor=../sync", "decorations?limit=20&cursor=d-1&extra=1",
+            "decorations/buy").forEach { assertFalse(it, allowedReadPath(it)) }
     }
     @Test fun writeDuringDecorationReadDiscardsScene() = runBlocking {
         val sessions = AccountSessions { "token" }; sessions.onAuthChanged("alice")

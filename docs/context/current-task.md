@@ -1,5 +1,13 @@
 # Cari handoff — 13 noyabr 2026
 
+## Son aktiv vahid — şəhər oxu düzəlişi
+- Completed: `ad0a396` bazasından `fix/city-decoration-read`; production transport-un decorations GET yolunu rədd etməsi regression ilə təkrarlandı və düzəldildi. Mobil dizayn dəyişməyib; owner diff/untracked faylları qorunur.
+- Current state / Decisions: Lokal review-da əlavə problem tapılmadı; istifadəçi göstərişi ilə iki core faylı və bu vahidin review/handoff qeydi lokal commit-ə hazırlanır. Backend müqaviləsi dəyişmir. Owner faylları commit-dən kənardır; merge/push/CI yoxdur.
+- Checks performed: düzəlişdən əvvəl iki regression FAIL; sonra CitySceneReadsTest10/10 və Java21/offline core/app unit+APK+lint PASS13s; diff check PASS. Real hesab E2E/runtime/render yoxdur; emulator açılmadı.
+- Remaining work: tarixi screenshot exception logu yoxdur; bu konkret deterministik transport maneəsi aradan qaldırılıb, bütün mümkün server/şəbəkə problemlərinin həlli iddia edilmir. Tam mərhələ4 qəbulu ayrıca açıqdır.
+- Relevant files: `GameplayHttpBackend.kt`, `CitySceneReadsTest.kt`, `docs/reviews/2026-11-13-city-decoration-read-fix.md`; plan yalnız `docs/PLAN.md`.
+- Exact next step: lokal commit nəticəsini bildir; ayrıca göstərişsiz merge/push/CI və yeni feature başlama. Aşağıdakı qeydlər əvvəlki vahidlərin tarixçəsidir.
+
 ## Completed
 - Əvvəlki navigation/default kosmetik/mobil portrait vahidi PR #1 ilə remote main-ə merge edilib; lokal/remote main baza `e97e78c` idi.
 - Main-dən lokal `feat/phase-4` yaradıldı. İlk mobil oxu vahidi: Home inventar → paginated server inventory → bina detalı → city membership oxusu implementasiya edilib.
