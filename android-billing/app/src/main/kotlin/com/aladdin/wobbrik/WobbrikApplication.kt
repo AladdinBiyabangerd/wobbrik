@@ -32,7 +32,8 @@ class WobbrikApplication : Application(), DefaultLifecycleObserver {
         data class Configured(val recovery: AuthenticatedRecoveryOwner, val commands: AcceptedAttemptCommands) : Bootstrap
     }
 
-    val engineHost by lazy { AcceptedEngineHost(AndroidFinishDraftStore(this)) }
+    internal val cosmeticDefaults by lazy { AndroidCosmeticDefaultsStore(this) }
+    val engineHost by lazy { AcceptedEngineHost(AndroidFinishDraftStore(this), cosmeticDefaults) }
 
     lateinit var bootstrap: Bootstrap
         private set

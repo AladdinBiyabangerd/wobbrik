@@ -1,36 +1,34 @@
 # Cari handoff — 13 noyabr 2026
 
 ## Completed
-- Checkpoint fix `92d640d`, branch `fix/end-of-attempt-checkpoint`: uğurlu eniş lokal davam edir; məğlubiyyətdə bir yekun checkpoint, sonra explicit finish. Review: 2026-11-13-end-of-attempt-checkpoint.md.
-- Bunun üzərində ayrıca `fix/navigation-consistency`: finish sonrası köhnə game route-un ikinci home şablonuna düşməsi düzəldildi; eyni kanonik HomeScreen istifadə olunur. Əlavə səhifələr key ilə scroll/local state baxımından ayrıldı.
-- Son açıq qərar tətbiq edildi: aktiv oyunda Android Geri → pauza; təkrar Geri də çıxmır. Menyuya qayıt → home/abandon. Finish picker Geri → home/niyyət qalır.
-- Koddan düymə→ekran PNG xəritələri hazırlandı, açılıb baxıldı: docs/reviews/navigation-consistency/{01-pages,02-game}.png.
+- Checkpoint `92d640d`, navigation `3130cce`, kosmetik qərar `8a718da` üzərində avtomatik finish/default görünüş vahidi tətbiq edildi.
+- Kolleksiya təsdiqli mövcud kosmetik picker-i açır; Təsdiqlə cihazda hesab üzrə daimi default saxlayır, Geri saxlamadan home-a qayıdır.
+- Cəhdin görünüşü ayrıca account/attempt açarı ilə capture edilir; kataloq/unlock fallback var. Default dəyişməsi başlanmış cəhdi dəyişmir.
+- Terminal loss → lazım olsa checkpoint → yeni exact Ready ilə avtomatik finish → canonical home. Sıfır mərtəbədə checkpoint yoxdur. Mövcud durable journal/retry saxlanır.
+- Aktiv Canvas cəhdin divar/pəncərə/giriş/işıq/dam atlaslarını istifadə edir. Yeni layout/asset/token yoxdur.
 
 ## Current state
-- Son kosmetik qərar istifadəçi göstərişi ilə eyni fix/navigation-consistency branch-inə daxil edilib (8a718da); əlavə docs branch-i silinib. Implementasiya yeni chatdə bu fix branch-də davam edəcək; kod implementasiyası hələ yoxdur.
-- Cari branch fix/navigation-consistency əvvəlki fix commit-i üzərindədir; heç biri main-ə merge/push edilməyib.
-- AppBackend və UI vizual layout/asset/token dəyişməyib. Yeni ekran yaradılmayıb. Runtime/Android render unverified; emulator açılmayıb.
+- Branch `fix/navigation-consistency`; main merge/push edilməyib. İstifadəçinin untracked `android-billing/app/release/` faylları saxlanıb.
+- Review: `docs/reviews/2026-11-13-default-cosmetics.md`; naviqasiya PNG/script-ləri yenilənib, Android screenshot deyil.
 
 ## Decisions
-- **Son qərar:** oyun bitəndə kosmetik picker açılmır; avtomatik finish → home olmalıdır. Kosmetik seçim oyun xaricində istənilən vaxt dəyişdirilən hesab üzrə standart seçimdir; növbəti oyun həmin görünüşlə açılmalıdır. Cari kod bunu hələ etmir.
-- docs/PLAN.md yeganə plan; §3 son Geri→pauza qərarını qeyd edir. Əvvəlki Geri→çıxış bununla əvəz olunub.
-- Əvvəl Android, backend dəyişiklikləri ayrıca. Mövcud vizuallar qalır, əlavə variantlar iki ilə məhdud; konkret asset seçimi sonrakı vahiddə.
-- CI yalnız ayrıca tələb ilə main-də; merge üçün istifadəçi təsdiqi lazımdır. Canlı yoxlama gate deyil.
+- İstifadəçi bu chatdə mövcud finish-cosmetics-v1 dizaynını Kolleksiyadan daimi seçim kimi açmağı təsdiqləyib.
+- AppBackend dəyişdirilmir; emulator açılmır; CI yalnız ayrıca tələb ilə main-də. Canlı yoxlama gate deyil.
+- Yeganə plan `docs/PLAN.md`; mərhələ 4-ə keçilmir. Merge istifadəçi təsdiqi tələb edir.
 
 ## Remaining work
-- Vizual borc: kolleksiya/nailiyyətlər ümumi hesab şablonudur, ayrıca tam feature ekranları deyil. Şəhər/İnventar/Bazar deaktivdir. Online pauzada Yenidən başla çatışmır. Bunlar hazır göstərilmir.
-- Mövcud dizaynın konkret təsdiqi olmadan UI redesign edilməməlidir. Mərhələ 4 başlanmayıb.
+- Android runtime/render yoxlanmayıb; atlas anchor/dizayn uyğunluğu üçün vizual PASS yoxdur. Bütün telefon/planşet/orientasiya/font/inset/accessibility render halları yoxlanmamışdır.
+- Default cihazda account-scoped saxlanır; cihazlararası sync yoxdur.
+- Nailiyyətlər ümumi hesab şablonudur; Şəhər/İnventar/Bazar deaktivdir; online pauzada Yenidən başla əvvəlki borcdur.
 
 ## Relevant files
-- docs/PLAN.md; docs/reviews/2026-11-13-navigation-consistency.md və navigation-consistency/ PNG/script.
-- app OnlineGame.kt, GameNavigation.kt, GameNavigationTest.kt; əvvəlki fix engine AcceptedEngineHost.kt.
+- docs/PLAN.md §3; docs/reviews/2026-11-13-default-cosmetics.md.
+- engine AcceptedEngineHost.kt, CosmeticDefaultsStore.kt, AcceptedAttemptCommandsTest.kt.
+- app AndroidCosmeticDefaultsStore.kt, WobbrikApplication.kt, OnlineGame.kt, FinishCosmeticScreen.kt, GameScene.kt.
 
 ## Checks performed
-- Son fokuslu app 3 unit test/build/lint PASS (32s); engine 64/core 70 test PASS (up-to-date). git diff --check PASS. PNG-lər vizual yoxlanıb; Android render deyil.
-- Backend dəyişmədiyindən backend test/deploy yoxdur. Emulator/ADB/canlı yoxlama və CI yoxdur.
+- Fokuslu assembleDebug, engine 67 test, app unit test, lintDebug PASS; son exact-Ready dəyişiklikdən sonra yenilənib (app 3 test).
+- git diff --check PASS. Runtime/render, backend tests, CI, emulator/ADB yoxdur.
 
 ## Exact next step
-- Əvvəl docs/PLAN.md §3 son kosmetik qərarını implementasiya et: avtomatik finish → home; ayrıca persist edilmiş account-scoped default görünüş və həmin seçimin oyunun real qrafikasına tətbiqi. Mövcud təsdiqli docs/design/finish-cosmetics-v1/phone-tablet.png və FinishCosmeticScreen.kt əsasdır; yeni redesign yoxdur.
-- Engine AcceptedEngineHost hazırda choosingFinish/selectPart/confirmFinish istifadə edir; FinishDraftStore attempt-scoped niyyətdir, hesab üzrə default storage deyil. AndroidFinishDraftStore və FinishCosmetics.selection/valid mövcuddur. Aktiv oyun SceneArt hazırda sabit game_floor rasterindən istifadə edir; default-u yalnız finish metadata-sına yazıb tam tətbiq sayma.
-- Terminal checkpointdən sonrakı yeni Ready üzərində avtomatik finish; sıfır mərtəbə, retry, process death, account/login epoch, locked seçim fallback və başlanmış cəhdin seçiminin sabitliyi fokuslu yoxlanmalıdır. AppBackend dəyişdirilmir, emulator açılmır, CI ayrıca tələb olmadan işləmir.
-- Mövcud 01/02 PNG-lər 3130cce naviqasiya kodunu göstərir; yeni kosmetik qərarın hədəf xəritəsi deyil. Kod dəyişəndə yenilə və runtime/render yoxlamasını dürüst qeyd et. Mərhələ 4-ə özbaşına keçmə; main merge yalnız təsdiqdən sonra.
+- Vahidin diff/commit-ini istifadəçiyə review üçün təqdim et. Merge yalnız açıq təsdiqdən sonra; CI ayrıca göstərişsiz işləmir. Növbəti məhsul vahidinə özbaşına başlama.

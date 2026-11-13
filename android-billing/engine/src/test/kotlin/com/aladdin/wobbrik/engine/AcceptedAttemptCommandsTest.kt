@@ -32,7 +32,19 @@ class AcceptedAttemptCommandsTest {
             override fun read(uid: String, attemptId: String) = drafts[uid to attemptId]
             override fun write(uid: String, attemptId: String, draft: FinishDraft) { check(!draftFailure); drafts[uid to attemptId] = draft }
         }
-        val host = AcceptedEngineHost(store)
+        val savedDefaults = mutableMapOf<String, Map<String, String>>()
+        val captured = mutableMapOf<Pair<String, String>, Map<String, String>>()
+        var defaultsFailure = false
+        val defaults = object : CosmeticDefaultsStore {
+            override fun read(uid: String) = savedDefaults[uid].orEmpty()
+            override fun write(uid: String, parts: Map<String, String>) { savedDefaults[uid] = parts.toMap() }
+            override fun attempt(uid: String, attemptId: String) = captured[uid to attemptId]
+            override fun capture(uid: String, attemptId: String, parts: Map<String, String>) {
+                check(!defaultsFailure)
+                captured[uid to attemptId] = parts.toMap()
+            }
+        }
+        val host = AcceptedEngineHost(store, defaults)
         fun journal() = DiskAttemptJournal { key -> object : JournalFile {
             val file = File(root, key)
             override fun read(): ByteArray? = if (file.exists()) file.readBytes() else null
@@ -47,7 +59,8 @@ class AcceptedAttemptCommandsTest {
             override suspend fun catalog(session: BillingSession) = RecoveryCatalog("wobbrik-v1", "wobbrik-structural-v1",
                 FinishCosmetics.categories.flatMap { category -> listOf(
                     CatalogItem("base_6_$category", category, category, "free", 0, null, null),
-                    CatalogItem("paid_$category", category, category, "paid", 0, null, null)) }, emptyList())
+                    CatalogItem("paid_$category", category, category, "paid", 0, null, null),
+                    CatalogItem("base_1_$category", category, category, "free", 0, null, null)) }, emptyList())
             override suspend fun sync(session: BillingSession): GameSnapshot {
                 check(!syncFailure) { "sync offline" }
                 return records.getOrPut(session.uid) { GameSnapshot("wobbrik-v1", 0, 0, 0, null) }
@@ -112,6 +125,63 @@ class AcceptedAttemptCommandsTest {
         }
         override fun close() { scope.cancel(); root.deleteRecursively() }
     }
+    @Test fun defaultAppearanceIsAccountScopedFrozenAcrossRecoveryAndUsedByNextAttempt() = runBlocking {
+        Fixture().use { f ->
+            f.host.bind(f.commands)
+            f.defaults.write("alice", parts + ("wall" to "paid_wall")) // locked -> free fallback
+            f.login(); yield(); f.commands.start(f.ready()); yield()
+            assertEquals(parts, f.host.snapshot().finishParts)
+            val first = f.ready()
+            f.defaults.write("alice", parts + ("wall" to "base_1_wall"))
+            val fresh = AcceptedEngineHost(f.store, f.defaults)
+            fresh.onRecoveryChanged(first)
+            assertEquals(parts, fresh.snapshot().finishParts)
+            f.commands.abandon(first); yield()
+            f.commands.start(f.ready()); yield()
+            assertEquals("base_1_wall", f.host.snapshot().finishParts["wall"])
+            f.login("bob"); yield(); f.commands.start(f.ready()); yield()
+            assertEquals(parts, f.host.snapshot().finishParts)
+            assertEquals(3, f.captured.size)
+            f.host.onFrame(1, first) // stale account capability cannot send anything
+            assertEquals(3, routes(f).count { it == AttemptCommand.Route.START })
+            assertFalse(routes(f).contains(AttemptCommand.Route.FINISH))
+        }
+    }
+
+    @Test fun terminalAutoFinishRetriesOnNewReadyAndNeverDuplicatesSameCapability() = runBlocking {
+        Fixture().use { f ->
+            f.host.bind(f.commands)
+            f.login(); yield(); f.commands.start(f.ready()); yield()
+            f.commands.checkpoint(f.ready(), landed(true)); yield()
+            val old = f.ready()
+            f.syncFailure = true
+            f.host.onFrame(1, old); yield()
+            assertTrue(f.owner.state.value is AuthenticatedRecoveryOwner.State.Error)
+            f.host.onFrame(2, old)
+            f.syncFailure = false
+            f.owner.onForeground(); yield()
+            f.host.onFrame(3, f.ready()); yield()
+            assertNull(f.ready().snapshot.attempt)
+            assertEquals(1, f.sent.map { it.second }.filter { it.route == AttemptCommand.Route.FINISH }.distinct().size)
+        }
+    }
+
+    @Test fun failedAppearanceCaptureBlocksGameplayUntilDurableRecovery() = runBlocking {
+        Fixture().use { f ->
+            f.host.bind(f.commands)
+            f.login(); yield()
+            f.defaultsFailure = true
+            f.commands.start(f.ready()); yield()
+            f.host.onForeground()
+            assertTrue(f.host.snapshot().finishStorageError)
+            assertFalse(f.host.resume(f.ready()))
+            f.defaultsFailure = false
+            f.host.onRecoveryChanged(f.ready())
+            assertTrue(f.host.resume(f.ready()))
+            assertEquals(parts, f.host.snapshot().finishParts)
+        }
+    }
+
     private val parts = setOf("wall", "window", "entrance", "roof", "lighting").associateWith { "base_6_$it" }
     private fun landed(terminal: Boolean = false): EngineCheckpoint = PracticeEngine().checkpoint().let {
         it.copy(state = it.state.copy(floors = listOf(Floor(0.0, 0.0)), perfectLandings = 1,
@@ -206,13 +276,13 @@ class AcceptedAttemptCommandsTest {
             assertEquals(1L, f.ready().snapshot.attempt!!.sequence)
             assertEquals(terminal.floors.size.toLong(), f.ready().snapshot.attempt!!.floors)
             assertFalse(f.host.snapshot().inputEnabled)
-            assertTrue(f.host.confirmFinish(f.ready())); yield()
+            f.host.onFrame(time + 16_666_666L, f.ready()); yield()
             assertEquals(AttemptCommand.Route.FINISH, routes(f).last())
             assertNull(f.ready().snapshot.attempt)
         }
     }
 
-    @Test fun hostZeroFloorLossSkipsCheckpointAndOnlyExplicitConfirmFinishes() = runBlocking {
+    @Test fun hostZeroFloorLossAutomaticallyFinishesWithoutCheckpoint() = runBlocking {
         Fixture().use { f ->
             f.host.bind(f.commands)
             f.login(); yield(); f.commands.start(f.ready()); yield()
@@ -221,18 +291,15 @@ class AcceptedAttemptCommandsTest {
             var time = 1L
             f.host.onFrame(time, ready)
             repeat(600) {
-                val scene = f.host.snapshot().scene!!
-                if (scene.phase == Phase.SWINGING && kotlin.math.abs(scene.craneX) >= PracticeRulesV1.FLOOR_WIDTH) {
+                val scene = f.host.snapshot().scene
+                if (scene?.phase == Phase.SWINGING && kotlin.math.abs(scene.craneX) >= PracticeRulesV1.FLOOR_WIDTH) {
                     f.host.drop(ready)
                 }
                 time += 16_666_666L
                 f.host.onFrame(time, ready)
             }
-            assertTrue(f.host.snapshot().choosingFinish)
-            assertFalse(f.host.snapshot().waiting)
-            assertTrue(f.host.snapshot().scene!!.floors.isEmpty())
-            assertEquals(listOf(AttemptCommand.Route.START), routes(f))
-            assertTrue(f.host.confirmFinish(ready)); yield()
+            yield()
+            assertNull(f.ready().snapshot.attempt)
             assertEquals(listOf(AttemptCommand.Route.START, AttemptCommand.Route.FINISH), routes(f))
             assertEquals(0L, f.ready().snapshot.coins)
         }
@@ -250,8 +317,8 @@ class AcceptedAttemptCommandsTest {
             freshHost.onRecoveryChanged(f.ready())
             assertFalse(freshHost.resume())
             assertTrue(freshHost.snapshot().choosingFinish)
-            assertEquals(2, f.sent.size) // recovery must never auto-finish
-            assertTrue(freshHost.confirmFinish(f.ready())); yield()
+            assertEquals(2, f.sent.size) // Dispatch waits for the exact Ready frame.
+            freshHost.onFrame(1L, f.ready()); yield()
             assertFalse(freshHost.confirmFinish(f.ready()))
             assertNull(f.ready().snapshot.attempt)
             assertEquals(listOf(AttemptCommand.Route.START, AttemptCommand.Route.CHECKPOINT, AttemptCommand.Route.FINISH),

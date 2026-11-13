@@ -4,7 +4,7 @@ import appbackend.wobbrik.game.AuthenticatedRecoveryOwner
 import appbackend.wobbrik.game.FinishCosmetics
 
 /** Application-owned online physics boundary. Runs local physics from an accepted start; dispatch always occurs outside its monitor. */
-class AcceptedEngineHost(private val drafts: FinishDraftStore? = null) {
+class AcceptedEngineHost(private val drafts: FinishDraftStore? = null, private val defaults: CosmeticDefaultsStore? = null) {
     data class Snapshot(
         val restore: AcceptedAttemptRestore.Result = AcceptedAttemptRestore.Result.Unavailable,
         val foreground: Boolean = false,
@@ -18,9 +18,10 @@ class AcceptedEngineHost(private val drafts: FinishDraftStore? = null) {
         /** The player entered this attempt in this process; app-scoped, so it survives rotation but not process death. */
         val playing: Boolean = false,
     ) {
-        val inputEnabled: Boolean get() = foreground && !waiting && scene?.paused == false && scene.phase != Phase.FINISHED
+        val inputEnabled: Boolean get() = foreground && !waiting && !finishStorageError && scene?.paused == false && scene.phase != Phase.FINISHED
     }
 
+    private var finishTriedFor: AuthenticatedRecoveryOwner.State.Ready? = null
     private var engine: PracticeEngine? = null
     private var ready: AuthenticatedRecoveryOwner.State.Ready? = null
     private var commands: AcceptedAttemptCommands? = null
@@ -47,16 +48,33 @@ class AcceptedEngineHost(private val drafts: FinishDraftStore? = null) {
         if (restored is AcceptedAttemptRestore.Result.Paused) lastOpen = ready?.accountKey to restored.attemptId
         if (restored is AcceptedAttemptRestore.Result.Paused) {
             val expected = ready ?: return
+            val uid = expected.accountKey
+            try {
+                val parts = if (uid != null && defaults != null) {
+                    defaults.attempt(uid, restored.attemptId) ?: expected.catalog?.let {
+                        FinishCosmetics.selection(it, expected.snapshot, defaults.read(uid)).also { selected ->
+                            defaults.capture(uid, restored.attemptId, selected)
+                        }
+                    }.orEmpty()
+                } else expected.catalog?.let { FinishCosmetics.selection(it, expected.snapshot, emptyMap()) }.orEmpty()
+                current = current.copy(finishParts = expected.catalog?.let { FinishCosmetics.selection(it, expected.snapshot, parts) }.orEmpty())
+            } catch (_: Exception) {
+                current = current.copy(finishStorageError = true)
+            }
             val draft = expected.accountKey?.let { drafts?.read(it, restored.attemptId) }
             // A local miss is reusable only against exactly the accepted progress it ended.
             val terminal = draft?.terminal?.takeIf { sameProgress(it, restored.checkpoint) }
                 ?: restored.checkpoint.takeIf { restored.terminal }
             if (terminal != null) {
                 engine = PracticeEngine().also { it.restore(terminal); it.pause() }
-                val parts = expected.catalog?.let { FinishCosmetics.selection(it, expected.snapshot, draft?.parts.orEmpty()) }.orEmpty()
+                val parts = expected.catalog?.let { FinishCosmetics.selection(it, expected.snapshot, draft?.parts?.takeIf { it.isNotEmpty() } ?: current.finishParts) }.orEmpty()
                 current = current.copy(scene = engine?.state, choosingFinish = true, finishParts = parts)
             }
         }
+    }
+
+    @Synchronized fun retryAppearance(expected: AuthenticatedRecoveryOwner.State.Ready) {
+        if (ready === expected && current.finishStorageError && !current.choosingFinish) onRecoveryChanged(expected)
     }
 
     /** Foreground never implicitly resumes an accepted attempt. */
@@ -84,6 +102,14 @@ class AcceptedEngineHost(private val drafts: FinishDraftStore? = null) {
      */
     fun onFrame(frameNanos: Long, expected: AuthenticatedRecoveryOwner.State.Ready? = null) {
         require(frameNanos >= 0)
+        val finish = synchronized(this) {
+            if (expected != null && expected === ready && current.choosingFinish && !current.waiting &&
+                !current.finishStorageError && finishTriedFor !== expected) {
+                finishTriedFor = expected
+                true
+            } else false
+        }
+        if (finish) { retryTerminal(expected!!); return }
         val dispatch = synchronized(this) {
             if (expected == null || expected !== ready || !current.inputEnabled) return
             val previous = current.previousFrameNanos
@@ -105,9 +131,9 @@ class AcceptedEngineHost(private val drafts: FinishDraftStore? = null) {
                     current = current.copy(scene = live.state, waiting = true, previousFrameNanos = null)
                     val expectedReady = ready ?: return
                     val proposal = live.checkpoint()
-                    saveDraft(expectedReady, FinishDraft(proposal))
+                    saveDraft(expectedReady, FinishDraft(proposal, current.finishParts))
                     current = current.copy(choosingFinish = true, finishParts = expectedReady.catalog?.let {
-                        FinishCosmetics.selection(it, expectedReady.snapshot, emptyMap())
+                        FinishCosmetics.selection(it, expectedReady.snapshot, current.finishParts)
                     }.orEmpty())
                     return@synchronized Triple(expectedReady, proposal, commands ?: return)
                 }
@@ -117,7 +143,7 @@ class AcceptedEngineHost(private val drafts: FinishDraftStore? = null) {
         }
         dispatch?.let { (expected, proposal, sender) ->
             val accepted = expected.snapshot.attempt ?: return
-            if (proposal.state.floors.size.toLong() > accepted.floors) sender.checkpoint(expected, proposal)
+            if (proposal.state.floors.size.toLong() > accepted.floors && !snapshot().finishStorageError) sender.checkpoint(expected, proposal)
             else synchronized(this) {
                 if (ready === expected) current = current.copy(waiting = false)
             }
@@ -125,7 +151,7 @@ class AcceptedEngineHost(private val drafts: FinishDraftStore? = null) {
     }
 
     @Synchronized fun resume(expected: AuthenticatedRecoveryOwner.State.Ready? = null): Boolean {
-        if (expected == null || expected !== ready || commands == null || !current.foreground || current.waiting) return false
+        if (expected == null || expected !== ready || commands == null || !current.foreground || current.waiting || current.finishStorageError) return false
         val restored = current.restore as? AcceptedAttemptRestore.Result.Paused ?: return false
         if (restored.terminal || current.choosingFinish) return false
         val live = engine ?: return false
@@ -137,6 +163,24 @@ class AcceptedEngineHost(private val drafts: FinishDraftStore? = null) {
     @Synchronized fun drop(expected: AuthenticatedRecoveryOwner.State.Ready? = null): Boolean {
         if (expected == null || expected !== ready || !current.inputEnabled) return false
         return (engine?.drop() == true).also { current = current.copy(scene = engine?.state) }
+    }
+
+    /** Retry durable terminal intent, checkpointing before finish when progress is still local. */
+    fun retryTerminal(expected: AuthenticatedRecoveryOwner.State.Ready): Boolean {
+        val dispatch = synchronized(this) {
+            if (ready !== expected || !current.choosingFinish || current.waiting) return false
+            val terminal = engine?.checkpoint() ?: return false
+            if (!saveDraft(expected, FinishDraft(terminal, current.finishParts))) return false
+            val sender = commands ?: return false
+            if (terminal.state.floors.size.toLong() > (expected.snapshot.attempt?.floors ?: return false)) {
+                current = current.copy(waiting = true)
+                sender to terminal
+            } else null
+        }
+        if (dispatch == null) return confirmFinish(expected)
+        val sent = dispatch.first.checkpoint(expected, dispatch.second)
+        if (!sent) synchronized(this) { if (ready === expected) current = current.copy(waiting = false) }
+        return sent
     }
 
     @Synchronized fun selectPart(expected: AuthenticatedRecoveryOwner.State.Ready, category: String, id: String): Boolean {

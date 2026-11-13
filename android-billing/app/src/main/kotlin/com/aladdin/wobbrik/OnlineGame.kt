@@ -31,6 +31,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import appbackend.wobbrik.game.UnreadableAttemptJournal
 import appbackend.wobbrik.game.GameSnapshot
+import appbackend.wobbrik.game.FinishCosmetics
 import appbackend.wobbrik.game.AuthenticatedRecoveryOwner
 import com.aladdin.wobbrik.engine.*
 import java.math.BigInteger
@@ -114,10 +115,27 @@ private fun AuthenticatedGame(app: WobbrikApplication) {
         }
     }
     if (page == "game" && hostState.playing && ready != null && hostState.scene != null) {
-        if (hostState.choosingFinish) FinishCosmeticScreen(hostState, ready,
-            onSelect = { category, id -> host.selectPart(ready, category, id) },
-            onConfirm = { host.confirmFinish(ready) }, onBack = { page = "home" })
-        else AcceptedScene(hostState, ready, host, onHome = { page = "home" })
+        AcceptedScene(hostState, ready, host, onHome = { page = "home" })
+        return
+    }
+    if (page == "collection" && ready != null) {
+        val uid = ready.accountKey
+        var selection by remember(ready) { mutableStateOf(ready.catalog?.let {
+            FinishCosmetics.selection(it, ready.snapshot, uid?.let(app.cosmeticDefaults::read).orEmpty())
+        }.orEmpty()) }
+        var storageError by remember(ready) { mutableStateOf(false) }
+        FinishCosmeticScreen(AcceptedEngineHost.Snapshot(finishParts = selection, finishStorageError = storageError), ready,
+            onSelect = { category, id ->
+                if (ready.catalog?.items?.any { it.id == id && it.category == category && FinishCosmetics.available(it, ready.snapshot) } == true)
+                    selection = selection + (category to id)
+            }, onConfirm = {
+                if (configured?.recovery?.state?.value === ready && uid != null && ready.catalog?.let {
+                    FinishCosmetics.valid(it, ready.snapshot, selection)
+                } == true) {
+                    storageError = runCatching { app.cosmeticDefaults.write(uid, selection) }.isFailure
+                    if (!storageError) page = "home"
+                }
+            }, onBack = { page = "home" })
         return
     }
     val journalBlocked = (state as? AuthenticatedRecoveryOwner.State.Error)?.cause is UnreadableAttemptJournal
@@ -333,6 +351,7 @@ private fun CenteredPane(modifier: Modifier, spacing: androidx.compose.ui.unit.D
 internal fun AcceptedScene(view: AcceptedEngineHost.Snapshot, ready: AuthenticatedRecoveryOwner.State.Ready,
                           host: AcceptedEngineHost, onHome: () -> Unit) {
     val scene = view.scene ?: return
+    val cosmeticArt = rememberCosmeticArt()
     val art = SceneArt(ImageBitmap.imageResource(R.drawable.game_floor), ImageBitmap.imageResource(R.drawable.game_crane),
         ImageBitmap.imageResource(R.drawable.game_island), ImageBitmap.imageResource(R.drawable.game_roof), ImageBitmap.imageResource(R.drawable.game_cloud))
     val motion = remember(ready) { SceneMotion() }
@@ -343,7 +362,7 @@ internal fun AcceptedScene(view: AcceptedEngineHost.Snapshot, ready: Authenticat
     BoxWithConstraints(Modifier.fillMaxSize().background(GameTokens.Background).safeDrawingPadding()) {
         val sceneTop = if (maxWidth > maxHeight) GameTokens.Hairline * 0 else hudHeight
         Canvas(Modifier.fillMaxSize().padding(top = sceneTop, bottom = GameTokens.Target).clipToBounds().clickable(enabled = view.inputEnabled) { host.drop(ready) }) {
-            drawGameScene(scene, art, motion)
+            drawGameScene(scene, art, motion, cosmeticArt, view.finishParts)
         }
         Row(Modifier.fillMaxWidth().onSizeChanged { hudHeight = with(density) { it.height.toDp() } }.padding(GameTokens.Inset), horizontalArrangement = Arrangement.SpaceBetween) {
             Text("${scene.floors.size} mərtəbə", color = GameTokens.Text, fontSize = GameTokens.Title, fontWeight = FontWeight.Bold)
@@ -357,8 +376,13 @@ internal fun AcceptedScene(view: AcceptedEngineHost.Snapshot, ready: Authenticat
         if (scene.paused || view.waiting) Column(Modifier.align(Alignment.Center).padding(GameTokens.Inset)
             .widthIn(max = GameTokens.PanelWidth).background(GameTokens.Surface, RoundedCornerShape(GameTokens.CardRadius))
             .verticalScroll(rememberScrollState()).padding(GameTokens.Inset), verticalArrangement = Arrangement.spacedBy(GameTokens.Gap)) {
-            Text(if (view.waiting) "Cəhd saxlanılır…" else "Fasilə", color = GameTokens.Text, fontSize = GameTokens.Title, fontWeight = FontWeight.Bold)
-            OnlineAction("Davam et", true, enabled = !view.waiting && (view.restore as? AcceptedAttemptRestore.Result.Paused)?.terminal == false) { host.resume(ready) }
+            Text(if (view.waiting || view.choosingFinish) "Cəhd saxlanılır…" else "Fasilə", color = GameTokens.Text, fontSize = GameTokens.Title, fontWeight = FontWeight.Bold)
+            OnlineAction(if (view.choosingFinish || view.finishStorageError) "Yenidən cəhd et" else "Davam et", true,
+                enabled = !view.waiting) {
+                if (view.choosingFinish) host.retryTerminal(ready)
+                else if (view.finishStorageError) host.retryAppearance(ready)
+                else host.resume(ready)
+            }
             OnlineAction("Menyuya qayıt", false) { host.pause(); onHome() }
         }
     }
