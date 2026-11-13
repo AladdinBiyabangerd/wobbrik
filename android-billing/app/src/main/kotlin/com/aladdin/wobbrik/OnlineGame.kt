@@ -75,16 +75,26 @@ private fun AuthenticatedGame(app: WobbrikApplication) {
             hostState = host.snapshot()
         }
     }
-    BackHandler(page != "home") { host.pause(); page = "home" }
+    BackHandler(page != "home") {
+        host.pause()
+        if (!GameNavigation.pauseOnBack(page, host.snapshot().choosingFinish)) page = "home"
+    }
     val ready = state as? AuthenticatedRecoveryOwner.State.Ready
     val restore = AcceptedAttemptRestore.from(state ?: AuthenticatedRecoveryOwner.State.SignedOut)
     // Restart/abandon policy (user decision, 9 November 2026): leaving the game page by any route
-    // (Back, "Menyuya qayıt", finish picker back) leaves the attempt. The host keeps a loss for its
+    // ("Menyuya qayıt", finish picker back) leaves the attempt. Gameplay Back only pauses. The host keeps a loss for its
     // finish and abandons an open mid-game attempt. A "game" page restored after process death was
     // left when the app closed: go home; Play then abandons that attempt instead of resuming it.
     LaunchedEffect(page) {
         if (page != "game") host.leave(state as? AuthenticatedRecoveryOwner.State.Ready)
         else if (!host.snapshot().playing) page = "home"
+    }
+    // Finish sync removes the active attempt. Always land on the canonical HomeScreen,
+    // rather than rendering the generic account template with a stale "game" route.
+    LaunchedEffect(page, state, hostState.playing) {
+        val reconciled = state is AuthenticatedRecoveryOwner.State.Ready &&
+            (restore == AcceptedAttemptRestore.Result.NoAttempt || restore is AcceptedAttemptRestore.Result.Finished)
+        if (GameNavigation.completed(page, hostState.playing, reconciled)) page = "home"
     }
     // Play pressed while an attempt from a closed app was still open: start once it is abandoned.
     var startAfterDiscard by remember(configured) { mutableStateOf(false) }
@@ -121,24 +131,28 @@ private fun AuthenticatedGame(app: WobbrikApplication) {
         restore is AcceptedAttemptRestore.Result.Blocked -> "Cəhd bu versiyada bərpa edilə bilmir"
         else -> null
     }
-    AccountScreen(page, ready, status,
-        onPage = { page = it },
-        onRetry = { configured?.recovery?.onForeground() },
-        onPlay = if (ready != null && restore !is AcceptedAttemptRestore.Result.Blocked) ({
-            when (restore) {
-                AcceptedAttemptRestore.Result.NoAttempt, is AcceptedAttemptRestore.Result.Finished -> {
-                    if (configured?.commands?.start(ready) == true) { host.enter(); page = "game" }
+    val accountPage = GameNavigation.accountPage(page)
+    // Local scroll/presentation state belongs to this destination, not to its caller.
+    key(accountPage) {
+        AccountScreen(accountPage, ready, status,
+            onPage = { page = it },
+            onRetry = { configured?.recovery?.onForeground() },
+            onPlay = if (ready != null && restore !is AcceptedAttemptRestore.Result.Blocked) ({
+                when (restore) {
+                    AcceptedAttemptRestore.Result.NoAttempt, is AcceptedAttemptRestore.Result.Finished -> {
+                        if (configured?.commands?.start(ready) == true) { host.enter(); page = "game" }
+                    }
+                    // Only a loss is resumable (its cosmetic finish). An open attempt is never resumed.
+                    is AcceptedAttemptRestore.Result.Paused ->
+                        if (restore.terminal || hostState.choosingFinish) { host.enter(); page = "game" }
+                        else if (host.discardOpen(ready)) startAfterDiscard = true
+                    else -> Unit
                 }
-                // Only a loss is resumable (its cosmetic finish). An open attempt is never resumed.
-                is AcceptedAttemptRestore.Result.Paused ->
-                    if (restore.terminal || hostState.choosingFinish) { host.enter(); page = "game" }
-                    else if (host.discardOpen(ready)) startAfterDiscard = true
-                else -> Unit
-            }
-        }) else null,
-        active = restore is AcceptedAttemptRestore.Result.Paused && (restore.terminal || hostState.choosingFinish),
-        journalBlocked = journalBlocked,
-        cached = if (ready == null) cached else null)
+            }) else null,
+            active = restore is AcceptedAttemptRestore.Result.Paused && (restore.terminal || hostState.choosingFinish),
+            journalBlocked = journalBlocked,
+            cached = if (ready == null) cached else null)
+    }
 }
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -161,7 +175,7 @@ internal fun AccountScreen(
         return
     }
     val snapshot = ready?.snapshot ?: cached
-    if (page == "home") {
+    if (GameNavigation.accountPage(page) == "home") {
         HomeScreen(snapshot, active, if (journalBlocked) null else onPlay, onPage, status, onRetry, journalBlocked)
         return
     }

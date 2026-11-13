@@ -1,30 +1,31 @@
 # Cari handoff — 13 noyabr 2026
 
 ## Completed
-- `fix/end-of-attempt-checkpoint`: hər uğurlu enişdə pause/checkpoint/reload çıxarıldı; oyun lokal davam edir, yalnız məğlubiyyətdə yığılmış irəliləyiş bir terminal checkpoint-də göndərilir. Mövcud explicit kosmetik finish saxlanır.
-- Uğurlu enişdə sorğu olmaması, bir yekun checkpoint/finish, sıfır mərtəbə və stale Ready regressiyaları əlavə/yeniləndi.
+- Checkpoint fix `92d640d`, branch `fix/end-of-attempt-checkpoint`: uğurlu eniş lokal davam edir; məğlubiyyətdə bir yekun checkpoint, sonra explicit finish. Review: 2026-11-13-end-of-attempt-checkpoint.md.
+- Bunun üzərində ayrıca `fix/navigation-consistency`: finish sonrası köhnə game route-un ikinci home şablonuna düşməsi düzəldildi; eyni kanonik HomeScreen istifadə olunur. Əlavə səhifələr key ilə scroll/local state baxımından ayrıldı.
+- Son açıq qərar tətbiq edildi: aktiv oyunda Android Geri → pauza; təkrar Geri də çıxmır. Menyuya qayıt → home/abandon. Finish picker Geri → home/niyyət qalır.
+- Koddan düymə→ekran PNG xəritələri hazırlandı, açılıb baxıldı: docs/reviews/navigation-consistency/{01-pages,02-game}.png.
 
 ## Current state
-- Fix branch review üçün hazırlanıb; main merge/push yoxdur. Mərhələ 4 implementasiyasına başlanmayıb.
-- AppBackend koduna toxunulmayıb; mövcud checkpoint API-si yığılmış delta qəbul edir. Runtime/render unverified, gate deyil.
+- Cari branch fix/navigation-consistency əvvəlki fix commit-i üzərindədir; heç biri main-ə merge/push edilməyib.
+- AppBackend və UI vizual layout/asset/token dəyişməyib. Yeni ekran yaradılmayıb. Runtime/Android render unverified; emulator açılmayıb.
 
 ## Decisions
-- Əvvəl Android; backend dəyişiklikləri ayrıca saxlanılır. Mövcud vizuallar qalır, əlavə variantlar hələlik iki; konkret asset seçimi bu bug fix-in əhatəsi deyil.
-- Hər enişdə şəbəkə yoxdur; oyun sonu server qəbulundan əvvəl lokal mərtəbələr wallet/XP/bina authority-si deyil. Yarımçıq tərk edilən lokal progress mükafat yaratmır.
-- Emulator/canlı yoxlama tələb edilmir; CI yalnız ayrıca tələb ilə main-də. Merge üçün istifadəçi təsdiqi gözlənilir.
+- docs/PLAN.md yeganə plan; §3 son Geri→pauza qərarını qeyd edir. Əvvəlki Geri→çıxış bununla əvəz olunub.
+- Əvvəl Android, backend dəyişiklikləri ayrıca. Mövcud vizuallar qalır, əlavə variantlar iki ilə məhdud; konkret asset seçimi sonrakı vahiddə.
+- CI yalnız ayrıca tələb ilə main-də; merge üçün istifadəçi təsdiqi lazımdır. Canlı yoxlama gate deyil.
 
 ## Remaining work
-- Fix-in main merge-i yalnız istifadəçi təsdiqindən sonra. 4-cü mərhələ ayrıca növbəti vahiddir; konkret inventory/detail/loading UI təsdiqi açıq qalır.
+- Vizual borc: kolleksiya/nailiyyətlər ümumi hesab şablonudur, ayrıca tam feature ekranları deyil. Şəhər/İnventar/Bazar deaktivdir. Online pauzada Yenidən başla çatışmır. Bunlar hazır göstərilmir.
+- Mövcud dizaynın konkret təsdiqi olmadan UI redesign edilməməlidir. Mərhələ 4 başlanmayıb.
 
 ## Relevant files
-- docs/PLAN.md §3/§9; docs/reviews/2026-11-13-end-of-attempt-checkpoint.md.
-- android-billing/engine/src/main/kotlin/com/aladdin/wobbrik/engine/AcceptedEngineHost.kt.
-- android-billing/engine/src/test/kotlin/com/aladdin/wobbrik/engine/AcceptedAttemptCommandsTest.kt.
+- docs/PLAN.md; docs/reviews/2026-11-13-navigation-consistency.md və navigation-consistency/ PNG/script.
+- app OnlineGame.kt, GameNavigation.kt, GameNavigationTest.kt; əvvəlki fix engine AcceptedEngineHost.kt.
 
 ## Checks performed
-- Engine 64 test PASS, core 70 test PASS (core up-to-date); fokuslu assembleDebug/lintDebug PASS (18s). git diff --check PASS.
-- AppBackend attempts.go checkpoint delta/sequence qaydası read-only yoxlandı; backend test/build aparılmadı (dəyişiklik yoxdur).
-- Emulator, canlı yoxlama, render və CI yoxdur.
+- Son fokuslu app 3 unit test/build/lint PASS (32s); engine 64/core 70 test PASS (up-to-date). git diff --check PASS. PNG-lər vizual yoxlanıb; Android render deyil.
+- Backend dəyişmədiyindən backend test/deploy yoxdur. Emulator/ADB/canlı yoxlama və CI yoxdur.
 
 ## Exact next step
-- Fix branch-in lokal review/yoxlama nəticəsini bildir; təsdiqdən əvvəl main-ə merge etmə. Sonra yalnız ayrıca tapşırıqla docs/PLAN.md §1 mərhələ 4/§9 üzrə davam et.
+- Naviqasiya fix nəticəsi və PNG-ləri istifadəçiyə təqdim et; main merge yalnız təsdiqdən sonra. Sonrakı chatdə qalan səhifə şablon borcunu mövcud dizaynla tutuşdur; docs/PLAN.md əsasdır, mərhələ 4-ə özbaşına keçmə.
