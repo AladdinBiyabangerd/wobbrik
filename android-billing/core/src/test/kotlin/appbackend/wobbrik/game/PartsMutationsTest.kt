@@ -13,7 +13,9 @@ class PartsMutationsTest {
     private fun receipt(edit: Boolean) = """{"revision":1,"accepted_at":"2026-11-13T00:00:00Z","result":${if (edit) """{"building_id":"building","building_revision":3,"price":0,"fee":0}""" else """{"item_id":"coins_wall_1","price":100}"""}}"""
 
     @Test fun bothRoutesPersistExactEnvelopeAndRetryAfterLostResponse() = runBlocking {
-        for (edit in listOf(false, true)) {
+        for (itemId in listOf("coins_wall_1", "decor_tree_1", "land_2", "edit")) {
+            val edit = itemId == "edit"
+            val purchase = if (edit) command(true) else GameplayWire.buyPart("fixed", 0, itemId)
             val sessions = AccountSessions { "fresh" }; sessions.onAuthChanged("alice")
             val files = mutableMapOf<String, ByteArray>()
             fun journal() = DiskAttemptJournal { key -> object : JournalFile {
@@ -28,12 +30,15 @@ class PartsMutationsTest {
                 else {
                     sent += path to requireNotNull(body)
                     if (lose) { lose = false; throw IOException("committed response lost") }
-                    GameplayResponse(200, receipt(edit))
+                    GameplayResponse(200, if (edit) receipt(true) else receipt(false)
+                        .replace("coins_wall_1", itemId).let {
+                            if (itemId.startsWith("decor_")) it.replace("\"price\":100", "\"price\":100,\"copy_id\":\"copy_a\"") else it
+                        })
                 }
             })
             val first = AttemptCoordinator(sessions, backend, journal()); first.recover()
-            try { first.execute(command(edit)); fail() } catch (_: IOException) { }
-            assertEquals(command(edit), journal().pending("alice"))
+            try { first.execute(purchase); fail() } catch (_: IOException) { }
+            assertEquals(purchase, journal().pending("alice"))
             assertNull(journal().pending("bob"))
             val second = AttemptCoordinator(sessions, backend, journal()); second.recover()
             assertEquals(listOf(sent.first(), sent.first()), sent)
@@ -49,10 +54,12 @@ class PartsMutationsTest {
         var submits = 0
         val catalog = RecoveryCatalog("wobbrik-v1", "wobbrik-structural-v1",
             parts.map { (category, id) -> CatalogItem(id, id, category, "free", 0, null, null) } +
-                CatalogItem("coins_wall_1", "Wall", "wall", "coins", 4, 100, null), emptyList())
+                CatalogItem("coins_wall_1", "Wall", "wall", "coins", 4, 100, null) +
+                CatalogItem("decor_tree_1", "Tree", "tree", "copy", 0, 25, null), listOf(LandOffer("land_1", 150, 200)))
         val backend = object : AttemptBackend {
             override suspend fun catalog(session: appbackend.wobbrik.billing.BillingSession) = catalog
-            override suspend fun sync(session: appbackend.wobbrik.billing.BillingSession) = GameSnapshot("wobbrik-v1", 0, 1000, 0, null)
+            override suspend fun sync(session: appbackend.wobbrik.billing.BillingSession) = GameSnapshot("wobbrik-v1", 0, 1000, 150, null,
+                AccountRecovery("now", "first", "later", 3, 0, emptyList(), emptyList(), emptyList(), emptyList()))
             override suspend fun submit(session: appbackend.wobbrik.billing.BillingSession, command: AttemptCommand) { submits++ }
         }
         val journal = object : AttemptJournal {
@@ -70,6 +77,8 @@ class PartsMutationsTest {
             val building = OwnedBuilding("building", 2, 10, 40, 20, 24, parts + ("wall" to "coins_wall_1"), false, null)
             assertFalse(commands.apply(stale, building, parts))
             assertFalse(BuildingDeletion(owner).confirmedDelete(stale, building))
+            assertFalse(CityPurchases(owner).buy(stale, "land_1"))
+            assertFalse(CityPurchases(owner).buy(stale, "decor_tree_1"))
             assertEquals(0, submits)
         } finally { scope.cancel() }
     }

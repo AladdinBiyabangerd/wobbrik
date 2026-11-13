@@ -124,8 +124,17 @@ private fun AuthenticatedGame(app: WobbrikApplication) {
         key(InventoryReadKey(ready)) { PartsScreen(configured, ready, partsBuilding, onBack = { page = "inventory" }) }
         return
     }
+    if (page == "decorations" && ready != null && configured != null) {
+        key(InventoryReadKey(ready)) { DecorationShopScreen(configured, ready, onBack = { page = "inventory" }) }
+        return
+    }
+    if (page == "land" && ready != null && configured != null) {
+        key(InventoryReadKey(ready)) { LandShopScreen(configured, ready, onBack = { page = "inventory" }) }
+        return
+    }
     if (page == "inventory" && ready != null && configured != null) {
-        key(InventoryReadKey(ready)) { InventoryScreen(configured, ready, onHome = { page = "home" }, onParts = { partsBuilding = it; page = "parts" }) }
+        key(InventoryReadKey(ready)) { InventoryScreen(configured, ready, onHome = { page = "home" },
+            onParts = { partsBuilding = it; page = "parts" }, onDecorations = { page = "decorations" }, onLand = { page = "land" }) }
         return
     }
     if (page == "collection" && ready != null) {

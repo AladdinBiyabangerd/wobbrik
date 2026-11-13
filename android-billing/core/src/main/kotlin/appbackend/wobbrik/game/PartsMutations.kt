@@ -26,8 +26,10 @@ class PartsMutations(private val owner: AuthenticatedRecoveryOwner, private val 
             fun number(key: String) = result.getValue(key).jsonPrimitive.also { require(!it.isString) }.long.also { require(it >= 0) }
             when (command.route) {
                 AttemptCommand.Route.SHOP_BUY -> {
-                    require(text("item_id") == request.getValue("item_id").jsonPrimitive.content)
+                    val itemId = request.getValue("item_id").jsonPrimitive.content
+                    require(text("item_id") == itemId)
                     number("price")
+                    if (itemId.startsWith("decor_")) InventoryReads.id(text("copy_id"))
                 }
                 AttemptCommand.Route.BUILDING_EDIT -> {
                     require(text("building_id") == request.getValue("building_id").jsonPrimitive.content)

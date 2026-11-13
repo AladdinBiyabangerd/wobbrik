@@ -87,3 +87,8 @@ Token kontrastı: text/background16.57, muted/surface8.22, on-accent/accent11.45
 ## 13 noyabr — silmə təsdiqi təklifi
 
 `delete-confirmation-proposal.png`: mövcud təsdiqli bina detalının üzərində tokenlərlə hazırlanmış silmə dialoqu. 13 noyabrda istifadəçi bu dialoqu və bina detalının sonundakı “Binanı sil” girişini “okeydir” cavabı ilə təsdiqlədi. Android build renderi deyil. Core adapter review-su: `../../reviews/2026-11-13-phase4-building-delete.md`.
+
+## 13 noyabr — dekor və torpaq alışının təsdiqi
+- İstifadəçi `03-decoration-flow.png` dekor dizaynını açıq təsdiqlədi.
+- `05-land-purchase.png` siyahı və alış təsdiqi hissəsi ayrıca açıq təsdiqləndi; əsas əməl “Al”dır. Xəritədə yer seçimi və placement bu vahidə daxil deyil, bağlı qalır.
+- Bu təsdiqlər Android render/vizual uyğunluq və ya mərhələ 4 qəbulu deyil.

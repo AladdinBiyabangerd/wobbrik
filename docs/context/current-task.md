@@ -72,3 +72,13 @@
 - Exact next step: yeni chatdə handoff və `docs/PLAN.md` oxu; dekor vahidi üçün mövcud `docs/design/city-completion-v1/03-decoration-flow.png` dizaynını göstər və konkret təsdiq al; təsdiqədək UI başlama. AppBackend dəyişmə/CI/merge/push yoxdur.
 
 - Son UI kodunda Checks performed: Java21 `:core:test :app:testDebugUnitTest :app:assembleDebug :app:lintDebug` BUILD SUCCESSFUL (52s; 15 executed,91 up-to-date), `git diff --check` PASS. CI/merge/push yoxdur.
+
+## Dekor/torpaq alış vahidi — 13 noyabr 2026
+- Completed: əvvəlki inventory/parts/delete diff artıq `c6c51de` commit-indədir. Dekor/torpaq alış adapteri və UI girişləri əlavə edildi; dekor copy inventory serverdən paginated oxunur. Alış mövcud SHOP_BUY + eyni durable journal/recovery/sync ilədir.
+- Current state: `feat/phase-4`; release APK/metadata qorunur və commit-ə daxil edilmir. Placement bağlıdır, AppBackend yazısı yoxdur.
+- Decisions: istifadəçi dekor dizaynını və torpaq siyahısı/alış təsdiqini açıq təsdiqlədi. Torpağın map selection hissəsi yoxdur, əməl “Al”dır. Mövcud dəyişiklikləri uyğun commit etmək açıq istənildi.
+- Remaining work: Android mobil portret/böyük şrift/inset/a11y renderləri və dizaynla müqayisə açıqdır; art crop/halo/native-pixel hədləri review-da qeyd olunub. Real şəhər renderer-i/V1 canlılıq və əvvəlki parts axınının vizual qəbulu qalır; mərhələ bütöv bitməyib.
+- Relevant files: `CityPurchases.kt`, `DecorationReads.kt`, `CityPurchasesTest.kt`, `PartsMutationsTest.kt`; app `DecorationShopScreen.kt`, `LandShopScreen.kt`, `InventoryScreen.kt`, `OnlineGame.kt`, `WobbrikApplication.kt`; `docs/reviews/2026-11-13-phase4-city-purchases.md`; yeganə plan `docs/PLAN.md`.
+- Checks performed: core unit testlər (XP/balans/daimi hüquq/təkrar copy, malformed pages/receipt, lost-response disk recovery, stale Ready) PASS; core/app unit + assembleDebug/lintDebug PASS ilk UI kodunda. Son UI əlavələrindən sonra eyni yoxlamalar yenidən başladılıb; son nəticə review qeydinə əlavə edilir. Kontrast 4 cüt PASS min8.22; diff check PASS. Android runtime/render/backend test/CI yoxdur.
+- Exact next step: son fokuslu yoxlamanın nəticəsini review et, bu alış vahidini ayrıca commit et; main merge/push/CI yoxdur. Sonra yalnız cari alış vahidinin açıq vizual uyğunluq işini davam etdir; placement-i yenidən açma və AppBackend-ə toxunma. Böyük yeni şəhər renderer vahidi bu chatə yığılmamalıdır.
+- Son nəticə: Java21 core/app unit + assembleDebug/lintDebug PASS (11s); CityPurchasesTest4/4, PartsMutationsTest4/4; diff check PASS. Alış vahidi lokal commit üçün review edilib; runtime/render PASS yoxdur.

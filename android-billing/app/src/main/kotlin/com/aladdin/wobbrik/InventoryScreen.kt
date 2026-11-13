@@ -41,7 +41,8 @@ internal class InventoryReadKey(private val ready: AuthenticatedRecoveryOwner.St
 /** Destination-local reads are cancelled and discarded whenever the exact Ready epoch changes. */
 @Composable
 internal fun InventoryScreen(configured: WobbrikApplication.Bootstrap.Configured,
-    ready: AuthenticatedRecoveryOwner.State.Ready, onHome: () -> Unit, onParts: (String?) -> Unit) {
+    ready: AuthenticatedRecoveryOwner.State.Ready, onHome: () -> Unit, onParts: (String?) -> Unit,
+    onDecorations: () -> Unit, onLand: () -> Unit) {
     var selected by rememberSaveable { mutableStateOf<String?>(null) }
     var retry by remember { mutableIntStateOf(0) }
     var deleteCandidate by remember(ready, selected) { mutableStateOf<OwnedBuilding?>(null) }
@@ -99,6 +100,8 @@ internal fun InventoryScreen(configured: WobbrikApplication.Bootstrap.Configured
             }
             if (selected == null) {
                 InventoryButton("Hissələr · Mağaza") { onParts(null) }
+                InventoryButton("Dekor") { onDecorations() }
+                InventoryButton("Ərazi alışı") { onLand() }
                 Row(Modifier.fillMaxWidth().background(GameTokens.Raised, RoundedCornerShape(GameTokens.CardRadius))
                     .padding(GameTokens.Small), verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
