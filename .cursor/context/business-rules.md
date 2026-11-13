@@ -1,6 +1,6 @@
 # Business rules
 
-Ətraflı mənbə: `docs/game-plan.md`; server sərhədi: `docs/kotlin-compose-plan.md` §5.
+Ətraflı mənbə: `docs/PLAN.md`; server sərhədi: `docs/PLAN.md` §2.
 
 - Bütün xərclənən sikkələr vahid AppBackend/PostgreSQL wallet/ledger-dədir. Client delta, Room və Firestore ikinci authority deyil.
 - Online cəhdin reward/progression/checkpoint nəticəsi server tərəfindən qəbul edilir; revision/dedup, retry və hesab izolyasiyası qorunur.
@@ -12,3 +12,5 @@
 - Vizual mənbələr: `docs/design/mobile-v1/`, `docs/design/game-tap-v2/`, `docs/design/tablet-v1/`; şəhər üçün `docs/design/README.md`. Eyni ekranın son təsdiqlənmiş versiyası əsasdır. Sxematik əvəzetmə və icazəsiz redesign olmaz.
 - Mövcud tokeni tap; ui-craft istifadə et; telefon/planşet renderlərini dizaynla yanaşı müqayisə edib bax. Böyük şrift/inset/keyboard/a11y və lazımi scroll qorunur.
 - Real SKU, Console, remote push və deploy ayrıca göstərişədək əhatədən kənardır.
+
+- 13 noyabr cari vəziyyəti: məcburi Google entry və guest/link çıxarılması hər iki main-dədir. Anonymous fallback, wallet merge və data deletion yoxdur. Canlı yoxlama tələb etmə, emulatoru avtomatik açma.

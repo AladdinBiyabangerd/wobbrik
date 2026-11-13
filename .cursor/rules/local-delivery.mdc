@@ -9,5 +9,11 @@ alwaysApply: true
 - Hər branch bitəndə diff üzrə lokal review edilir. Tapılan problemlər branch-də düzəldilir; CI branch-də işə salınmır. Uğursuz və ya icra edilməmiş yoxlama keçmiş sayılmır.
 - CI yalnız branch `main`-ə merge edildikdən sonra `main` üzərində və yalnız lokaldır: `./scripts/local-ci.sh`. GitHub Actions/remote CI yaradılmır. Arrowz-dakı vahid Gradle `ci` task yanaşması nümunədir, onun oyun qaydaları köçürülmür.
 - Review qeydi `docs/reviews/` altında branch, yoxlanmış diff/commit, tapıntılar, düzəlişlər, CI nəticəsi və qalan məhdudiyyətləri göstərir. Son dəyişiklikdən sonra uyğun yoxlamalar yenilənir.
-- Lokal review tamamlandıqdan sonra branch tarixi saxlanılmaqla `main`-ə merge edilir; sonra `main` üzərində `./scripts/local-ci.sh` işlədilir. CI uğursuz olarsa iş tamamlanmış sayılmır: düzəliş ayrıca branch-də hazırlanır, review və merge edilir, CI yenə yalnız `main` üzərində işlədilir. Remote push/deploy ayrıca göstəriş tələb edir.
+- Lokal review və istifadəçi təsdiqindən sonra branch tarixi saxlanılmaqla `main`-ə merge edilir; yalnız istifadəçi CI-ni ayrıca tələb edibsə `main` üzərində `./scripts/local-ci.sh` işlədilir. CI uğursuz olarsa iş tamamlanmış sayılmır: düzəliş ayrıca branch-də hazırlanır, review və merge edilir, CI yenə yalnız `main` üzərində işlədilir. Remote push/deploy ayrıca göstəriş tələb edir.
 - AppBackend dəyişərsə onun ayrıca repository/branch/commit və öz AGENTS.md yoxlamaları da tələb olunur; Wobbrik CI nəticəsi backend yoxlamalarını əvəz etmir.
+
+## Cari istifadəçi qərarı — 13 noyabr 2026
+
+- Yeganə plan `docs/PLAN.md`-dir. Köhnə planlar silinib; tarix git/backup və review-lardadır. Handoff ikinci plan deyil.
+- Canlı yoxlama heç vaxt tələb edilmir, emulator avtomatik açılmır. Yoxlanmamış runtime/render PASS sayılmır və canlı yoxlama merge/tamamlanma gate-i deyil.
+- CI yalnız istifadəçi ayrıca istəyəndə, yalnız main-də lokaldır. Fokuslu build/lint/unit və disposable lokal PostgreSQL testləri icazəli adi yoxlamalardır. Avtomatik CI işə salınmır.

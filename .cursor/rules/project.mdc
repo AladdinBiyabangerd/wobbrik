@@ -5,8 +5,7 @@ alwaysApply: true
 
 ## Canonical sources
 
-- Texniki icra planı: `docs/kotlin-compose-plan.md`, mərhələlər 1–7 (§6).
-- Məhsul və iqtisadiyyat qaydaları: `docs/game-plan.md`; mərhələ 3 icra detalları: `docs/stage-three-online-plan.md`.
+- Yeganə plan: `docs/PLAN.md` — mərhələlər §1, arxitektura/server §2, lifecycle §3, məhsul/iqtisadiyyat §4–5, kataloq §6, şəhər §7. Başqa plan yaratma.
 - Aktiv handoff: `docs/context/current-task.md`. `.cursor/context/current-task.md` yalnız bu fayla girişdir, ikinci status mənbəyi deyil.
 - Qısa kontekst: `.cursor/context/{architecture,business-rules,decisions}.md`.
 - Cursor üçün always-on güzgülər: `.cursor/rules/*.mdc`; qayda dəyişəndə uyğun güzgünü də yenilə.
@@ -27,3 +26,9 @@ alwaysApply: true
 5. Telefon/planşet, pəncərə/orientasiya, böyük şrift, inset/klaviatura, əlçatanlıq və tələb olunan lokalları yoxla; zəruri scroll-u saxla. Təsdiqlənməmiş dil siyahısını uydurma.
 6. Vizual vahiddə real build renderlərini dizaynla yanaşı müqayisə et; nəticə və məhdudiyyətləri `docs/reviews/` altında yaz. Tam mərhələ qəbulu üçün ayrıca `docs/reviews/<phase>/acceptance.md` istifadə oluna bilər; mövcud review-ları köçürmə.
 7. Dizayn nümunəsinin OK-u mərhələ qəbulu deyil; mərhələ qəbulu növbəti mərhələyə başlama icazəsi deyil. Növbəti mərhələ ayrıca istifadəçi tapşırığı ilə başlayır.
+
+## Cari istifadəçi qərarı — 13 noyabr 2026
+
+- Yeganə plan `docs/PLAN.md`-dir. Köhnə planlar silinib; tarix git/backup və review-lardadır. Handoff ikinci plan deyil.
+- Canlı yoxlama heç vaxt tələb edilmir, emulator avtomatik açılmır. Yoxlanmamış runtime/render PASS sayılmır və canlı yoxlama merge/tamamlanma gate-i deyil.
+- CI yalnız istifadəçi ayrıca istəyəndə, yalnız main-də lokaldır. Fokuslu build/lint/unit və disposable lokal PostgreSQL testləri icazəli adi yoxlamalardır. Avtomatik CI işə salınmır.

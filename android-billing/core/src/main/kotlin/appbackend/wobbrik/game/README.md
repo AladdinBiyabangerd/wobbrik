@@ -39,7 +39,7 @@ The API has no abandon endpoint: do not reinterpret pause/restart/menu as finish
 or grant a reward. Resolve that lifecycle contract before wiring those actions.
 
 Reference: AppBackend `docs/wobbrik-game-api.md`, Wobbrik
-`docs/kotlin-compose-plan.md` section 5. Backend contract/schema/rules are unchanged.
+`docs/PLAN.md` §2. Backend contract/schema/rules are unchanged.
 
 EngineCheckpointCodec in :engine carries practice-checkpoint-v1 and pinned local
 rules, including direction, fall/sway velocities and fractional tick units. Decode

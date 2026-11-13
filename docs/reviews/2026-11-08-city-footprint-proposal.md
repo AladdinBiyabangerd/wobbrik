@@ -4,7 +4,7 @@ Status: **8 noyabr 2026-da istifadəçi tərəfindən təsdiqlənmiş ilkin oyun
 
 ## Dəyişməyən əsas
 
-`docs/kotlin-compose-plan.md`-dəki cari `city-geometry-v1` əsasdır: 1 oyun vahidi = 1000 tick, düz bina 100×100 vahid, obyektlər arasında 10 vahid Chebyshev boşluq, quarter-turn dönmə. Köhnə backend sənədindəki sərbəst dönmə/boşluqsuz yerləşdirmə tarixi bu yeni müqaviləni əvəz etmir. Tikinti əyriliyi saxlanır, sahə real proyeksiyadan hesablanır. Burada metr və ekran pikseli nəzərdə tutulmur.
+`docs/PLAN.md`-dəki cari `city-geometry-v1` əsasdır: 1 oyun vahidi = 1000 tick, düz bina 100×100 vahid, obyektlər arasında 10 vahid Chebyshev boşluq, quarter-turn dönmə. Köhnə backend sənədindəki sərbəst dönmə/boşluqsuz yerləşdirmə tarixi bu yeni müqaviləni əvəz etmir. Tikinti əyriliyi saxlanır, sahə real proyeksiyadan hesablanır. Burada metr və ekran pikseli nəzərdə tutulmur.
 
 ## Torpaq forması və ölçüləri
 
@@ -51,7 +51,7 @@ Düzbucaqlı dekor konturu mərkəz origin ilə `(-W/2,-H/2),(W/2,-H/2),(W/2,H/2
 
 ## Yoxlamalar və növbəti addım
 
-Mənbələr: `docs/game-plan.md` §7, §23; `docs/kotlin-compose-plan.md` şəhər həndəsəsi bölməsi; AppBackend `docs/wobbrik-game-api.md` torpaq hüquqları/union qaydaları. Hər iki typed geometry review oxunub. Server/mobile kod dəyişmir, CI tətbiq olunmur. Rəqəmlərin və nümunə yerləşmələrin fokuslu hesab yoxlaması PASS (6 parcel tutumu, pairwise boşluq, cəm sahə/qiymət və L-yol sahəsi). Statik sxem render edilib və görüntüyə baxılıb; 3 mövcud token kontrast cütü PASS. İnteraktiv canvas runtime-ı yoxlanmayıb; cihaz/live HTTP/balans və hazır artwork uyğunluğu sübutu yoxdur.
+Mənbələr: `docs/PLAN.md` §4–7; `docs/PLAN.md` şəhər həndəsəsi bölməsi; AppBackend `docs/wobbrik-game-api.md` torpaq hüquqları/union qaydaları. Hər iki typed geometry review oxunub. Server/mobile kod dəyişmir, CI tətbiq olunmur. Rəqəmlərin və nümunə yerləşmələrin fokuslu hesab yoxlaması PASS (6 parcel tutumu, pairwise boşluq, cəm sahə/qiymət və L-yol sahəsi). Statik sxem render edilib və görüntüyə baxılıb; 3 mövcud token kontrast cütü PASS. İnteraktiv canvas runtime-ı yoxlanmayıb; cihaz/live HTTP/balans və hazır artwork uyğunluğu sübutu yoxdur.
 
 Növbəti addım: təsdiqlənmiş parametrlərlə ayrıca backend domain/data placement vahidinə başla. Typed/provenance-ni yenidən qurma. Main üçün ayrıca OK tələbi saxlanır.
 

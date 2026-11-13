@@ -4,8 +4,7 @@ Koddan əvvəl bu faylı və `docs/context/current-task.md`-ni oxu. Paralel əsa
 
 ## Canonical sources
 
-- Texniki icra planı: `docs/kotlin-compose-plan.md`, mərhələlər 1–7 (§6).
-- Məhsul və iqtisadiyyat qaydaları: `docs/game-plan.md`; mərhələ 3 icra detalları: `docs/stage-three-online-plan.md`.
+- Yeganə plan: `docs/PLAN.md` — mərhələlər §1, arxitektura/server §2, lifecycle §3, məhsul/iqtisadiyyat §4–5, kataloq §6, şəhər §7. Başqa plan yaratma.
 - Aktiv handoff: `docs/context/current-task.md`. `.cursor/context/current-task.md` yalnız bu fayla girişdir, ikinci status mənbəyi deyil.
 - Qısa kontekst: `.cursor/context/{architecture,business-rules,decisions}.md`.
 - Cursor üçün always-on güzgülər: `.cursor/rules/*.mdc`; qayda dəyişəndə uyğun güzgünü də yenilə.
@@ -44,7 +43,7 @@ Koddan əvvəl bu faylı və `docs/context/current-task.md`-ni oxu. Paralel əsa
 - Hər branch bitəndə diff üzrə lokal review edilir. Tapılan problemlər branch-də düzəldilir; CI branch-də işə salınmır. Uğursuz və ya icra edilməmiş yoxlama keçmiş sayılmır.
 - CI yalnız branch `main`-ə merge edildikdən sonra `main` üzərində və yalnız lokaldır: `./scripts/local-ci.sh`. GitHub Actions/remote CI yaradılmır. Arrowz-dakı vahid Gradle `ci` task yanaşması nümunədir, onun oyun qaydaları köçürülmür.
 - Review qeydi `docs/reviews/` altında branch, yoxlanmış diff/commit, tapıntılar, düzəlişlər, CI nəticəsi və qalan məhdudiyyətləri göstərir. Son dəyişiklikdən sonra uyğun yoxlamalar yenilənir.
-- Lokal review tamamlandıqdan sonra branch tarixi saxlanılmaqla `main`-ə merge edilir; sonra `main` üzərində `./scripts/local-ci.sh` işlədilir. CI uğursuz olarsa iş tamamlanmış sayılmır: düzəliş ayrıca branch-də hazırlanır, review və merge edilir, CI yenə yalnız `main` üzərində işlədilir. Remote push/deploy ayrıca göstəriş tələb edir.
+- Lokal review və istifadəçi təsdiqindən sonra branch tarixi saxlanılmaqla `main`-ə merge edilir; yalnız istifadəçi CI-ni ayrıca tələb edibsə `main` üzərində `./scripts/local-ci.sh` işlədilir. CI uğursuz olarsa iş tamamlanmış sayılmır: düzəliş ayrıca branch-də hazırlanır, review və merge edilir, CI yenə yalnız `main` üzərində işlədilir. Remote push/deploy ayrıca göstəriş tələb edir.
 - AppBackend dəyişərsə onun ayrıca repository/branch/commit və öz AGENTS.md yoxlamaları da tələb olunur; Wobbrik CI nəticəsi backend yoxlamalarını əvəz etmir.
 
 ## Məhsulun icra məqsədi
@@ -59,7 +58,7 @@ Koddan əvvəl bu faylı və `docs/context/current-task.md`-ni oxu. Paralel əsa
 - Wallet, oyun/nailiyyət mükafatları, progression/checkpoint, bina mülkiyyəti, bazar və şəhər axını qurulanda və ya yenilənəndə AppBackend-də uyğun domain qaydaları, API/DTO, schema/migration və test dəyişikliklərini də eyni işin hissəsi kimi yoxla və lazım olanları et. Yalnız mobil axını dəyişib server uyğunluğunu tamamlanmış sayma.
 - Xərclənən bütün sikkələr və mülkiyyət üçün vahid authority AppBackend/PostgreSQL-dir. Client delta, Room və ya Firestore ikinci wallet yaratmır. Alış krediti, oyun mükafatı, xərcləmə və bazar transferi eyni wallet/ledger ilə işləməlidir.
 - Müqavilə dəyişəndə backend və mobil uyğunluğunu, qayda versiyasını, revision/dedup, hesab izolyasiyası, retry və köhnə client davranışını yoxla; dəyişmiş API müqaviləsini sənədləşdir. Backend dəyişməsinə ehtiyac yoxdursa bunu yoxlama nəticəsində açıq qeyd et.
-- Əsas müqavilə: `docs/kotlin-compose-plan.md`, xüsusən 5-ci bölmə. Backend alış sərhədi: `/Users/mac/My Workspace/AppBackend/docs/wobbrik-billing.md`. Tam domain adapterinin hazır olduğunu yalnız kod və yoxlamalar bunu təsdiqləyəndə bildir.
+- Əsas müqavilə: `docs/PLAN.md`, xüsusən §2 və §7. Backend alış sərhədi: `/Users/mac/My Workspace/AppBackend/docs/wobbrik-billing.md`. Tam domain adapterinin hazır olduğunu yalnız kod və yoxlamalar bunu təsdiqləyəndə bildir.
 
 ## Visual work
 
@@ -121,3 +120,9 @@ Optimize for minimum necessary context. One chat = one logical task.
 - At the start of a continuation chat, read `docs/context/current-task.md` if present, then inspect only the referenced files needed for the task.
 - Keep the handoff factual: include checks performed, unresolved issues, and the exact next step; do not invent completed work or context-usage percentages.
 - Recommend a new chat without creating one automatically. If the user chooses to continue here, respect that choice and keep the handoff current.
+
+## Cari istifadəçi qərarı — 13 noyabr 2026
+
+- Yeganə plan `docs/PLAN.md`-dir. Köhnə planlar silinib; tarix git/backup və review-lardadır. Handoff ikinci plan deyil.
+- Canlı yoxlama heç vaxt tələb edilmir, emulator avtomatik açılmır. Yoxlanmamış runtime/render PASS sayılmır və canlı yoxlama merge/tamamlanma gate-i deyil.
+- CI yalnız istifadəçi ayrıca istəyəndə, yalnız main-də lokaldır. Fokuslu build/lint/unit və disposable lokal PostgreSQL testləri icazəli adi yoxlamalardır. Avtomatik CI işə salınmır.
