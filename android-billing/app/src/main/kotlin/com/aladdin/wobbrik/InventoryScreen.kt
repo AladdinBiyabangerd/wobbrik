@@ -8,12 +8,15 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.foundation.Image
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
@@ -73,7 +76,14 @@ internal fun InventoryScreen(configured: WobbrikApplication.Bootstrap.Configured
                 TextButton(onClick = back, modifier = Modifier.sizeIn(minWidth = GameTokens.Target, minHeight = GameTokens.Target)) { Text("←", color = GameTokens.Text) }
                 Text(if (selected == null) "İnventar" else "Bina detalları", Modifier.weight(1f), color = GameTokens.Text,
                     fontSize = GameTokens.Title, fontWeight = FontWeight.Bold)
-                Text("${ready.snapshot.coins} ●", color = GameTokens.Text, fontWeight = FontWeight.Bold)
+                Surface(color = GameTokens.Surface, shape = RoundedCornerShape(GameTokens.CardRadius),
+                    border = BorderStroke(GameTokens.Hairline, GameTokens.Raised)) {
+                    Row(Modifier.padding(GameTokens.Small), verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {
+                        Image(painterResource(R.drawable.ui_coin), contentDescription = "Sikkə", Modifier.size(GameTokens.Inset))
+                        Text(ready.snapshot.coins.toString(), color = GameTokens.Text, fontWeight = FontWeight.Bold)
+                    }
+                }
             }
             if (selected == null) {
                 Text("Binalar", Modifier.fillMaxWidth().background(GameTokens.Raised, RoundedCornerShape(GameTokens.ControlRadius))
@@ -84,7 +94,9 @@ internal fun InventoryScreen(configured: WobbrikApplication.Bootstrap.Configured
                         Surface(onClick = { selected = building.id }, color = GameTokens.Surface,
                             shape = RoundedCornerShape(GameTokens.CardRadius), border = BorderStroke(GameTokens.Hairline, GameTokens.Raised)) {
                             Column(Modifier.padding(GameTokens.Small), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-                                BuildingPreview(building, Modifier.fillMaxWidth().height(GameTokens.PanelWidth / 2))
+                                Surface(color = GameTokens.Background, shape = RoundedCornerShape(GameTokens.ControlRadius)) {
+                                    BuildingPreview(building, Modifier.fillMaxWidth().height(GameTokens.PanelWidth / 2))
+                                }
                                 Text(buildingName(building, ready.catalog), color = GameTokens.Text, fontWeight = FontWeight.Bold)
                                 Text("${building.floors} mərtəbə  ›", color = GameTokens.Muted)
                             }
@@ -116,49 +128,93 @@ private fun buildingName(building: OwnedBuilding, catalog: RecoveryCatalog?): St
 @Composable
 private fun BuildingDetail(building: OwnedBuilding, city: CityMembership?, catalog: RecoveryCatalog?, modifier: Modifier) {
     val art = rememberCosmeticArt()
+    val value = remember(building, catalog) { BuildingValueBreakdown.from(building, catalog) }
+    val largeFont = LocalDensity.current.fontScale > 1.3f
     var tab by rememberSaveable(building.id) { mutableIntStateOf(0) }
     Column(modifier, verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {
+        Row(Modifier.fillMaxWidth().then(if (largeFont) Modifier.horizontalScroll(rememberScrollState()) else Modifier),
+            horizontalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {
             listOf("Sakin", "Dəyər", "Hissələr").forEachIndexed { index, title ->
-                Button(onClick = { tab = index }, modifier = Modifier.weight(1f).heightIn(min = GameTokens.Target),
+                Button(onClick = { tab = index }, modifier = (if (largeFont) Modifier.widthIn(min = GameTokens.Target * 2) else Modifier.weight(1f)).heightIn(min = GameTokens.Target),
                     contentPadding = PaddingValues(GameTokens.Quarter), shape = RoundedCornerShape(GameTokens.ControlRadius),
                     colors = ButtonDefaults.buttonColors(containerColor = if (tab == index) GameTokens.Accent else GameTokens.Raised,
                         contentColor = if (tab == index) GameTokens.Background else GameTokens.Text)) { Text(title, softWrap = false,
                         fontSize = if (LocalDensity.current.fontScale > 1f) GameTokens.Caption else GameTokens.Body) }
             }
         }
-        Row(Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-            BuildingPreview(building, Modifier.weight(1f).fillMaxHeight())
-            Column(Modifier.weight(1f).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-            Text(buildingName(building, catalog), color = GameTokens.Text, fontSize = GameTokens.Hint, fontWeight = FontWeight.Bold)
-            when (tab) {
-                0 -> {
-                    DetailRow("Mərtəbə", building.floors.toString()); DetailRow("Sakin", building.residents.toString())
-                    Text(when {
-                        city == null -> "Şəhərə aidlik yüklənməyib"
-                        city.buildings[building.id] == building.revision -> "✓ Şəhərdə yerləşdirilib"
-                        building.id in city.buildings -> "Şəhər məlumatı dəyişib. Yenilə."
-                        else -> "İnventardadır"
-                    }, color = GameTokens.Muted)
-                    Text("Passiv gəlir yaratmır", color = GameTokens.Muted)
+        Surface(Modifier.weight(1f), color = GameTokens.Surface,
+            shape = RoundedCornerShape(GameTokens.CardRadius),
+            border = BorderStroke(GameTokens.Hairline, GameTokens.Raised)) {
+            if (largeFont) {
+                Column(Modifier.fillMaxSize().padding(GameTokens.Small)) {
+                    BuildingPreview(building, Modifier.fillMaxWidth().height(GameTokens.Target * 3))
+                    BuildingDetailContent(building, city, catalog, art, value, tab, Modifier.weight(1f))
                 }
-                1 -> { DetailRow("Baza dəyəri", building.baseValue.toString()); DetailRow("Maksimum satış", building.maxPrice.toString()) }
-                2 -> FinishCosmetics.categories.forEach { category ->
-                    val item = catalog?.items?.firstOrNull { it.id == building.parts[category] }
-                    Canvas(Modifier.fillMaxWidth().height(GameTokens.Target)) {
-                        sprite(art[building.parts[category]], 0f, 0f, size.width, size.height)
-                    }
-                    DetailRow(when(category) { "wall" -> "Divar"; "window" -> "Pəncərə"; "entrance" -> "Giriş"; "roof" -> "Dam"; else -> "İşıq" }, item?.name ?: building.parts.getValue(category))
+            } else {
+                Row(Modifier.fillMaxSize().padding(GameTokens.Small), horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+                    BuildingPreview(building, Modifier.weight(1f).fillMaxHeight())
+                    BuildingDetailContent(building, city, catalog, art, value, tab, Modifier.weight(1f))
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun BuildingDetailContent(building: OwnedBuilding, city: CityMembership?, catalog: RecoveryCatalog?,
+    art: Map<String, CosmeticSprite>, value: BuildingValueBreakdown?, tab: Int, modifier: Modifier) {
+    Column(modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+        Text(buildingName(building, catalog), color = GameTokens.Text, fontSize = GameTokens.Hint, fontWeight = FontWeight.Bold)
+        when (tab) {
+            0 -> {
+                DetailRow("Mərtəbə", building.floors.toString()); DetailRow("Sakin", building.residents.toString())
+                Text(when {
+                    city == null -> "Şəhərə aidlik yüklənməyib"
+                    city.buildings[building.id] == building.revision -> "✓ Şəhərdə yerləşdirilib"
+                    building.id in city.buildings -> "Şəhər məlumatı dəyişib. Yenilə."
+                    else -> "İnventardadır"
+                }, color = GameTokens.Muted)
+                DetailRow("Hər mərtəbəyə", if (building.residents.toBigInteger() == building.floors.toBigInteger() * java.math.BigInteger.valueOf(4)) "4 sakin" else "—")
+                DetailRow("Passiv gəlir", "Yaratmır")
+            }
+            1 -> {
+                if (value != null) {
+                    DetailRow("Tikinti", value.construction.toString())
+                    DetailRow("Sakin tutumu", value.capacity.toString())
+                    DetailRow("Hissələr", value.parts.toString())
+                }
+                DetailRow("Baza dəyəri", building.baseValue.toString())
+                DetailRow("Maksimum satış", building.maxPrice.toString())
+                if (building.traded) Text("Alınmış bina yenidən satılmır", color = GameTokens.Muted)
+                else if (value != null) {
+                    Text("Maksimum qiymətlə satışda", color = GameTokens.Muted, fontSize = GameTokens.Caption)
+                    DetailRow("Komissiya", value.commissionAtMaximum.toString())
+                    DetailRow("Satıcıya", value.sellerAtMaximum.toString())
+                }
+                if (value == null) Text("Qiymət bölgüsü mövcud kataloqla təsdiqlənmir", color = GameTokens.Muted)
+            }
+            2 -> FinishCosmetics.categories.forEach { category ->
+                val item = catalog?.items?.firstOrNull { it.id == building.parts[category] }
+                Surface(color = GameTokens.Surface, shape = RoundedCornerShape(GameTokens.ControlRadius),
+                    border = BorderStroke(GameTokens.Hairline, GameTokens.Raised)) {
+                    Column(Modifier.fillMaxWidth().padding(GameTokens.Small), verticalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {
+                        Canvas(Modifier.fillMaxWidth().height(GameTokens.Target)) {
+                            sprite(art[building.parts[category]], 0f, 0f, size.width, size.height)
+                        }
+                        Text(when(category) { "wall" -> "Divar"; "window" -> "Pəncərə"; "entrance" -> "Giriş"; "roof" -> "Dam"; else -> "İşıq" },
+                            color = GameTokens.Muted, fontSize = GameTokens.Caption)
+                        Text(item?.name ?: building.parts.getValue(category), color = GameTokens.Text, fontWeight = FontWeight.Bold)
+                    }
+                }
+            }
         }
     }
 }
 
 @Composable
 private fun DetailRow(label: String, value: String) {
-    Surface(color = GameTokens.Surface, shape = RoundedCornerShape(GameTokens.ControlRadius)) {
+    Surface(color = GameTokens.Surface, shape = RoundedCornerShape(GameTokens.ControlRadius),
+        border = BorderStroke(GameTokens.Hairline, GameTokens.Raised)) {
         Row(Modifier.fillMaxWidth().padding(GameTokens.Small), horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
             Text(label, Modifier.weight(1f), color = GameTokens.Muted)
             Text(value, Modifier.weight(1f), color = GameTokens.Text, fontWeight = FontWeight.Bold)

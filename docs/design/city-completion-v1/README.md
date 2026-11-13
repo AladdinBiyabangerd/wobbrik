@@ -1,6 +1,6 @@
 # Şəhər üçün çatışmayan dizaynlar — 9 noyabr 2026
 
-Status: **13 noyabrda `04-building-detail.png` görünüşləri istifadəçi tərəfindən təsdiqlənib; digər lövhələr təklif olaraq qalır.** Branch `docs/missing-city-designs-v1`. Built-in imagegen; promptlar `prompts.json`. Hər vəziyyət bir kompozisiyada verilir, eyni ekranın cihaz ölçüsü variantları hazırlanmayıb. Bunlar Android build renderləri deyil.
+Status: **13 noyabrda `04-building-detail.png` görünüşləri istifadəçi tərəfindən təsdiqlənib; `02-parts-flow-v2.png` də 13 noyabrda hissələr/mağaza və binaya tətbiq vahidi üçün açıq təsdiqlənib; digər lövhələr təklif olaraq qalır.** Branch `docs/missing-city-designs-v1`. Built-in imagegen; promptlar `prompts.json`. Hər vəziyyət bir kompozisiyada verilir, eyni ekranın cihaz ölçüsü variantları hazırlanmayıb. Bunlar Android build renderləri deyil.
 
 - [Kolleksiya və altı başlanğıc üslubu](01-collection.png).
 - [68 hissə: seçim → açılma → tətbiq — düzəliş v2](02-parts-flow-v2.png).
