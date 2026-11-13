@@ -2,7 +2,7 @@
 
 ## Cari davam — network-resilience lokal review/commit (14 noyabr 2026)
 - Completed: offline Play/read-cache və pending nəticə diff-i lokal review edildi; yeni konkret bug tapılmadı, production kod dəyişmədi. İstifadəçi həm review/commit, həm ayrıca reconciliation vahidini açıq istədi.
-- Current state: `fix/network-resilience`, baza `a2ebcce`; network vahidi ayrıca lokal commit üçün ayrıldı. Owner phase4 DetailRow/acceptance/render/handoff və release/oyun QA faylları kənarda qorunur. Merge/push/CI yoxdur.
+- Current state: `fix/network-resilience`, baza `a2ebcce`; network vahidi `8d7ab4b` lokal commit-ində saxlanıldı. Owner phase4 DetailRow/acceptance/render/handoff və release/oyun QA faylları kənarda qorunur. Merge/push/CI yoxdur.
 - Decisions: reconciliation üçün təkrar ümumi icazə istəmə; bu chat review/commit vahidini bitirir. UI dəyişərsə konkret təsdiq/ui-craft sərhədi qalır. Backend dəyişməyib; mövcud account-scoped attempt/receipt GET müqaviləsi var.
 - Checks performed: Java21/offline unit/APK/lint PASS1s,107/108up-to-date (əvvəlki218unit reuse); offline host3/3PASS16s; yeni inventory/detailfont2,city390/game360 PNG-lərinə baxıldı; contrast4/4min8.22,diffcheckPASS. Working tree owner diff-i ilə yoxlanıb; isolated commit-only/device/emulator/real-server yoxlaması deyil.
 - Remaining work: account/receipt reconciliation və connectivity scheduler implementasiya edilməyib. Başqa cihazın cəhdi avtomatik abandon edilmir; missing-started pending silinmir/restart edilmir. Əvvəlki runtime/full parity məhdudiyyətləri qalır.
