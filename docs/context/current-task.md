@@ -1,6 +1,7 @@
 # Cari handoff — 13 noyabr 2026
 
 ## Completed
+- Mobil portret kilidi MainActivity manifestində tətbiq edildi; mobil əvvəl / planşet sonra qərarı qayda güzgüsü və əsas plana yazıldı.
 - Silent finish home: qəbul edilmiş hesab keşi olduqda Recovering loading panelini göstərmir; terminal checkpoint/finish arasında oyun səhnəsi geri görünmür. Oyna finish təsdiqinədək deaktivdir; rəqəmlər server Ready nəticəsi ilə yenilənir.
 - Checkpoint `92d640d`, navigation `3130cce`, kosmetik qərar `8a718da` üzərində avtomatik finish/default görünüş vahidi tətbiq edildi.
 - Kolleksiya təsdiqli mövcud kosmetik picker-i açır; Təsdiqlə cihazda hesab üzrə daimi default saxlayır, Geri saxlamadan home-a qayıdır.
@@ -14,6 +15,8 @@
 - Review: `docs/reviews/2026-11-13-default-cosmetics.md`; naviqasiya PNG/script-ləri yenilənib, Android screenshot deyil.
 
 ## Decisions
+- 13 noyabr əlavə qərarı: mobil yalnız portret rejimində olacaq; mobil landşaft dizaynı və yoxlaması tələb edilmir. Müxtəlif portret ölçüləri və font/a11y uyğunluğu saxlanır. MainActivity manifestində portrait kilidi tətbiq edilib; runtime yoxlanmayıb.
+- 13 noyabr: mobil tam bitmədən planşet dizaynına keçilmir; hər mobil vahid üçün planşet dizaynı hazırlanmaz. Planşet işi mobil tamamlandıqdan sonra ayrıca istifadəçi tapşırığı ilə başlayır. Qayda AGENTS.md, visual-work.mdc və PLAN.md-də qeyd edilib.
 - İstifadəçi bu chatdə mövcud finish-cosmetics-v1 dizaynını Kolleksiyadan daimi seçim kimi açmağı təsdiqləyib.
 - AppBackend dəyişdirilmir; emulator açılmır; CI yalnız ayrıca tələb ilə main-də. Canlı yoxlama gate deyil.
 - Yeganə plan `docs/PLAN.md`; mərhələ 4-ə keçilmir. Merge istifadəçi təsdiqi tələb edir.
@@ -29,9 +32,11 @@
 - app AndroidCosmeticDefaultsStore.kt, WobbrikApplication.kt, OnlineGame.kt, FinishCosmeticScreen.kt, GameScene.kt.
 
 ## Checks performed
+- Mobil portret: assembleDebug və lintDebug PASS; merged manifest-də portrait yoxlanıb; diff check PASS. Review: `docs/reviews/2026-11-13-mobile-portrait.md`. Runtime/render yoxlanmayıb.
 - Silent finish vahidi: app unit, core/engine unit (up-to-date), assembleDebug və lintDebug PASS; diff check PASS. Android runtime/render və performans ölçümü yoxdur; CI işə salınmayıb.
 - Fokuslu assembleDebug, engine 67 test, app unit test, lintDebug PASS; son exact-Ready dəyişiklikdən sonra yenilənib (app 3 test).
 - git diff --check PASS. Runtime/render, backend tests, CI, emulator/ADB yoxdur.
 
 ## Exact next step
+- Mobil portret kilidi və qayda qeydlərinin commit-ini review et; yeni böyük vahidi yeni chatdə davam et.
 - Silent finish home diff/commit-ini istifadəçiyə review üçün təqdim et. Merge yalnız açıq təsdiqdən sonra; CI ayrıca göstərişsiz işləmir. Növbəti məhsul vahidinə özbaşına başlama.
