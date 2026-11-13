@@ -7,7 +7,7 @@
 - Koddan düymə→ekran PNG xəritələri hazırlandı, açılıb baxıldı: docs/reviews/navigation-consistency/{01-pages,02-game}.png.
 
 ## Current state
-- Son kosmetik qərar ayrıca docs/default-cosmetics-flow branch-də qeyd olunur; parent navigation fix HEAD 3130cce-dir. Bu qərarın kod implementasiyası hələ yoxdur.
+- Son kosmetik qərar istifadəçi göstərişi ilə eyni fix/navigation-consistency branch-inə daxil edilib (8a718da); əlavə docs branch-i silinib. Implementasiya yeni chatdə bu fix branch-də davam edəcək; kod implementasiyası hələ yoxdur.
 - Cari branch fix/navigation-consistency əvvəlki fix commit-i üzərindədir; heç biri main-ə merge/push edilməyib.
 - AppBackend və UI vizual layout/asset/token dəyişməyib. Yeni ekran yaradılmayıb. Runtime/Android render unverified; emulator açılmayıb.
 
