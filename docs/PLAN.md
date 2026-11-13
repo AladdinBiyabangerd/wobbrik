@@ -33,7 +33,7 @@ Ekranda görünən oyun hələ ayrıca offline məşqdir. Onlayn hostun input-u 
 - [x] Başlatma, checkpoint və finish üçün mövcud server müqaviləsi mobil inteqrasiya ilə tutuşdurulub.
 - [x] Branch → lokal review → main-ə merge → lokal CI iş qaydası tətbiq olunub.
 - [ ] Faktiki backend ünvanı ilə canlı mobil bağlantı yoxlanılsın.
-- [ ] Buraxılış build-i və cihazdakı işləmə ayrıca təsdiqlənsin.
+- [x] Buraxılış APK-sının telefonda yoxlanması istifadəçi qərarı ilə bağlı sayılır (13 noyabr); yeni cihaz testi/PASS iddiası deyil.
 
 ## 2. Əsas tikinti mexanikası — qismən hazırdır
 
@@ -52,6 +52,9 @@ Ekranda görünən oyun hələ ayrıca offline məşqdir. Onlayn hostun input-u 
 
 ## 3. Onlayn oyun və serverdə irəliləyiş — hazırda üzərində işlənən mərhələ
 
+**13 noyabr status düzəlişi:** finish-cosmetics, Room cache, account landscape və restart/abandon artıq main-dədir. AppBackend guest düzəlişi (`d12f1dd`) və abandon/migration 017 (`773858d`) Railway-də işləyən `bb3072a` versiyasına daxildir (deploy `9064c450-cbff-4821-b8a0-86c217aa5249`, SUCCESS/RUNNING; `/readyz` uğurlu). Migration statusu startup kodu və işlək servis əsasında çıxarılıb, birbaşa SQL yoxlanmayıb. Kosmetik seçim vizualı istifadəçi tərəfindən qəbul edilib; telefon yoxlamaları istifadəçi qərarı ilə bağlıdır. Aşağıdakı köhnə “merge gözləyir” qeydləri bu vahidlər üçün tarixi məlumatdır. Bu yoxlamada CI və yeni authenticated `/sync` sorğusu işlədilməyib.
+
+
 ### 3.1. Hesab və cəhdin bərpası
 
 - [x] Tətbiq səviyyəsində Firebase auth/recovery owner qurulub.
@@ -59,7 +62,7 @@ Ekranda görünən oyun hələ ayrıca offline məşqdir. Onlayn hostun input-u 
 - [x] Serverin qəbul etdiyi cəhd `AcceptedAttemptRestore` ilə yoxlanıb pauzada bərpa olunur.
 - [x] Boş, bitmiş, terminal, uyğunsuz və davam edilmiş cəhdlər fərqləndirilir.
 - [ ] Real giriş ekranı və hesab naviqasiyası yekun axına qoşulsun.
-- [ ] Canlı hesabla giriş/çıxış və yenidən giriş yoxlanılsın.
+- [x] Telefonda hesabla giriş/çıxış və yenidən giriş yoxlaması istifadəçi qərarı ilə bağlıdır (13 noyabr); yeni test icra edilməyib.
 
 ### 3.2. Mühərrikin tətbiqə bağlanması
 
@@ -77,7 +80,7 @@ Ekranda görünən oyun hələ ayrıca offline məşqdir. Onlayn hostun input-u 
 - [x] Finish yalnız terminal vəziyyət və qəbul edilmiş mərtəbə/sayğaclarla göndərilir.
 - [x] Lokal pul/mükafat verilmir; qəbuldan sonra server snapshot-u yenilənir.
 - [x] Bu inteqrasiya üçün 11 yeni test əlavə edilib və lokal CI keçib.
-- [ ] Eyni davranış real server, şəbəkə kəsilməsi və cihazda prosesin bağlanması ilə yoxlanılsın.
+- [x] Telefon üzrə şəbəkə/retry/prosesin bağlanması yoxlamaları istifadəçi qərarı ilə bağlıdır (13 noyabr); faktiki yeni test/PASS deyil. Məlum backend xətalarının düzəldilməsi ayrıca qalır.
 
 ### 3.4. Real oyunun onlayn axına qoşulması — DAVAM EDİR
 
@@ -88,7 +91,7 @@ Ekranda görünən oyun hələ ayrıca offline məşqdir. Onlayn hostun input-u 
 - [x] Son eniş → checkpoint → yeni Ready → finish axını: canlı oyun axını yoxlaması istifadəçi qərarı ilə (9 noyabr) tələb olunmur və açıq iş sayılmır.
 - [x] Finish kosmetik seçimi versiyalı server kataloqu və cari hesabın unlock-larına bağlandı (`feat/finish-cosmetics`); durable draft və explicit təsdiq var. Vizual qəbul istifadəçidədir (canlı yoxlama tələb olunmur), main-ə merge edilməyib.
 - [x] Explicit resume/drop ilə onlayn input açılır; restart/abandon siyasəti `feat/restart-abandon`-da əmələ bağlanıb (merge edilməyib).
-- [ ] Restart/abandon siyasəti (istifadəçi qərarı, 9 noyabr) implementasiya olunsun: oyunçu açıq cəhdi oyunun
+- [x] Restart/abandon siyasəti (istifadəçi qərarı, 9 noyabr) implementasiya edilib və main-dədir: oyunçu açıq cəhdi oyunun
   ortasında tərk edərsə (Home, Geri və ya tətbiqi bağlamaq) cəhd silinir və saxlanmır — nəticə və bina
   yaranmır, sonradan “Cəhdə qayıt” olmur. Saxlama yalnız iki halda olur: (1) oyunçu uduzur — uduzmadan
   əvvəlki son qəbul edilmiş uğurlu vəziyyət saxlanır; (2) oyunçu oyunu özü bitirir — mövcud axın:
@@ -101,8 +104,8 @@ Ekranda görünən oyun hələ ayrıca offline məşqdir. Onlayn hostun input-u 
   qayıt”) açıq cəhdi silir; uduzulmuş cəhd (kosmetik seçim) saxlanır və yalnız o “Cəhdə qayıt”
   olaraq qalır. Tətbiq bağlanıbsa, köhnə açıq cəhd açılışda bərpa edilmir; “Oyna” onu əvvəlcə silir,
   sonra yeni cəhd başladır.
-- [ ] Google guest link UI yazılıb; live Console web client + provider yoxlaması açıqdır.
-- [ ] Room yalnız hesab üzrə server snapshot keşi kimi qoşulsun (plan vahid 3). 9 noyabr qərarı (B):
+- [x] Google guest link UI yazılıb; telefonda Google link yoxlaması istifadəçi qərarı ilə bağlıdır (13 noyabr), yeni test/PASS deyil. Console dəyişikliyi icra edilməyib.
+- [x] Room yalnız hesab üzrə server snapshot keşi kimi qoşulub və main-dədir (plan vahid 3). 9 noyabr qərarı (B):
   gözləyən əmrlər üçün yeganə outbox davamlı fayl journal-ı (`DurableJournalFile`) qalır; Room
   ikinci journal/outbox və wallet authority deyil, journal Room-a köçürülmür.
   Status (9 noyabr): `feat/room-cache`-də implementasiya edildi və lokal yoxlandı; merge gözləyir.

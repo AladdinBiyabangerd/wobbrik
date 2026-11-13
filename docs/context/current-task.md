@@ -1,3 +1,22 @@
+## Latest stage-three blocker reconciliation — 13 November 2026
+- Completed: verified outstanding mobile branches (finish-cosmetics, room-cache, account-landscape-three-pane, restart-abandon, restore/durability fixes) are already ancestors of Wobbrik main 0045422. No duplicate merge needed.
+- Backend: AppBackend main bb3072a contains guest auth merge d12f1dd and abandon merge 773858d (migration 017). Railway AppBackend production deployment 9064c450-cbff-4821-b8a0-86c217aa5249 is SUCCESS/RUNNING, created 2026-11-13 08:02 UTC, commit bb3072ac20d61e11dbb22383af6825c278bb4602, domain appsbackend.up.railway.app. Thus older “guest fix/migration not deployed” notes are superseded.
+- Checks performed: ancestry checks; Railway read-only status; HTTPS /readyz returned {"status":"ready"}; startup calls prepareDatabase before HTTP serving. Migration completion is inferred from deployed source/startup and readiness, not a direct production SQL inspection. No new authenticated /sync request or phone test performed.
+- Decisions: user accepted cosmetic selection visual on 13 November; stage-three phone checks closed by user. User explicitly prohibits CI until requested; NO CI run in this unit. No code, remote push, deploy, production migration command or backend working-tree changes made.
+- Current state: the specifically listed blockers (missing guest-fix release, missing branch merges/migration release, cosmetic visual acceptance) are closed on this evidence. This does not claim new end-to-end test PASS or acceptance of later stages.
+- Remaining work: no implementation work for those listed blockers. Other historical stage-three checklist items need separate scoped reconciliation before declaring whole-stage acceptance; do not start stage four automatically.
+- Relevant files: docs/PLAN.md; docs/reviews/2026-11-13-stage-three-status-reconciliation.md; AppBackend cmd/server/main.go and migrations/017_wobbrik_attempt_abandon.sql.
+- Exact next step: reconcile any other stage-three checklist items against merged code if full stage acceptance is requested; do not reopen waived phone checks or run CI.
+
+## Latest user decision — 13 November 2026: stage-three phone checks closed
+- Completed: user explicitly counts stage-three phone verification items as closed, including Google guest linking, account sign-in/out/re-login, release APK device behaviour and device network/retry/process-restart scenarios.
+- Current state: closed by user decision; no new device test was run and no technical PASS is claimed. This supersedes historical requests below to perform those phone checks; do not reopen them unless the user asks.
+- Decisions: this closure concerns the current stage-three discussion, not future stages' performance, visual or billing acceptance. Known backend guest /sync 403 is not proven fixed by closing phone checks.
+- Remaining work: establish outstanding branch/main integration and backend migration status; resolve known production guest /sync 403; existing finish-cosmetic visual acceptance remains separate.
+- Relevant files: docs/PLAN.md §1, §3; earlier release/auth/restart handoffs below.
+- Checks performed: documentation diff only; no device/backend/build/CI action.
+- Exact next step: inspect outstanding stage-three integration and backend fix/migration status without requesting phone verification again.
+
 ## Latest city building visual policy (plan) — 9 November 2026
 - Completed: user-approved decision recorded on `docs/city-placement-visual-policy` (from main `28d5208`): PLAN §4 subsection "Şəhərdə binanın görünüşü", checked item under Açıq qərarlar, pointers in `kotlin-compose-plan.md` (footprint ≠ visual form) and `design/README.md`.
 - Policy: only city placement and viewing a placed building (live in-game look stays as it is). The building closely follows the curvature/lean/floor-offset stack actually built (play geometry is the source; no straightening into a box); it is a solid, full-bodied designed UI building (windows, roof, walls); parts/coverings are dressed onto the real form like clothes on a mannequin, not a flat rectangular skin.
