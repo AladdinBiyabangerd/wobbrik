@@ -120,6 +120,10 @@ private fun AuthenticatedGame(app: WobbrikApplication) {
         AcceptedScene(hostState, ready, host, onHome = { page = "home" })
         return
     }
+    if (page == "city" && ready != null && configured != null) {
+        key(InventoryReadKey(ready)) { CityScreen(configured, ready, onHome = { page = "home" }, onInventory = { page = "inventory" }) }
+        return
+    }
     if (page == "parts" && ready != null && configured != null) {
         key(InventoryReadKey(ready)) { PartsScreen(configured, ready, partsBuilding, onBack = { page = "inventory" }) }
         return

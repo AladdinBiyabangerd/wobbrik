@@ -184,12 +184,12 @@ private fun HomeControls(snapshot: GameSnapshot?, active: Boolean, onPlay: (() -
                 verticalAlignment = Alignment.CenterVertically) {
                 HomeButton(large = tablet, label = if (active) "Cəhdə qayıt" else "Oyna", primary = true, showPlayIcon = true, enabled = onPlay != null,
                     modifier = Modifier.weight(1f), onClick = { onPlay?.invoke() })
-                HomeButton(large = tablet, label = "Şəhərim", icon = R.drawable.ui_city, enabled = false,
+                HomeButton(large = tablet, label = "Şəhərim", icon = R.drawable.ui_city, enabled = onPlay != null,
                     modifier = Modifier.weight(1f).heightIn(min = GameTokens.Target * 2), onClick = { onPage("city") })
             }
         } else {
             HomeButton(large = tablet, label = if (active) "Cəhdə qayıt" else "Oyna", primary = true, showPlayIcon = true, enabled = onPlay != null, compact = compact, onClick = { onPlay?.invoke() })
-            if (tablet) HomeButton(large = tablet, label = "Şəhərim", icon = R.drawable.ui_city, enabled = false, onClick = { onPage("city") })
+            HomeButton(large = tablet, label = "Şəhərim", icon = R.drawable.ui_city, enabled = onPlay != null, onClick = { onPage("city") })
         }
         // User decision (9 November): layouts with the side menu (tablet, short landscape) show only Oyna here;
         // the secondary entries stay in the side menu / account page. Phone portrait keeps both buttons.
@@ -265,7 +265,7 @@ private fun HomeRail(onPage: (String) -> Unit, shortHeight: androidx.compose.ui.
             androidx.compose.runtime.CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides
                 if (item == null) LocalMinimumInteractiveComponentSize.current else androidx.compose.ui.unit.Dp.Unspecified) {
             items.forEach { (icon, label, page) ->
-                    IconButton(onClick = { onPage(page) }, enabled = page != "market" && page != "city",
+                    IconButton(onClick = { onPage(page) }, enabled = page != "market",
                         modifier = Modifier.size(item ?: (GameTokens.Target + GameTokens.Small)).background(if (page == "home") GameTokens.Accent else GameTokens.Surface,
                             RoundedCornerShape(GameTokens.ControlRadius))) { Image(painterResource(icon), label, Modifier.size(item?.times(0.75f) ?: GameTokens.Target), contentScale = ContentScale.Fit) }
                 }

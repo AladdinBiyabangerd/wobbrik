@@ -322,14 +322,7 @@ internal fun BuildingPreview(building: OwnedBuilding, modifier: Modifier) {
         centers.forEachIndexed { index, center ->
             val x = left + (center / 1000f - 50f - min) * scale
             val base = bottom - index * 30f * scale
-            val upper = base - 100f * 597f / 1064f * scale
-            sprite(art[building.parts["wall"]], x, upper, 100f * scale, 100f * 597f / 1064f * scale)
-            if (index > 0) sprite(art[building.parts["window"]], x + 30f * scale, upper + 12f * scale, 40f * scale, 35f * scale)
-            if (index == 0) {
-                sprite(art[building.parts["entrance"]], x + 30f * scale, base - 40f * scale, 40f * scale, 40f * scale)
-                sprite(art[building.parts["lighting"]], x + 75f * scale, base - 35f * scale, 15f * scale, 25f * scale)
-            }
-            if (index == centers.lastIndex) roof(art[building.parts["roof"]], x, base - 36f * scale, 100f * scale)
+            buildingFloor(art, building.parts, x, base, scale, index == 0, index == centers.lastIndex)
         }
     }
 }
