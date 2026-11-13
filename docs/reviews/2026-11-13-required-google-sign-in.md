@@ -44,3 +44,7 @@ User explicitly instructed “canli yoxlama hec vaxt teleb etme” (never requir
 - Recovery regressions in the rerun cover delayed old-account/catalog responses, same-UID re-login epochs, synchronous invalidation, logout/pending-command preservation and canceled receipts. These verify core behavior, not real Firebase listener delivery or real credential-picker behavior.
 - Both repositories' diff checks PASS; backend worktree clean. Owner edits preserved. No emulator/ADB/device use in this completion, no live-test request, CI, merge, push, deploy or Console action.
 - Result: remaining code checks complete. Runtime/visual behavior remains unverified evidence only; per user instruction it is not a requested or required gate. Feature branches remain unmerged pending separate merge authorization.
+
+## Authorized main integration
+
+User authorized merge/push in both repositories and Wobbrik branch/worktree cleanup. Auth merged preserving history as 09f3b49; only current-task handoff had content conflicts, resolved preserving both records. Main focused assembleDebug/lintDebug/core:test/engine:test PASS (1m9s, 100 tasks: 22 executed, 78 up-to-date). This clean main worktree has no local Firebase config, so this build verifies the supported config-absent checkout; configured feature build was separately verified above. No emulator/live test or local-ci.sh (existing explicit no-CI decision). Existing owner edits remain separate and are to be archived before cleanup.
