@@ -25,6 +25,15 @@ class GameNavigationTest {
         }
     }
 
+    @Test fun inventoryReadKeyUsesReadyIdentityAcrossEqualSnapshots() {
+        val snapshot = GameSnapshot("wobbrik-v1", 7, 123, 45, null)
+        val first = AuthenticatedRecoveryOwner.State.Ready(snapshot, accountKey = "alice")
+        val second = AuthenticatedRecoveryOwner.State.Ready(snapshot, accountKey = "alice")
+        assertEquals(first, second)
+        assertEquals(InventoryReadKey(first), InventoryReadKey(first))
+        assertNotEquals(InventoryReadKey(first), InventoryReadKey(second))
+    }
+
     @Test fun finishReturnsHomeOnlyAfterReconciliationOfAnEnteredGame() {
         assertTrue(GameNavigation.completed("game", true, true))
         assertFalse(GameNavigation.completed("game", true, false)) // active, loading or failed

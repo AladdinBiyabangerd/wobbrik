@@ -265,7 +265,7 @@ private fun HomeRail(onPage: (String) -> Unit, shortHeight: androidx.compose.ui.
             androidx.compose.runtime.CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides
                 if (item == null) LocalMinimumInteractiveComponentSize.current else androidx.compose.ui.unit.Dp.Unspecified) {
             items.forEach { (icon, label, page) ->
-                    IconButton(onClick = { onPage(page) }, enabled = page != "inventory" && page != "market" && page != "city",
+                    IconButton(onClick = { onPage(page) }, enabled = page != "market" && page != "city",
                         modifier = Modifier.size(item ?: (GameTokens.Target + GameTokens.Small)).background(if (page == "home") GameTokens.Accent else GameTokens.Surface,
                             RoundedCornerShape(GameTokens.ControlRadius))) { Image(painterResource(icon), label, Modifier.size(item?.times(0.75f) ?: GameTokens.Target), contentScale = ContentScale.Fit) }
                 }

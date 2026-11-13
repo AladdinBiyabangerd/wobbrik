@@ -119,6 +119,10 @@ private fun AuthenticatedGame(app: WobbrikApplication) {
         AcceptedScene(hostState, ready, host, onHome = { page = "home" })
         return
     }
+    if (page == "inventory" && ready != null && configured != null) {
+        key(InventoryReadKey(ready)) { InventoryScreen(configured, ready, onHome = { page = "home" }) }
+        return
+    }
     if (page == "collection" && ready != null) {
         val uid = ready.accountKey
         var selection by remember(ready) { mutableStateOf(ready.catalog?.let {
