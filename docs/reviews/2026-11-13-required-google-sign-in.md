@@ -23,3 +23,24 @@ Branch: `feat/required-google-sign-in`; reviewed implementation diff against `3c
 Isolated read-only emulator 5588 was started, debug APK installed, but no valid screenshot was obtained (boot/install/activity sequence did not reach a captured frame). User then explicitly said not to open an emulator every time; isolated emulator was stopped and no further render attempted. Shared 5586 was not controlled. Do not automatically reopen an emulator for continuation.
 
 All runtime visual cases remain UNVERIFIED: small/normal phone portrait and landscape, tablet portrait/landscape, font 1.0/2.0, insets, keyboard and accessibility. Native type/spacing, source-rectangle background seams and adaptive composition have not been visually compared with the approved board. Concept approval and a passing build are not runtime visual acceptance. Live credential-picker cancel/retry, sign-in, relaunch/session retention and account changes also remain unverified. Keep this unit on its feature branches pending any requested device/visual review and merge decision; do not advance stage four.
+
+## Validation continuation — no emulator launch
+
+- Rechecked `d972775` auth entry, credential cancellation/error handling, Google-provider gate, token UID/object guard, Firebase listener recovery epoch and UID-keyed composition. Source inspection only; no new runtime PASS.
+- `adb devices -l`: only previously shared `emulator-5586`; no physical device. No emulator launched, activity opened, installation, account change or device data mutation performed. ADB inventory required sandbox escalation for its local socket and succeeded.
+- Existing generated debug configuration has a non-empty backend origin. Explicit Google web-client override is empty; resource fallback remains implemented. This does not verify the installed APK, endpoint reachability, OAuth configuration or real Google credentials.
+- Wobbrik `git diff --check` PASS; backend feature worktree remains clean. Existing build/test evidence above was not rerun because source is unchanged. No CI/merge/push/deploy/Console changes.
+- Await selected device: physical phone, or explicit reservation of existing 5586. Then validate picker cancel/retry, successful Google → backend recovery, force-stop/relaunch session retention and controlled account isolation without clearing data or resetting attempts. All visual/device acceptance remains open.
+
+## Superseding user decision — live checks
+
+User explicitly instructed “canli yoxlama hec vaxt teleb etme” (never require live validation). Device selection/reservation and live-test requests are withdrawn; live checks are not a mandatory completion/merge gate. Do not auto-launch an emulator or request user-run live results. Existing runtime/visual cases remain unverified evidence limits. No new CI/merge/push/deploy/Console authorization is implied.
+
+## Code-validation completion — 13 November 2026
+
+- Scope: Android `d972775` versus `3ce3ac7`, backend `47cf75e` versus `bb3072a`; source unchanged. Reviewed Google credential type/non-empty token and client-ID fallback, cancel/error/retry paths, required session gate, token UID/object guard, auth epoch invalidation, UID-keyed UI, recovery cache/journal isolation and removal of guest entry points. No additional actionable defect found. No UI changes or rendered-visual acceptance claimed.
+- Fresh Android `./gradlew :app:assembleDebug :app:lintDebug :core:test :engine:test --rerun-tasks`: PASS, 34s, all 103 actionable tasks executed. Core 70 and engine 62 tests, zero failures/errors/skips. Lint: zero errors, 17 warnings; existing MainActivity LocalLifecycleOwner deprecation also reported during compilation. Warnings are not claimed resolved by this auth review.
+- Backend fresh `go test -race ./internal/platform -run '^TestFirebaseTokens$' -count=1 -v`: PASS, 1.888s. This is a local signed-token unit test, not live Firebase or database integration. Earlier full real-disposable-PostgreSQL suite remains the integration evidence; unchanged backend required no DTO/schema/economy/migration changes or further implementation.
+- Recovery regressions in the rerun cover delayed old-account/catalog responses, same-UID re-login epochs, synchronous invalidation, logout/pending-command preservation and canceled receipts. These verify core behavior, not real Firebase listener delivery or real credential-picker behavior.
+- Both repositories' diff checks PASS; backend worktree clean. Owner edits preserved. No emulator/ADB/device use in this completion, no live-test request, CI, merge, push, deploy or Console action.
+- Result: remaining code checks complete. Runtime/visual behavior remains unverified evidence only; per user instruction it is not a requested or required gate. Feature branches remain unmerged pending separate merge authorization.
