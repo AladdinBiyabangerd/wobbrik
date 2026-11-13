@@ -1,3 +1,10 @@
+## Google release and cleanup — 13 November 2026
+- Completed: Google auth main merge 09f3b49; focused main Android build/lint/core/engine checks PASS. No emulator/live request or CI.
+- Decisions: user authorized both main pushes and deletion of Wobbrik non-main branches/worktrees. Preserve uncommitted work and branch history in external archive before deletion. Backend unrelated branches/worktrees stay intact.
+- Current step: finish backend disposable-PostgreSQL main checks, push both main refs, archive and clean Wobbrik; verify remote/local equality. Runtime visual/auth evidence remains unverified, not a gate. No deployment.
+- Relevant files: docs/reviews/2026-11-13-required-google-sign-in.md; backend docs/reviews/2026-11-13-required-google-auth.md.
+- Remaining work: only release/cleanup verification in this unit; do not start another feature.
+
 ## Google main integration — 13 November 2026
 - User authorized both main merges and remote pushes. No emulator or live check required.
 - Android auth code reviewed and locally verified; backend auth reviewed and race/integration tested. Merge handoff conflict preserves both historical records; this entry supersedes older no-merge/no-push wording for this unit.
