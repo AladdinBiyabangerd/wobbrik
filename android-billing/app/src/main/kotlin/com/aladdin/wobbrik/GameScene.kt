@@ -23,7 +23,7 @@ internal data class SceneArt(val floor: ImageBitmap, val crane: ImageBitmap,
 /** Sprite coordinates are art anchors, not UI spacing or authoritative building geometry.
  * No bitmap allocation/decoding in the frame loop. Physics/collision units stay unchanged.
  */
-internal fun DrawScope.drawGameScene(state: PracticeState, art: SceneArt, motion: SceneMotion) {
+internal fun DrawScope.drawGameScene(state: PracticeState, art: SceneArt, motion: SceneMotion, cosmetics: Map<String, CosmeticSprite> = emptyMap(), parts: Map<String, String> = emptyMap()) {
     if (size.width <= 0f || size.height <= 0f) return
     val floorWidth = PracticeRulesV1.FLOOR_WIDTH.toFloat()
     val floorHeight = PracticeRulesV1.FLOOR_HEIGHT.toFloat()
@@ -59,7 +59,16 @@ internal fun DrawScope.drawGameScene(state: PracticeState, art: SceneArt, motion
         // Keep every visible connecting floor, including ones below the camera anchor.
         if (p.y >= -width && upper <= size.height + width) {
             rotate(degrees, p) {
-                sprite(art.floor, 233, 258, 1064, 597, p.x - width / 2, upper, width)
+                val wall = cosmetics[parts["wall"]]
+                if (wall == null) sprite(art.floor, 233, 258, 1064, 597, p.x - width / 2, upper, width)
+                else {
+                    sprite(wall, p.x - width / 2, upper, width, width * 597 / 1064)
+                    sprite(cosmetics[parts["window"]], p.x - width * .2f, upper + width * .12f, width * .4f, width * .35f)
+                    if (y == 0.0) {
+                        sprite(cosmetics[parts["entrance"]], p.x - width * .2f, p.y - width * .4f, width * .4f, width * .4f)
+                        sprite(cosmetics[parts["lighting"]], p.x + width * .25f, p.y - width * .35f, width * .15f, width * .25f)
+                    }
+                }
             }
         }
     }
@@ -70,6 +79,10 @@ internal fun DrawScope.drawGameScene(state: PracticeState, art: SceneArt, motion
     // Rotate the connected stack as one body about its foundation. No per-floor sliding.
     rotate(motion.towerDegrees, island) {
         state.floors.forEach { f -> floor(f.centerX, f.baseY) }
+        if (state.phase != Phase.FINISHED) state.floors.lastOrNull()?.let { last ->
+            val p = point(last.centerX, last.baseY)
+            roof(cosmetics[parts["roof"]], p.x - width / 2, p.y - width * .36f, width)
+        }
     }
     if (state.phase != Phase.FINISHED) {
         val target = point(state.floors.lastOrNull()?.centerX ?: 0.0,
@@ -128,7 +141,8 @@ internal fun DrawScope.drawGameScene(state: PracticeState, art: SceneArt, motion
         val last = state.floors.last()
         val p = point(last.centerX, last.baseY)
         rotate(motion.towerDegrees, island) {
-            sprite(art.roof, 229, 121, 1308, 641, p.x - width / 2,
+            if (cosmetics[parts["roof"]] != null) roof(cosmetics[parts["roof"]], p.x - width / 2, p.y - width * .36f, width)
+            else sprite(art.roof, 229, 121, 1308, 641, p.x - width / 2,
                 p.y - width * .36f - width * 641 / 1308, width)
         }
     }

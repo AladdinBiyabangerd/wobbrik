@@ -32,6 +32,7 @@ android {
 }
 kotlin { jvmToolchain(21) }
 dependencies {
+    testImplementation("junit:junit:4.13.2")
     implementation(project(":engine"))
     implementation(project(":android"))
     implementation("androidx.lifecycle:lifecycle-process:2.8.7")

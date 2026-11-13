@@ -40,11 +40,11 @@ import com.aladdin.wobbrik.engine.AcceptedEngineHost
 import org.json.JSONObject
 import kotlin.math.roundToInt
 
-private data class CosmeticSprite(val image: ImageBitmap, val origin: IntOffset, val size: IntSize)
+internal data class CosmeticSprite(val image: ImageBitmap, val origin: IntOffset, val size: IntSize)
 
 /** Atlas metadata locates art only; it never supplies catalog entries or ownership. */
 @Composable
-private fun rememberCosmeticArt(): Map<String, CosmeticSprite> {
+internal fun rememberCosmeticArt(): Map<String, CosmeticSprite> {
     val context = LocalContext.current
     return remember(context) {
         val metadata = context.assets.open("finish/catalog-map.json").bufferedReader().use { JSONObject(it.readText()) }
@@ -67,7 +67,7 @@ private fun rememberCosmeticArt(): Map<String, CosmeticSprite> {
     }
 }
 
-private fun DrawScope.sprite(sprite: CosmeticSprite?, left: Float, top: Float, width: Float, height: Float, alpha: Float = 1f) {
+internal fun DrawScope.sprite(sprite: CosmeticSprite?, left: Float, top: Float, width: Float, height: Float, alpha: Float = 1f) {
     if (sprite == null) return
     val scale = minOf(width / sprite.size.width, height / sprite.size.height)
     val w = (sprite.size.width * scale).roundToInt().coerceAtLeast(1)
@@ -78,7 +78,7 @@ private fun DrawScope.sprite(sprite: CosmeticSprite?, left: Float, top: Float, w
 }
 
 /** Common facade eave anchor: changing roof silhouettes must not move the join. */
-private fun DrawScope.roof(sprite: CosmeticSprite?, left: Float, baseline: Float, width: Float) {
+internal fun DrawScope.roof(sprite: CosmeticSprite?, left: Float, baseline: Float, width: Float) {
     if (sprite == null) return
     val scale = minOf(width / sprite.size.width, width * .85f / sprite.size.height)
     val w = (sprite.size.width * scale).roundToInt().coerceAtLeast(1)
