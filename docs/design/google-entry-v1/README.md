@@ -1,0 +1,5 @@
+# Mandatory Google entry — 13 November 2026
+
+User approved `approved-phone.png` in this chat (“okeydir”). Built-in imagegen proposal based on mobile-v1/account-states.png, with existing GameTokens palette. Prompt: preserve the account builder/island style, navy background, Wobbrik logo, title “Wobbrik-ə xoş gəldin”, supporting text “Oynamaq üçün Google hesabınla daxil ol”, one white Google sign-in action “Google ilə daxil ol”; no guest, skip, balance, progression or navigation before sign-in.
+
+Runtime uses exact source rectangles of the approved board for logo, illustration, wreaths and Google mark, with native accessible text/button layout. Generated extraction candidate was rejected because it changed the artwork. Source rectangles are art metadata, not spacing tokens. Phone portrait stacks art and actions; short landscape/tablet use side-by-side panels. Adaptive validation and differences are recorded in docs/reviews/2026-11-13-required-google-sign-in.md. Concept approval does not imply runtime acceptance.

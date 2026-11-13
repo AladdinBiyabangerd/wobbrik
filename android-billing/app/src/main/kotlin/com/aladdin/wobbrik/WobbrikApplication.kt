@@ -19,8 +19,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.tasks.await
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -42,47 +40,40 @@ class WobbrikApplication : Application(), DefaultLifecycleObserver {
     private var authListener: FirebaseAuth.AuthStateListener? = null
     sealed interface AccountState {
         data object Loading : AccountState
-        data class Session(val anonymous: Boolean) : AccountState
+        data object SignedOut : AccountState
+        data class Session(val uid: String) : AccountState
         data class Error(val cause: Exception) : AccountState
     }
     private val mutableAccount = MutableStateFlow<AccountState>(AccountState.Loading)
     val account = mutableAccount.asStateFlow()
-    private var accountWork: Job? = null
 
-    /** Existing Firebase sessions are retained. Only a signed-out installation creates a guest. */
-    fun retryAccount() {
-        if (bootstrap !is Bootstrap.Configured || accountWork?.isActive == true) return
-        val auth = FirebaseAuth.getInstance()
-        accountWork = recoveryScope.launch {
-            mutableAccount.value = AccountState.Loading
-            try {
-                val user = auth.currentUser ?: auth.signInAnonymously().await().user
-                    ?: error("Firebase returned no user")
-                if (auth.currentUser?.uid != user.uid) throw AccountChanged()
-                mutableAccount.value = AccountState.Session(user.isAnonymous)
-                // The listener owns auth epochs; only backend recovery can publish Ready.
-                (bootstrap as Bootstrap.Configured).recovery.onForeground()
-            } catch (cancelled: CancellationException) {
-                throw cancelled
-            } catch (failure: Exception) {
-                mutableAccount.value = AccountState.Error(failure)
-            }
-        }
+    /** Only Google-backed Firebase sessions may authorize recovery or gameplay. */
+    private fun googleUser() = FirebaseAuth.getInstance().currentUser?.takeIf { user ->
+        user.providerData.any { it.providerId == "google.com" }
     }
 
-    /** Link in place, never sign in over a guest or combine two server wallets. */
-    suspend fun linkGuest(credential: AuthCredential) {
+    fun retryAccount() {
+        if (bootstrap !is Bootstrap.Configured) return
+        val user = googleUser()
+        mutableAccount.value = user?.let { AccountState.Session(it.uid) } ?: AccountState.SignedOut
+        if (user != null) (bootstrap as Bootstrap.Configured).recovery.onForeground()
+    }
+
+    suspend fun signInGoogle(credential: AuthCredential) {
         check(bootstrap is Bootstrap.Configured)
-        val auth = FirebaseAuth.getInstance()
-        val guest = auth.currentUser ?: throw AccountChanged()
-        require(guest.isAnonymous) { "An anonymous session is required" }
-        // Collision must fail here: callers must not fall back to signInWithCredential.
-        val linked = guest.linkWithCredential(credential).await().user ?: throw AccountChanged()
-        check(linked.uid == guest.uid && auth.currentUser?.uid == guest.uid)
-        check(!linked.isAnonymous) { "Google link left the session anonymous" }
-        mutableAccount.value = AccountState.Session(linked.isAnonymous)
-        // Same UID still needs a recovery epoch so stale Ready cannot authorize input.
-        (bootstrap as? Bootstrap.Configured)?.recovery?.onAuthChanged(linked.uid)
+        mutableAccount.value = AccountState.Loading
+        try {
+            val user = FirebaseAuth.getInstance().signInWithCredential(credential).await().user
+                ?: throw AccountChanged()
+            if (googleUser()?.uid != user.uid) throw AccountChanged()
+            // The Firebase listener establishes the recovery epoch, including same-UID re-login.
+            mutableAccount.value = AccountState.Session(user.uid)
+        } catch (cancelled: CancellationException) {
+            retryAccount()
+            throw cancelled
+        } catch (failure: Exception) {
+            mutableAccount.value = AccountState.Error(failure)
+        }
     }
 
     override fun onCreate() {
@@ -99,10 +90,10 @@ class WobbrikApplication : Application(), DefaultLifecycleObserver {
         val transport = UrlConnectionGameplayTransport(BuildConfig.BACKEND_ORIGIN)
         val auth = FirebaseAuth.getInstance()
         val sessions = AccountSessions { uid ->
-            val user = auth.currentUser ?: throw AccountChanged()
+            val user = googleUser() ?: throw AccountChanged()
             if (user.uid != uid) throw AccountChanged()
             val token = user.getIdToken(false).await().token
-            if (auth.currentUser !== user) throw AccountChanged()
+            if (googleUser() !== user) throw AccountChanged()
             require(!token.isNullOrBlank()) { "Firebase returned an empty ID token" }
             token
         }
@@ -114,11 +105,12 @@ class WobbrikApplication : Application(), DefaultLifecycleObserver {
         val commands = AcceptedAttemptCommands(owner)
         engineHost.bind(commands)
         bootstrap = Bootstrap.Configured(owner, commands)
-        authListener = FirebaseAuth.AuthStateListener { source ->
+        authListener = FirebaseAuth.AuthStateListener {
             // Do not deduplicate by UID: a re-login must establish a new recovery epoch.
-            owner.onAuthChanged(source.currentUser?.uid)
-            mutableAccount.value = source.currentUser?.let { AccountState.Session(it.isAnonymous) }
-                ?: AccountState.Loading
+            val user = googleUser()
+            owner.onAuthChanged(user?.uid)
+            mutableAccount.value = user?.let { AccountState.Session(it.uid) }
+                ?: AccountState.SignedOut
         }.also(auth::addAuthStateListener)
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)
         retryAccount()

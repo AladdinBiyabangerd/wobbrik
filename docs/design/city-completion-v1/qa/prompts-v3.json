@@ -1,0 +1,6 @@
+{
+  "method": "built-in imagegen only, user decision; no deterministic source-art edits",
+  "references": "Original board plus starting-buildings-v2.png for board floor corrections",
+  "02-parts-flow": "Image1 EDIT TARGET; image2 source art. Preserve entire three-screen UI, all text/data/price/controls. RIGHT preview tower ONLY: composite exact ten-floor limestone tower from upper-left of image2 into same right hero area, uniformly scale to fit whole tower. Transfer exact ten courses and actual offsets; do not regenerate floor count. Then change only its wall finish to smooth sandy cream fine plaster matching selected İncə suvaq. Keep source geometry, nine upper courses plus entrance. Keep all UI unchanged. Output only three-screen board, no atlas.",
+  "discarded_attempts_summary": "01/04/06 source transfer;05 square parcel;decor-plan exact path proportions. Failed checks; outputs discarded. Only final selected output prompts are reproduced verbatim."
+}

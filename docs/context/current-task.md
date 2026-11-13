@@ -1,3 +1,84 @@
+## Google main integration — 13 November 2026
+- User authorized both main merges and remote pushes. No emulator or live check required.
+- Android auth code reviewed and locally verified; backend auth reviewed and race/integration tested. Merge handoff conflict preserves both historical records; this entry supersedes older no-merge/no-push wording for this unit.
+- Owner dirty files remain in original feature checkout. No deploy or Console changes authorized. Existing explicit no-CI decision remains; use focused main checks, not local-ci.sh, unless user requests CI.
+- Current step: complete main checks, push both main branches and verify local/remote equality. Do not advance to another feature.
+
+## Google code checks complete — 13 November 2026
+- Completed: final scoped Android/backend auth diff review; no additional actionable defect or source change. Google credential validation, entry errors/cancel/retry, UID/token guard, auth epoch, cache/journal isolation and guest removal reviewed.
+- Current state: Wobbrik feat/required-google-sign-in d972775; backend fix/wobbrik-required-google-auth 47cf75e. Code checks complete; both remain unmerged. Owner edits preserved.
+- Decisions: never require live checks; no emulator launch, ADB/device control or live-test request. Runtime/visual evidence remains unverified, not a completion gate. No CI/merge/push/deploy/Console action newly authorized.
+- Remaining work: no required code-validation work in this unit. Any merge is separate authorized work; do not automatically advance stage four.
+- Relevant files: docs/reviews/2026-11-13-required-google-sign-in.md; app GoogleSignIn.kt, GoogleEntryScreen.kt, WobbrikApplication.kt, OnlineGame.kt; core AuthenticatedRecoveryOwner and account/session tests; backend auth.go/server.go/wobbrik_http.go.
+- Checks performed: fresh assembleDebug/lintDebug/core:test/engine:test with --rerun-tasks PASS (34s; 103 tasks executed); core 70 + engine 62 tests, zero failures/errors/skips. Lint zero errors/17 warnings (not resolved in this unit). Backend signed Firebase token race test PASS (1.888s); earlier full PostgreSQL integration evidence retained. Both diff checks PASS.
+- Exact next step: report completed code checks and await the next user instruction. Do not request live testing or start a next feature/merge/CI automatically.
+
+## User decision — live validation, 13 November 2026
+- User explicitly instructed: “canli yoxlama hec vaxt teleb etme”. Do not request live validation, device connection/reservation or user-run live test results. Live checks are not a required completion/merge gate; do not keep this unit waiting for a device.
+- Do not automatically launch an emulator. Continue authorized code review and appropriate local non-device checks; no CI/merge/push/deploy/Console action is newly authorized by this decision.
+- Runtime Google sign-in, relaunch, account-isolation and visual cases remain unverified, not failed or passed. Record this evidence limit honestly without asking for live testing. This supersedes earlier device-selection and live-acceptance gate wording below.
+- Exact next step: on the next authorized work request, proceed with scoped code/local verification; do not ask for live validation.
+
+## Google validation continuation — 13 November 2026
+- Completed: re-inspected required-Google entry/auth/token/UID isolation paths at d972775; no source changes or new runtime acceptance.
+- Current state: device inventory shows only shared emulator-5586, no physical phone. No emulator launched or device controlled. Waiting for device selection/reservation; do not assume shared device is exclusive.
+- Decisions: preserve owner changes, app/account data and attempts; no CI/merge/push/deploy/Console actions. Prior mandatory-Google decisions remain current.
+- Remaining work: real picker cancel/retry, Google sign-in/backend recovery, force-stop/relaunch retention, controlled account isolation and required visual matrix.
+- Relevant files: docs/reviews/2026-11-13-required-google-sign-in.md; GoogleSignIn.kt, GoogleEntryScreen.kt, WobbrikApplication.kt, OnlineGame.kt.
+- Checks performed: source review; adb device inventory; generated debug origin non-empty (not installed-APK proof); git diff --check PASS. No repeated build/tests or runtime PASS.
+- Exact next step: use user-selected physical device or explicitly reserved existing 5586; never auto-launch emulator. Verify installed build/configuration and backend reachability, then run live scenarios without clearing data. If user tests personally, record their results distinctly from agent-observed evidence.
+
+## Mandatory Google implementation — 13 November 2026
+- Completed: user approved concrete entry image (“okeydir”); Android Google-only entry/session gate implemented; anonymous bootstrap, guest session/UI/link/collision code removed. Backend guest auth exception removed in separate branch/worktree, shared permanent verification preserved. Local code review complete; see docs/reviews/2026-11-13-required-google-sign-in.md.
+- Current state: Wobbrik feat/required-google-sign-in commit d972775 (base 3ce3ac7), AppBackend fix/wobbrik-required-google-auth commit 47cf75e at /private/tmp/wobbrik-required-google-backend (base bb3072a). Owner files preserved. No merge/push/deploy/Console/CI. Implementation is not runtime visual or live-auth acceptance.
+- Decisions: app is pre-release; user says no legacy production accounts, so migration is not a blocker. No data deletion/merge performed. User says emulator need not be opened every time: do not automatically start it again. Isolated 5588 stopped; shared 5586 untouched. Existing no-CI instruction remains.
+- Remaining work: requested live Google picker/sign-in/relaunch/account-isolation checks and visual acceptance. All required phone/tablet/orientation/font runtime renders remain unverified; no valid screenshot obtained before stopping the emulator in response to the user’s preference. Stage-four inventory/detail approval remains pending; do not start next feature here.
+- Relevant files: app WobbrikApplication.kt, GoogleSignIn.kt, GoogleEntryScreen.kt, OnlineGame.kt; AccountPreviewActivity signin fixture; docs/design/google-entry-v1; review above; backend internal/platform/{auth,server,wobbrik_http}.go and tests, docs/wobbrik-game-api.md.
+- Checks performed: Android assembleDebug/lintDebug PASS (final 20s); core/engine test tasks PASS via UP-TO-DATE results; token contrast PASS. Backend full real disposable-PostgreSQL race suite, focused signed-token boundary tests, vet/build PASS. Both scoped diff reviews/diff checks PASS. No live/device/render PASS claimed.
+- Exact next step: report bounded implementation and limits; continue only requested validation/merge work in a new chat with this handoff/review. Do not reopen migration questions, auto-start an emulator, run CI or advance stage four without user steering.
+
+## User clarification — mandatory Google entry, 13 November 2026
+- User clarified there are no legacy production users: app has not launched. Legacy-account migration is outside this unit; do not reopen it as a blocker. This does not authorize deleting test data or resetting current attempts.
+- User requested the concrete sign-in visual, since the earlier account reference was not the proposed entry screen. Preparing a separate imagegen proposal based on account-states.png; approval is still pending. No UI/auth implementation or CI.
+- Exact next step: show the generated mandatory-Google entry proposal, obtain its specific UI approval, then continue the auth removal/implementation unit on feat/required-google-sign-in. Earlier preflight migration-blocker wording below is superseded by this clarification.
+
+## Mandatory Google entry preflight — 13 November 2026
+- Completed: created `feat/required-google-sign-in` with all existing owner changes preserved; inspected account-states.png, approved landscape c2 notes, GameTokens, Firebase bootstrap/link code and backend route authorization.
+- Current state: proposal/approval gate only; no auth/UI/backend code changed. Mandatory entry proposal reuses existing account illustration, navy surfaces and cyan primary action; title “Wobbrik-ə xoş gəldin”, text “Oynamaq üçün Google hesabınla daxil ol”, action “Google ilə daxil ol”. No sample balance/progression or gameplay navigation before authentication. Loading/error/cancel stay at entry; valid Google sessions resume normally. Portrait stacks illustration/actions; short landscape and tablet place them side by side using existing responsive tokens. This proposal is NOT yet approved or rendered.
+- Decisions: no CI, device control, remote push/deploy or Console changes. Preserve anonymous UID/data/journals; do not silently sign in over an existing anonymous session or merge wallets. Full guest-code removal remains required; migration policy needs an explicit decision before implementation.
+- Remaining work: obtain specific entry UI approval and decide handling of existing anonymous installations. Existing linkGuest is the only inspected UID-preserving conversion; deleting it while also forbidding replacement/merge leaves conversion unresolved. Do not invent a hidden guest fallback.
+- Relevant files: app WobbrikApplication.kt, GoogleGuestLink.kt, OnlineGame.kt, GameTokens.kt; docs/design/mobile-v1/account-states.png; docs/design/account-landscape-actions-v1/README.md; AppBackend internal/platform/{server,wobbrik_http}.go.
+- Checks performed: scoped source and reference-image inspection; branch creation PASS. Backend already has permanent-account user middleware; seven inspected gameplay routes still use guestGameUser and need conversion/removal review. No schema change indicated by preflight, no backend changes or tests performed. No build/test/CI/runtime render.
+- Exact next step: present existing reference and concrete proposal to user; after UI approval and anonymous-installation policy decision, implement the bounded mandatory-Google auth unit and guest removal in both repositories, with focused checks and review. Read AppBackend AGENTS.md before any backend edit.
+
+## Latest user decision — Google sign-in required, 13 November 2026
+- Completed: product/technical/stage-three plans and Cursor mirrors updated; user explicitly requires deleting all former guest-specific code. User explicitly replaced guest gameplay with mandatory Google sign-in at first entry; no guest mode in the app. This supersedes earlier guest-first product decisions and the proposed guest inventory/city API expansion.
+- Current state: decision recorded only; auth implementation still creates anonymous Firebase sessions. Branch feat/stage-four-first-unit; owner changes preserved.
+- Decisions: require Google before entering the game; retain valid Google sessions on later launches. No CI. Do not expand guest API access for stage four. Existing anonymous data is not authorized for deletion, wallet merging or silent account replacement.
+- Remaining work: remove ALL code specific to the former guest model (anonymous bootstrap, guest session/UI, Google guest-link, conflict/transition flows and guest-only tests/fixtures); remove Wobbrik guest-only backend auth paths while preserving shared/other-app auth. Do not retain a hidden guest fallback or parallel legacy guest implementation. This is required future implementation, NOT completed code deletion. Implement auth as a separate small unit/branch; present concrete sign-in UI based on existing account designs before UI implementation. Resolve treatment of existing anonymous installations without losing progression or merging wallets. Stage-four inventory/detail UI approval remains pending.
+- Relevant files: app WobbrikApplication.kt (signInAnonymously, linkGuest), GoogleGuestLink.kt, OnlineGame.kt; docs/design/mobile-v1/account-states.png; docs/design/account-landscape-actions-v1/README.md; docs/game-plan.md guest-first text; docs/kotlin-compose-plan.md §5.
+- Checks performed: scoped source search only; no code change, build, test, render or CI.
+- Exact next step: new chat reads this entry, creates separate auth branch preserving owner changes, inspects approved account design and presents mandatory-Google entry proposal; implement after specific UI approval. Check AppBackend permanent-account authorization; no guest endpoint expansion.
+
+## Stage-four first unit selection — 13 November 2026
+- Completed: selected accepted finish → owned inventory → building detail (residents/value/installed parts), with city membership read. Existing design images inspected; findings in docs/reviews/2026-11-13-stage-four-first-unit.md.
+- Current state: branch feat/stage-four-first-unit; owner changes preserved. Planning/source review only; UI approval pending, no implementation.
+- Decisions: no CI. Defer purchase/edit/placement/decor/land/market. Existing approved city references stay canonical; 04/06/07 remain pending proposals.
+- Remaining work: scoped approval of 06 inventory panel, 04 detail and 07 loading/retry; concrete empty-state/action treatment; resolve preview module/quality constraints without replacing real geometry.
+- AppBackend: inventory/detail/city reads exist but use permanent-account auth; guest read compatibility needs a focused backend change/test. No schema/economy change indicated by this read slice. Backend owner files untouched.
+- Relevant files: docs/PLAN.md §4; docs/design/city-completion-v1/README.md; review above; core GameplayHttpBackend.kt; AppBackend internal/platform/wobbrik_http.go and internal/wobbrik/market.go.
+- Checks performed: source/image inspection; no tests/build/render/CI/runtime request. No commit/merge/push.
+- Exact next step: obtain scoped UI decisions, then implement this one slice; do not treat existing proposals or known incorrect floor counts as accepted production assets.
+
+## Latest user authorization — 13 November 2026: proceed to stage four
+- Completed: stage-three status reconciliation committed as 56fe041 and merged into main as d58ef76. User explicitly approved proceeding to stage four after that report.
+- Current state: stage four is authorized; implementation has NOT started. Start a new chat under the context-growth rule. Current owner checkout retains unrelated city-design changes; do not discard them.
+- Decisions: no CI unless user explicitly requests it. Stage-three phone checks and finish-cosmetic visual acceptance remain closed by user decision. Stage-four authorization does not approve every pending city design or authorize remote push/deploy/Console actions.
+- Remaining work: review pending city designs against already approved city references; identify the first bounded collection/parts/city integration unit under PLAN §4 and the canonical technical plan. Obtain specific approval for any still-unapproved UI before implementing it. Check AppBackend compatibility for the selected unit.
+- Relevant files: docs/PLAN.md §4; docs/kotlin-compose-plan.md §5–6; docs/game-plan.md §23; docs/design/city-completion-v1/README.md; docs/design/{city-plan.png,city-view.png}; docs/reviews/2026-11-13-stage-three-status-reconciliation.md.
+- Checks performed: previous unit verified merge ancestry, deployed backend revision and readiness; no CI, new device test or stage-four build/render in this authorization handoff.
+- Exact next step: new chat reads this latest entry, PLAN §4 and city-completion README, then presents existing pending designs needed for the first bounded stage-four unit. Do not invent a new design or start an unrelated implementation.
+
 ## Latest stage-three blocker reconciliation — 13 November 2026
 - Completed: verified outstanding mobile branches (finish-cosmetics, room-cache, account-landscape-three-pane, restart-abandon, restore/durability fixes) are already ancestors of Wobbrik main 0045422. No duplicate merge needed.
 - Backend: AppBackend main bb3072a contains guest auth merge d12f1dd and abandon merge 773858d (migration 017). Railway AppBackend production deployment 9064c450-cbff-4821-b8a0-86c217aa5249 is SUCCESS/RUNNING, created 2026-11-13 08:02 UTC, commit bb3072ac20d61e11dbb22383af6825c278bb4602, domain appsbackend.up.railway.app. Thus older “guest fix/migration not deployed” notes are superseded.
@@ -16,6 +97,47 @@
 - Relevant files: docs/PLAN.md §1, §3; earlier release/auth/restart handoffs below.
 - Checks performed: documentation diff only; no device/backend/build/CI action.
 - Exact next step: inspect outstanding stage-three integration and backend fix/migration status without requesting phone verification again.
+
+## Updated Firebase release — 10 November 2026
+- Completed/current state: supplied Downloads/google-services (6).json validated for com.aladdin.wobbrik and copied to git-excluded app/google-services.json; signed release rebuilt in Android Studio with existing signing settings. Delivered output/apk/Wobbrik-Railway-release.apk.
+- Checks performed: assembleRelease BUILD SUCCESSFUL (40s); Google Services task reran; generated Web OAuth client matches new JSON; apksigner verify PASS, same release SHA-1 602a1663aeaca47e97c80d2bcca201fd916124fe.
+- Decisions: Firebase config update only; no source/API/backend/deploy/Console changes.
+- Remaining work: physical device Google link and backend guest /sync 403 unverified/unresolved.
+- Relevant files: android-billing/app/google-services.json (ignored), app/release/app-release.apk; output/apk/Wobbrik-Railway-release.apk.
+- Exact next step: user tests updated signed APK; investigate reported error in a new bounded chat using this handoff and docs/stage-three-online-plan.md.
+
+## Release APK delivery — 10 November 2026
+- Completed: Android Studio Generate Signed APK with existing saved keystore `Documents/WobbrikKeyStore/Untitled.jks`, alias `relase`; no credentials exposed or changed. Output: `output/apk/Wobbrik-Railway-release.apk`.
+- Checks: Studio assembleRelease BUILD SUCCESSFUL; apksigner verify PASS; generated release BuildConfig DEBUG=false and BACKEND_ORIGIN=https://appsbackend.up.railway.app. Firebase Google Services task included.
+- Current state: signed release prepared for user's physical-phone test; no device test, backend change, deploy or Console change.
+- Remaining/exact next step: user adds release certificate SHA-1/SHA-256 to Firebase Android app and tests Google link; existing backend anonymous /sync 403 still requires separate resolution. See conversation for fingerprints; source artifact app/release/app-release.apk.
+
+## Latest backend origin — 10 November 2026
+- Completed: user-supplied `https://appsbackend.up.railway.app` configured in `android-billing/gradle.properties`; README updated. `chore/backend-origin` commit `464ad4f` reviewed and merged into main and current design branch; existing dirty design work preserved.
+- Current state: default URL applies to new builds; `-Pwobbrik.backendOrigin` still overrides it. No install/push/deploy/Console changes.
+- Decisions: origin only; no API/domain/schema change, no AppBackend code change needed.
+- Checks performed: HTTPS `/readyz` HTTP 200; generated BuildConfig URL verified; local main `./scripts/local-ci.sh` PASS (debug build/tests/lint); diff check PASS.
+- Remaining work: authenticated device gameplay was not tested.
+- Relevant files: android-billing/{gradle.properties,README.md}; docs/reviews/2026-11-10-backend-origin.md.
+- Exact next step: build/install normally to use Railway; separately requested local testing can override the origin. Existing design tasks below remain unchanged.
+
+## Latest city raster / floor QA — 9 November 2026
+- Completed: `docs/city-raster-floor-qa`: three separate v2 sources generated; six style towers visually counted as ten floors including entrance, roof excluded; three dark/light composites viewed. `02-parts-flow-v2.png` now has entrance + nine upper floors with original rectangular windows/violet roof and smooth plaster; original board preserved. QA records hashes, 30 alpha>=8 bounds, density1/2/3/4 limits and numbered floor markers.
+- Current state: PARTIAL, proposals only. User explicitly chose IMAGEGEN ONLY; Python/Pillow used only for QA measurements/composites/markers, no source-art edits. Source-reference and specific-floor removal attempts still failed01/04/06 (04 still11;01 hero extra;06 thumbnails short + extra city buildings). Those attempts discarded, original boards retained.05 ghost still not exact square; road ratio correction failed.
+- Decisions: retain style/layout and native text requirement; no new UI implementation, geometry engine or backend rule. Atlas not a runtime arbitrary-height building. Equal3x4 cells unsafe (long road crosses cell). Ground anchors null; alpha1–7 noise excluded from QA bounds. No arbitrary upscale claim.
+- Remaining work: imagegen-only01/04/06 floor consistency without other composition changes; exact road/land contours, production crops/anchors/modules and high-density sources. No runtime/stage4 acceptance.
+- Relevant files: docs/design/city-completion-v1/{README.md,02-parts-flow-v2.png,assets/*-v2.png,qa/}; docs/reviews/2026-11-09-city-raster-floor-qa.md; docs/PLAN.md §4.
+- Checks performed: QA script PASS offline (Pillow cache); sources/dark-light/numbered overlays inspected;02 fully opaque alpha255 and ten-floor hero counted; token contrast16.57/8.22/11.45 PASS; diff check PASS. No Android build/render/CI/backend changes, merge/push/deploy.
+- Exact next step: in a new bounded chat, read README/review and correct ONLY04's extra upper course with imagegen; verify9 upper+entrance before saving a new version. Do not ask again for Python permission. Then tackle01/06 separately; do not call this finished.
+
+## Latest missing city designs / raster candidates — 9 November 2026
+- Completed: six flow boards and three RGBA source atlases prepared with built-in imagegen, inspected including navy alpha composite; prompts and 12 canonical decoration ID map saved under docs/design/city-completion-v1/. Existing 68 part sources reused, not regenerated. No size variants of the same screen.
+- Current state: docs/missing-city-designs-v1; proposals awaiting user review, not approved references or runtime assets. No app/backend implementation, merge/push/deploy/CI.
+- Decisions: use existing approved navy/cyan city style and canonical six starting styles. Full-height runtime buildings must compose real floor geometry and dress parts onto it; fixed whole-tower images cannot represent arbitrary height/lean. Text/buttons remain native; arbitrary raster upscaling cannot guarantee quality.
+- Remaining work: design approval/corrections; exact floor-count visual consistency, some parapet/style/plan geometry and generated spelling issues; real sprite crops/anchors, density limits, light-background alpha QA and actual adaptive render checks. Do not call current rasters production-ready or stage4 complete.
+- Relevant files: docs/design/city-completion-v1/{README.md,prompts.json,01-collection.png..06-city-inventory.png,assets/}; approved docs/design/{city-plan.png,city-view.png}; docs/PLAN.md §4 and game-plan.md §23.
+- Checks performed: six final boards and alpha-preview visually inspected; 12 decoration IDs match backend catalogue; source dimensions and alpha decoded; token contrast16.57/8.22/11.45 PASS. No Android build/device renders or backend tests (art-only). Detailed limits in README/review.
+- Exact next step: review these proposals with user; correct current bounded design issues before approved UI implementation. No new stage implementation, merge or deploy implicitly authorized.
 
 ## Latest city building visual policy (plan) — 9 November 2026
 - Completed: user-approved decision recorded on `docs/city-placement-visual-policy` (from main `28d5208`): PLAN §4 subsection "Şəhərdə binanın görünüşü", checked item under Açıq qərarlar, pointers in `kotlin-compose-plan.md` (footprint ≠ visual form) and `design/README.md`.
@@ -331,3 +453,11 @@
 - User explicitly chose code-only completion while emulator is shared, then requested the next part and said live testing will be performed personally. Do not resume emulator interaction without new instruction; live scenarios remain unverified.
 - Next bounded implementation unit: PLAN §3.4 finish cosmetic-part selection linked to server catalog/account unlocks. Do not advance to stage 4 or invent a parallel plan. Before visual implementation read ui-craft and existing approved designs; present the applicable design for specific approval as AGENTS.md requires.
 - Exact next step in a new chat: read this handoff, PLAN §3.4 and stage-three-online-plan; inspect AcceptedAttemptCommands/AcceptedEngineHost finish configuration, RecoveryCatalog/account unlock mapping and AppBackend finish contract. Establish the existing approved cosmetic-selection behavior/design before coding; preserve current active attempt and pending journals. New work uses its own feature branch retaining the restore-fix history. No merge/push/deploy or Console changes authorized.
+## Latest city states / return designs — 9 November 2026
+- Completed: two built-in imagegen proposals, `07-loading-errors.png` (pending, insufficient coins, read error) and `08-building-return.png` (select, confirm, accepted inventory). Both inspected; balance header corrected to100 to match150−100=50.
+- Current state: `docs/city-states-return-design`; proposals awaiting user approval, no Android implementation/merge/push/deploy.
+- Decisions: no new land-contour or crop/anchor drawings. Implementation uses approved size rules and existing68 parts; this supersedes earlier requests for new contour/crop artwork. Real building geometry remains authoritative; generated tower floor counts are not implementation assets.
+- Remaining work: user review of these two UI proposals; later approved adaptive implementation. Unknown mutation result stays pending/reconciled, never treated as a failed purchase; return success only after server acceptance.
+- Relevant files: docs/design/city-completion-v1/{07-loading-errors.png,08-building-return.png,states-return-prompts.json,README.md}; docs/reviews/2026-11-09-city-states-return-design.md; docs/kotlin-compose-plan.md §5.
+- Checks performed: both boards visually inspected, token contrast PASS; no Android/device/adaptive/font2.0 renders, CI or backend changes. Existing return contract preserves ownership/parts/listing, grants no refund/XP.
+- Exact next step: obtain user design approval/corrections for07/08; no additional contour/anchor art and no automatic stage4 start.

@@ -1,6 +1,5 @@
 package com.aladdin.wobbrik
 
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
@@ -24,7 +23,6 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.imageResource
@@ -35,7 +33,6 @@ import appbackend.wobbrik.game.UnreadableAttemptJournal
 import appbackend.wobbrik.game.GameSnapshot
 import appbackend.wobbrik.game.AuthenticatedRecoveryOwner
 import com.aladdin.wobbrik.engine.*
-import kotlinx.coroutines.launch
 import java.math.BigInteger
 import java.math.BigDecimal
 import java.math.MathContext
@@ -44,6 +41,16 @@ import java.math.MathContext
 @Composable
 internal fun OnlineGame(app: WobbrikApplication) {
     val account by app.account.collectAsState()
+    val session = account as? WobbrikApplication.AccountState.Session
+    if (session == null) {
+        GoogleEntry(app, account)
+        return
+    }
+    key(session.uid) { AuthenticatedGame(app) }
+}
+
+@Composable
+private fun AuthenticatedGame(app: WobbrikApplication) {
     val configured = app.bootstrap as? WobbrikApplication.Bootstrap.Configured
     // Ready is a capability: structural equality must not retain an old auth epoch.
     // Read the canonical object every frame; StateFlow/Compose conflation may skip
@@ -56,10 +63,6 @@ internal fun OnlineGame(app: WobbrikApplication) {
     var page by rememberSaveable { mutableStateOf("home") }
     val host = app.engineHost
     var hostState by remember { mutableStateOf(host.snapshot()) }
-    var linkMessage by remember { mutableStateOf<String?>(null) }
-    var linking by remember { mutableStateOf(false) }
-    val activity = LocalContext.current as? ComponentActivity
-    val scope = rememberCoroutineScope()
     // Snapshot has no Compose dependency. Poll even when paused so lifecycle revocation is visible.
     LaunchedEffect(host, configured) {
         while (true) withFrameNanos { now ->
@@ -108,7 +111,7 @@ internal fun OnlineGame(app: WobbrikApplication) {
         return
     }
     val journalBlocked = (state as? AuthenticatedRecoveryOwner.State.Error)?.cause is UnreadableAttemptJournal
-    val error = account is WobbrikApplication.AccountState.Error || state is AuthenticatedRecoveryOwner.State.Error
+    val error = state is AuthenticatedRecoveryOwner.State.Error
     val status = when {
         app.bootstrap is WobbrikApplication.Bootstrap.MissingFirebase -> "Firebase konfiqurasiyası yoxdur"
         app.bootstrap is WobbrikApplication.Bootstrap.MissingBackendOrigin -> "Server ünvanı konfiqurasiya edilməyib"
@@ -118,14 +121,9 @@ internal fun OnlineGame(app: WobbrikApplication) {
         restore is AcceptedAttemptRestore.Result.Blocked -> "Cəhd bu versiyada bərpa edilə bilmir"
         else -> null
     }
-    val guest = (account as? WobbrikApplication.AccountState.Session)?.anonymous == true
-    AccountScreen(page, ready, account, status,
-        onPage = { page = it; linkMessage = null },
-        onRetry = {
-            linkMessage = null
-            if (account is WobbrikApplication.AccountState.Error) app.retryAccount()
-            else configured?.recovery?.onForeground()
-        },
+    AccountScreen(page, ready, status,
+        onPage = { page = it },
+        onRetry = { configured?.recovery?.onForeground() },
         onPlay = if (ready != null && restore !is AcceptedAttemptRestore.Result.Blocked) ({
             when (restore) {
                 AcceptedAttemptRestore.Result.NoAttempt, is AcceptedAttemptRestore.Result.Finished -> {
@@ -139,24 +137,8 @@ internal fun OnlineGame(app: WobbrikApplication) {
             }
         }) else null,
         active = restore is AcceptedAttemptRestore.Result.Paused && (restore.terminal || hostState.choosingFinish),
-        onLinkGoogle = if (guest && configured != null && activity != null && !linking) ({
-            linking = true
-            linkMessage = null
-            scope.launch {
-                try {
-                    val clientId = GoogleGuestLink.serverClientId(activity)
-                    app.linkGuest(GoogleGuestLink.googleCredential(activity, clientId))
-                } catch (failure: Throwable) {
-                    GoogleGuestLink.userMessage(failure)?.let { linkMessage = it }
-                } finally {
-                    linking = false
-                }
-            }
-        }) else null,
-        linking = linking,
-        linkMessage = linkMessage,
         journalBlocked = journalBlocked,
-        cached = if (ready == null && account is WobbrikApplication.AccountState.Session) cached else null)
+        cached = if (ready == null) cached else null)
 }
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -164,15 +146,11 @@ internal fun OnlineGame(app: WobbrikApplication) {
 internal fun AccountScreen(
     page: String,
     ready: AuthenticatedRecoveryOwner.State.Ready?,
-    account: WobbrikApplication.AccountState,
     status: String?,
     onPage: (String) -> Unit,
     onRetry: () -> Unit,
     onPlay: (() -> Unit)?,
     active: Boolean,
-    onLinkGoogle: (() -> Unit)? = null,
-    linking: Boolean = false,
-    linkMessage: String? = null,
     journalBlocked: Boolean = false,
     // Shown in the existing value slots only; Play, commands and status still follow [ready].
     cached: GameSnapshot? = null,
@@ -228,7 +206,7 @@ internal fun AccountScreen(
                 }
             }
             val info: @Composable ColumnScope.() -> Unit = {
-                    if (page == "account") Text(if ((account as? WobbrikApplication.AccountState.Session)?.anonymous == true) "Qonaq inşaatçı" else "İnşaatçı",
+                    if (page == "account") Text("İnşaatçı",
                         color = GameTokens.Text, fontSize = titleSize, fontWeight = FontWeight.Bold)
                     if (snapshot != null) Surface(shape = RoundedCornerShape(GameTokens.CardRadius), color = GameTokens.Surface,
                         border = BorderStroke(GameTokens.Hairline, GameTokens.Raised)) {
@@ -269,13 +247,6 @@ internal fun AccountScreen(
                                 Text(snapshot?.account?.achievements?.let { if (it.isEmpty()) "Hələ nailiyyət yoxdur" else "${it.size} nailiyyət açılıb" } ?: "—", color = GameTokens.Muted)
                             }
                         }
-                    }
-                    if (page == "account" && onLinkGoogle != null) {
-                        OnlineAction(if (linking) "Google bağlanır…" else "Google ilə bağla", true,
-                            enabled = !linking, onClick = onLinkGoogle)
-                        Text("Eyni oyun hesabı saxlanır; balansı başqa hesaba birləşdirmir.",
-                            color = GameTokens.Muted, fontSize = GameTokens.Body)
-                        if (linkMessage != null) Text(linkMessage, color = GameTokens.Danger, fontSize = GameTokens.Body)
                     }
                     if (page == "achievements" || page == "collection") {
                         val items = if (page == "achievements") snapshot?.account?.achievements else snapshot?.account?.unlocks

@@ -63,8 +63,8 @@ JDK21 və Android SDK36 ilə:
 ### Android application auth bootstrap
 
 The app now owns one `AuthenticatedRecoveryOwner`, disk journal and Firebase Auth
-listener per process. Existing Firebase sessions are observed; this does not create
-an anonymous account or add sign-in UI. ID tokens come from the current Firebase
+listener per process. Only Google-backed Firebase sessions authorize recovery. First entry requires
+Google sign-in through Credential Manager; valid Google sessions are retained. ID tokens come from the current Firebase
 user on each request (SDK refresh enabled), with account/epoch guards around I/O.
 Process foreground retries recovery; Activity recreation does not create writers.
 
@@ -77,8 +77,8 @@ selects Firebase. Without either configuration the application reports
 `MissingFirebase` / `MissingBackendOrigin` through `WobbrikApplication.bootstrap`
 and does not start recovery. Invalid nonempty origins fail explicitly.
 
-Guest → Google link uses Credential Manager and `linkWithCredential` only (same UID;
-no `signInWithCredential` fallback). Provide the Web OAuth client ID via
+Google sign-in uses Credential Manager and Firebase `signInWithCredential`.
+Provide the Web OAuth client ID via
 `wobbrik.googleWebClientId`, or ensure `google-services.json` generates
 `default_web_client_id`. Enabling the Google provider in Firebase Console remains a
 separate explicit step; this repo does not change Console settings.
@@ -88,4 +88,4 @@ Offline `PracticeGame` remains debug/fixture-only. Restart/abandon stay unbound.
 Live auth, process death and backend connectivity still need configured device
 verification.
 Firebase listener semantics: https://firebase.google.com/docs/reference/android/com/google/firebase/auth/FirebaseAuth
-Google account linking: https://firebase.google.com/docs/auth/android/account-linking
+Google sign-in: https://firebase.google.com/docs/auth/android/google-signin
