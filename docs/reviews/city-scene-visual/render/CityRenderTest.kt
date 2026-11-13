@@ -36,7 +36,7 @@ class CityRenderTest {
   compose.setContent {
    val density=LocalDensity.current
    CompositionLocalProvider(LocalDensity provides Density(density.density,font)) {
-    CityContent(data,failed,{}, {}, {})
+    CityContent(data,failed,{}, {}, {}, lifeTimeSeconds=0.0)
    }
   }
   compose.waitForIdle()
@@ -56,7 +56,7 @@ class CityRenderTest {
   }
  }
  private fun capture(name: String) {
-  val file=File("/Users/mac/My Workspace/Wobbrik/docs/reviews/city-chrome-visual/city-scene-visual/$name.png")
+  val file=File("/Users/mac/My Workspace/Wobbrik/docs/reviews/city-liveness-visual/regression/city-scene-visual/$name.png")
   file.parentFile!!.mkdirs()
   compose.runOnUiThread {
    val view=compose.activity.window.decorView
@@ -78,7 +78,7 @@ class CityRenderTest {
  @Test @Config(qualifiers="w320dp-h568dp-xxhdpi") fun narrowLargeFont()=render(2f,"city-320-font2")
  @Test fun navigationAndView() {
   var home = 0; var inventory = 0
-  compose.setContent { CityContent(scene,false,{}, { home++ }, { inventory++ }) }
+  compose.setContent { CityContent(scene,false,{}, { home++ }, { inventory++ }, lifeTimeSeconds=0.0) }
   compose.onNodeWithText("Bazar").assertIsNotEnabled()
   compose.onNodeWithText("İnventar").performClick()
   compose.onNodeWithContentDescription("Ana ekran").performClick()

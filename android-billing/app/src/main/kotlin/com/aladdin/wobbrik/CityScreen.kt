@@ -41,13 +41,17 @@ internal fun CityScreen(configured: WobbrikApplication.Bootstrap.Configured,
 
 @Composable
 internal fun CityContent(scene: CityScene?, failed: Boolean, onRetry: () -> Unit,
-    onHome: () -> Unit, onInventory: () -> Unit) {
+    onHome: () -> Unit, onInventory: () -> Unit, lifeTimeSeconds: Double? = null) {
     var selected by remember(scene) { mutableStateOf<String?>(null) }
     var focused by remember(scene) { mutableStateOf(false) }
     BackHandler(focused) { focused = false }
     val art = rememberCosmeticArt()
     val decorArt = rememberDecorationArt()
     val terrainArt = rememberCityTerrainArt()
+    val lifeArt = rememberCityLifeArt()
+    val routes = remember(scene) { scene?.let(CityLifeRoutes::build).orEmpty() }
+    val lifeClock = if (lifeTimeSeconds == null) rememberCityLifeClock(scene != null && !focused, scene)
+        else rememberUpdatedState(lifeTimeSeconds)
     val contours = remember(scene) { CityTerrainGeometry.contours(scene?.parcels.orEmpty()) }
     val terrainBounds = remember(contours) { CityTerrainGeometry.bounds(contours) }
     val surface = remember(contours) { citySurface(contours) }
@@ -66,7 +70,11 @@ internal fun CityContent(scene: CityScene?, failed: Boolean, onRetry: () -> Unit
         BoxWithConstraints(Modifier.weight(1f).fillMaxWidth()) {
             val visible = if (focused && chosen != null) listOf(chosen) else buildings
             val sceneBounds = if (focused && chosen != null) emptyList() else
-                listOfNotNull(terrainBounds) + decorations.map { it.bounds }
+                listOfNotNull(terrainBounds) + decorations.map {
+                    // Sweep envelope for the approved subtle tree motion, with the fixed camera unchanged.
+                    if (it.source.copy.itemId.startsWith("decor_tree_")) it.bounds.copy(left=it.bounds.left-2, right=it.bounds.right+2)
+                    else it.bounds
+                }
             val maxArtScale = minOf(cityArtScale(visible, art),
                 (if (focused) emptyList() else decorations).minOfOrNull { cityDecorationArtScale(it) } ?: Double.POSITIVE_INFINITY)
             Canvas(Modifier.fillMaxSize().semantics {
@@ -91,14 +99,22 @@ internal fun CityContent(scene: CityScene?, failed: Boolean, onRetry: () -> Unit
                 val view = cityViewport(visible, size.width.toDouble(), size.height.toDouble(), maxArtScale, sceneBounds) ?: return@Canvas
                 if (!focused) cityTerrain(surface, cliff, view, terrainArt)
                 if (!focused) decorations.filter { it.road }.sortedBy { it.source.copy.id }.forEach { cityDecoration(it, view) }
+                val seconds = if (focused) 0.0 else lifeClock.value
+                val moving = seconds > 0.0
+                val actors = if (focused) emptyList() else cityLifeActors(routes, seconds)
                 // Roads lie below all upright objects. Buildings and upright decorations share painter depth.
                 val layers = visible.map { Triple(it.foundation.y, it.foundation.x, it.source.building.id) to it } +
-                    (if (focused) emptyList() else decorations.filter { !it.road }.map { Triple(it.anchor.y, it.anchor.x, it.source.copy.id) to it })
+                    (if (focused) emptyList() else decorations.filter { !it.road }.map { Triple(it.anchor.y, it.anchor.x, it.source.copy.id) to it }) +
+                    actors.map { Triple(it.position.y, it.position.x, it.route.id) to it }
                 layers.sortedWith(compareBy<Pair<Triple<Double, Double, String>, Any>> { it.first.first }
                     .thenBy { it.first.second }.thenBy { it.first.third }).forEach { layer ->
                     val projected = layer.second
                     if (projected is CityDecorationDrawing) {
-                        cityDecoration(projected, view)
+                        cityLivingDecoration(projected, view, seconds, moving)
+                        return@forEach
+                    }
+                    if (projected is CityLifeActor) {
+                        cityLifeActor(projected, view, lifeArt, moving)
                         return@forEach
                     }
                     projected as CityBuildingProjection.Building
@@ -107,7 +123,8 @@ internal fun CityContent(scene: CityScene?, failed: Boolean, onRetry: () -> Unit
                         val scale = view.scale.toFloat()
                         val x = (view.x + (point.x - 50) * view.scale).toFloat()
                         val base = (view.y + point.y * view.scale).toFloat()
-                        buildingFloor(art, parts, x, base, scale, index == 0, index == projected.floors.lastIndex)
+                        buildingFloor(art, parts, x, base, scale, index == 0, index == projected.floors.lastIndex,
+                            windowAlpha = if (moving) cityWindowAlpha(projected.source.building.id,index,seconds) else 1f)
                     }
                 }
             }

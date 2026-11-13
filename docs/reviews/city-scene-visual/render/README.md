@@ -19,3 +19,13 @@ It measures actual inventory label line bounds against its laid-out width (rathe
 `hasVisualOverflow`, which flags the wider no-wrap paragraph even for fitting text).
 Run the same command with both `--tests '*CityRenderTest' --tests '*CityTerrainRenderTest'`
 for 18 host tests. Review: `../../2026-11-13-phase4-city-chrome.md`.
+
+V1 liveness continuation: `CityLifeRenderTest` adds 8 native tests (four portrait/font
+cases, empty scene, 24 animation frames, background/resume and platform motion off/on).
+`CityLifeRoutesTest` adds 8 safety tests. Run the same init script with
+`--tests '*CityLifeRenderTest' --tests '*CityRenderTest' --tests '*CityTerrainRenderTest'
+--tests '*CityLifeRoutesTest' --tests '*CityTerrainGeometryTest' --tests '*CityBuildingProjectionTest'`.
+43 tests total. Existing city fixtures use an explicit frozen life clock and write under
+`city-liveness-visual/regression/` so prior accepted evidence is preserved.
+Review: `../../2026-11-13-phase4-city-liveness.md`; native sequence and GIF are synthetic
+scene evidence, not a live account or device capture.

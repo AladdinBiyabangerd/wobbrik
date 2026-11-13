@@ -39,7 +39,7 @@ class CityTerrainRenderTest {
  private fun render(data:CityScene,font:Float,name:String) {
   compose.setContent {
    val density=LocalDensity.current
-   CompositionLocalProvider(LocalDensity provides Density(density.density,font)) { CityContent(data,false,{}, {}, {}) }
+   CompositionLocalProvider(LocalDensity provides Density(density.density,font)) { CityContent(data,false,{}, {}, {}, lifeTimeSeconds=0.0) }
   }
   compose.waitForIdle()
   compose.onNodeWithContentDescription("Ana ekran").assertIsDisplayed()
@@ -47,7 +47,7 @@ class CityTerrainRenderTest {
   capture(name)
  }
  private fun capture(name:String) {
-  val file=File("/Users/mac/My Workspace/Wobbrik/docs/reviews/city-chrome-visual/city-terrain-visual/$name.png")
+  val file=File("/Users/mac/My Workspace/Wobbrik/docs/reviews/city-liveness-visual/regression/city-terrain-visual/$name.png")
   file.parentFile!!.mkdirs()
   compose.runOnUiThread {
    val v=compose.activity.window.decorView
