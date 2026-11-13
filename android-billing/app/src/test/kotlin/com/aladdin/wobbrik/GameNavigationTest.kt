@@ -2,8 +2,19 @@ package com.aladdin.wobbrik
 
 import org.junit.Assert.*
 import org.junit.Test
+import appbackend.wobbrik.game.AuthenticatedRecoveryOwner
+import appbackend.wobbrik.game.GameSnapshot
 
 class GameNavigationTest {
+    @Test fun backgroundRecoveryKeepsAcceptedHomeButInitialLoadAndFailuresRemainVisible() {
+        val accepted = GameSnapshot("wobbrik-v1", 7, 123, 45, null)
+        assertTrue(GameNavigation.showAcceptedHome(AuthenticatedRecoveryOwner.State.Recovering, accepted))
+        assertFalse(GameNavigation.showAcceptedHome(AuthenticatedRecoveryOwner.State.Recovering, null))
+        assertFalse(GameNavigation.showAcceptedHome(AuthenticatedRecoveryOwner.State.SignedOut, accepted))
+        assertFalse(GameNavigation.showAcceptedHome(AuthenticatedRecoveryOwner.State.Error(Exception("offline")), accepted))
+        assertFalse(GameNavigation.showAcceptedHome(null, accepted))
+    }
+
     @Test fun allAccountEntrypointsResolveToOneCanonicalDestination() {
         for (page in listOf("home", "account", "collection", "achievements")) {
             assertEquals(page, GameNavigation.accountPage(page))

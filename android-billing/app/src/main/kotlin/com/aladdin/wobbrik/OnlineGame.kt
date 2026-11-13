@@ -114,7 +114,8 @@ private fun AuthenticatedGame(app: WobbrikApplication) {
             else -> Unit
         }
     }
-    if (page == "game" && hostState.playing && ready != null && hostState.scene != null) {
+    if (page == "game" && hostState.playing && ready != null && hostState.scene != null &&
+        (!hostState.choosingFinish || hostState.finishStorageError)) {
         AcceptedScene(hostState, ready, host, onHome = { page = "home" })
         return
     }
@@ -145,7 +146,7 @@ private fun AuthenticatedGame(app: WobbrikApplication) {
         app.bootstrap is WobbrikApplication.Bootstrap.MissingBackendOrigin -> "Server ünvanı konfiqurasiya edilməyib"
         journalBlocked -> JournalRecoveryCopy.Title
         error -> "Bağlantı yoxdur"
-        ready == null -> "Hesab və cəhd bərpa olunur…"
+        ready == null && !GameNavigation.showAcceptedHome(state, cached) -> "Hesab və cəhd bərpa olunur…"
         restore is AcceptedAttemptRestore.Result.Blocked -> "Cəhd bu versiyada bərpa edilə bilmir"
         else -> null
     }
@@ -155,7 +156,7 @@ private fun AuthenticatedGame(app: WobbrikApplication) {
         AccountScreen(accountPage, ready, status,
             onPage = { page = it },
             onRetry = { configured?.recovery?.onForeground() },
-            onPlay = if (ready != null && restore !is AcceptedAttemptRestore.Result.Blocked) ({
+            onPlay = if (ready != null && !hostState.choosingFinish && restore !is AcceptedAttemptRestore.Result.Blocked) ({
                 when (restore) {
                     AcceptedAttemptRestore.Result.NoAttempt, is AcceptedAttemptRestore.Result.Finished -> {
                         if (configured?.commands?.start(ready) == true) { host.enter(); page = "game" }
@@ -167,7 +168,7 @@ private fun AuthenticatedGame(app: WobbrikApplication) {
                     else -> Unit
                 }
             }) else null,
-            active = restore is AcceptedAttemptRestore.Result.Paused && (restore.terminal || hostState.choosingFinish),
+            active = false, // Terminal attempts finish automatically; Home never offers to reopen them.
             journalBlocked = journalBlocked,
             cached = if (ready == null) cached else null)
     }
