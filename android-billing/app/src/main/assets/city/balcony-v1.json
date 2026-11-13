@@ -1,0 +1,7 @@
+{
+  "reference": "docs/design/city-garden-v1/balcony-proposal/preview.png",
+  "sprites": {
+    "balcony_front": [184, 182, 825, 436],
+    "balcony_side": [1308, 121, 642, 457]
+  }
+}

@@ -47,7 +47,7 @@ class CityTerrainRenderTest {
   capture(name)
  }
  private fun capture(name:String) {
-  val file=File("/Users/mac/My Workspace/Wobbrik/docs/reviews/city-liveness-visual/regression/city-terrain-visual/$name.png")
+  val file=File("/Users/mac/My Workspace/Wobbrik/docs/reviews/city-balcony-visual/regression/city-terrain-visual/$name.png")
   file.parentFile!!.mkdirs()
   compose.runOnUiThread {
    val v=compose.activity.window.decorView
@@ -90,4 +90,37 @@ class CityTerrainRenderTest {
   assertTrue(contains(439.0,100.0)); assertTrue(contains(441.0,100.0))
   assertTrue(contains(700.0,50.0)); assertFalse(contains(740.0,200.0))
  }
+ @Test fun shorelineHasNoInternalParcelOrLRectangleSeams() {
+  val parcels=listOf(CityParcel("base",CityPosition(0,0,0)),CityParcel("land_2",CityPosition(440000,0,0)))
+  val surface=citySurface(CityTerrainGeometry.contours(parcels))
+  val region=Region().apply { setPath(surface.asAndroidPath(),Region(-5000,-5000,5000,5000)) }
+  val shore=cityShore(surface)
+  assertTrue(shore.strips.isNotEmpty())
+  shore.strips.forEach { (a,b) ->
+   val middle=(a+b)/2f
+   val delta=b-a
+   if (delta.getDistance()>2f) {
+    val normal=androidx.compose.ui.geometry.Offset(-delta.y,delta.x)/delta.getDistance()*2f
+    fun inside(p:androidx.compose.ui.geometry.Offset)=region.contains(p.x.toInt(),p.y.toInt())
+    assertFalse("An interior seam received shore art",inside(middle+normal) && inside(middle-normal))
+   }
+  }
+  shore.tufts.forEach { assertTrue(region.contains(it.x.toInt(),it.y.toInt())) }
+ }
+ @Test fun emptyAndDisconnectedShoreStaySeparate() {
+  assertTrue(cityShore(citySurface(emptyList())).strips.isEmpty())
+  val a=CityParcel("land_1",CityPosition(0,0,0))
+  val b=CityParcel("land_1",CityPosition(1000000,0,0))
+  val first=cityShore(citySurface(CityTerrainGeometry.contours(listOf(a))))
+  val both=cityShore(citySurface(CityTerrainGeometry.contours(listOf(a,b))))
+  fun length(shore:CityShore)=shore.strips.sumOf { (a,b) -> (b-a).getDistance().toDouble() }
+  assertEquals(length(first)*2,length(both),1.0)
+  both.strips.forEach { (a,b) ->
+   assertTrue("Disconnected land must not be bridged",maxOf(a.x,b.x)<=220.1f || minOf(a.x,b.x)>=779.9f)
+  }
+  assertTrue(both.tufts.any { it.x<220f })
+  assertTrue(both.tufts.any { it.x>780f })
+  both.tufts.forEach { assertTrue(it.x<220f || it.x>780f) }
+ }
+
 }

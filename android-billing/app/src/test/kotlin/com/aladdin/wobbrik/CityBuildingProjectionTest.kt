@@ -24,7 +24,16 @@ class CityBuildingProjectionTest {
         assertEquals(10, points.size)
         assertEquals(1999999.999, points[0].x, 0.0000001)
         assertEquals(2000000.001, points[1].x, 0.0000001)
-        assertEquals(-30.0005, points[1].y, 0.0000001)
+        assertEquals(-CityBuildingProjection.ArtPitch - 0.0005, points[1].y, 0.0000001)
+    }
+    @Test fun facadeWidthAndFrontAnchorMatchProjectedServerFootprint() {
+        val position = CityPosition(100000,200000,0)
+        val center = CityBuildingProjection.floor(position,0,0)
+        val corners = listOf(-50.0 to -50.0,50.0 to -50.0,50.0 to 50.0,-50.0 to 50.0)
+            .map { (x,y) -> CityTerrainGeometry.point(position,x,y) }
+        assertEquals(corners.minOf { it.x },center.x-CityBuildingProjection.ArtWidth/2,0.0)
+        assertEquals(corners.maxOf { it.x },center.x+CityBuildingProjection.ArtWidth/2,0.0)
+        assertEquals(corners.maxOf { it.y },center.y+CityBuildingProjection.FoundationFront,0.0)
     }
     @Test fun missingPositionOrGeometryNeverBecomesAnOriginBuilding() {
         assertNull(CityBuildingProjection.building(source(position = null)))

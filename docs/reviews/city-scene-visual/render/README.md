@@ -29,3 +29,27 @@ cases, empty scene, 24 animation frames, background/resume and platform motion o
 `city-liveness-visual/regression/` so prior accepted evidence is preserved.
 Review: `../../2026-11-13-phase4-city-liveness.md`; native sequence and GIF are synthetic
 scene evidence, not a live account or device capture.
+
+City parity continuation (`7b7b676` base): captures now write under
+`../../city-parity-visual/`. `CityParityRenderTest` adds three low-rise synthetic
+account cases (390/font1, 360/font1, 320/font2) with five owned buildings, all
+quarter turns, mixed coin/reward art, and focus/return for each building.
+Add `--tests '*CityParityRenderTest'` to the prior host command; the complete
+city set is now 47 tests including six projection/footprint tests.
+See `../../2026-11-13-phase4-city-design-parity.md` for remaining design gaps;
+these renders do not certify full concept parity or real account/device flow.
+
+City garden continuation: captures now write under `../../city-garden-visual/`,
+preserving previous parity evidence. The same production fixtures exercise the
+new union shoreline, inset grass/flower tufts and modular facade planters.
+`CityTerrainRenderTest` adds two shoreline tests: no union-internal seams, and
+no bridge across disconnected parcels (empty shore also checked). Full set:
+49 tests. Native segmentation/tuft counts are deliberately not a contract;
+perimeter length, boundary location and land containment are checked instead.
+Review continuation: `../../2026-11-13-phase4-city-design-parity.md`.
+
+Approved balcony continuation: captures now write under `../../city-balcony-visual/`.
+The same49test set covers the new front/side balcony source, corner-window/ground
+exceptions, compact/font2/focus and tall-portrait grouped composition. Comparison
+is a QA composite; synthetic fixtures remain outside production data adapters.
+Review: `../../2026-11-13-phase4-city-design-parity.md`, final balcony section.

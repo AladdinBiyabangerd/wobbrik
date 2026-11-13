@@ -6,6 +6,12 @@ import appbackend.wobbrik.game.CitySceneBuilding
 /** Fixed camera in world units. Rotate floor offsets around the foundation before projection.
  * A quarter turn changes world geometry, never the orientation of a screen-space bitmap. */
 internal object CityBuildingProjection {
+    // A server 100×100 footprint projects to 200 horizontal units at this camera.
+    const val ArtWidth = 200.0
+    const val FoundationFront = 50.0
+    // Approved modular floor pitch (176 / 464 at the projected footprint width).
+    // Presentation only: server accepted centers and horizontal footprint are unchanged.
+    const val ArtPitch = ArtWidth * 176 / 464
     data class Point(val x: Double, val y: Double)
     data class Bounds(val left: Double, val top: Double, val right: Double, val bottom: Double)
     data class Building(val source: CitySceneBuilding, val foundation: Point, val floors: List<Point>, val bounds: Bounds)
@@ -21,7 +27,7 @@ internal object CityBuildingProjection {
             3 -> 0.0 to -offset
             else -> error("Invalid city rotation")
         }
-        return project(position.xTicks / 1000.0 + dx, position.yTicks / 1000.0 + dy, index * 30.0)
+        return project(position.xTicks / 1000.0 + dx, position.yTicks / 1000.0 + dy, index * ArtPitch)
     }
 
     fun building(source: CitySceneBuilding): Building? {
@@ -29,9 +35,9 @@ internal object CityBuildingProjection {
         val centers = source.building.geometry?.geometry?.centers ?: return null
         if (centers.isEmpty() || centers.size.toLong() != source.building.floors) return null
         val floors = centers.mapIndexed { index, center -> floor(position, center, index) }
-        // Includes the full 85-unit roof anchor and the 100-unit facade, not only floor centers.
-        val bounds = Bounds(floors.minOf { it.x } - 50, floors.minOf { it.y } - 121,
-            floors.maxOf { it.x } + 50, floors.maxOf { it.y })
+        // Includes conservative catalog roof extent and the full projected footprint.
+        val bounds = Bounds(floors.minOf { it.x } - ArtWidth / 2, floors.minOf { it.y } + FoundationFront - ArtWidth * 1.21,
+            floors.maxOf { it.x } + ArtWidth / 2, floors.maxOf { it.y } + FoundationFront)
         return Building(source, floor(position, 0, 0), floors, bounds)
     }
 

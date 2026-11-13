@@ -18,7 +18,7 @@ import androidx.compose.ui.graphics.nativeCanvas
 internal fun DrawScope.drawModularRoof(item: CosmeticSprite?, id: String?, left: Float, baseline: Float, width: Float) {
     if (item == null) return
     // Legacy roof crops include neighbouring sprites in three cells. Tighten only
-    // this game's source sample; picker/city catalog metadata and IDs stay intact.
+    // the modular renderer's source sample; picker catalog metadata and IDs stay intact.
     val w = when (id) { "reward_roof_1" -> 280f; "coins_roof_1" -> 303f; "reward_roof_2" -> 305f
         else -> item.size.width.toFloat() }
     val h = if (id == "reward_roof_1") 154f else item.size.height.toFloat()
@@ -55,7 +55,7 @@ internal fun DrawScope.drawModularRoof(item: CosmeticSprite?, id: String?, left:
  * Material samples exclude the old panel's frame and silhouette entirely.
  */
 internal fun DrawScope.drawModularFloor(shell: CosmeticSprite, art: Map<String, CosmeticSprite>, atlases: Map<String, GameAtlas>,
-    parts: Map<String, String>, left: Float, upper: Float, width: Float, ground: Boolean) {
+    parts: Map<String, String>, left: Float, upper: Float, width: Float, ground: Boolean, windowAlpha: Float = 1f) {
     translate(left, upper) {
         scale(width / 464f, width / 464f, androidx.compose.ui.geometry.Offset.Zero) {
             val contour = Path().apply {
@@ -70,7 +70,7 @@ internal fun DrawScope.drawModularFloor(shell: CosmeticSprite, art: Map<String, 
             clipPath(contour) {
                 sprite(shell, 0f, 0f, 464f, 288f)
                 // Front and right side share the approved hull; never stretch a panel hull.
-                fun plane(item: CosmeticSprite?, source: RectF, quad: FloatArray) {
+                fun plane(item: CosmeticSprite?, source: RectF, quad: FloatArray, alpha: Float = 1f) {
                     if (item == null) return
                     drawIntoCanvas { canvas ->
                         val matrix = Matrix()
@@ -83,7 +83,7 @@ internal fun DrawScope.drawModularFloor(shell: CosmeticSprite, art: Map<String, 
                         native.drawBitmap(item.image.asAndroidBitmap(),
                             Rect(item.origin.x + source.left.toInt(), item.origin.y + source.top.toInt(),
                                 item.origin.x + source.right.toInt(), item.origin.y + source.bottom.toInt()),
-                            source, Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG))
+                            source, Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG).apply { this.alpha = (alpha.coerceIn(0f, 1f) * 255).toInt() })
                         native.restore()
                     }
                 }
@@ -108,7 +108,8 @@ internal fun DrawScope.drawModularFloor(shell: CosmeticSprite, art: Map<String, 
                     else (14f + 326f*x) to (105f + 16f*x + 126f*y)
                     val corners = listOf(point(u,v),point(u+w,v),point(u+w,v+h),point(u,v+h))
                     plane(item, RectF(item.size.width*sourceStart,0f,item.size.width*sourceEnd,item.size.height.toFloat()),
-                        corners.flatMap { listOf(it.first,it.second) }.toFloatArray())
+                        corners.flatMap { listOf(it.first,it.second) }.toFloatArray(),
+                        if (id == parts["window"]) windowAlpha else 1f)
                 }
                 if (ground) {
                     decal(parts["entrance"],false,.31f,.02f,.38f,1.02f)

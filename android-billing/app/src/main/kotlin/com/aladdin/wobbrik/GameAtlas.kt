@@ -50,7 +50,7 @@ internal fun rememberGameAtlases(): Map<String, GameAtlas> {
 internal fun gameAtlasStyle(parts: Map<String, String>): String =
     if (parts["wall"] == "base_2_wall") "modular-teal" else "modular"
 
-/** Game-only approved replacements; catalog/ownership and other consumers keep their IDs. */
+/** Approved modular windows shared by game and city; catalog IDs/ownership are unchanged. */
 @Composable
 internal fun rememberGameWindowArt(): Map<String, CosmeticSprite> {
     val context = LocalContext.current

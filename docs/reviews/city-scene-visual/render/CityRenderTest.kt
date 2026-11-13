@@ -56,7 +56,7 @@ class CityRenderTest {
   }
  }
  private fun capture(name: String) {
-  val file=File("/Users/mac/My Workspace/Wobbrik/docs/reviews/city-liveness-visual/regression/city-scene-visual/$name.png")
+  val file=File("/Users/mac/My Workspace/Wobbrik/docs/reviews/city-balcony-visual/regression/city-scene-visual/$name.png")
   file.parentFile!!.mkdirs()
   compose.runOnUiThread {
    val view=compose.activity.window.decorView
