@@ -66,6 +66,20 @@ class CitySceneReadsTest {
         })
         rejectedSuspend { CitySceneRepository(backend).load(requireNotNull(sessions.current())) }
     }
+    @Test fun emptyCityAndEmptyDecorationInventoryAreValid() = runBlocking {
+        val sessions = AccountSessions { "token" }; sessions.onAuthChanged("alice")
+        val backend = GameplayHttpBackend(sessions, GameplayTransport { path, _, _ ->
+            GameplayResponse(200, if (path.startsWith("city?")) city().replace("\"population\":\"40\"", "\"population\":\"0\"")
+                else """{"copies":[]}""")
+        })
+        val scene = CitySceneRepository(backend).load(requireNotNull(sessions.current()))
+        assertTrue(scene.buildings.isEmpty())
+        assertTrue(scene.decorations.isEmpty())
+        assertEquals(1, scene.parcels.size)
+    }
+    @Test fun missingServerGeometryContractIsRejectedRatherThanInventingAnIsland() {
+        assertThrows(NoSuchElementException::class.java) { CitySceneReads.page(city().replace("\"geometry_version\":\"city-geometry-v1\",", "")) }
+    }
     @Test fun newLoginOfSameUidRejectsLateResponse() = runBlocking {
         val sessions = AccountSessions { "token" }; sessions.onAuthChanged("alice")
         val session = requireNotNull(sessions.current())

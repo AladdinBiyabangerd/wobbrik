@@ -35,7 +35,10 @@ internal fun CityScreen(configured: WobbrikApplication.Bootstrap.Configured,
             check(configured.sessions.current() == session && configured.recovery.state.value === ready)
             scene = loaded
         } catch (cancelled: CancellationException) { throw cancelled }
-        catch (_: Exception) { failed = true }
+        catch (failure: Exception) {
+            android.util.Log.w("WobbrikCity", "City read failed", failure)
+            failed = true
+        }
     }
     BackHandler(onBack = onHome)
     CityContent(scene, failed, { retry++ }, onHome, onInventory)

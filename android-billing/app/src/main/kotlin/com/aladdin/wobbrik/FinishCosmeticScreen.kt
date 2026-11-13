@@ -39,6 +39,7 @@ import appbackend.wobbrik.game.FinishCosmetics
 import com.aladdin.wobbrik.engine.AcceptedEngineHost
 import org.json.JSONObject
 import kotlin.math.roundToInt
+import kotlin.math.roundToLong
 
 internal data class CosmeticSprite(val image: ImageBitmap, val origin: IntOffset, val size: IntSize)
 
@@ -124,7 +125,8 @@ private fun CosmeticCategoryIcon(category: String, color: Color) {
 @Composable
 internal fun FinishCosmeticScreen(view: AcceptedEngineHost.Snapshot, ready: AuthenticatedRecoveryOwner.State.Ready,
     onSelect: (String, String) -> Unit, onConfirm: () -> Unit, onBack: () -> Unit) {
-    val art = rememberCosmeticArt()
+    val art = rememberCosmeticArt() + rememberGameWindowArt()
+    val atlases = rememberGameAtlases()
     var category by remember { mutableStateOf("wall") }
     val labels = listOf("Divar", "Pəncərə", "Giriş", "Dam", "İşıq")
     val catalog = ready.catalog
@@ -132,6 +134,7 @@ internal fun FinishCosmeticScreen(view: AcceptedEngineHost.Snapshot, ready: Auth
     val valid = catalog != null && view.finishParts.values.all { it in art } &&
         FinishCosmetics.valid(catalog, ready.snapshot, view.finishParts)
     BoxWithConstraints(Modifier.fillMaxSize().background(GameTokens.Background).safeDrawingPadding().padding(GameTokens.Gap)) {
+        val stackedActions = maxWidth < GameTokens.MediumWidth && androidx.compose.ui.platform.LocalDensity.current.fontScale > 1f
         val wide = maxWidth >= GameTokens.MediumWidth && maxWidth > maxHeight
         val gridColumns = if (maxWidth >= GameTokens.ExpandedWidth && wide) 3 else 2
         Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
@@ -143,29 +146,10 @@ internal fun FinishCosmeticScreen(view: AcceptedEngineHost.Snapshot, ready: Auth
                 Surface(modifier, color = GameTokens.Surface, shape = RoundedCornerShape(GameTokens.CardRadius)) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Canvas(Modifier.fillMaxWidth().weight(1f).semantics { contentDescription = "Seçilmiş bina görünüşü" }) {
-                            val levels = view.scene?.floors?.size?.coerceIn(1, 6) ?: 1
-                            val wallWidth = minOf(size.width * .72f, size.height / (levels * .32f + 1.3f))
-                            val floorHeight = wallWidth * .32f
-                            val towerHeight = (levels - 1) * floorHeight + wallWidth * .65f
-                            val x = (size.width - wallWidth) / 2
-                            val y = (size.height - towerHeight - wallWidth * .85f) / 2 + wallWidth * .85f
-                            for (floor in (0 until levels).reversed()) {
-                                val top = y + floor * floorHeight
-                                sprite(art[view.finishParts["wall"]], x, top, wallWidth, wallWidth * .7f)
-                            }
-                            for (floor in 0 until levels - 1) {
-                                val top = y + floor * floorHeight
-                                sprite(art[view.finishParts["window"]], x + wallWidth * .25f,
-                                    top + floorHeight * .5f, wallWidth * .3f, floorHeight * .85f)
-                            }
-                            roof(art[view.finishParts["roof"]], x, y + wallWidth * .1f, wallWidth)
-                            val base = y + (levels - 1) * floorHeight + wallWidth * .65f
-                            sprite(art[view.finishParts["entrance"]], x + wallWidth * .3f, base - wallWidth * .5f,
-                                wallWidth * .4f, wallWidth * .5f)
-                            sprite(art[view.finishParts["lighting"]], x + wallWidth * .7f, base - wallWidth * .45f,
-                                wallWidth * .18f, wallWidth * .3f)
+                            val centers = view.scene?.floors?.map { (it.centerX * 1000).roundToLong() } ?: listOf(0L)
+                            buildingPreview(atlases, art, view.finishParts, centers)
                         }
-                        Text("${view.scene?.floors?.size ?: 0} mərtəbə", Modifier.padding(GameTokens.Small),
+                        Text(view.scene?.floors?.size?.let { "$it mərtəbə" } ?: "Standart görünüş", Modifier.padding(GameTokens.Small),
                             color = GameTokens.Text, fontWeight = FontWeight.Bold)
                     }
                 }
@@ -200,9 +184,11 @@ internal fun FinishCosmeticScreen(view: AcceptedEngineHost.Snapshot, ready: Auth
                                     verticalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {
                                     Box {
                                         Canvas(Modifier.fillMaxWidth().height(GameTokens.Target + GameTokens.Inset)) {
-                                            sprite(art[item.id], 0f, 0f, size.width, size.height, if (available) 1f else GameTokens.DimOpacity)
-                                            if (item.category == "wall") sprite(art[view.finishParts["window"]],
-                                                size.width * .3f, size.height * .2f, size.width * .3f, size.height * .6f, if (available) 1f else GameTokens.DimOpacity)
+                                            if (!available) drawContext.canvas.saveLayer(
+                                                androidx.compose.ui.geometry.Rect(Offset.Zero, size),
+                                                androidx.compose.ui.graphics.Paint().apply { alpha = GameTokens.DimOpacity })
+                                            partPreview(atlases, art, view.finishParts + (category to item.id), category)
+                                            if (!available) drawContext.canvas.restore()
                                         }
                                         if (selected) Text("✓", color = GameTokens.Background, fontWeight = FontWeight.Bold,
                                             modifier = Modifier.align(Alignment.TopEnd).background(GameTokens.Accent, CircleShape).padding(GameTokens.Quarter))
@@ -227,14 +213,25 @@ internal fun FinishCosmeticScreen(view: AcceptedEngineHost.Snapshot, ready: Auth
                 preview(Modifier.fillMaxWidth().weight(1f))
                 picker(Modifier.fillMaxWidth().weight(2f))
             }
-            Row(horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-                Button(onClick = onBack, shape = RoundedCornerShape(GameTokens.ControlRadius), modifier = Modifier.weight(1f).heightIn(min = GameTokens.Target),
-                    colors = ButtonDefaults.buttonColors(containerColor = GameTokens.Raised, contentColor = GameTokens.Text)) { Text("← Geri") }
+            val backAction: @Composable (Modifier) -> Unit = { modifier ->
+                Button(onClick = onBack, shape = RoundedCornerShape(GameTokens.ControlRadius), modifier = modifier.heightIn(min = GameTokens.Target),
+                    colors = ButtonDefaults.buttonColors(containerColor = GameTokens.Raised, contentColor = GameTokens.Text)) { Text("← Geri", softWrap = false) }
+            }
+            val confirmAction: @Composable (Modifier) -> Unit = { modifier ->
                 Button(onClick = onConfirm, shape = RoundedCornerShape(GameTokens.ControlRadius), enabled = valid && !view.waiting,
-                    modifier = Modifier.weight(2f).heightIn(min = GameTokens.Target),
+                    modifier = modifier.heightIn(min = GameTokens.Target),
                     colors = ButtonDefaults.buttonColors(containerColor = GameTokens.Accent, contentColor = GameTokens.Background)) {
-                    Text(if (view.waiting) "Saxlanılır…" else "✓ Təsdiqlə", fontWeight = FontWeight.Bold)
+                    Text(if (view.waiting) "Saxlanılır…" else "✓ Təsdiqlə", fontWeight = FontWeight.Bold, softWrap = false)
                 }
+            }
+            if (stackedActions) {
+                Column(verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+                    backAction(Modifier.fillMaxWidth())
+                    confirmAction(Modifier.fillMaxWidth())
+                }
+            } else Row(horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+                backAction(Modifier.weight(1f))
+                confirmAction(Modifier.weight(2f))
             }
         }
     }

@@ -92,8 +92,22 @@ class PartsMutationsTest {
         }
     }
 
+    @Test fun malformedOrUncommittedReceiptsCannotCompleteMutations() {
+        val buy = command(false)
+        val edit = command(true)
+        listOf(
+            buy to receipt(false).replace("\"revision\":1", "\"revision\":0"),
+            buy to receipt(false).replace("\"price\":100", "\"price\":-1"),
+            edit to receipt(true).replace("\"building_revision\":3", "\"building_revision\":2"),
+            edit to receipt(true).replace("\"fee\":0", "\"fee\":1"),
+            edit to receipt(true).replace("\"price\":0", "\"price\":1")
+        ).forEach { (command, body) ->
+            assertThrows(IllegalArgumentException::class.java) { PartsMutations.receipt(body, command) }
+        }
+    }
+
     @Test fun definitiveRejectionClearsJournalButUnknownFailureRetainsIt() = runBlocking {
-        for (code in listOf("insufficient_balance", "listing_conflict", "invalid_request", "operation_payload_conflict")) {
+        for (code in listOf("insufficient_balance", "listing_conflict", "building_conflict", "shop_conflict", "not_found", "revision_conflict", "invalid_request", "operation_payload_conflict")) {
             val sessions = AccountSessions { "token" }; sessions.onAuthChanged("alice")
             var pending: AttemptCommand? = null
             val journal = object : AttemptJournal {
@@ -101,7 +115,7 @@ class PartsMutationsTest {
                 override fun save(uid: String, command: AttemptCommand) { pending = command }
                 override fun remove(uid: String, command: AttemptCommand) { assertEquals(pending, command); pending = null }
             }
-            val backend = GameplayHttpBackend(sessions, GameplayTransport { _, _, _ -> GameplayResponse(if (code == "invalid_request") 400 else 409, """{"error":"$code"}""") })
+            val backend = GameplayHttpBackend(sessions, GameplayTransport { _, _, _ -> GameplayResponse(when (code) { "invalid_request" -> 400; "not_found" -> 404; else -> 409 }, """{"error":"$code"}""") })
             // Seed the same journal used by recovery; no new operation on retry.
             pending = command(code == "listing_conflict")
             val coordinator = AttemptCoordinator(sessions, object : AttemptBackend {

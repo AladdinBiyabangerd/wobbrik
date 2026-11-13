@@ -41,9 +41,8 @@ internal class InventoryReadKey(private val ready: AuthenticatedRecoveryOwner.St
 /** Destination-local reads are cancelled and discarded whenever the exact Ready epoch changes. */
 @Composable
 internal fun InventoryScreen(configured: WobbrikApplication.Bootstrap.Configured,
-    ready: AuthenticatedRecoveryOwner.State.Ready, onHome: () -> Unit, onParts: (String?) -> Unit,
+    ready: AuthenticatedRecoveryOwner.State.Ready, selected: String?, onSelectBuilding: (String?) -> Unit, onHome: () -> Unit, onParts: (String?) -> Unit,
     onDecorations: () -> Unit, onLand: () -> Unit) {
-    var selected by rememberSaveable { mutableStateOf<String?>(null) }
     var retry by remember { mutableIntStateOf(0) }
     var deleteCandidate by remember(ready, selected) { mutableStateOf<OwnedBuilding?>(null) }
     val deletion = remember(configured) { BuildingDeletion(configured.recovery) }
@@ -75,7 +74,7 @@ internal fun InventoryScreen(configured: WobbrikApplication.Bootstrap.Configured
         catch (_: Exception) { failed = true }
         finally { loading = false }
     }
-    val back = { if (selected != null) selected = null else onHome() }
+    val back = { if (selected != null) onSelectBuilding(null) else onHome() }
     BackHandler(onBack = back)
     Box(Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(GameTokens.Surface, GameTokens.Background)))
         .safeDrawingPadding().padding(GameTokens.Gap)) {
@@ -111,7 +110,7 @@ internal fun InventoryScreen(configured: WobbrikApplication.Bootstrap.Configured
                 LazyVerticalGrid(GridCells.Adaptive(GameTokens.PanelWidth / 2 - GameTokens.Gap), Modifier.weight(1f),
                     horizontalArrangement = Arrangement.spacedBy(GameTokens.Small), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
                     items(buildings, key = { it.id }) { building ->
-                        Surface(onClick = { selected = building.id }, color = GameTokens.Surface,
+                        Surface(onClick = { onSelectBuilding(building.id) }, color = GameTokens.Surface,
                             shape = RoundedCornerShape(GameTokens.CardRadius), border = BorderStroke(GameTokens.Hairline, GameTokens.Raised)) {
                             Column(Modifier.padding(GameTokens.Small), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
                                 Surface(color = GameTokens.Background, shape = RoundedCornerShape(GameTokens.ControlRadius)) {
@@ -149,7 +148,7 @@ internal fun InventoryScreen(configured: WobbrikApplication.Bootstrap.Configured
             deleteCandidate = null
             if (deletion.confirmedDelete(ready, candidate)) {
                 // Ready is revoked during submission. The next Ready remount reads server inventory.
-                selected = null; cursor = null
+                onSelectBuilding(null); cursor = null
             }
         })
     }
@@ -295,7 +294,8 @@ private fun DetailRow(label: String, value: String) {
 /** Uses accepted coordinates without inventing a straight footprint for legacy buildings. */
 @Composable
 internal fun BuildingPreview(building: OwnedBuilding, modifier: Modifier) {
-    val art = rememberCosmeticArt()
+    val art = rememberCosmeticArt() + rememberGameWindowArt()
+    val atlases = rememberGameAtlases()
     val gardenImage = ImageBitmap.imageResource(R.drawable.inventory_garden)
     val garden = remember(gardenImage) { CosmeticSprite(gardenImage, androidx.compose.ui.unit.IntOffset.Zero,
         androidx.compose.ui.unit.IntSize(gardenImage.width, gardenImage.height)) }
@@ -308,22 +308,7 @@ internal fun BuildingPreview(building: OwnedBuilding, modifier: Modifier) {
         return
     }
     Canvas(modifier.semantics { contentDescription = "${building.floors} mərtəbəli bina" }) {
-        // Use the same facade/eave anchors as GameScene; centers remain server coordinates.
-        // Fit the entire silhouette, including the garden, instead of clipping leaning towers.
-        val min = minOf(-90f, centers.min() / 1000f - 50f)
-        val max = maxOf(90f, centers.max() / 1000f + 50f)
-        val top = (centers.lastIndex * 30f) + 100f
-        val below = 55f
-        val height = top + below
-        val scale = minOf(size.width / (max - min), size.height / height)
-        val left = (size.width - (max - min) * scale) / 2
-        val bottom = (size.height - height * scale) / 2 + top * scale
-        sprite(garden, left + (-90f - min) * scale, bottom - 65f * scale, 180f * scale, 120f * scale)
-        centers.forEachIndexed { index, center ->
-            val x = left + (center / 1000f - 50f - min) * scale
-            val base = bottom - index * 30f * scale
-            buildingFloor(art, building.parts, x, base, scale, index == 0, index == centers.lastIndex)
-        }
+        buildingPreview(atlases, art, building.parts, centers, garden)
     }
 }
 

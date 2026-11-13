@@ -63,6 +63,7 @@ private fun AuthenticatedGame(app: WobbrikApplication) {
     var cached by remember(configured) { mutableStateOf<GameSnapshot?>(null) }
     var page by rememberSaveable { mutableStateOf("home") }
     var partsBuilding by rememberSaveable { mutableStateOf<String?>(null) }
+    var inventoryBuilding by rememberSaveable { mutableStateOf<String?>(null) }
     val host = app.engineHost
     var hostState by remember { mutableStateOf(host.snapshot()) }
     // Snapshot has no Compose dependency. Poll even when paused so lifecycle revocation is visible.
@@ -121,11 +122,11 @@ private fun AuthenticatedGame(app: WobbrikApplication) {
         return
     }
     if (page == "city" && ready != null && configured != null) {
-        key(InventoryReadKey(ready)) { CityScreen(configured, ready, onHome = { page = "home" }, onInventory = { page = "inventory" }) }
+        key(InventoryReadKey(ready)) { CityScreen(configured, ready, onHome = { page = "home" }, onInventory = { inventoryBuilding = null; page = "inventory" }) }
         return
     }
     if (page == "parts" && ready != null && configured != null) {
-        key(InventoryReadKey(ready)) { PartsScreen(configured, ready, partsBuilding, onBack = { page = "inventory" }) }
+        key(InventoryReadKey(ready)) { PartsScreen(configured, ready, partsBuilding, onBack = { inventoryBuilding = partsBuilding; page = "inventory" }) }
         return
     }
     if (page == "decorations" && ready != null && configured != null) {
@@ -137,8 +138,8 @@ private fun AuthenticatedGame(app: WobbrikApplication) {
         return
     }
     if (page == "inventory" && ready != null && configured != null) {
-        key(InventoryReadKey(ready)) { InventoryScreen(configured, ready, onHome = { page = "home" },
-            onParts = { partsBuilding = it; page = "parts" }, onDecorations = { page = "decorations" }, onLand = { page = "land" }) }
+        key(InventoryReadKey(ready)) { InventoryScreen(configured, ready, selected = inventoryBuilding, onSelectBuilding = { inventoryBuilding = it }, onHome = { page = "home" },
+            onParts = { partsBuilding = it; page = "parts" }, onDecorations = { inventoryBuilding = null; page = "decorations" }, onLand = { inventoryBuilding = null; page = "land" }) }
         return
     }
     if (page == "collection" && ready != null) {
@@ -186,7 +187,7 @@ private fun AuthenticatedGame(app: WobbrikApplication) {
     // Local scroll/presentation state belongs to this destination, not to its caller.
     key(accountPage) {
         AccountScreen(accountPage, ready, status,
-            onPage = { page = it },
+            onPage = { if (it == "inventory") inventoryBuilding = null; page = it },
             onRetry = { configured?.recovery?.onForeground() },
             onPlay = if (ready != null && !hostState.choosingFinish && restore !is AcceptedAttemptRestore.Result.Blocked) ({
                 when (restore) {

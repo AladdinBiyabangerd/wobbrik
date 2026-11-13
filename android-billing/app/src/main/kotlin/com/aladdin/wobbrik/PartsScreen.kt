@@ -19,7 +19,8 @@ import kotlinx.coroutines.CancellationException
 @Composable
 internal fun PartsScreen(configured: WobbrikApplication.Bootstrap.Configured,
     ready: AuthenticatedRecoveryOwner.State.Ready, buildingId: String?, onBack: () -> Unit) {
-    val art = rememberCosmeticArt()
+    val art = rememberCosmeticArt() + rememberGameWindowArt()
+    val atlases = rememberGameAtlases()
     val mutations = remember(configured) { PartsMutations(configured.recovery) }
     val catalog = ready.catalog
     var category by remember { mutableStateOf("wall") }
@@ -31,6 +32,7 @@ internal fun PartsScreen(configured: WobbrikApplication.Bootstrap.Configured,
     var draft by remember { mutableStateOf(emptyMap<String, String>()) }
     var failed by remember { mutableStateOf(false) }
     var retry by remember { mutableIntStateOf(0) }
+    val previewParts = draft.ifEmpty { building?.parts ?: catalog?.let { FinishCosmetics.selection(it, ready.snapshot, emptyMap()) }.orEmpty() }
     LaunchedEffect(ready, buildingId, retry) {
         if (buildingId == null) return@LaunchedEffect
         building = null; failed = false
@@ -59,7 +61,7 @@ internal fun PartsScreen(configured: WobbrikApplication.Bootstrap.Configured,
             Column(Modifier.weight(1f).verticalScroll(rememberScrollState()), horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(GameTokens.Gap)) {
                 Text(item.name, color = GameTokens.Text, fontSize = GameTokens.Title, fontWeight = FontWeight.Bold)
-                Canvas(Modifier.fillMaxWidth().height(GameTokens.PanelWidth)) { sprite(art[item.id], 0f, 0f, size.width, size.height) }
+                Canvas(Modifier.fillMaxWidth().height(GameTokens.PanelWidth)) { partPreview(atlases, art, previewParts + (item.category to item.id), item.category) }
                 Text("Bina dəyərinə +${item.weight}", color = GameTokens.Accent, fontSize = GameTokens.Title)
                 Text(partAccess(item, ready), color = GameTokens.Text, fontWeight = FontWeight.Bold)
                 if (item.method == "coins") Text("Hesabda daimi açılır", color = GameTokens.Muted)
@@ -105,12 +107,12 @@ internal fun PartsScreen(configured: WobbrikApplication.Bootstrap.Configured,
                     val old = catalog?.items?.firstOrNull { it.id == current.parts[category] }?.name ?: current.parts[category].orEmpty()
                     val new = catalog?.items?.firstOrNull { it.id == draft[category] }?.name ?: draft[category].orEmpty()
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-                        listOf("Hazırkı" to current.parts[category], "Seçilmiş" to draft[category]).forEach { (label, id) ->
+                        listOf("Hazırkı", "Seçilmiş").forEach { label ->
                             Surface(onClick = { choosing = true }, modifier = Modifier.weight(1f), color = GameTokens.Surface,
                                 shape = RoundedCornerShape(GameTokens.ControlRadius),
                                 border = BorderStroke(GameTokens.Hairline, if (label == "Seçilmiş") GameTokens.Accent else GameTokens.Raised)) {
                                 Column(Modifier.padding(GameTokens.Small)) {
-                                    Canvas(Modifier.fillMaxWidth().height(GameTokens.Target * 2)) { sprite(art[id], 0f, 0f, size.width, size.height) }
+                                    Canvas(Modifier.fillMaxWidth().height(GameTokens.Target * 2)) { partPreview(atlases, art, (if (label == "Hazırkı") current.parts else draft), category) }
                                     Text(label, color = GameTokens.Muted)
                                     Text(if (label == "Hazırkı") old else new, color = GameTokens.Text, fontWeight = FontWeight.Bold)
                                 }
@@ -141,7 +143,7 @@ internal fun PartsScreen(configured: WobbrikApplication.Bootstrap.Configured,
                     }, color = GameTokens.Surface, shape = RoundedCornerShape(GameTokens.ControlRadius),
                         border = BorderStroke(GameTokens.Hairline, if (active) GameTokens.Accent else GameTokens.Raised)) {
                         Column(Modifier.padding(GameTokens.Small), verticalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {
-                            Canvas(Modifier.fillMaxWidth().height(GameTokens.Target * 2)) { sprite(art[choice.id], 0f, 0f, size.width, size.height) }
+                            Canvas(Modifier.fillMaxWidth().height(GameTokens.Target * 2)) { partPreview(atlases, art, previewParts + (choice.category to choice.id), choice.category) }
                             Text(choice.name, color = GameTokens.Text, fontWeight = FontWeight.Bold)
                             Text(if (active) "✓ Seçilib" else partAccess(choice, ready), color = if (available) GameTokens.Success else GameTokens.Muted)
                         }
