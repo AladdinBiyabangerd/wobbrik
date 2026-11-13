@@ -44,6 +44,7 @@ object GameplayWire {
         require(root.string("rules_version") == "wobbrik-v1")
         val r = root.getValue("request").jsonObject
         val rebuilt = when (command.route) {
+            AttemptCommand.Route.SHOP_BUY, AttemptCommand.Route.BUILDING_EDIT, AttemptCommand.Route.BUILDING_DELETE -> throw IllegalArgumentException("Unsupported by historical client")
             AttemptCommand.Route.START -> { require(r.string("engine_version") == "wobbrik-structural-v1"); start(command.operationId, command.expectedRevision) }
             AttemptCommand.Route.CHECKPOINT -> checkpoint(command.operationId, command.expectedRevision, r.string("attempt_id"), r.number("sequence"), r.number("floors"), r.number("precise"), r.number("rescues"), r.getValue("snapshot").toString())
             AttemptCommand.Route.FINISH -> finish(command.operationId, command.expectedRevision, r.string("attempt_id"), r.number("sequence"), r.getValue("parts").jsonObject.mapValues { (_, v) -> v.jsonPrimitive.also { require(it.isString) }.content })

@@ -83,3 +83,7 @@ Generativ bina şəkillərində ayrı-ayrı mərtəbələrin sayı yazı ilə h�
 Sakin nümunəsi F=10 → R=40, pulsuz hissələr üçün B=20, maksimum24, komissiya2, satıcı22. Ərazi1: level3/150XP/200sikkə/+4 ekvivalent. Bunlar yeni balans qərarı deyil. Hissə açmaq hesab hüququdur, dekor almaq ayrıca nüsxədir; tətbiq/yerləşdirmə təsdiqi açılma/alışdan ayrıdır. Xəta, pending, insufficient coins, elan geri götürmə və hesab bağlama kimi əlavə halların tam dizaynı bu lövhələrdə yoxdur.
 
 Token kontrastı: text/background16.57, muted/surface8.22, on-accent/accent11.45 — PASS. PNG-nin hər pikseli üçün kontrast və ya touch-target testi deyil. Telefon/planşet, böyük şrift və adaptiv Android renderi aparılmayıb: bu iş dizayn/raster təklifidir, tətbiq və ya mərhələ qəbulu deyil. İstifadəçi təsdiqi olmadan UI implementasiyası başlamır. Backend/API/schema və iqtisadi qaydalar dəyişməyib; bu art-only iş üçün AppBackend dəyişikliyi lazım deyil.
+
+## 13 noyabr — silmə təsdiqi təklifi
+
+`delete-confirmation-proposal.png`: mövcud təsdiqli bina detalının üzərində tokenlərlə hazırlanmış silmə dialoqu. 13 noyabrda istifadəçi bu dialoqu və bina detalının sonundakı “Binanı sil” girişini “okeydir” cavabı ilə təsdiqlədi. Android build renderi deyil. Core adapter review-su: `../../reviews/2026-11-13-phase4-building-delete.md`.

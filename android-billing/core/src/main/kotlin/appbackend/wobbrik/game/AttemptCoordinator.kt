@@ -10,7 +10,7 @@ import kotlinx.coroutines.sync.withLock
 
 /** Wire bodies are immutable and retained verbatim, including operation ID and revision. */
 data class AttemptCommand(val operationId: String, val expectedRevision: Long, val route: Route, val envelope: String) {
-    enum class Route { START, CHECKPOINT, FINISH, ABANDON }
+    enum class Route { START, CHECKPOINT, FINISH, ABANDON, SHOP_BUY, BUILDING_EDIT, BUILDING_DELETE }
 }
 data class ServerAttempt(val id: String, val active: Boolean, val sequence: Long, val checkpointJson: String?, val floors: Long = 0, val precise: Long = 0, val rescues: Long = 0, val continued: Boolean = false, val rulesVersion: String = "wobbrik-v1", val engineVersion: String = "wobbrik-structural-v1", val geometryVersion: String? = null, val acceptedGeometry: AcceptedCityGeometry? = null)
 data class GameSnapshot(val rulesVersion: String, val revision: Long, val coins: Long, val xp: Long, val attempt: ServerAttempt?, val account: AccountRecovery? = null) {
@@ -33,7 +33,10 @@ interface AttemptJournal {
     fun remove(uid: String, command: AttemptCommand)
 }
 
-/** Only a definitive revision_conflict, not timeout, 404 or operation_conflict. */
+/** A documented rejection of a parts mutation; never an ambiguous network outcome. */
+class MutationRejected(val code: String) : IllegalStateException(code)
+
+/** Only a definitive revision_conflict; never an automatic rebase. */
 class RevisionConflict : IllegalStateException("Sync required before a new operation")
 
 /** Serializes this host's mutations; server revisions handle other devices. No local grants. */
@@ -81,6 +84,11 @@ class AttemptCoordinator(
         stillCurrent(session)
         try {
             backend.submit(session, command)
+        } catch (rejected: MutationRejected) {
+            stillCurrent(session)
+            journal.remove(session.uid, command)
+            refresh(session)
+            throw rejected
         } catch (conflict: RevisionConflict) {
             stillCurrent(session)
             journal.remove(session.uid, command)

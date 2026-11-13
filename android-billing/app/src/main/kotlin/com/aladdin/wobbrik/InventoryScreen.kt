@@ -11,6 +11,7 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -21,9 +22,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import appbackend.wobbrik.game.*
 import kotlinx.coroutines.CancellationException
 
@@ -36,9 +41,11 @@ internal class InventoryReadKey(private val ready: AuthenticatedRecoveryOwner.St
 /** Destination-local reads are cancelled and discarded whenever the exact Ready epoch changes. */
 @Composable
 internal fun InventoryScreen(configured: WobbrikApplication.Bootstrap.Configured,
-    ready: AuthenticatedRecoveryOwner.State.Ready, onHome: () -> Unit) {
+    ready: AuthenticatedRecoveryOwner.State.Ready, onHome: () -> Unit, onParts: (String?) -> Unit) {
     var selected by rememberSaveable { mutableStateOf<String?>(null) }
     var retry by remember { mutableIntStateOf(0) }
+    var deleteCandidate by remember(ready, selected) { mutableStateOf<OwnedBuilding?>(null) }
+    val deletion = remember(configured) { BuildingDeletion(configured.recovery) }
     var cursor by remember { mutableStateOf<String?>(null) }
     var buildings by remember(ready) { mutableStateOf(emptyList<OwnedBuilding>()) }
     var next by remember(ready) { mutableStateOf<String?>(null) }
@@ -73,7 +80,12 @@ internal fun InventoryScreen(configured: WobbrikApplication.Bootstrap.Configured
         .safeDrawingPadding().padding(GameTokens.Gap)) {
         Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-                TextButton(onClick = back, modifier = Modifier.sizeIn(minWidth = GameTokens.Target, minHeight = GameTokens.Target)) { Text("←", color = GameTokens.Text) }
+                Surface(onClick = back, shape = CircleShape, color = GameTokens.Raised,
+                    border = BorderStroke(GameTokens.Hairline, GameTokens.Muted), modifier = Modifier.size(GameTokens.Target)) {
+                    Box(contentAlignment = Alignment.Center, modifier = Modifier.semantics { contentDescription = "Geri" }) {
+                        Text("‹", color = GameTokens.Text, fontSize = GameTokens.Score)
+                    }
+                }
                 Text(if (selected == null) "İnventar" else "Bina detalları", Modifier.weight(1f), color = GameTokens.Text,
                     fontSize = GameTokens.Title, fontWeight = FontWeight.Bold)
                 Surface(color = GameTokens.Surface, shape = RoundedCornerShape(GameTokens.CardRadius),
@@ -86,8 +98,13 @@ internal fun InventoryScreen(configured: WobbrikApplication.Bootstrap.Configured
                 }
             }
             if (selected == null) {
-                Text("Binalar", Modifier.fillMaxWidth().background(GameTokens.Raised, RoundedCornerShape(GameTokens.ControlRadius))
-                    .padding(GameTokens.Small), color = GameTokens.Accent, fontWeight = FontWeight.Bold)
+                InventoryButton("Hissələr · Mağaza") { onParts(null) }
+                Row(Modifier.fillMaxWidth().background(GameTokens.Raised, RoundedCornerShape(GameTokens.CardRadius))
+                    .padding(GameTokens.Small), verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+                    Image(painterResource(R.drawable.ui_inventory), null, Modifier.size(GameTokens.Inset))
+                    Text("Binalar", color = GameTokens.Accent, fontWeight = FontWeight.Bold)
+                }
                 LazyVerticalGrid(GridCells.Adaptive(GameTokens.PanelWidth / 2 - GameTokens.Gap), Modifier.weight(1f),
                     horizontalArrangement = Arrangement.spacedBy(GameTokens.Small), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
                     items(buildings, key = { it.id }) { building ->
@@ -108,6 +125,10 @@ internal fun InventoryScreen(configured: WobbrikApplication.Bootstrap.Configured
                 if (!loading) TextButton(onClick = { cursor = null; buildings = emptyList(); next = null; retry++ }) { Text("Yenilə", color = GameTokens.Accent) }
             } else if (detail != null) {
                 BuildingDetail(requireNotNull(detail), city, ready.catalog, Modifier.weight(1f))
+                InventoryButton("Bina görünüşü") { onParts(detail?.id) }
+                TextButton(onClick = { deleteCandidate = detail }, modifier = Modifier.fillMaxWidth().heightIn(min = GameTokens.Target)) {
+                    Text("Binanı sil", color = GameTokens.Danger)
+                }
             } else Spacer(Modifier.weight(1f))
             if (loading) Row(horizontalArrangement = Arrangement.spacedBy(GameTokens.Small), verticalAlignment = Alignment.CenterVertically) {
                 CircularProgressIndicator(Modifier.size(GameTokens.Inset), color = GameTokens.Accent)
@@ -119,6 +140,49 @@ internal fun InventoryScreen(configured: WobbrikApplication.Bootstrap.Configured
             }
             InventoryButton(if (selected == null) "Ana ekran" else "İnventara qayıt", back)
         }
+    }
+    deleteCandidate?.let { candidate ->
+        BuildingDeleteConfirmation(onDismiss = { deleteCandidate = null }, onConfirm = {
+            deleteCandidate = null
+            if (deletion.confirmedDelete(ready, candidate)) {
+                // Ready is revoked during submission. The next Ready remount reads server inventory.
+                selected = null; cursor = null
+            }
+        })
+    }
+}
+
+@Composable
+private fun BuildingDeleteConfirmation(onDismiss: () -> Unit, onConfirm: () -> Unit) {
+    val largeFont = LocalDensity.current.fontScale > 1f
+    Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
+        Surface(modifier = Modifier.padding(GameTokens.Gap).widthIn(max = GameTokens.PanelWidth),
+            color = GameTokens.Surface, shape = RoundedCornerShape(GameTokens.CardRadius)) {
+            Column(Modifier.padding(GameTokens.Gap), verticalArrangement = Arrangement.spacedBy(GameTokens.Gap),
+                horizontalAlignment = Alignment.CenterHorizontally) {
+                Text("Bina silinsin?", color = GameTokens.Text, fontSize = GameTokens.Title, fontWeight = FontWeight.Bold)
+                Text("Bina inventardan və şəhərdən silinəcək. Sikkə qaytarılmır. Bu əməliyyatı geri qaytarmaq mümkün deyil.",
+                    modifier = Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState()),
+                    color = GameTokens.Muted, fontSize = GameTokens.Body, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+                if (largeFont) Column(verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+                    DeleteDialogButton("Ləğv et", false, Modifier.fillMaxWidth(), onDismiss)
+                    DeleteDialogButton("Binanı sil", true, Modifier.fillMaxWidth(), onConfirm)
+                } else Row(horizontalArrangement = Arrangement.spacedBy(GameTokens.Gap)) {
+                    DeleteDialogButton("Ləğv et", false, Modifier.weight(1f), onDismiss)
+                    DeleteDialogButton("Binanı sil", true, Modifier.weight(1f), onConfirm)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun DeleteDialogButton(label: String, destructive: Boolean, modifier: Modifier, onClick: () -> Unit) {
+    Button(onClick = onClick, modifier = modifier.heightIn(min = GameTokens.Target),
+        shape = RoundedCornerShape(GameTokens.ControlRadius),
+        colors = ButtonDefaults.buttonColors(containerColor = if (destructive) GameTokens.Danger else GameTokens.Raised,
+            contentColor = if (destructive) GameTokens.Background else GameTokens.Text)) {
+        Text(label, fontSize = GameTokens.Body, fontWeight = FontWeight.Bold, softWrap = false)
     }
 }
 
@@ -197,13 +261,16 @@ private fun BuildingDetailContent(building: OwnedBuilding, city: CityMembership?
                 val item = catalog?.items?.firstOrNull { it.id == building.parts[category] }
                 Surface(color = GameTokens.Surface, shape = RoundedCornerShape(GameTokens.ControlRadius),
                     border = BorderStroke(GameTokens.Hairline, GameTokens.Raised)) {
-                    Column(Modifier.fillMaxWidth().padding(GameTokens.Small), verticalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {
-                        Canvas(Modifier.fillMaxWidth().height(GameTokens.Target)) {
+                    Row(Modifier.fillMaxWidth().padding(GameTokens.Small), verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+                        Canvas(Modifier.size(GameTokens.Target)) {
                             sprite(art[building.parts[category]], 0f, 0f, size.width, size.height)
                         }
-                        Text(when(category) { "wall" -> "Divar"; "window" -> "Pəncərə"; "entrance" -> "Giriş"; "roof" -> "Dam"; else -> "İşıq" },
-                            color = GameTokens.Muted, fontSize = GameTokens.Caption)
-                        Text(item?.name ?: building.parts.getValue(category), color = GameTokens.Text, fontWeight = FontWeight.Bold)
+                        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {
+                            Text(when(category) { "wall" -> "Divar"; "window" -> "Pəncərə"; "entrance" -> "Giriş"; "roof" -> "Dam"; else -> "İşıq" },
+                                color = GameTokens.Muted, fontSize = GameTokens.Caption)
+                            Text(item?.name ?: building.parts.getValue(category), color = GameTokens.Text, fontWeight = FontWeight.Bold)
+                        }
                     }
                 }
             }
@@ -224,8 +291,11 @@ private fun DetailRow(label: String, value: String) {
 
 /** Uses accepted coordinates without inventing a straight footprint for legacy buildings. */
 @Composable
-private fun BuildingPreview(building: OwnedBuilding, modifier: Modifier) {
+internal fun BuildingPreview(building: OwnedBuilding, modifier: Modifier) {
     val art = rememberCosmeticArt()
+    val gardenImage = ImageBitmap.imageResource(R.drawable.inventory_garden)
+    val garden = remember(gardenImage) { CosmeticSprite(gardenImage, androidx.compose.ui.unit.IntOffset.Zero,
+        androidx.compose.ui.unit.IntSize(gardenImage.width, gardenImage.height)) }
     val centers = building.geometry?.geometry?.centers
     val missing = building.parts.values.any { it !in art }
     if (centers == null || missing) {
@@ -235,30 +305,33 @@ private fun BuildingPreview(building: OwnedBuilding, modifier: Modifier) {
         return
     }
     Canvas(modifier.semantics { contentDescription = "${building.floors} mərtəbəli bina" }) {
-        val min = minOf(0L, centers.min()) / 1000f - 50f
-        val max = maxOf(0L, centers.max()) / 1000f + 50f
-        val height = centers.size * 30f + 120f
+        // Use the same facade/eave anchors as GameScene; centers remain server coordinates.
+        // Fit the entire silhouette, including the garden, instead of clipping leaning towers.
+        val min = minOf(-90f, centers.min() / 1000f - 50f)
+        val max = maxOf(90f, centers.max() / 1000f + 50f)
+        val top = (centers.lastIndex * 30f) + 100f
+        val below = 55f
+        val height = top + below
         val scale = minOf(size.width / (max - min), size.height / height)
         val left = (size.width - (max - min) * scale) / 2
-        val bottom = (size.height + height * scale) / 2 - 40f * scale
+        val bottom = (size.height - height * scale) / 2 + top * scale
+        sprite(garden, left + (-90f - min) * scale, bottom - 65f * scale, 180f * scale, 120f * scale)
         centers.forEachIndexed { index, center ->
             val x = left + (center / 1000f - 50f - min) * scale
-            val y = bottom - (index + 1) * 30f * scale
-            sprite(art[building.parts["wall"]], x, y, 100f * scale, 70f * scale)
-            if (index > 0) sprite(art[building.parts["window"]], x + 25f * scale, y + 15f * scale, 30f * scale, 25f * scale)
+            val base = bottom - index * 30f * scale
+            val upper = base - 100f * 597f / 1064f * scale
+            sprite(art[building.parts["wall"]], x, upper, 100f * scale, 100f * 597f / 1064f * scale)
+            if (index > 0) sprite(art[building.parts["window"]], x + 30f * scale, upper + 12f * scale, 40f * scale, 35f * scale)
             if (index == 0) {
-                sprite(art[building.parts["entrance"]], x + 30f * scale, y + 15f * scale, 40f * scale, 50f * scale)
-                sprite(art[building.parts["lighting"]], x + 70f * scale, y + 20f * scale, 18f * scale, 30f * scale)
+                sprite(art[building.parts["entrance"]], x + 30f * scale, base - 40f * scale, 40f * scale, 40f * scale)
+                sprite(art[building.parts["lighting"]], x + 75f * scale, base - 35f * scale, 15f * scale, 25f * scale)
             }
-            if (index == centers.lastIndex) roof(art[building.parts["roof"]], x, y + 10f * scale, 100f * scale)
+            if (index == centers.lastIndex) roof(art[building.parts["roof"]], x, base - 36f * scale, 100f * scale)
         }
     }
 }
 
 @Composable
 private fun InventoryButton(label: String, onClick: () -> Unit) {
-    Button(onClick, Modifier.fillMaxWidth().heightIn(min = GameTokens.Target), shape = RoundedCornerShape(GameTokens.ControlRadius),
-        colors = ButtonDefaults.buttonColors(containerColor = GameTokens.Accent, contentColor = GameTokens.Background)) {
-        Text(label, fontWeight = FontWeight.Bold)
-    }
+    HomeButton(label = label, primary = true, compact = true, onClick = onClick)
 }

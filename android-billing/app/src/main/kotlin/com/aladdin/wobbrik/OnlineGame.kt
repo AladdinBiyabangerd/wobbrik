@@ -62,6 +62,7 @@ private fun AuthenticatedGame(app: WobbrikApplication) {
     // Display-only last accepted snapshot of the current uid; never a capability.
     var cached by remember(configured) { mutableStateOf<GameSnapshot?>(null) }
     var page by rememberSaveable { mutableStateOf("home") }
+    var partsBuilding by rememberSaveable { mutableStateOf<String?>(null) }
     val host = app.engineHost
     var hostState by remember { mutableStateOf(host.snapshot()) }
     // Snapshot has no Compose dependency. Poll even when paused so lifecycle revocation is visible.
@@ -119,8 +120,12 @@ private fun AuthenticatedGame(app: WobbrikApplication) {
         AcceptedScene(hostState, ready, host, onHome = { page = "home" })
         return
     }
+    if (page == "parts" && ready != null && configured != null) {
+        key(InventoryReadKey(ready)) { PartsScreen(configured, ready, partsBuilding, onBack = { page = "inventory" }) }
+        return
+    }
     if (page == "inventory" && ready != null && configured != null) {
-        key(InventoryReadKey(ready)) { InventoryScreen(configured, ready, onHome = { page = "home" }) }
+        key(InventoryReadKey(ready)) { InventoryScreen(configured, ready, onHome = { page = "home" }, onParts = { partsBuilding = it; page = "parts" }) }
         return
     }
     if (page == "collection" && ready != null) {
@@ -149,7 +154,17 @@ private fun AuthenticatedGame(app: WobbrikApplication) {
         app.bootstrap is WobbrikApplication.Bootstrap.MissingFirebase -> "Firebase konfiqurasiyası yoxdur"
         app.bootstrap is WobbrikApplication.Bootstrap.MissingBackendOrigin -> "Server ünvanı konfiqurasiya edilməyib"
         journalBlocked -> JournalRecoveryCopy.Title
-        error -> "Bağlantı yoxdur"
+        error -> when (val cause = (state as AuthenticatedRecoveryOwner.State.Error).cause) {
+            is appbackend.wobbrik.game.MutationRejected -> when (cause.code) {
+                "insufficient_balance" -> "Sikkə kifayət etmir. Hesabı yenilə."
+                "listing_conflict" -> "Bina aktiv elandadır. Əvvəl elanı geri götür."
+                "building_conflict" -> "Bina dəyişib. Yenilə və seçimi təkrar et."
+                "shop_conflict" -> "Hissə artıq açılıb. Hesabı yenilə."
+                "invalid_request" -> "Seçilmiş hissələr tətbiq edilə bilmir. Hesabı yenilə."
+                else -> "Bina artıq əlçatan deyil. Hesabı yenilə."
+            }
+            else -> "Bağlantı yoxdur"
+        }
         ready == null && !GameNavigation.showAcceptedHome(state, cached) -> "Hesab və cəhd bərpa olunur…"
         restore is AcceptedAttemptRestore.Result.Blocked -> "Cəhd bu versiyada bərpa edilə bilmir"
         else -> null

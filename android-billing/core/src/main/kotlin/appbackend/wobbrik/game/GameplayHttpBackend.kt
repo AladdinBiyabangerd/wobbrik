@@ -20,8 +20,25 @@ class GameplayHttpBackend(private val sessions: Sessions, private val transport:
     override suspend fun sync(session: BillingSession): GameSnapshot = GameplayWire.snapshot(request(session, "sync", null))
     override suspend fun submit(session: BillingSession, command: AttemptCommand) {
         GameplayWire.validate(command)
-        val path = "attempts/" + command.route.name.lowercase(java.util.Locale.ROOT)
-        RecoveryDtos.attemptReceipt(request(session, path, command.envelope), command.route)
+        val path = when (command.route) {
+            AttemptCommand.Route.SHOP_BUY -> "shop/buy"
+            AttemptCommand.Route.BUILDING_EDIT -> "buildings/edit"
+            AttemptCommand.Route.BUILDING_DELETE -> "buildings/delete"
+            else -> "attempts/" + command.route.name.lowercase(java.util.Locale.ROOT)
+        }
+        val body = try { request(session, path, command.envelope) }
+        catch (failure: GameplayHttpError) {
+            if (command.route in setOf(AttemptCommand.Route.SHOP_BUY, AttemptCommand.Route.BUILDING_EDIT, AttemptCommand.Route.BUILDING_DELETE) &&
+                ((failure.status == 409 && failure.code in setOf("shop_conflict", "insufficient_balance", "building_conflict", "listing_conflict")) ||
+                 (failure.status == 404 && failure.code == "not_found") ||
+                 (failure.status == 400 && failure.code == "invalid_request"))) throw MutationRejected(requireNotNull(failure.code))
+            throw failure
+        }
+        when (command.route) {
+            AttemptCommand.Route.SHOP_BUY, AttemptCommand.Route.BUILDING_EDIT -> PartsMutations.receipt(body, command)
+            AttemptCommand.Route.BUILDING_DELETE -> BuildingDeletion.receipt(body, command)
+            else -> RecoveryDtos.attemptReceipt(body, command.route)
+        }
     }
     internal suspend fun read(session: BillingSession, path: String): String = request(session, path, null)
     private suspend fun request(session: BillingSession, path: String, body: String?): String {
@@ -48,7 +65,7 @@ class UrlConnectionGameplayTransport(origin: String) : GameplayTransport {
         require(it.path.isNullOrEmpty() || it.path == "/")
     }.toString().trimEnd('/')
     override suspend fun request(path: String, bearer: String, body: String?): GameplayResponse = withContext(Dispatchers.IO) {
-        require(allowedReadPath(path) || path in setOf("sync", "catalog", "attempts/start", "attempts/checkpoint", "attempts/finish", "attempts/abandon"))
+        require(allowedReadPath(path) || path in setOf("sync", "catalog", "shop/buy", "buildings/edit", "buildings/delete", "attempts/start", "attempts/checkpoint", "attempts/finish", "attempts/abandon"))
         val suffix = if (path == "catalog") "catalog?rules_version=wobbrik-v1" else path
         val responseLimit = if (path.startsWith("inventory?")) 1_048_576 else 65_536
         val connection = URI("$base/v1/apps/wobbrik/game/$suffix").toURL().openConnection() as HttpURLConnection
