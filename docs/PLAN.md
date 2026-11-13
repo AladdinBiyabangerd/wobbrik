@@ -45,7 +45,7 @@ Google vahidinin sübutu: [Android review](reviews/2026-11-13-required-google-si
 ## 3. Cəhd lifecycle və bərpa
 
 - `AuthenticatedRecoveryOwner` Firebase listener-dən hər login epoch-u alır; dəyişmə sinxron olaraq hostu və əvvəlki Ready-ni ləğv edir. Token alınması backend sync uğuru deyil. Gecikmiş cavab, eyni UID ilə re-login və logout ayrıca qorunur.
-- `AcceptedEngineHost` yalnız cari exact Ready + foreground ilə input verir; settled landing-də dayanır, checkpoint göndərir, yalnız qəbul edilmiş yeni snapshot-dan davam edir. Waiting/recovery/error/pause-də drop bağlıdır. Frame clock arxa plandan qayıdanda reset olur, avtomatik resume yoxdur.
+- **13 noyabr 2026 qərarı:** `AcceptedEngineHost` cari exact Ready + foreground ilə lokal fizikanı işlədir; uğurlu enişdə dayanma, server checkpoint-i və reload yoxdur. Yalnız məğlubiyyətdə yığılmış uğurlu mərtəbələr bir terminal checkpoint-də göndərilir; qəbuldan sonra kosmetik seçim/açıq finish təsdiqi mövcud API ilə işləyir. Sıfır mərtəbədə checkpoint yoxdur. Wallet/XP/bina yalnız server qəbulundan sonra authority-dir; yarımçıq tərk edilən lokal irəliləyiş mükafat qazandırmır. Waiting/recovery/error/pause-də drop bağlıdır. Frame clock arxa plandan qayıdanda reset olur, avtomatik resume yoxdur.
 - Şəbəkə fasiləsi eyni aktiv ekran daxilində pause/retry-dir; accepted checkpoint əsasdır. Düşən mərtəbə restore zamanı krana qayıdır. Yeni bina/reward lokal yaradılmır. Uyğunsuz journal/versiya bloklanır və baytları saxlanır.
 - **9 noyabr restart/abandon qərarı:** Home/Geri/oyunun ortasında tətbiqi bağlamaq açıq cəhdi tərk edir. Oyna əvvəl serverdə abandon-u reconcile edir, sonra yeni cəhd açır; abandon nəticə/bina/refund/XP yaratmır. Bu, əvvəlki “hər process ölümündən sonra aktiv cəhdə qayıt” qaydasını əvəz edir. Davam yalnız uduzulmuş cəhdin son accepted progress-i və explicit finish/kosmetik təsdiq niyyəti üçün saxlanılır.
 - Kosmetik draft `(account, attempt)` üzrə server kataloqu/unlock-larla tutuşdurulur. Finish avtomatik deyil, istifadəçi açıq təsdiqləyir. Terminal checkpoint və finish ayrı durable əmrlərdir; pending envelope dəyişmir. Miss yeni mərtəbə əlavə etmədən son accepted progress-lə müqayisə olunur.
@@ -450,6 +450,8 @@ Koordinatlar canonical decimal string tick, ±1000000000; quarter_turns məcburi
 - Yeni stack, təsdiqlənməmiş dil siyahısı, ikinci plan, ikinci wallet/journal və icazəsiz redesign yaradılmır. Nəticə və yoxlama məhdudiyyətləri `reviews/`-da qeyd olunur; review tarixçədir, aktiv roadmap deyil.
 
 ## 9. Qalan qərarlar və dəqiq növbəti addım
+
+- **13 noyabr cari icra sırası:** əvvəl Android; AppBackend dəyişiklikləri ayrıca saxlanılır. Mərhələ 4-dən əvvəl hər enişdə save/reload xətası ayrıca fix branch-də düzəldilir. Mövcud vizuallar saxlanılır; əlavə vizual variantlar hələlik iki ilə məhdudlaşdırılır, hansı asset-lərin seçiləcəyi uyğun vahiddə dəqiqləşdirilir; bu, §6 kataloqunun silinməsi deyil.
 
 - Mərhələ 4 ilk vahidi üçün inventory/detail/loading dizaynlarının konkret təsdiqi; real həndəsəni qoruyan preview və raster keyfiyyəti. 68 hissə və mövcud ölçülər istifadə olunur; əlavə land-contour/crop dizayn dəsti tələb olunmur.
 - Reward davam fizikasının stabilləşdirilməsi və client callback riskinin texniki sərhədi; SSV hazır deyil və avtomatik yeni tələb seçilmir.

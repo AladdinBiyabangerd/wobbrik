@@ -130,7 +130,7 @@ class AcceptedAttemptCommandsTest {
         }
     }
 
-    @Test fun onlineHostStopsAtLandingAndRequiresFreshExplicitResume() = runBlocking {
+    @Test fun onlineHostKeepsSuccessfulLandingsLocalAndRevokesStaleAccountInput() = runBlocking {
         Fixture().use { f ->
             f.host.bind(f.commands)
             f.login(); yield()
@@ -151,21 +151,90 @@ class AcceptedAttemptCommandsTest {
             var time = 0L
             repeat(20) { time += 100_000_000L; f.host.onFrame(time, old) }
             yield()
-            assertEquals(1L, f.ready().snapshot.attempt!!.floors)
-            assertEquals(2, f.sent.size)
-            assertFalse(f.host.snapshot().inputEnabled)
-            assertFalse(f.host.resume(old))
-            assertTrue(f.host.resume(f.ready()))
+            assertSame(old, f.ready())
+            assertEquals(0L, f.ready().snapshot.attempt!!.floors)
+            assertEquals(1, f.host.snapshot().scene!!.floors.size)
+            assertEquals(1, f.sent.size) // start only: no landing checkpoint or sync
+            assertTrue(f.host.snapshot().inputEnabled)
+            assertFalse(f.host.snapshot().waiting)
             val scene = f.host.snapshot().scene
-            f.host.onFrame(Long.MAX_VALUE, old)
+            f.host.onFrame(Long.MAX_VALUE, old.copy())
             assertEquals(scene, f.host.snapshot().scene)
-            assertNull(f.host.snapshot().previousFrameNanos)
-            assertFalse(f.host.drop(old))
+            assertFalse(f.host.drop(old.copy()))
             f.host.onPause()
             f.host.onFrame(Long.MAX_VALUE)
             assertFalse(f.host.drop())
             f.login("bob"); yield()
             assertNull(f.host.snapshot().scene)
+        }
+    }
+
+    @Test fun localRunSendsOneAccumulatedTerminalCheckpointThenFinishes() = runBlocking {
+        Fixture().use { f ->
+            f.host.bind(f.commands)
+            f.login(); yield(); f.commands.start(f.ready()); yield()
+            val initial = f.ready()
+            f.host.onForeground()
+            assertTrue(f.host.resume(initial))
+            var time = 1L
+            f.host.onFrame(time, initial)
+            // Drop near the centre for several floors, then wait for an edge miss.
+            var frames = 0
+            while (!f.host.snapshot().choosingFinish && frames++ < 20000) {
+                val scene = f.host.snapshot().scene!!
+                if (scene.phase == Phase.SWINGING) {
+                    val centre = scene.floors.lastOrNull()?.centerX ?: 0.0
+                    val offset = kotlin.math.abs(f.host.snapshot().cameraX + scene.craneX - centre)
+                    if ((scene.floors.size >= 3 && offset >= PracticeRulesV1.FLOOR_WIDTH) ||
+                        (scene.floors.size < 3 && offset < 3.0)) {
+                        f.host.drop(initial)
+                    }
+                }
+                time += 16_666_666L
+                f.host.onFrame(time, initial)
+                if (!f.host.snapshot().choosingFinish) {
+                    assertSame(initial, f.ready())
+                    assertEquals(listOf(AttemptCommand.Route.START), routes(f))
+                    assertFalse(f.host.snapshot().waiting)
+                }
+            }
+            yield()
+            assertTrue("Run must reach loss", f.host.snapshot().choosingFinish)
+            val terminal = f.host.snapshot().scene!!
+            assertTrue(terminal.floors.size >= 3)
+            assertEquals(listOf(AttemptCommand.Route.START, AttemptCommand.Route.CHECKPOINT), routes(f))
+            assertEquals(1L, f.ready().snapshot.attempt!!.sequence)
+            assertEquals(terminal.floors.size.toLong(), f.ready().snapshot.attempt!!.floors)
+            assertFalse(f.host.snapshot().inputEnabled)
+            assertTrue(f.host.confirmFinish(f.ready())); yield()
+            assertEquals(AttemptCommand.Route.FINISH, routes(f).last())
+            assertNull(f.ready().snapshot.attempt)
+        }
+    }
+
+    @Test fun hostZeroFloorLossSkipsCheckpointAndOnlyExplicitConfirmFinishes() = runBlocking {
+        Fixture().use { f ->
+            f.host.bind(f.commands)
+            f.login(); yield(); f.commands.start(f.ready()); yield()
+            val ready = f.ready()
+            f.host.onForeground(); assertTrue(f.host.resume(ready))
+            var time = 1L
+            f.host.onFrame(time, ready)
+            repeat(600) {
+                val scene = f.host.snapshot().scene!!
+                if (scene.phase == Phase.SWINGING && kotlin.math.abs(scene.craneX) >= PracticeRulesV1.FLOOR_WIDTH) {
+                    f.host.drop(ready)
+                }
+                time += 16_666_666L
+                f.host.onFrame(time, ready)
+            }
+            assertTrue(f.host.snapshot().choosingFinish)
+            assertFalse(f.host.snapshot().waiting)
+            assertTrue(f.host.snapshot().scene!!.floors.isEmpty())
+            assertEquals(listOf(AttemptCommand.Route.START), routes(f))
+            assertTrue(f.host.confirmFinish(ready)); yield()
+            assertEquals(listOf(AttemptCommand.Route.START, AttemptCommand.Route.FINISH), routes(f))
+            assertEquals(0L, f.ready().snapshot.coins)
         }
     }
 

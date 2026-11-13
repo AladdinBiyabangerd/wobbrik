@@ -3,7 +3,7 @@ package com.aladdin.wobbrik.engine
 import appbackend.wobbrik.game.AuthenticatedRecoveryOwner
 import appbackend.wobbrik.game.FinishCosmetics
 
-/** Application-owned online physics boundary. Owns only accepted online physics; dispatch always occurs outside its monitor. */
+/** Application-owned online physics boundary. Runs local physics from an accepted start; dispatch always occurs outside its monitor. */
 class AcceptedEngineHost(private val drafts: FinishDraftStore? = null) {
     data class Snapshot(
         val restore: AcceptedAttemptRestore.Result = AcceptedAttemptRestore.Result.Unavailable,
@@ -79,8 +79,8 @@ class AcceptedEngineHost(private val drafts: FinishDraftStore? = null) {
     }
 
     /**
-     * Stop at the first settled tick: a catch-up frame must never simulate past the
-     * checkpoint boundary. The coordinator independently rejects stale Ready identity.
+     * Run successful landings locally without network or recovery transitions. Only a loss
+     * submits accumulated progress; the coordinator still rejects stale Ready identity.
      */
     fun onFrame(frameNanos: Long, expected: AuthenticatedRecoveryOwner.State.Ready? = null) {
         require(frameNanos >= 0)
@@ -93,24 +93,22 @@ class AcceptedEngineHost(private val drafts: FinishDraftStore? = null) {
             }
             current = current.copy(previousFrameNanos = frameNanos)
             val live = engine ?: return
-            // One tick per advance allows us to observe every settled landing.
+            // Observe the terminal tick without simulating beyond the loss.
             var remaining = if (previous == null) 0L else (frameNanos - previous).coerceAtMost(133_333_334L)
             while (remaining > 0) {
                 val step = remaining.coerceAtMost(16_666_666L)
                 val before = live.state
                 live.advance(step)
                 remaining -= step
-                if (before.phase == Phase.FALLING && live.state.phase != Phase.FALLING) {
+                if (before.phase != Phase.FINISHED && live.state.phase == Phase.FINISHED) {
                     live.pause()
                     current = current.copy(scene = live.state, waiting = true, previousFrameNanos = null)
                     val expectedReady = ready ?: return
                     val proposal = live.checkpoint()
-                    if (proposal.state.phase == Phase.FINISHED) {
-                        saveDraft(expectedReady, FinishDraft(proposal))
-                        current = current.copy(choosingFinish = true, finishParts = expectedReady.catalog?.let {
-                            FinishCosmetics.selection(it, expectedReady.snapshot, emptyMap())
-                        }.orEmpty())
-                    }
+                    saveDraft(expectedReady, FinishDraft(proposal))
+                    current = current.copy(choosingFinish = true, finishParts = expectedReady.catalog?.let {
+                        FinishCosmetics.selection(it, expectedReady.snapshot, emptyMap())
+                    }.orEmpty())
                     return@synchronized Triple(expectedReady, proposal, commands ?: return)
                 }
             }

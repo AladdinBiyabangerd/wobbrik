@@ -1,29 +1,30 @@
 # Cari handoff — 13 noyabr 2026
 
 ## Completed
-- Məcburi Google giriş hər iki main-ə tarixçə qorunaraq merge və push edilib. Android auth d972775/merge 09f3b49; backend auth 47cf75e/merge 7d52fe4, yoxlama qeydi ilə backend main 6fc1214.
-- Vahid aktual plan `docs/PLAN.md`-dir (konsolidasiya 2f5054f, main merge 9a9915b). Dörd köhnə plan silinib, aktiv AGENTS/Cursor/source keçidləri yenilənib. Təsdiqlənmiş məhsul/kataloq/həndəsə qaydaları qorunub.
-- Wobbrik əlavə worktree və köhnə lokal/remote branch-ləri silinib; əsas workspace main-dədir. Bu son handoff docs branch-i də main merge/push-dan sonra silinir.
-- AppBackend üçün bu işdə yaradılmış /private/tmp/wobbrik-required-google-backend worktree-si silinib; digər backend işlərinə toxunulmayıb.
+- `fix/end-of-attempt-checkpoint`: hər uğurlu enişdə pause/checkpoint/reload çıxarıldı; oyun lokal davam edir, yalnız məğlubiyyətdə yığılmış irəliləyiş bir terminal checkpoint-də göndərilir. Mövcud explicit kosmetik finish saxlanır.
+- Uğurlu enişdə sorğu olmaması, bir yekun checkpoint/finish, sıfır mərtəbə və stale Ready regressiyaları əlavə/yeniləndi.
 
 ## Current state
-- Yalnız Wobbrik əsas workspace/worktree və main saxlanılır. Google main push və plan merge-dən sonra hər iki repo üçün local main/origin main 0 ahead / 0 behind yoxlandı; bu son docs qeydi də main-ə push olunur və ref eyniliyi təkrar yoxlanır.
-- Runtime Google/visual nəticəsi unverified-dir; gate deyil. Deploy/Console/real SKU edilməyib.
+- Fix branch review üçün hazırlanıb; main merge/push yoxdur. Mərhələ 4 implementasiyasına başlanmayıb.
+- AppBackend koduna toxunulmayıb; mövcud checkpoint API-si yığılmış delta qəbul edir. Runtime/render unverified, gate deyil.
 
 ## Decisions
-- Yeganə plan docs/PLAN.md; handoff qısa iş vəziyyətidir, review tarixi sübutdur. Canlı yoxlama heç vaxt tələb edilmir; emulator avtomatik açılmır. CI yalnız ayrıca istifadəçi tələbi ilə. Bu iş üçün merge/push/branch-worktree cleanup açıq təsdiqlənib.
-- Dirty fayllar və main-ə daxil olmayan commit-lər silinmədən əvvəl /Users/mac/My Workspace/Wobbrik-backup-20261113-141911 altında verified git bundle/patch/tar və original-untracked kimi qorunub. Original ignored output/config qalır. Backup ikinci aktiv plan/worktree deyil.
+- Əvvəl Android; backend dəyişiklikləri ayrıca saxlanılır. Mövcud vizuallar qalır, əlavə variantlar hələlik iki; konkret asset seçimi bu bug fix-in əhatəsi deyil.
+- Hər enişdə şəbəkə yoxdur; oyun sonu server qəbulundan əvvəl lokal mərtəbələr wallet/XP/bina authority-si deyil. Yarımçıq tərk edilən lokal progress mükafat yaratmır.
+- Emulator/canlı yoxlama tələb edilmir; CI yalnız ayrıca tələb ilə main-də. Merge üçün istifadəçi təsdiqi gözlənilir.
 
 ## Remaining work
-- Bu məntiqi vahiddə yeni kod və ya məhsul implementasiyası qalmır. Final git ref/worktree yoxlamasından sonra dayan; növbəti böyük işi yeni chat-də ayrıca istifadəçi tapşırığı ilə başla.
+- Fix-in main merge-i yalnız istifadəçi təsdiqindən sonra. 4-cü mərhələ ayrıca növbəti vahiddir; konkret inventory/detail/loading UI təsdiqi açıq qalır.
 
 ## Relevant files
-- docs/PLAN.md; AGENTS.md/.cursor/rules; docs/reviews/2026-11-13-required-google-sign-in.md; docs/reviews/2026-11-13-single-plan-and-cleanup.md; backend docs/reviews/2026-11-13-required-google-auth.md.
+- docs/PLAN.md §3/§9; docs/reviews/2026-11-13-end-of-attempt-checkpoint.md.
+- android-billing/engine/src/main/kotlin/com/aladdin/wobbrik/engine/AcceptedEngineHost.kt.
+- android-billing/engine/src/test/kotlin/com/aladdin/wobbrik/engine/AcceptedAttemptCommandsTest.kt.
 
 ## Checks performed
-- Fresh Android 132 core/engine test PASS; main fokuslu assembleDebug/lintDebug/core:test/engine:test PASS (1m9s). Lint 17 xəbərdarlıq qalır.
-- Backend main vet, fresh race suite bütün paketlərdə real disposable PostgreSQL 18 UTF-8 ilə PASS, build PASS; cluster dayandırılıb. Əvvəlki SQL_ASCII test konfiqurasiyası uğursuzluğu düzəldilib, kod dəyişməyib.
-- Docs diff check, yeganə plan/§1–9, lokal linklər, aktiv qayda keçidləri və bütün adlı kataloq sətirlərinin qorunması PASS. Docs-only iş üçün build/CI təkrarlanmayıb. Emulator/ADB/canlı yoxlama tələb və istifadə edilməyib.
+- Engine 64 test PASS, core 70 test PASS (core up-to-date); fokuslu assembleDebug/lintDebug PASS (18s). git diff --check PASS.
+- AppBackend attempts.go checkpoint delta/sequence qaydası read-only yoxlandı; backend test/build aparılmadı (dəyişiklik yoxdur).
+- Emulator, canlı yoxlama, render və CI yoxdur.
 
 ## Exact next step
-- Bu işin sonunda final main/origin SHA eyniliyi və Wobbrik-in tək branch/worktree vəziyyətini bildir. Sonrakı yeni chat üçün docs/PLAN.md və bu handoff-u oxu; növbəti məhsul addımı §1 mərhələ 4/§9-dur, konkret UI təsdiqi ayrıca qalır. Canlı yoxlama və emulator açılması istəmə.
+- Fix branch-in lokal review/yoxlama nəticəsini bildir; təsdiqdən əvvəl main-ə merge etmə. Sonra yalnız ayrıca tapşırıqla docs/PLAN.md §1 mərhələ 4/§9 üzrə davam et.
