@@ -15,4 +15,6 @@ alwaysApply: true
 - Wallet, oyun/nailiyyət mükafatları, progression/checkpoint, bina mülkiyyəti, bazar və şəhər axını qurulanda və ya yenilənəndə AppBackend-də uyğun domain qaydaları, API/DTO, schema/migration və test dəyişikliklərini də eyni işin hissəsi kimi yoxla və lazım olanları et. Yalnız mobil axını dəyişib server uyğunluğunu tamamlanmış sayma.
 - Xərclənən bütün sikkələr və mülkiyyət üçün vahid authority AppBackend/PostgreSQL-dir. Client delta, Room və ya Firestore ikinci wallet yaratmır. Alış krediti, oyun mükafatı, xərcləmə və bazar transferi eyni wallet/ledger ilə işləməlidir.
 - Müqavilə dəyişəndə backend və mobil uyğunluğunu, qayda versiyasını, revision/dedup, hesab izolyasiyası, retry və köhnə client davranışını yoxla; dəyişmiş API müqaviləsini sənədləşdir. Backend dəyişməsinə ehtiyac yoxdursa bunu yoxlama nəticəsində açıq qeyd et.
-- Əsas müqavilə: `docs/kotlin-compose-plan.md`, xüsusən 5-ci bölmə. Backend alış sərhədi: `/Users/mac/My Workspace/AppBackend/docs/wobbrik-billing.md`. Tam domain adapterinin hazır olduğunu yalnız kod və yoxlamalar bunu təsdiqləyəndə bildir.
+- Əsas müqavilə: `docs/PLAN.md`, xüsusən §2 və §7. Backend alış sərhədi: `/Users/mac/My Workspace/AppBackend/docs/wobbrik-billing.md`. Tam domain adapterinin hazır olduğunu yalnız kod və yoxlamalar bunu təsdiqləyəndə bildir.
+
+- 13 noyabr cari vəziyyəti: məcburi Google entry və guest/link çıxarılması hər iki main-dədir. Anonymous fallback, wallet merge və data deletion yoxdur. Canlı yoxlama tələb etmə, emulatoru avtomatik açma.
