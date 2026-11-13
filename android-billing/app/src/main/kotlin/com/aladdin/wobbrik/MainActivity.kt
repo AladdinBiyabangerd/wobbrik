@@ -85,8 +85,8 @@ internal fun PracticeGame(
     var fpsLine by remember { mutableStateOf("") }
     val art = SceneArt(
         ImageBitmap.imageResource(R.drawable.game_floor), ImageBitmap.imageResource(R.drawable.game_crane),
-        ImageBitmap.imageResource(R.drawable.game_island), ImageBitmap.imageResource(R.drawable.game_roof),
-        ImageBitmap.imageResource(R.drawable.game_cloud))
+        ImageBitmap.imageResource(R.drawable.inventory_garden), ImageBitmap.imageResource(R.drawable.game_roof),
+        ImageBitmap.imageResource(R.drawable.game_cloud), rememberGameAtlases())
     val density = LocalDensity.current
     var hudHeight by remember { mutableStateOf(GameTokens.Target + GameTokens.Inset) }
     fun publish() {

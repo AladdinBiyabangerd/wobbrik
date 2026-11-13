@@ -1,0 +1,66 @@
+{
+  "version": 1,
+  "source_size": [
+    1536,
+    1024
+  ],
+  "cells": {
+    "floor": [
+      40,
+      144,
+      464,
+      288
+    ],
+    "ground": [
+      534,
+      144,
+      464,
+      288
+    ],
+    "roof": [
+      1030,
+      264,
+      474,
+      148
+    ],
+    "window": [
+      132,
+      615,
+      280,
+      282
+    ],
+    "entrance": [
+      596,
+      560,
+      340,
+      365
+    ],
+    "lighting": [
+      1160,
+      602,
+      204,
+      284
+    ]
+  },
+  "floor_pitch_px": 176,
+  "floor_depth_px": 112,
+  "top_anchors_px": [
+    [
+      8,
+      90
+    ],
+    [
+      139,
+      16
+    ],
+    [
+      450,
+      30
+    ],
+    [
+      342,
+      105
+    ]
+  ],
+  "notes": "Complete composites: never add duplicate window/entrance/light overlays. Old catalog remains for mixed selections."
+}
