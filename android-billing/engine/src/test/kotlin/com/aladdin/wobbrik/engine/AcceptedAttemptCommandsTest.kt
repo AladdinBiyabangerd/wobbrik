@@ -79,6 +79,7 @@ class AcceptedAttemptCommandsTest {
                     fun number(k: String) = request.getValue(k).jsonPrimitive.long
                     fun string(k: String) = request.getValue(k).jsonPrimitive.content
                     val attempt = when (command.route) {
+                        AttemptCommand.Route.SHOP_BUY, AttemptCommand.Route.BUILDING_EDIT, AttemptCommand.Route.BUILDING_DELETE -> error("Not an attempt command")
                         AttemptCommand.Route.START -> {
                             check(old.attempt?.active != true)
                             ServerAttempt(command.operationId, true, 0, null, geometryVersion = request["geometry_version"]?.jsonPrimitive?.content)
@@ -411,12 +412,13 @@ class AcceptedAttemptCommandsTest {
     }
 
     @Test fun lostCommittedResponseForEveryRouteRetriesExactDiskEnvelopeAfterRecreation() = runBlocking {
-        for (route in AttemptCommand.Route.entries) Fixture().use { f ->
+        for (route in listOf(AttemptCommand.Route.START, AttemptCommand.Route.CHECKPOINT, AttemptCommand.Route.FINISH, AttemptCommand.Route.ABANDON)) Fixture().use { f ->
             f.login(); yield()
             if (route != AttemptCommand.Route.START) { f.commands.start(f.ready()); yield() }
             if (route == AttemptCommand.Route.FINISH) { f.commands.checkpoint(f.ready(), landed(true)); yield() }
             f.afterCommit = { error("lost committed response") }
             when (route) {
+                AttemptCommand.Route.SHOP_BUY, AttemptCommand.Route.BUILDING_EDIT, AttemptCommand.Route.BUILDING_DELETE -> error("Not an attempt command")
                 AttemptCommand.Route.START -> f.commands.start(f.ready())
                 AttemptCommand.Route.CHECKPOINT -> f.commands.checkpoint(f.ready(), landed(true))
                 AttemptCommand.Route.FINISH -> f.commands.finish(f.ready(), landed(true), parts)

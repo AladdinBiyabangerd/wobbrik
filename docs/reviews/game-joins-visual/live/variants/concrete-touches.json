@@ -1,0 +1,26 @@
+{
+  "initial_floors": 0,
+  "parts": {},
+  "style": 6,
+  "touches": [
+    {
+      "before_count": 0,
+      "crane_x": 2.99968750976548
+    },
+    {
+      "before_count": 1,
+      "crane_x": 7.495118141085624
+    },
+    {
+      "before_count": 2,
+      "crane_x": 10.725667394092277
+    }
+  ],
+  "final": [
+    "SWINGING",
+    73.57402223681201,
+    3,
+    216953.985771583
+  ],
+  "three_floors": true
+}

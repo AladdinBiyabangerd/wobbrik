@@ -1,0 +1,31 @@
+{
+  "initial_floors": 0,
+  "parts": {
+    "window": "base_3_window",
+    "entrance": "coins_entrance_2",
+    "lighting": "reward_lighting_1",
+    "roof": "paid_roof_1"
+  },
+  "style": 1,
+  "touches": [
+    {
+      "before_count": 0,
+      "crane_x": 2.99968750976548
+    },
+    {
+      "before_count": 1,
+      "crane_x": 8.99156487272908
+    },
+    {
+      "before_count": 2,
+      "crane_x": 11.632821240636348
+    }
+  ],
+  "final": [
+    "SWINGING",
+    -44.44440334493547,
+    3,
+    216961.465750041
+  ],
+  "three_floors": true
+}

@@ -5,6 +5,11 @@ import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.res.imageResource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
@@ -47,7 +52,24 @@ class ScenePreviewActivity : ComponentActivity() {
                 // Reject Android's stale task-snapshot starting window in capture tooling.
                 val marker = "Wobbrik fixture floors=$count crane=${state.craneX.toInt()} paused=${state.paused} drift=$drift finished=${state.phase == Phase.FINISHED}"
                 Box(Modifier.fillMaxSize().semantics { contentDescription = marker }) {
-                    PracticeGame(engine, renderOnly = !intent.getBooleanExtra("animate", false), previewMotion = motion)
+                    val parts = listOf("wall", "window", "entrance", "lighting", "roof").associateWith { category ->
+                        intent.getStringExtra(category) ?: "base_${intent.getIntExtra("style",1).coerceIn(1,6)}_$category"
+                    }
+                    if (intent.getBooleanExtra("scene_only",false)) {
+                        // Explicit frozen Android-renderer fixture for inspecting terminal roof joins
+                        // without the result panel. Never presented as an interactive attempt.
+                        val art = SceneArt(ImageBitmap.imageResource(R.drawable.game_floor),
+                            ImageBitmap.imageResource(R.drawable.game_crane),ImageBitmap.imageResource(R.drawable.inventory_garden),
+                            ImageBitmap.imageResource(R.drawable.game_roof),ImageBitmap.imageResource(R.drawable.game_cloud),rememberGameAtlases())
+                        val cosmetics = rememberCosmeticArt()+rememberGameWindowArt()
+                        Canvas(Modifier.fillMaxSize().safeDrawingPadding().background(GameTokens.Background)) {
+                            drawGameScene(engine.state,art,motion,cosmetics,parts)
+                        }
+                    } else PracticeGame(engine, renderOnly = !intent.getBooleanExtra("animate", false), previewMotion = motion,
+                        previewObserver = if (intent.getBooleanExtra("telemetry", false)) { current ->
+                            android.util.Log.d("AtlasQA", "${current.phase} ${current.craneX} ${current.floors.size}")
+                        } else null,
+                        previewParts = parts)
                 }
             }
         }

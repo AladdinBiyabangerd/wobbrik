@@ -1,42 +1,334 @@
 # Cari handoff — 13 noyabr 2026
 
+## Son aktiv vahid — şəhər oxu düzəlişi
+- Completed: `ad0a396` bazasından `fix/city-decoration-read`; production transport-un decorations GET yolunu rədd etməsi regression ilə təkrarlandı və düzəldildi. Mobil dizayn dəyişməyib; owner diff/untracked faylları qorunur.
+- Current state / Decisions: Lokal review-da əlavə problem tapılmadı; istifadəçi göstərişi ilə iki core faylı və bu vahidin review/handoff qeydi lokal commit-ə hazırlanır. Backend müqaviləsi dəyişmir. Owner faylları commit-dən kənardır; merge/push/CI yoxdur.
+- Checks performed: düzəlişdən əvvəl iki regression FAIL; sonra CitySceneReadsTest10/10 və Java21/offline core/app unit+APK+lint PASS13s; diff check PASS. Real hesab E2E/runtime/render yoxdur; emulator açılmadı.
+- Remaining work: tarixi screenshot exception logu yoxdur; bu konkret deterministik transport maneəsi aradan qaldırılıb, bütün mümkün server/şəbəkə problemlərinin həlli iddia edilmir. Tam mərhələ4 qəbulu ayrıca açıqdır.
+- Relevant files: `GameplayHttpBackend.kt`, `CitySceneReadsTest.kt`, `docs/reviews/2026-11-13-city-decoration-read-fix.md`; plan yalnız `docs/PLAN.md`.
+- Exact next step: lokal commit nəticəsini bildir; ayrıca göstərişsiz merge/push/CI və yeni feature başlama. Aşağıdakı qeydlər əvvəlki vahidlərin tarixçəsidir.
+
 ## Completed
-- Mobil portret kilidi MainActivity manifestində tətbiq edildi; mobil əvvəl / planşet sonra qərarı qayda güzgüsü və əsas plana yazıldı.
-- Silent finish home: qəbul edilmiş hesab keşi olduqda Recovering loading panelini göstərmir; terminal checkpoint/finish arasında oyun səhnəsi geri görünmür. Oyna finish təsdiqinədək deaktivdir; rəqəmlər server Ready nəticəsi ilə yenilənir.
-- Checkpoint `92d640d`, navigation `3130cce`, kosmetik qərar `8a718da` üzərində avtomatik finish/default görünüş vahidi tətbiq edildi.
-- Kolleksiya təsdiqli mövcud kosmetik picker-i açır; Təsdiqlə cihazda hesab üzrə daimi default saxlayır, Geri saxlamadan home-a qayıdır.
-- Cəhdin görünüşü ayrıca account/attempt açarı ilə capture edilir; kataloq/unlock fallback var. Default dəyişməsi başlanmış cəhdi dəyişmir.
-- Terminal loss → lazım olsa checkpoint → yeni exact Ready ilə avtomatik finish → canonical home. Sıfır mərtəbədə checkpoint yoxdur. Mövcud durable journal/retry saxlanır.
-- Aktiv Canvas cəhdin divar/pəncərə/giriş/işıq/dam atlaslarını istifadə edir. Yeni layout/asset/token yoxdur.
+- Əvvəlki navigation/default kosmetik/mobil portrait vahidi PR #1 ilə remote main-ə merge edilib; lokal/remote main baza `e97e78c` idi.
+- Main-dən lokal `feat/phase-4` yaradıldı. İlk mobil oxu vahidi: Home inventar → paginated server inventory → bina detalı → city membership oxusu implementasiya edilib.
+- Sakin, base/max dəyər və hissələr serverdən oxunur; preview yalnız accepted geometry və mövcud atlaslarla çəkilir. Legacy/missing art statusu var.
+- Session/login epoch və exact Ready izolyasiyası, city mixed-revision rəddi, read DTO regression testləri əlavə edildi.
+- İnventar/detail davamında sikkə nişanı, çərçivələr, hissə kartları və v1/server cəmləri ilə tutuşdurulan read-only qiymət bölgüsü əlavə edildi; böyük şrift üçün şaquli detail və scroll tabları var.
+
+- İnventar/detail davamı: binasız şəffaf `inventory_garden.png`, GameScene ilə uyğun preview anchor-ları, üfüqi hissə kartları, dairəvi geri düyməsi və mövcud parlaq HomeButton təqdimatı lokal working diff-dədir. Review: `docs/reviews/2026-11-13-phase4-inventory-garden.md`.
+
+- Hissələr/mağaza və binaya tətbiq working diff-də əlavə edilib: `PartsScreen.kt`, `PartsMutations.kt`, eyni durable journal-a `SHOP_BUY`/`BUILDING_EDIT` route-ları. Review: `docs/reviews/2026-11-13-phase4-parts-flow.md`.
 
 ## Current state
-- Son vahid review: `docs/reviews/2026-11-13-silent-finish-home.md`; mobil presentation düzəlişidir, backend müqaviləsi dəyişməyib.
-- Branch `fix/navigation-consistency`; main merge/push edilməyib. İstifadəçinin untracked `android-billing/app/release/` faylları saxlanıb.
-- Review: `docs/reviews/2026-11-13-default-cosmetics.md`; naviqasiya PNG/script-ləri yenilənib, Android screenshot deyil.
+- Branch `feat/phase-4`; main merge/push yoxdur. Untracked `android-billing/app/release/` istifadəçi faylları qorunub.
+- Review-lar: `docs/reviews/2026-11-13-phase4-inventory-read.md`, `docs/reviews/2026-11-13-phase4-inventory-detail-polish.md`. İlk oxu vahidi implementasiya edilib, Android vizual qəbul/render yoxdur; mərhələ 4 bütöv bitməyib.
 
 ## Decisions
-- 13 noyabr əlavə qərarı: mobil yalnız portret rejimində olacaq; mobil landşaft dizaynı və yoxlaması tələb edilmir. Müxtəlif portret ölçüləri və font/a11y uyğunluğu saxlanır. MainActivity manifestində portrait kilidi tətbiq edilib; runtime yoxlanmayıb.
-- 13 noyabr: mobil tam bitmədən planşet dizaynına keçilmir; hər mobil vahid üçün planşet dizaynı hazırlanmaz. Planşet işi mobil tamamlandıqdan sonra ayrıca istifadəçi tapşırığı ilə başlayır. Qayda AGENTS.md, visual-work.mdc və PLAN.md-də qeyd edilib.
-- İstifadəçi bu chatdə mövcud finish-cosmetics-v1 dizaynını Kolleksiyadan daimi seçim kimi açmağı təsdiqləyib.
-- AppBackend dəyişdirilmir; emulator açılmır; CI yalnız ayrıca tələb ilə main-də. Canlı yoxlama gate deyil.
-- Yeganə plan `docs/PLAN.md`; mərhələ 4-ə keçilmir. Merge istifadəçi təsdiqi tələb edir.
+- İstifadəçi mərhələ 4 implementasiyasına icazə verdi, AppBackend-ə toxunmağı qadağan etdi. Yalnız server müqavilə/kodu read-only oxundu; server dəyişdirilmədi.
+- İstifadəçi inventory-market-v2 inventar və city-completion-v1/04-building-detail görünüşlərini açıq təsdiqlədi. Ehtiyac olsa raster asset hazırlamağa icazə var. `02-parts-flow-v2.png` bu chatdə hissələr/mağaza və binaya tətbiq üçün açıq təsdiqləndi; digər city-completion lövhələri hələ təklifdir.
+- Mobil əvvəl, yalnız portret; planşet işi ayrıca göstərişlə. Emulator/canlı yoxlama tələb edilmir, avtomatik açılmır. CI yalnız ayrıca istək ilə main-də.
+- Yeganə plan `docs/PLAN.md`; wallet/ownership authority AppBackend qalır. Yeni merge/push göstərişi yoxdur.
 
 ## Remaining work
-- Android runtime/render yoxlanmayıb; atlas anchor/dizayn uyğunluğu üçün vizual PASS yoxdur. Bütün telefon/planşet/orientasiya/font/inset/accessibility render halları yoxlanmamışdır.
-- Default cihazda account-scoped saxlanır; cihazlararası sync yoxdur.
-- Nailiyyətlər ümumi hesab şablonudur; Şəhər/İnventar/Bazar deaktivdir; online pauzada Yenidən başla əvvəlki borcdur.
+- Bu UI-nin təsdiqli dizayna vizual uyğunluğu və Android renderi yoxlanmayıb. Qiymət breakdown-u əlavə edilib. Ground dressing asset-i və preview anchor düzəlişi əlavə edilib; parlaq çərçivə/ikon eyniliyi və atlas join-lərinin Android render təsdiqi hələ açıqdır; review-da sərhədlər var. Sabit fasadlı game_island accepted geometry-ni pozacağı üçün istifadə edilmədi.
+- Hissələr üzrə sikkə alış/edit inteqrasiyası working diff-dədir; tam vizual uyğunluq/render təsdiqlənməyib. Mərhələ 4 qalan vahidlər: delete, placement/dekor/land, real şəhər renderer-i. Başqa lövhələrin konkret təsdiqi uyğun vahiddə lazımdır.
+- Mövcud texniki borclar: default kosmetik cihaz üzrədir; nailiyyətlər ümumi hesab şablonudur, online pause restart açıqdır. Bu vahid onları dəyişmir.
 
 ## Relevant files
-- docs/PLAN.md §3; docs/reviews/2026-11-13-default-cosmetics.md.
-- engine AcceptedEngineHost.kt, CosmeticDefaultsStore.kt, AcceptedAttemptCommandsTest.kt.
-- app AndroidCosmeticDefaultsStore.kt, WobbrikApplication.kt, OnlineGame.kt, FinishCosmeticScreen.kt, GameScene.kt.
+- `docs/PLAN.md` §1 mərhələ 4, §§2/4/6/7; yeni review.
+- core `InventoryReads.kt`, `GameplayHttpBackend.kt`, `InventoryReadsTest.kt`, `BuildingValueBreakdown.kt`, `BuildingValueBreakdownTest.kt`.
+- app `InventoryScreen.kt`, `OnlineGame.kt`, `HomeScreen.kt`, `WobbrikApplication.kt`, `GameNavigationTest.kt`, `GameTokens.kt`.
+- Dizayn: `docs/design/mobile-v1/inventory-market-v2.png`, `docs/design/city-completion-v1/04-building-detail.png`.
 
 ## Checks performed
-- Mobil portret: assembleDebug və lintDebug PASS; merged manifest-də portrait yoxlanıb; diff check PASS. Review: `docs/reviews/2026-11-13-mobile-portrait.md`. Runtime/render yoxlanmayıb.
-- Silent finish vahidi: app unit, core/engine unit (up-to-date), assembleDebug və lintDebug PASS; diff check PASS. Android runtime/render və performans ölçümü yoxdur; CI işə salınmayıb.
-- Fokuslu assembleDebug, engine 67 test, app unit test, lintDebug PASS; son exact-Ready dəyişiklikdən sonra yenilənib (app 3 test).
-- git diff --check PASS. Runtime/render, backend tests, CI, emulator/ADB yoxdur.
+- Hissələr vahidinin son kodunda Java 21 ilə `:core:test :engine:test :app:testDebugUnitTest :app:assembleDebug :app:lintDebug` PASS (14s); PartsMutationsTest 4/4 PASS. Token kontrastı 4 cüt PASS, minimum 8.22; diff check PASS. Runtime/render/CI/backend testləri edilməyib.
+- Java 21 ilə `:core:test :app:testDebugUnitTest :app:assembleDebug :app:lintDebug` PASS son kodda. InventoryReadsTest 7/7; BuildingValueBreakdownTest 4/4; identity regression mövcuddur.
+- Mətn token kontrast cütləri PASS (minimum 8.22 (bu diff-də istifadə edilən ölçülmüş cütlər)), git diff --check PASS.
+- CI/backend testləri/runtime/render/emulator/ADB yoxdur. Heç biri PASS kimi təqdim edilmir.
 
 ## Exact next step
-- Mobil portret kilidi və qayda qeydlərinin commit-ini review et; yeni böyük vahidi yeni chatdə davam et.
-- Silent finish home diff/commit-ini istifadəçiyə review üçün təqdim et. Merge yalnız açıq təsdiqdən sonra; CI ayrıca göstərişsiz işləmir. Növbəti məhsul vahidinə özbaşına başlama.
+- Cari working diff-ni `docs/reviews/2026-11-13-phase4-parts-flow.md` ilə review et; birbaşa main merge/push etmə. Əvvəlki inventory garden/polish diff-i və istifadəçi `app/release/` faylları qorunur.
+- Hissələrə giriş: İnventar → Hissələr/Mağaza. Tətbiq: bina detalı → Bina görünüşü → kateqoriya → açıq hissə → Tətbiq et. Alış və edit eyni tətbiq-owned durable journal ilə işləyir; ikinci outbox/wallet yoxdur.
+- AppBackend dəyişdirilməyib; mövcud `shop/buy` və `buildings/edit` müqaviləsi saxlanılıb. Reklam/real pul axını əlavə edilməyib. Android vizual uyğunluq/runtime/render yoxlanmayıb; emulator avtomatik açılmır, canlı yoxlama gate deyil.
+- Əlaqəli yeni fayllar: app `PartsScreen.kt`; core `PartsMutations.kt`, `PartsMutationsTest.kt`; mövcud `AttemptCoordinator.kt`, `GameplayWire.kt`, `GameplayHttpBackend.kt`, `OnlineGame.kt`, `InventoryScreen.kt`.
+- Növbəti böyük vahidə keçməzdən əvvəl istifadəçi tapşırığı gözlə; dizaynın renderer olmadan birəbir uyğunluğunu və mərhələ 4 tamamlanmasını iddia etmə. Plan yalnız `docs/PLAN.md`-dir.
+
+
+## Son review davamı — 13 noyabr 2026
+- Current state: `feat/phase-4` / `09185dc`; cari inteqrasiya `PLAN.md` mərhələ 4 ilə tutuşduruldu, implementation dəyişmədi. AppBackend-ə toxunulmadı.
+- Completed/Checks: parts wire/receipt/coordinator/domain və UI giriş/çıxış statik review; yeni təsdiqlənmiş bug yoxdur. Java 21 fokuslu core/engine/app unit + assembleDebug/lintDebug BUILD SUCCESSFUL (107/108 UP-TO-DATE); diff check PASS. Runtime/render/CI yoxdur.
+- Remaining work: silmə; placement DTO/client və atomik yerləşdirmə/dəyişdirmə/qaytarma; dekor və torpaq alışı; real şəhər renderer-i/əhali/canlılıq. Mövcud parts buy→unlock→apply→detail tam axınının regression yoxlaması və mobil vizual müqayisə açıqdır.
+- Decisions: reklam/billing mərhələ 6, bazar/leaderboard mərhələ 5; planşet/landşaft hazırkı iş deyil. Yeni feature, merge/push başlamadı.
+- Relevant files/Exact next step: `docs/reviews/2026-11-13-phase4-parts-flow.md` son bölməsi; növbəti review vahidi üçün `PartsMutationsTest.kt` və `PartsScreen.kt` əsasında uğurlu buy/apply və rədd ssenarilərinin regression əhatəsini tamamlamaq; yeni böyük vahid yalnız istifadəçi tapşırığı ilə.
+
+
+## Son istifadəçi qərarı və silmə vahidi — 13 noyabr 2026
+- Decisions: istifadəçi şəhərə yerləşdir/yerini dəyiş/inventara qaytar/atomik dəyiş və əyrilik/sahə yoxlamaları bəndini bağlı saymağı, qalan işləri davam etdirməyi tapşırdı. `PLAN.md` §1-də qeyd edildi. Bu, test/implementasiya PASS iddiası deyil; əvvəlki placement TODO-larını cari tapşırıq kimi götürmə. AppBackend-ə yazı qadağası qalır.
+- Completed: bina silmə core adapteri, wire/HTTP route, receipt validation və mövcud durable journal recovery inteqrasiyası working diff-dədir. UI hələ qoşulmayıb. Review: `docs/reviews/2026-11-13-phase4-building-delete.md`.
+- Current state: `feat/phase-4` / `09185dc`; əvvəlki diff/release faylları qorunur. `BuildingDeletion.kt`, `BuildingDeletionTest.kt` yenidir; PartsMutationsTest stale Ready testi delete üçün də genişləndi. Backend yalnız read-only müqavilə/kod yoxlaması, dəyişiklik yoxdur.
+- Checks performed: Java21 core/engine/app unit + assembleDebug/lintDebug PASS; son test əlavəsindən sonra core:test yenidən PASS; diff check PASS. Kontrast 3 cüt PASS (min8.22). Android runtime/render/CI yoxdur.
+- Remaining work: silmə UI təsdiqi və qoşulması; dekor/torpaq; real şəhər renderer-i və V1 canlılıq; mövcud parts axınının tam regression/vizual uyğunluğu. Bütün mərhələ bitmiş sayılmır.
+- Relevant files: `BuildingDeletion.kt`, `BuildingDeletionTest.kt`, `GameplayWire.kt`, `GameplayHttpBackend.kt`, `InventoryScreen.kt`, `GameTokens.kt`; təsdiqli `docs/design/city-completion-v1/04-building-detail.png`.
+- Exact next step: istifadəçiyə delete confirmation nümunəsini göstər və konkret təsdiqini al (AGENTS UI qapısı). Silmə girişinin görünüşü də təsdiqlənməlidir. Sonra həmin dizayn əsasında InventoryScreen-ə aydın təsdiqli silmə axınını qoş, server uğurundan sonra inventarı yenidən oxu. AppBackend yazısı/CI/merge/push etmə.
+
+
+## Silmə UI təsdiqi və inteqrasiya — 13 noyabr 2026
+- Decisions: istifadəçi “okeydir” ilə `delete-confirmation-proposal.png` dialoqunu və detail sonunda “Binanı sil” girişini açıq təsdiqlədi. Yenidən təsdiq istəmə.
+- Completed/Current state: `InventoryScreen.kt`-də silmə girişi və təsdiqli dialoq core `BuildingDeletion`-a qoşuldu. Ləğv et/outside/Back dispatch etmir; yalnız “Binanı sil” təsdiqi exact Ready ilə submit edir. Dispatch zamanı köhnə detail/list seçimindən çıxır, növbəti Ready-də inventory serverdən yenidən oxunur; lokal wallet/refund və optimistik ownership silinməsi yoxdur. Böyük şriftdə dialoq düymələri şaqulidir, izahat scroll edə bilir.
+- Relevant files: `InventoryScreen.kt`, `BuildingDeletion.kt`, `BuildingDeletionTest.kt`, `docs/reviews/2026-11-13-phase4-building-delete.md`; `docs/design/city-completion-v1/README.md` təsdiq statusu yeniləndi.
+- Remaining work: dekor/torpaq və real şəhər renderer-i; parts tam axın regression/vizual uyğunluğu. Placement bağlıdır. Android silmə UI render/runtime yoxlanmayıb; birəbir vizual PASS yoxdur. Emulator avtomatik açılmır.
+- Exact next step: yeni chatdə handoff və `docs/PLAN.md` oxu; dekor vahidi üçün mövcud `docs/design/city-completion-v1/03-decoration-flow.png` dizaynını göstər və konkret təsdiq al; təsdiqədək UI başlama. AppBackend dəyişmə/CI/merge/push yoxdur.
+
+- Son UI kodunda Checks performed: Java21 `:core:test :app:testDebugUnitTest :app:assembleDebug :app:lintDebug` BUILD SUCCESSFUL (52s; 15 executed,91 up-to-date), `git diff --check` PASS. CI/merge/push yoxdur.
+
+## Dekor/torpaq alış vahidi — 13 noyabr 2026
+- Completed: əvvəlki inventory/parts/delete diff artıq `c6c51de` commit-indədir. Dekor/torpaq alış adapteri və UI girişləri əlavə edildi; dekor copy inventory serverdən paginated oxunur. Alış mövcud SHOP_BUY + eyni durable journal/recovery/sync ilədir.
+- Current state: `feat/phase-4`; release APK/metadata qorunur və commit-ə daxil edilmir. Placement bağlıdır, AppBackend yazısı yoxdur.
+- Decisions: istifadəçi dekor dizaynını və torpaq siyahısı/alış təsdiqini açıq təsdiqlədi. Torpağın map selection hissəsi yoxdur, əməl “Al”dır. Mövcud dəyişiklikləri uyğun commit etmək açıq istənildi.
+- Remaining work: Android mobil portret/böyük şrift/inset/a11y renderləri və dizaynla müqayisə açıqdır; art crop/halo/native-pixel hədləri review-da qeyd olunub. Real şəhər renderer-i/V1 canlılıq və əvvəlki parts axınının vizual qəbulu qalır; mərhələ bütöv bitməyib.
+- Relevant files: `CityPurchases.kt`, `DecorationReads.kt`, `CityPurchasesTest.kt`, `PartsMutationsTest.kt`; app `DecorationShopScreen.kt`, `LandShopScreen.kt`, `InventoryScreen.kt`, `OnlineGame.kt`, `WobbrikApplication.kt`; `docs/reviews/2026-11-13-phase4-city-purchases.md`; yeganə plan `docs/PLAN.md`.
+- Checks performed: core unit testlər (XP/balans/daimi hüquq/təkrar copy, malformed pages/receipt, lost-response disk recovery, stale Ready) PASS; core/app unit + assembleDebug/lintDebug PASS ilk UI kodunda. Son UI əlavələrindən sonra eyni yoxlamalar yenidən başladılıb; son nəticə review qeydinə əlavə edilir. Kontrast 4 cüt PASS min8.22; diff check PASS. Android runtime/render/backend test/CI yoxdur.
+- Exact next step: son fokuslu yoxlamanın nəticəsini review et, bu alış vahidini ayrıca commit et; main merge/push/CI yoxdur. Sonra yalnız cari alış vahidinin açıq vizual uyğunluq işini davam etdir; placement-i yenidən açma və AppBackend-ə toxunma. Böyük yeni şəhər renderer vahidi bu chatə yığılmamalıdır.
+- Son nəticə: Java21 core/app unit + assembleDebug/lintDebug PASS (11s); CityPurchasesTest4/4, PartsMutationsTest4/4; diff check PASS. Alış vahidi lokal commit üçün review edilib; runtime/render PASS yoxdur.
+
+## Dekor/torpaq vizual davamı — 13 noyabr 2026
+- Completed: alış vahidi artıq `faf4af7` commit-indədir. Cari working diff alış təsdiqlərini ortaq `CityPurchasePanel.kt` çərçivəsinə keçirir; torpaq xülasəsini siyahı scroll-undan ayırır, daimi hüquq mətni əlavə edir. Düymələr normal şriftdə yanaşı, böyüdülmüş şriftdə şaqulidir; izahat ayrıca scroll edir.
+- Current state: `feat/phase-4` / `faf4af7`; bu davam commit edilməyib. Release istifadəçi faylları qorunur.
+- Decisions: əvvəlki dekor və torpaq alış dizayn təsdiqləri qüvvədədir. Placement bağlıdır, AppBackend-ə toxunulmur; emulator açılmır, CI/merge/push yoxdur.
+- Remaining work: Android render və dizaynla birəbir uyğunluq açıqdır. Crop/halo/native-pixel keyfiyyəti, kart/ikonlar, kiçik/normal portret font1/2, inset/a11y yoxlanmayıb. Yeni şəhər renderer vahidi başlanmayıb.
+- Relevant files: `CityPurchasePanel.kt`, `DecorationShopScreen.kt`, `LandShopScreen.kt`; `docs/reviews/2026-11-13-phase4-city-purchases.md`; `docs/design/city-completion-v1/{03-decoration-flow,05-land-purchase}.png`; yeganə plan `docs/PLAN.md`.
+- Checks performed: Java21 `:app:compileDebugKotlin :app:lintDebug` PASS (11s), diff check PASS, 3 kontrast cütü PASS (min8.22). Android runtime/render yoxdur; host screenshot infrastrukturu layihədə yoxdur. Build vizual qəbul deyil.
+- Exact next step: cari kiçik panel diff-ni review et; növbəti uyğunluq işində əvvəl host Android render imkanını müəyyənləşdir (emulator avtomatik açma, yeni stack pinləri uydurma). Render mümkün olmazsa məhdudiyyəti saxla; təsdiqli art-ı özbaşına dəyişmə, placement və AppBackend işini açma.
+
+## Kart/ikon/dekor crop davamı — 13 noyabr 2026
+- Completed: dekor kartları/qiymət pill-i/cyan kontur, kateqoriya və alış vektor ikonları, alış panelində art+divider+izahat, torpaq kartlarının yığcam/detallı görünüşü və adaptiv başlıq cari working diff-dədir. `CityPurchaseArt.kt` + `purchase-art.json` 12 ölçülmüş crop və native-pixel scale≤1 verir; orijinal dekor atlası dəyişməyib.
+- Current state: `feat/phase-4` / `faf4af7`; bu davam hələ commit edilməyib. Əvvəlki panel diff-i daxildir. `app/release/` istifadəçi faylları qorunub.
+- Decisions: placement bağlıdır, AppBackend yazısı yoxdur. Əvvəlki dekor/torpaq alış təsdiqləri qüvvədədir. Yeni şəffaf torpaq cutout namizədi göstərildi; orijinaldan xırda detallar fərqləndiyi üçün ayrıca tətbiq təsdiqi async soruşuldu, cavab HƏLƏ YOXDUR. Təsdiqsiz tətbiq etmə.
+- Remaining work: aktiv torpaq 153×141px crop-un tünd düzbucaqlı matte-i qalır. `docs/reviews/city-purchases-visual/land-thumbnail-candidate.png` bunun şəffaf yüksək çözünürlüklü namizədidir, app assets-də deyil. Tam piksel eyniliyi/mərhələ qəbulu iddiası yoxdur; server nüsxə/status mətnləri, tall portrait spacing və mövcud inventory return naviqasiyası review-da qeyd olunub. Real inset/TalkBack/cihaz runtime açıqdır.
+- Relevant files: `DecorationShopScreen.kt`, `LandShopScreen.kt`, `CityPurchase{Art,Chrome,Panel}.kt`, `assets/city/purchase-art.json`, 6 city vector drawable; `scripts/check-city-purchase-art.py`; review `docs/reviews/2026-11-13-phase4-city-purchases.md` son bölmə; render evidence/harness `docs/reviews/city-purchases-visual/`; yeganə plan `docs/PLAN.md`.
+- Checks performed: 6/6 host native Compose render ssenarisi PASS, 12 list/confirmation PNG-yə və design comparison-lara baxıldı: dekor/torpaq 360×640dp font1/2 və390×844dp font1, density3/API34. 12/12 source crop QA PASS, tünd/açıq fonlarda baxıldı. Normal Java21 core/app unit + assembleDebug/lintDebug PASS (15s); kontrast5cüt PASS(min8.22); diff check PASS. Emulator açılmadı; CI/backend test/merge/push yoxdur. Host harness production build pinlərini dəyişmir.
+- Exact next step: istifadəçinin torpaq cutout təsdiq cavabını yoxla. Təsdiq varsa namizədi app city assets-ə ayrıca adla köçür, JSON-dakı land bounds-u aktiv metadata-ya əlavə et, `rememberLandArt`-ı ona keçir və host land render/build/lint-ni yenilə. Təsdiq yoxdursa orijinalı saxla, namizədi tətbiq etmə. Bu chatdə başqa böyük vahid açma; yeni chat üçün bu handoff/review və PLAN.md kifayətdir.
+
+## Son qərar — torpaq cutout-u tətbiq edildi
+- Completed/Decisions: istifadəçi “Bəli, şəffaf cutout-u tətbiq et” ilə namizədi açıq təsdiqlədi. `city/land-thumbnail-v2.png` app assets-ə dəyişdirilmədən kopyalandı; `purchase-art.json.land` və `rememberLandArt()` ilə siyahı+alış panelinə qoşuldu. Əvvəlki “cavab yoxdur/aktiv matte qalır” qeydləri artıq cari vəziyyət deyil.
+- Checks performed: torpaq3/3 host render PASS(15s); altı yeni land list/confirmation PNG-si/contact sheet-ə və tünd/açıq fon cutout QA-sına baxıldı, matte yoxdur. Alpha/bounds QA PASS; Java21 assembleDebug/lintDebug PASS(17s), diff check PASS. Əvvəlki unit/kontrast nəticələri qüvvədədir; domain/rəng tokenləri dəyişməyib.
+- Current state: `feat/phase-4` / `faf4af7`, bütün vizual davam working diff-dir, commit/merge/push yoxdur. Placement bağlıdır, AppBackend dəyişmir. CI/emulator yoxdur. Məhdudiyyətlər əvvəlki bölmədə/review-da qalır; tam mərhələ qəbulu deyil.
+- Relevant files: CityPurchaseArt.kt; assets/city/{purchase-art.json,land-thumbnail-v2.png}; scripts/check-city-purchase-art.py; docs/reviews/city-purchases-visual/ və 2026-11-13-phase4-city-purchases.md son bölmə.
+- Exact next step: bu kiçik alış vizual diff-inin review/qəbulunu yekunlaşdır; yeni feature/şəhər renderer-i başlama. Cutout üçün yenidən təsdiq istəmə. Növbəti böyük vahid yeni chat və ayrıca istifadəçi tapşırığı ilədir.
+
+## Commit təhvil qeydi — 13 noyabr 2026
+- İstifadəçi bu vizual alış vahidini commit etməyi tapşırdı. Kart/ikon/panel, 12 dekor crop-u, təsdiqli şəffaf torpaq cutout-u və review/render sübutları eyni lokal commit-ə daxil edilir. Əvvəlki “commit edilməyib” qeydləri bu commit-dən əvvəlki tarixçədir.
+- Branch `feat/phase-4`; review bazası `faf4af7`. Son uyğun yoxlamalar yuxarıda qeyd edilib; commit öncəsi diff check PASS. Owner `app/release/` faylları xaricdə saxlanır. Merge/push/CI yoxdur.
+- Növbəti addım: yalnız istifadəçinin ayrıca göstərişi ilə review/qəbul və ya növbəti vahid; placement/AppBackend açılmır.
+
+## Şəhər renderer-i başlanğıcı — 13 noyabr 2026 (cari)
+- Decisions: istifadəçi göstərilmiş `city-view.png` və V1 canlılığı “basla” ilə təsdiqlədi. Yenidən eyni təsdiqi istəmə. İstifadəçinin öz tikdiyi/yerləşdirdiyi binalar həqiqi mərtəbə sayını, əyriliyini və hissələrini saxlamalıdır. Placement bağlı qalır.
+- Decisions (əvvəlki backend qadağasını əvəz edir): AppBackend-də ehtiyac olan dəyişikliklərə icazə var; onun main-indən ayrıca branch aç, worktree yaratma. Bu oxu vahidində backend dəyişikliyi tələb olunmadı və edilmədi.
+- Completed: `CitySceneReads.kt` server parcel/position oxusu, paginated city + building detail + placed decoration səhnə yığımı; revision bracket/mixed-page rəddi, legacy null mövqe, canonical tick yoxlamaları. `WobbrikApplication.Configured.cityScene` eyni auth backend-ə qoşulub.
+- Current state: `feat/phase-4`, baza artıq `bb02b50` (əvvəlki alış vizualı commit olunub); yeni scene reader/test/bootstrap diff-i commit edilməyib. İstifadəçi release faylları qorunur. Ekran/renderer/animasiya hələ əlavə edilməyib.
+- Checks performed: Java21 core:test PASS; CitySceneReadsTest7/7. Son bootstrap compile/lint nəticəsi review-da. UI/render/runtime/CI/backend test yoxdur.
+- Relevant files: core `CitySceneReads.kt`, `CitySceneReadsTest.kt`; app `WobbrikApplication.kt`, `InventoryScreen.kt` (`BuildingPreview`), `CosmeticArt.kt`, `GameTokens.kt`; review `docs/reviews/2026-11-13-phase4-city-scene-reads.md`; dizayn `docs/design/city-view.png`; yeganə plan `docs/PLAN.md` §§1/4/7.
+- Remaining work/Exact next step: həmin məlumat modelindən real şəhər səhnəsini çək: əvvəl mövcud GameScene/cosmetic atlasları və native crop/anchor hədlərini yoxla, accepted floor geometry + server x/y/quarter-turn projection/depth ordering qur, real parcel union-una ada səthi oturt; sonra təsdiqli şəhər UI/bina seçimi və V1 canlılıq. Şəhəri sabit hazır raster və ya sadə placeholder bina ilə əvəz etmə. Asset/kamera məhdudiyyəti təsdiqli görünüşə mane olarsa açıq göstər, özbaşına alternativ tətbiq etmə. Host Compose render harness-i `docs/reviews/city-purchases-visual/`-dədir; emulator açma. Merge/push/CI göstərişi yoxdur.
+
+- Son yoxlama: Java21 `:core:test :app:compileDebugKotlin :app:lintDebug` PASS (28s); `git diff --check` PASS. UI/render/CI yoxdur.
+
+## Renderer asset sərhədi — 13 noyabr 2026
+- Completed: istifadəçinin cari tapşırığı üzrə handoff/PLAN/CitySceneReads və mövcud BuildingPreview/atlas anchor-ları yoxlandı; city-view, wall atlas və land cutout source şəkillərinə baxıldı. Review: `docs/reviews/2026-11-13-city-renderer-art-boundary.md`.
+- Current state: renderer/UI kodu əlavə edilməyib; əvvəlki scene-reader/bootstrap owner diff və release faylları qorunur. Placement bağlıdır.
+- Açıq texniki sərhəd: atlas hər hissə üçün bir baxış sprite-idir; quarter-turn/kamera dönüşü üçün səth və əlavə baxış məlumatı yoxdur. Alış land cutout-u real parcel union-u deyil və sabit ağaclar daşıyır. Bunları təsdiqli şəhər səhnəsinin tam əvəzi sayma.
+- Checks: source inspeksiyası; yeni build/render/CI/backend yoxlaması yoxdur. Android vizual PASS yoxdur.
+- Exact next step: mövcud atlaslarla ilkin sabit bucaq təqdimatına istifadəçi razılığını və ya modul asset istiqamətini dəqiqləşdir; bundan əvvəl sadələşdirilmiş şəhər görünüşü tətbiq etmə. Real binaların mərtəbə sayını, qəbul edilmiş ofsetlərini, hissələrini və server mövqeyini saxla; legacy null mövqeni uydurma.
+
+## Cari handoff — sabit şəhər bina qatı və növbəti oyun UI fix-i
+- Completed: istifadəçi sabit kameranı “beli” ilə təsdiqlədi. `CityScreen.kt` real scene repository-yə qoşuldu; `CityBuildingProjection.kt` server position/quarter-turn və accepted mərtəbə ofsetlərini qoruyur, depth sort/bounds/focus verir. Server parts mövcud atlasdan, native pixel cap ilə çəkilir. `BuildingArt.kt` inventarla ortaq anchor helper-dir. Home mobil şəhər girişi açılıb. Placement bağlıdır, backend dəyişmədi.
+- Current state: `feat/phase-4`, baza `bb02b50`; istifadəçi cari vahidi bitəndə commit etməyi tapşırdı. Scene reader/bootstrap daxil cari vahid commit edilir; release owner faylları xaricdədir. Merge/push/CI yoxdur.
+- Decisions: sabit kamera qəbul edilib; yenidən təsdiq istəmə. Tam city-view uyğunluğu iddia edilmir: terrain parcel union/dekor/tam chrome/orbit/V1 canlılıq açıqdır. Əvvəlki art-boundary blok sualı bağlandı.
+- Checks performed: 6/6 host native Compose render testi +5/5 projection unit PASS; 9 screenshot/contact/design comparison açılıb baxıldı. 360×640 font1/2,390×844 font1, overview/focus, empty/error və Home entry/click. Normal Java21 core/engine/app unit +assembleDebug/lintDebug PASS(24s); 4 kontrast cütü PASS(min8.22),diff check PASS. Real hesab/device/inset/TalkBack/backend test/CI/emulator yoxdur.
+- Relevant files: `CityScreen.kt`, `CityBuildingProjection.kt`, `BuildingArt.kt`, `HomeScreen.kt`, `OnlineGame.kt`, `InventoryScreen.kt`; reader/bootstrap; `docs/reviews/2026-11-13-phase4-city-buildings.md`, `docs/reviews/city-scene-visual/`; yeganə plan `docs/PLAN.md`.
+- Remaining work / Exact next step: istifadəçi commit-dən sonra ayrıca aktiv oyun UI problemini düzəltməyi tapşırdı. Screenshot: `/var/folders/02/vb81250n1ld9gwqlq74ybm000000gn/T/codex-clipboard-22dc0624-dab8-41b9-b618-d23b60a3198e.png`. Mərtəbə panel seams/tünd boşluqlar, game island-da hazır ev üzündən ikinci baza/giriş, aktiv oyunda dam, kəndir-floor anchor ayrılması. `GameScene.kt` oxundu, aktiv roof çağırışı təsdiqləndi; dəyişdirilməyib. Yeni chatdə ui-craft/token/game-tap-v2 və screenshot-u oxu, mövcud təsdiqli istinadı təqdim et, konkret fix UI təsdiqini mövcud söhbət göstərişi ilə tutuşdur; fizika/accepted geometry-ni dəyişmədən anchors/crops/layering/roof phase düzəlişini hazırla. Yeni dizayn alternativi uydurma, emulator/CI açma. Başqa şəhər feature-i başlama.
+
+## Active game joins + two atlas proposals — 13 November 2026
+- Completed: separate `fix/game-scene-joins` from `e308d62`. GameScene visual pitch/full-width wall drawing, building-free garden in both callers, ground-only entrance, active roof removal and cable anchors/framing corrected. Physics/SceneMotion/accepted geometry/backend unchanged. Review `docs/reviews/2026-11-13-game-scene-joins.md`.
+- Current state: working diff, no commit/merge/push/CI. Owner `app/release/` intact. Existing shallow wall art cannot satisfy full game-tap-v2 geometry; do not claim design acceptance.
+- Decisions: user explicitly permits old atlas removal if needed and asks TWO complete color sets, same game-tap-v2 style/forms, mainly colors changed. Built-in imagegen produced purple/pink and teal/ivory proposals; no asset approval yet, not installed. Do not request generation scope again.
+- Checks performed: 7 native host production-Canvas render fixtures PASS; final Java21 assembleDebug/lintDebug +engine:test PASS(24s), diff check PASS. Final screenshots viewed; no emulator/device/account/HUD/font/inset/a11y/CI/backend checks. PNG alpha exists; generated exterior haze still requires cleanup.
+- Relevant files: GameScene.kt, MainActivity.kt, OnlineGame.kt; `docs/reviews/game-joins-visual/render/`; `docs/design/game-tap-v2/atlas-v3-proposal/{purple,teal}.png` and README (prompt set/limitations); plan only `docs/PLAN.md`.
+- Remaining work: concrete style approval; clean alpha + matching crop/anchor geometry, independent-part layering compatibility without breaking 68-item ownership catalog; then install approved assets and render seams/ropes/ground/finish. Fallback lacks a dedicated entrance; new ground asset must resolve it. No old atlas deletion before consumer/ID compatibility checked.
+- Exact next step: show the two saved proposals and receive visual approval under AGENTS; then continue only this game-scene/atlas integration in new chat. No new city feature, automatic emulator, CI or merge/push.
+
+## Atlas təmizləmə davamı — 13 noyabr 2026
+- Decisions: istifadəçinin “təsdiqlədiyim iki atlası təmizləyib GameScene-ə qoş, fizikanı dəyişmə” göstərişi purple/teal dizayn təsdiqidir; yenidən vizual təsdiq istəmə.
+- Checks performed: handoff/PLAN/ui-craft/imagegen, orijinal iki atlas, GameScene/CosmeticSprite loader və mövcud host render harness oxundu. Built-in imagegen ilə purple iki dəfə, teal bir dəfə background-extraction sınandı; çıxışlarda xarici halo qalır, app-ə tətbiq edilmədi. Yeni kod/build/render/CI yoxdur; əvvəlki working diff qorunur.
+- Current state/Remaining work: imagegen alternativ redaktə üsulu üçün açıq istifadəçi seçimi tələb etdiyindən kontur maskası ilə skript təmizliyinə async icazə sualı göndərildi; cavab gözlənilir. Asset inteqrasiyası başlanmayıb. Fizika/backend dəyişməyib.
+- Exact next step: kontur maskasına cavabı yoxla; icazə varsa orijinal iki atlasın daxili piksellərini saxlayaraq xarici halo-nu təmizlə, crop/anchor metadata və GameScene render qoşulmasını hazırla. Tam kompozit sprite-lərin pəncərə/giriş/lampa daşıdığını nəzərə al: duplicate overlay etmə, qarışıq 68 hissə kataloqunu səssiz əvəz etmə; köhnə atlasları compatibility sübutu olmadan silmə. Host production Canvas renderində iki rəng, seams, swing/ropes, ground və finish-i yoxla; emulator/CI açma.
+
+## Cari nəticə — təsdiqli iki atlas GameScene-də
+- Decisions: istifadəçi kontur maskası ilə skript təmizliyinə açıq icazə verdi; əvvəlki gözlənilən cavab qeydi bağlanıb. Purple/teal təsdiqlidir.
+- Completed: orijinal RGB-ni dəyişmədən xarici alpha halo maskalandı; `assets/game-v3/{purple,teal}.png` + crop/pitch/depth/top-anchor metadata, `GameAtlas.kt` loader və GameScene/both callers inteqrasiyası hazırdır. Giriş yalnız accepted foundation-da, dam yalnız finish-də; composite-da duplicate overlays yoxdur. Renderdə tapılan kəndir ucu/guide plane ölçülmüş anchor-larla düzəldildi.
+- Current state: `fix/game-scene-joins`, baza `e308d62`, working diff; commit/merge/push/CI yoxdur, owner app/release qorunub. Purple partless/local və tam base_1; teal tam base_2; qarışıq/digər 68-item seçimləri köhnə independent art-da qalır. Köhnə atlaslar silinməyib. Fizika/SceneMotion/accepted geometry/core/backend diff-i yoxdur.
+- Checks performed: 12/12 native host Canvas render PASS, iki rəng dark/light alpha QA və final contact/design comparison görüntülərinə baxıldı. 360×640dp və390×844dp; straight/swing/empty/finish/one floor/40 floors/mixed catalog. Java21 offline engine:test +app:testDebugUnitTest +assembleDebug +lintDebug PASS(12s); diff check PASS. UI rəng/mətn tokenləri dəyişmədiyindən kontrast təkrarlanmadı.
+- Remaining work/limits: tam phone.png uyğunluğu iddia edilmir; framing/rope length/background/HUD/garden fərqləri qalır. Picker/inventory/city 68-item art migrasiyası bu vahiddə deyil. Full HUD/font2/inset/a11y/live/device/account yoxlanmayıb, emulator/CI açılmayıb. Bunlar runtime PASS deyil və avtomatik gate yaratmır.
+- Relevant files: `GameAtlas.kt`, `GameScene.kt`, `MainActivity.kt`, `OnlineGame.kt`, `assets/game-v3/`, `scripts/clean-game-atlases.py`; review `docs/reviews/2026-11-13-game-scene-joins.md`, `docs/reviews/game-joins-visual/atlas-integration-contact.png`; dizayn `docs/design/game-tap-v2/atlas-v3-proposal/`; plan yalnız `docs/PLAN.md`.
+- Exact next step: cari atlas inteqrasiyasını istifadəçiyə təhvil ver; ayrıca göstəriş olmadan yeni feature/art migrasiyası/merge/push/CI başlama. Mövcud source və köhnə catalog atlases-i saxla.
+
+## Atlas review və lokal commit — 13 noyabr 2026
+- Completed/Decisions: istifadəçi review və problem yoxdursa lokal commit tapşırdı; merge/push/CI qadağası saxlanır. `e308d62` bazasına qarşı atlas/scene/callers/asset/metadata/script/harness diff-i lokal review edildi; yeni production bug tapılmadı.
+- Fixes: yalnız host QA-da hissəsiz lokal default fixture-i düzəldildi, maksimal yellənmə fixture-ləri artıq sıfır bucaq deyil, 90 frame settle edilmiş yük bucağını yoxlayır. Fizika/engine/core/SceneMotion dəyişmir.
+- Checks performed: düzəldilmiş son 12 host render 12/12 PASS(15s,0 skips/failures/errors); iki rəngin final rotated swing və local-default PNG-lərinə baxıldı. Production dəyişmədiyi üçün əvvəlki final unit/APK/lint PASS qüvvədədir; staged diff check PASS. Runtime/a11y/CI yoxdur.
+- Current state: `fix/game-scene-joins`; bu review və atlas vahidi uyğun lokal commit-ə daxil edilir. Owner app/release xaricdə, PNG render evidence mövcud .gitignore üzrə lokal qalır; source/production atlaslar və harness versionlanır. Merge/push/CI yoxdur.
+- Remaining work: əvvəlki tam ekran/runtime/a11y və full design parity məhdudiyyətləri qalır; yeni feature və 68-item migrasiya başlanmadı.
+- Relevant files: əvvəlki atlas vahidi + `docs/reviews/2026-11-13-game-scene-joins.md` son review bölməsi, `docs/reviews/game-joins-visual/render/GameJoinsRenderTest.kt`; plan `docs/PLAN.md`.
+- Exact next step: lokal commit nəticəsini istifadəçiyə bildir; ayrıca göstəriş olmadan merge/push/CI və yeni böyük vahid başlama.
+
+## Cari vahid — şəhər torpaq/dekor — 13 noyabr 2026
+- Decisions: istifadəçi `docs/design/city-view.png` əsasında torpaq/dekor işini açıq təsdiqlədi; kamera sabitdir. Əlavə asset-sərhədi sualına “Bəli, mövcud baxışla davam et” cavabı ağac/skamya/fənər billboard-larını təsdiqləyir; quarter-turn onların görünüşünü dəyişmir. Yollar real müstəvidə dönür. Yenidən təsdiq istəmə.
+- Completed: server scene parcels → exact rect/L union → materiallı ot/torpaq ekstrüziyası; serverdə yerləşmiş 12 dekor növü atlasdan; yollarda affine quarter-turn; ortaq bina/dekor painter order, terrain/decor viewport fit, binasız şəhər və semantics sayı. Mövcud exact Ready oxu axını qorunur; placement/mutation yoxdur. Imagegen materialı production assets-ə saxlandı.
+- Current state: `feat/city-terrain-decor`, baza `937f5ea`, working diff. Commit/merge/push/CI yoxdur; owner `android-billing/app/release/` qorunur. Backend read-only footprint müqayisəsi edildi, server dəyişikliyi lazım deyil və edilmədi.
+- Checks performed: final host 24/24 test PASS (9 terrain native render/union, 6 city regression, 4 terrain geometry, 5 building projection). 10 yeni screenshot və contact/design comparison açılıb baxıldı; 360×640 font1/2,390×844 font1, torpaq-only/decor-only, 6 parcel/rotated L, 12 dekor/4 yol dönüşü, focus/return. Semantics getter exception və material sərhəd piksel xətti düzəldildi. Normal final unit/APK/lint nəticəsi review-da qeyd edilir. Real hesab/device/inset/TalkBack/emulator/CI/backend test yoxdur.
+- Remaining work: tam konsept uyğunluğu yoxdur — həqiqi düz parcel kənarları konseptin yumru/dekorativ sahilinə bərabər deyil; mövcud bina artı, tam chrome və V1 canlılıq qalır. Təsdiqli upright single-view məhdudiyyəti saxlanır. Bu, mərhələ 4 qəbulu deyil. Fizika/accepted geometry dəyişməyib.
+- Relevant files: `CityScreen.kt`, yeni `CityTerrainGeometry.kt`, `CityTerrainArt.kt`, `CityTerrainGeometryTest.kt`; `assets/city/terrain-material-v1.png`; `docs/reviews/2026-11-13-phase4-city-terrain-decor.md`; `docs/reviews/city-scene-visual/render/CityTerrainRenderTest.kt`; `docs/reviews/city-terrain-visual/`; yeganə plan `docs/PLAN.md`.
+- Exact next step: cari torpaq/dekor diff-ni istifadəçiyə təhvil ver və lokal review nəticəsini göstər; ayrıca göstəriş olmadan yeni feature, merge/push/CI başlama. Təsdiqlənmiş dizayn/sabit kamera/billboard qərarlarını yenidən soruşma. Tam şəhər uyğunluğu iddia etmə.
+- Son yoxlama: Java21 normal `:core:test :engine:test :app:testDebugUnitTest :app:assembleDebug :app:lintDebug` PASS (11s); final host 24/24 PASS (15s); lokal diff review və `git diff --check` PASS. Commit yoxdur.
+
+## Lokal review/commit və növbəti iş
+- Completed: istifadəçinin review → problem yoxdursa lokal commit göstərişi əsasında `937f5ea` bazalı bütün torpaq/dekor diff-i yenidən review edildi; yeni production bug tapılmadı, kod dəyişmədi. Contact sheet yenidən vizual yoxlandı; diff check PASS. Əvvəlki final test nəticələri qüvvədədir.
+- Current state: `feat/city-terrain-decor`; torpaq/dekor vahidi lokal commit edilir. Owner `app/release/` xaricdədir; merge/push/CI qadağası qalır.
+- Decisions: istifadəçi sonra digər işə keçməyi də tapşırdı. Mövcud city-view/sabit kamera/billboard təsdiqləri saxlanır; təkrar seçim sualı yoxdur.
+- Remaining work / Exact next step: növbəti kiçik vahid şəhərin mövcud təsdiqli dizayna uyğun başlıq və aşağı naviqasiya/“Binaya bax” panelinin tamamlanmasıdır; placement/market endpoint-ləri bu vahidə uydurulmur, kamera sabit qalır. Sonra ayrıca V1 canlılıq. AGENTS context-growth qaydasına görə bu chatdə ikinci böyük implementasiya başlamır; yeni chatdə buradan davam et.
+- Relevant files: `docs/PLAN.md` §§1/4/7/9; `docs/design/city-view.png`; `CityScreen.kt`, `GameTokens.kt`, `HomeScreen.kt`, `OnlineGame.kt`, mövcud city host harness və son terrain review. V1 canlılıq hələ implementasiya edilməyib.
+
+## Cari vahid — şəhər chrome-u — 13 noyabr 2026
+- Completed: `8b4a6a4` üzərindən `feat/city-chrome`; şəhər başlığı/əhali, cyan görünüş zolağı, kamera illüstrasiyalı “Binaya bax”/Bax/Geri paneli və Şəhər/İnventar/Bazar aşağı naviqasiyası qoşuldu. Real Home/inventory və mövcud bina focus/return işləyir. Plan/Bazar deaktivdir, placement/market uydurulmur.
+- Current state: istifadəçinin “commit” göstərişi ilə bu vahid lokal commit edilir; merge/push/CI yoxdur; owner release faylları və əvvəlcədən untracked live-check review qorunub.
+- Decisions: cari istifadəçi city-view əsasında bu vahidi tapşırıb, kamera sabitdir. Təsdiqli istinaddan kamera illüstrasiyasını şəffaf cutout kimi çıxarmağa ayrıca “Bəli” cavabı verilib; imagegen nəticəsi alpha saxlanılaraq app resource-a qoşulub. Mənbə ilə bit-identik crop deyil.
+- Checks performed: final host18/18 PASS(22s), 22 PNG/contact/design comparison-a baxıldı; 320×568/font2,360×640/font1/2,390×844/font1, loading/error/empty, focus/return/nav callbacks. Dar İnventar kəsilməsi düzəldildi, real text line bounds yoxlaması PASS. Son Java21 core/engine/app unit+assembleDebug+lintDebug PASS(14s), kontrast4/4(min8.22),diff check PASS. Emulator/device/real account/inset/TalkBack/CI/backend test yoxdur.
+- Remaining work: tam city-view piksel uyğunluğu/qəbulu və V1 canlılıq açıqdır. Mövcud bina artı/terrain sərhədi bu vahiddə dəyişməyib. Yeni feature başlamır; backend dəyişməsi lazım deyil və edilmədi.
+- Relevant files: `CityChrome.kt`, `CityScreen.kt`, `res/drawable-nodpi/city_view_camera_v1.png`; review `docs/reviews/2026-11-13-phase4-city-chrome.md`; host `city-scene-visual/render/`, yeni evidence `docs/reviews/city-chrome-visual/`; yeganə plan `docs/PLAN.md`.
+- Exact next step: lokal commit nəticəsini bildir; ayrıca göstəriş olmadan merge/push/CI və V1 canlılıq başlama. Sabit kamera/city-view/cutout təsdiqlərini yenidən soruşma.
+
+## Oyun modul atlası — pəncərə preview-su, 13 noyabr 2026 (cari)
+- Completed: `826a441` bazasından `fix/game-modular-atlas`; bütün qeyri-tam purple/teal seçimləri təmiz həcmli shell+material+ayrı hissə qatlarına yönəldilib. Köhnə panel hull fallback silinib. İki generated clean shell, GameFacade.kt və debug selector/read-only telemetry əlavə edilib. Şəhər source-u, fizika, SceneMotion, accepted geometry, 68 ID/ownership/kataloq/backend dəyişməyib.
+- Decisions: istifadəçi göstərilən bina gövdələrini OK saydı, damın oturuşunu və pəncərələri rədd etdi. Dam source depth-in iki dəfə sayılması düzəldildi; yeni 14-window proposal göstərildi. İstifadəçi “Əvvəl binanın üzərində göstər” seçdi: **pəncərə tətbiqi hələ təsdiqlənməyib**. Altı bina preview-su hazırdır, yalnız test harness candidate PNG-ni docs-dan oxuyur; production window art dəyişməyib.
+- Current state: working diff, commit/merge/push/CI yoxdur. Əvvəlki owner handoff/release/live review/QA patch qorunub. `all-six-emulator.png` HƏLƏ köhnə rədd edilmiş sübutdur, yenilənmiş PASS deyil.
+- Checks performed: normal core/engine/app unit+assembleDebug+lintDebug PASS21s (telemetry-dən əvvəl); telemetry assemble PASS5s; son roof correction ilə host22/22 PASS26s, əlavə6window proposal PASS11s. Emulator5592 sıfırdan real touch cəhdləri2–3mərtəbə də göstərdi, amma tam altı-style yekun sübut alınmadı; pəncərə təsdiqi gözlənəndə capture prosesi dayandırıldı. Emulator5586 toxunulmayıb. Son focused check nəticəsi review-da yenilənir. Build vizual qəbul deyil.
+- Relevant files: GameAtlas.kt, GameFacade.kt, GameScene.kt, MainActivity.kt; debug ScenePreviewActivity.kt; game-v3/modular{,-teal}.png; docs/design/game-tap-v2/modular-window-proposal/; docs/reviews/2026-11-13-game-modular-atlas.md; game-joins-visual/render/GameJoinsRenderTest.kt; preview `game-joins-visual/proposed-windows-on-buildings.png`. Plan yalnız docs/PLAN.md.
+- Remaining work / Exact next step: bina üzərində pəncərə preview-suna cavabı al. Təsdiq olarsa14pəncərəni ID/formaları saxlayaraq clean crop/contour/aspect/corner projection ilə qoş; pure purple/teal təsdiqini səssiz dəyişmə. Dam və bütün68ID üzrə vizual QA, son unit/APK/lint, sonra emulator5592-də altı baza+qarışıq/earned/paid real çoxmərtəbəli və terminal screenshots. Yalnız bundan sonra istənilən all-six-emulator.png-ni yeni emulator sübutu ilə yenilə. Hazırkı nəticəni tamamlanmış atlas fix-i sayma; şəhər/fizika/merge/push/CI yoxdur.
+- Son nəticə: cari production/debug source-da Java21 offline core/engine/app unit+assembleDebug+lintDebug PASS13s; diff check PASS. Engine/core/SceneMotion/CityScreen diff yoxdur. Capture və onun QA logcat alt prosesləri dayandırılıb; köhnə pəncərəli emulator cəhdlərini yekun sübut sayma. Bina üzərində yeni pəncərə preview-su istifadəçiyə göstərilir, tətbiq təsdiqi gözlənir.
+
+## Təsdiqli pəncərələr tətbiq edildi — 13 noyabr 2026 (son cari status)
+- Decisions: istifadəçi bina üzərindəki yeni pəncərələri tətbiq etməyi və son dam formasını saxlamağı açıq təsdiqlədi. Əvvəlki “pəncərə təsdiqi gözlənir” artıq tarixçədir. 68 ID/seçim, fizika və şəhər sərhədi qüvvədədir.
+- Completed: game-v3/windows.png + windows.json bütün14pəncərəni eyni ID-lərlə PracticeGame/AcceptedScene-ə qoşur; bütün dəstlər clean modular hull istifadə edir, baked pəncərə qatı yoxdur. Künc pəncərəsinin iki qanadı ön/yan səthə ayrıca oturur. Dam son təsdiqli rise/eave formasındadır; purple/teal təsdiqli material/trim/base cap qorunur. City/shared catalog/ownership/default seçimlər/backend/engine/SceneMotion dəyişməyib.
+- Checks performed: son normal Java21 offline core/engine/app unit+APK+lint PASS29s; host28/28 PASS29s;68unikalID və14window keyset PASS;QA Python syntax/diff check PASS. Emulator5592 hostGPU,540×1200/density210:6baza+3qarışıq realtouch ilə0→3mərtəbə;14kombinasiyada68ID, hərəsində5mərtəbəli active+roof fixture28PNG. Raw/contact şəkillərə baxıldı. Realwooddrop/pause/resume/miss→FINISHED3floor ayrıca yoxlandı. Emulator5586 toxunulmayıb. Fixturelər real oynanmış cəhd kimi təqdim edilmir; bütün Cartesian kombinasiyalar enumerasiya edilməyib.
+- Relevant files/evidence: docs/reviews/2026-11-13-game-modular-atlas.md son bölmə; live/variants/all-six-emulator.png artıq YENİ real3floor6style sübutudur; köhnə rədd şəkli ayrıca backup-dadır. live/variants/mixed-emulator.png; live/catalog/{manifest.json,all-68-active-emulator.png,all-68-roof-emulator.png}; render/capture-{live-variants,catalog-emulator}.py və build-emulator-contacts.py.
+- Current state: fix/game-modular-atlas working diff; commit/merge/push/CI yoxdur. Owner release/əvvəlki handoff/live-review/QA patch qorunub. Authenticated server/release flow, planşet/landşaft/TalkBack/tam mərhələ qəbulu yoxlanmayıb. Yalnız bu atlas vahidi təhvil verilir.
+- Remaining work / Exact next step: yekun review və istifadəçi təhvili; ayrıca göstəriş olmadan merge/push/CI/yeni feature yoxdur. Pəncərə təsdiqini təkrar soruşma. Kiçik portret/font2 son capture nəticəsi review-da əlavə olunur.
+- Son yekun: 360×640dp/font2 emulatorda5mərtəbəli panel kadrına baxıldı; HUD/pauza/hint oxunur, mövcud hint dekorativ garden üzərindədir (tam dizayn pariteti iddiası deyil). Emulatorun ilkin1080×2400/density420/font1 parametrləri bərpa edildi; statik5mərtəbəli taxta terminal görünüşündə saxlanır. Son lokal diff review/diff check PASS; scope daxilində açıq bug tapılmadı. Atlas vahidi təhvilə hazırdır, yeni iş/merge/push/CI yalnız ayrıca göstərişlə.
+
+## Atlas vahidinin lokal commit-i
+- İstifadəçi bu atlas vahidini lokal commit etməyi açıq tapşırdı. Son review/yoxlamalar qüvvədədir; kod dəyişmədi. Yalnız atlas source/assets, təsdiq sənədi, bu vahidin handoff bölmələri və yeni emulator sübutları commit olunur. Əvvəlcədən mövcud owner release/live-review/QA patch və handoff əlavələri ayrıca saxlanır. Merge/push/CI yoxdur.
+- Gələcək hissələr avtomatik uyğun sayılmır: mövcud modul səth/anchor/crop müqaviləsi ilə hazırlanmalı, eyni ID xəritəsinə qoşulmalı və qarışıq+çoxmərtəbəli renderlə yoxlanmalıdır. Köhnə panel hull fallback artıq yoxdur.
+
+## Şəhər V1 canlılığı — 13 noyabr 2026 (son cari status)
+- Decisions: istifadəçi V1 canlılığını başlamağı və təsdiqli city-view/sabit kameranı saxlamağı tapşırdı. Hazırlanan sakin/avtomobil nümunəsini “Bəli, bu qrafikanı tətbiq et” ilə açıq təsdiqlədi; yenidən təsdiq istəmə.
+- Completed: `CityLifeRoutes.kt` real parcel union/accepted bina footprint/dekor/yol əsasında maksimum6sakin+2avtomobil üçün təhlükəsiz ambient marşrutlar yaradır. Unknown geometry fail-closed; L yolun iki qolu və quarter-turn saxlanır. `CityLifeArt.kt`, təsdiqli directional sprite/alpha metadata və CityScreen painter integration; pəncərə işığı, yüngül ağac hərəkəti. Focus sabitdir; saat background/focus-da dayanır, platform animasiyaları off/on-a tabedir. Server əhali/wallet/ownership və oyun fizikasına toxunulmayıb.
+- Current state: `feat/city-liveness`, baza341c2da, working diff; commit/merge/push/CI yoxdur. Əvvəlki owner handoff/release/live-check/QA faylları qorunub. Backend footprint müqayisəsi read-only, dəyişiklik tələb olunmadı.
+- Checks performed: final native host43/43 PASS34s (8life render/lifecycle/motion+18city regression+8routes+9geometry/projection); normal Java21 offline core/engine/app unit+assembleDebug+lintDebug PASS29s; kontrast4/4(min8.22),diff check PASS. 320×568/font2,360×640/font1/2,390×844/font1; iki vaxt/focus/return/empty;24native animasiya kadrı. Contact/design comparison/alpha QA və ayrı PNG-lərə baxıldı. Emulator/device/real hesab/API/inset/TalkBack/GPU benchmark/CI yoxdur.
+- Remaining work: tam city-view piksel/kompozisiya pariteti, əvvəlki city bina artı/terrain fərqləri və ümumi mərhələ4qəbulu açıqdır. Actorlar directional walking pose+bob, skeletal gait deyil; avtomobillər yol qollarında gediş-gəliş edir, tam traffic network deyil. Planşet/landşaft ayrıca işdir.
+- Relevant files: CityLifeRoutes.kt, CityLifeArt.kt, CityScreen.kt, BuildingArt.kt, CityLifeRoutesTest.kt; assets/city/life-actors-v1.{png,json}; docs/design/city-liveness-v1/README.md; docs/reviews/2026-11-13-phase4-city-liveness.md; city-scene-visual/render/CityLifeRenderTest.kt; local city-liveness-visual/contact.png,design-comparison.png,city-life-preview.gif. Yeganə plan docs/PLAN.md.
+- Exact next step: hazır V1 canlılıq vahidini istifadəçiyə təhvil ver; sonrakı review/commit/yeni feature üçün ayrıca göstərişi gözlə. Tam şəhər dizaynı və mərhələ4bitmiş sayılmır; merge/push/CI yoxdur.
+
+## V1 canlılıq — lokal review və commit
+- İstifadəçi lokal review → problem yoxdursa commit tapşırdı. `341c2da` bazalı vahid yenidən review edildi; yeni bug tapılmadı, source/test dəyişmədi. Son43host və normal unit/APK/lint PASS qüvvədədir; contact sheet yenidən baxıldı, diff check PASS.
+- `feat/city-liveness` üzərində yalnız bu vahid commit olunur; əvvəlki owner handoff/release/live-check/QA faylları qorunur və commit-ə daxil edilmir. Merge/push/CI yoxdur. Növbəti addım lokal commit nəticəsini istifadəçiyə bildirməkdir; yeni feature ayrıca göstərişlə.
+
+## Şəhər dizayn tutuşdurması — 13 noyabr 2026 (ən son)
+- Completed: `7b7b676` bazasından `fix/city-design-parity`; şəhər köhnə panel fasadı mövcud modular shell/material/14window ilə əvəz edildi, şəhərin seçilmiş kataloq damı saxlandı. Server 100×100 footprint üçün proyeksiya eni100→200/ön dayaq+50 düzəldi; ArtPitch yalnız presentation addımıdır. Loqo/başlıq/tab nisbəti/alt nav çərçivəsi bərpa edildi. Server accepted centers/quarter-turn/ownership, sabit kamera və fizika dəyişmir.
+- Current state: working diff, commit/merge/push/CI yoxdur. Əvvəlki owner handoff/release/live-review/XML/QA patch qorunur. **Tam city-view pariteti/mərhələ4qəbulu deyil.**
+- Decisions: istifadəçi təsdiqli city-view ilə tutuşdurub fərqləri düzəltməyi tapşırıb; yeni dizayn seçimi yoxdur. Real torpağa statik konsept adası və hesaba uydurma ev/dekor əlavə edilmir. Backend geometry müqaviləsi read-only yoxlandı; dəyişiklik tələb olunmadı.
+- Checks performed: final host47/47 PASS50s; normal Java21 offline core/engine/app unit+APK+lint PASS39s; kontrast4/4(min8.22), diff check PASS. 320×568/font2,360×640/font1/2,390×844/font1; representative5bina/3–5floor, mixed coin/reward, bütün dönüşlər və focus/Geri; life/regression. Müqayisə və ayrıca normal/kiçik/font2/mixed-focus PNG-lərə baxıldı. Emulator/device/API/inset/TalkBack/GPU/CI yoxdur.
+- Remaining work: dinamik union üçün təsdiqli city-view sahil/çiçək asset-i yoxdur; modular artda balkon/bağça detalları çatmır; uzun telefon pəncərəsində kompozisiya/chrome glow/icon/tab pariteti də açıqdır. Bu asset/kompozisiya fərqləri tamamlanmış sayılmır.
+- Relevant files: CityBuildingArt.kt,CityBuildingProjection.kt,CityScreen.kt,CityChrome.kt,GameFacade.kt,GameAtlas.kt; CityBuildingProjectionTest.kt; city-scene-visual/render/CityParityRenderTest.kt; `docs/reviews/2026-11-13-phase4-city-design-parity.md`; lokal `docs/reviews/city-parity-visual/design-comparison.png`. Plan yalnız `docs/PLAN.md`.
+- Exact next step: yeni chatdə bu handoff və review-u oxu; təsdiqli city-view əsasında çatışmayan dinamik sahil və modul fasad bağça/balkon artının sərhədini həll et, yeni alternativ dizayn uydurma. Alternativ lazım olsa əvvəl konkret nümunə/təsdiq; sonra inteqrasiya və host portret render müqayisəsi. Cari diff-i qoruyaraq davam et; merge/push/CI avtomatik yoxdur.
+
+## City-view sahil/bağça davamı — 13 noyabr 2026 (ən son)
+- Completed: əvvəlki `fix/city-design-parity` diff-i qorunaraq `CityGardenArt.kt` + `city/garden-v1.{png,json}` əlavə edildi. Boolean union xarici konturunda teksturalı sahil, səth daxilində çiçək/ot; modular fasadda ön/yan planter+ivy, corner-window anchor. Ground qapı/işıq örtülmür. Vahid4:5tab rail, laylar/şəhər vektorları, aktiv gradient/çərçivə tokenlərlə uyğunlaşdırılıb. Asset prompt/provenance `docs/design/city-garden-v1/README.md`.
+- Current state: eyni branch/baza7b7b676, working diff; commit/merge/push/CI yoxdur. Əvvəlki owner release/live-review/XML/QA patch qorunur. Server geometry/ownership/selected parts/defaults/fizika/API dəyişməyib; backend dəyişikliyi tələb olunmadı.
+- Decisions: istifadəçinin bu davam tapşırığı təsdiqli city-view asset/kompozisiyası üçündür; yeni alternativ konsept yaradılmayıb. Səth ornamentləri owned dekor deyil. Statik konsept adası/uydurma bina-fountain/garden mülkiyyəti tətbiq edilmir; entrance/step sprite-ı seçilmiş qapı/footprint-ə müdaxilə etməmək üçün işlədilmir.
+- Checks performed: API24-uyğun son source ilə bütün49host test bir run-daPASS58s; son normal Java21/offline core/engine/app unit+APK+lintPASS28s. İlkin say-gözləntisi testi və API26-only Path.approximate lint xətası düzəldilib; minSdk24 qalır, cihazAPI24 runtime yoxlanmayıb. Kontrast4/4min8.22 və diff checkPASS. 360font1,390font1,320font2,mixed-focus,all-parcels və comparison renderlərinə baxıldı. Emulator açılmayıb.
+- Remaining work: tam city-view piksel pariteti/mərhələ4qəbulu deyil. Real union düz sərhədlidir; server seçilmiş hissə/bina yerləşmələri konseptdəki statik evlərlə eyniləşdirilmir. Geniş terras/kafe balkonları, tam neon-glow və uzun viewport-un əlavə şaquli havası fərqləri açıqdır. Bunları səssiz redesign, geometry/crop və uydurma dekor ilə gizlətmə. Planşet/landşaft/device/API/inset/TalkBack/GPU/68ID tam şəhər enumerasiyası yoxlanmayıb.
+- Relevant files: CityGardenArt.kt,CityScreen.kt,CityChrome.kt; city/garden-v1.{png,json}; drawable/city_{plan_layers,view_skyline}.xml; city-scene-visual/render/CityTerrainRenderTest.kt; `docs/reviews/2026-11-13-phase4-city-design-parity.md` son bölmə; lokal `docs/reviews/city-garden-visual/design-comparison.png`. Yeganə plan docs/PLAN.md.
+- Exact next step: cari asset/chrome vahidini review nəticələri və açıq paritet məhdudiyyətləri ilə təhvil ver. Yeni alternativ vizual/terras və ya geometry qərarı üçün əvvəl konkret nümunə və açıq istifadəçi təsdiqi tələb olunur. Ayrıca göstərişsiz commit/merge/push/CI yoxdur.
+
+## City-view chrome glow davamı — 13 noyabr 2026 (ən son)
+- Completed: cari sahil/bağça/owner diff qorundu; `CityChrome.kt` aktiv tab və şəhər nav-a token əsaslı cyan glow əlavə edir. Yeni rəng/ölçü/pin yoxdur; layout/geometry/ownership/kamera dəyişmir.
+- Current state: eyni `fix/city-design-parity`, baza7b7b676, working diff. Commit/merge/push/CI yoxdur.
+- Decisions: əvvəlki təsdiqli city-view və asset sərhədləri qüvvədədir. Yeni terras/alternativ kompozisiya tətbiq edilməyib.
+- Checks performed: host49/49PASS58s; 390font1 və320font2 yeni şəkillərinə baxıldı. Kontrast4/4min8.22; diff checkPASS. Adi unit/APK/lint son nəticəsi review-a əlavə edilir; emulator/device yoxdur.
+- Remaining work: geniş terras/kafe balkonları, uzun viewport boşluğu və bütün chrome-un piksel pariteti açıqdır. Bu kiçik davam bütün city-view tapşırığını tamamlamır; mərhələ4qəbulu deyil.
+- Relevant files: CityChrome.kt; `docs/reviews/2026-11-13-phase4-city-design-parity.md` son bölmə; `docs/reviews/city-garden-visual/representative-{390-font1,320-font2}.png`; plan yalnız docs/PLAN.md.
+- Exact next step: son adi yoxlamanın nəticəsini qeyd et; qalan terras üçün konkret modul nümunəsini istifadəçiyə göstərib əvvəlki handoff-un təsdiq sərhədini həll et. Mövcud diff-i qoru; ayrıca göstərişsiz commit/merge/push/CI yoxdur.
+- Son adi nəticə: Java21/offline core/engine/app unit+APK+lintPASS16s(108task); son source review və diff checkPASS.
+- Yeni konkret balkon nümunəsi: `docs/design/city-garden-v1/balcony-proposal/{preview.png,README.md}`; built-in imagegen, ön/yan ledge+railing/flowers. Tətbiq təsdiqi GÖZLƏNİR; app-ə köçürülməyib. Exact next step: nümunəyə istifadəçi cavabını al; təsdiq olarsa mövcud facade anchor/selected window/occlusion/native-pixel sərhədlərinə uyğun proyeksiya edib portret host müqayisəsi apar. Nümunə bina üzərində yoxlanmayıb; kafe terras/uzun viewport fərqi hələ açıqdır.
+
+## Təsdiqli balkon və kompozisiya — 13 noyabr 2026 (cari yekun)
+- Completed: istifadəçi balkon nümunəsini açıq təsdiqlədi; əvvəlki pending artıq tarixçədir. Dəyişdirilməmiş preview `city/balcony-v1.png`+JSON ilə CityGardenArt-a qoşuldu. Ön balkon shell meylinə proyeksiya edilir; yan/corner anchor-ları var, ground qapı/işıq qorunur. Uzun normal portretdə kvadrat scene sahəsi və mərkəzləşmiş board scene→Bax boşluğunu azaldır; kiçik/font2 əvvəlki hündürlük davranışındadır.
+- Current state: eyni `fix/city-design-parity`/baza7b7b676 working diff; əvvəlki owner/source/release/live-review/XML/QA qorunur. Commit/merge/push/CI yoxdur.
+- Decisions: konkret balkon təsdiqlənib, yenidən soruşma. Mobil əvvəl/portret/sabit kamera/source pixel cap/real union və server parts saxlanır. Backend müqaviləsi dəyişmədiyindən AppBackend dəyişikliyi tələb olunmadı.
+- Remaining work: bu balkon/adaptiv kompozisiya vahidi hazırdır. Statik konseptlə tam piksel eyniliyi və mərhələ4qəbulu iddia edilmir; real union/hesab məzmunu konseptin uydurma ev/fontan/kafe dəsti ilə əvəz olunmur. Device/API24runtime/inset/TalkBack/GPU/68IDtam şəhər/planşet/landşaft yoxlanmayıb; canlı yoxlama gate deyil.
+- Relevant files: CityGardenArt.kt,CityScreen.kt; assets/city/balcony-v1.{png,json}; təsdiq/provenance `docs/design/city-garden-v1/balcony-proposal/README.md`; `docs/reviews/2026-11-13-phase4-city-design-parity.md` son bölmə; `docs/reviews/city-balcony-visual/balcony-comparison.png`; plan yalnız docs/PLAN.md.
+- Checks performed: full49hostPASS47s; output destination/formatdan sonra parity3/3PASS16s; son normal Java21/offline core/engine/app unit+APK+lintPASS19s; kontrast4/4min8.22; diff checkPASS. Final comparison və mixed-focus/raw390/360 şəkillərinə baxıldı; synthetic hesabdır. Emulator açılmadı.
+- Exact next step: bu tamamlanmış balkon/kompozisiya vahidini təhvil ver; ayrıca istifadəçi göstərişi olmadan yeni feature, commit, merge, push və CI başlama. Sonrakı review/commit istənərsə cari diff-i və owner fayllarını ayıraraq bax; artıq təsdiqlənmiş balkonu yenidən təsdiqə çıxarma.
+
+## Balkon/kompozisiya lokal review — 13 noyabr 2026
+- Completed: istifadəçinin istəyi ilə hazır city diff PLAN §7 və son review/handoff əsasında lokal review edildi; yeni konkret bug tapılmadı, source/test/asset dəyişdirilmədi.
+- Current state / Decisions: `fix/city-design-parity`, HEAD `7b7b676`; working diff və owner faylları qorunur. Təsdiqli balkon yenidən təsdiqə çıxarılmır; backend müqaviləsi dəyişmir. Commit/merge/push/CI yoxdur.
+- Checks performed: təkrar Java21/offline native49/49PASS58s; normal unit/APK/lintPASS4s(108task,95up-to-date); kontrast4/4min8.22; balkon SHA256 eyniliyi; comparison/raw320font2/mixed-focus və yeni raw390font1 görüntülərinə baxıldı. Synthetic host; device/emulator yoxdur.
+- Remaining work: əvvəlki tam paritet/mərhələ4və yoxlanmamış runtime məhdudiyyətləri qalır; yeni düzəliş tapşırığı açılmadı.
+- Relevant files: `docs/reviews/2026-11-13-phase4-city-design-parity.md` müstəqil lokal review bölməsi; əvvəlki balkon bölməsindəki source/assets/render yolları; yeganə plan `docs/PLAN.md`.
+- Exact next step: lokal review nəticəsini təhvil ver; ayrıca göstərişsiz commit/merge/push/CI və yeni feature başlama.
+
+## City-design-parity — lokal commit
+- İstifadəçi review-dan sonra lokal commit tapşırdı. Review edilmiş şəhər source/assets/test/harness, PLAN qeydləri və bu vahidin handoff bölmələri commit edilir; əvvəlki owner oyun handoff əlavələri index-dən kənarda saxlanır.
+- Son49host və normal unit/APK/lint/kontrast/diff check PASS qüvvədədir; production source dəyişmədi. Merge/push/CI yoxdur. Növbəti addım lokal commit nəticəsini bildirməkdir.
+
+## Hissələr regression və preview — 13 noyabr 2026 (cari)
+- Completed: buy→unlock→apply→fresh detail regression testi; receipt/rejection əhatəsi genişləndi. Parts-dan geri dönüş bina ID-sini saxlayır, serverdən yenilənmiş detal oxunur. İnventar/detail/parts/default-picker köhnə baked fasad əvəzinə oyun modular shell + seçilmiş window art/pitch/roof ilə çəkilir. Server accepted center-ləri dəyişmir. Standart preview-da 0 mərtəbə əvəzinə Standart görünüş; dar böyük şriftdə footer düymələri şaqulidir.
+- Current state: `fix/parts-flow-regression`, baza `c40475b`. İstifadəçi bitdikdən sonra lokal commit etməyi tapşırıb. Owner handoff/release/live-review/XML/QA patch qorunur, əlaqəsiz fayllar commit-ə daxil edilmir. Main merge/push/CI yoxdur.
+- Decisions: istifadəçi 2-ci şəkildə fasadın da səhv olduğunu dəqiqləşdirdi; düzəliş oyundakı təsdiqli renderer-in təkrar istifadəsidir, redesign/yeni asset deyil. AppBackend yalnız read-only yoxlandı, müqavilə dəyişmir.
+- Remaining work: 1-ci şəkildəki şəhər oxu xətasının konkret səbəbi təsdiqlənməyib. `WobbrikCity` cause/stack logu əlavə edildi; empty-city/decor və missing geometry regression-u var. Screenshot-dan hansı HTTP/DTO/race xətası olduğu seçilmir. Tam mərhələ4 qəbulu/runtime yoxlaması iddiası yoxdur.
+- Yeni istifadəçi tapşırığı: həddən böyük komponentlər **bir çox səhifədədir**, tək inventory deyil. Cari vahiddən sonra ayrıca mobil responsive ölçü vahidi: düymə/kart/başlıq/ikon/boşluqlar width+height+fontScale pillələrinə görə yığcamlaşmalı, mövcud rəng/üslub və əsas əməliyyatların əlçatanlığı saxlanmalıdır. Ümumi ölçü işi bu commit-ə daxil deyil. Konkret ölçü nümunəsi əvvəl göstərilir; yeni alternativ dizayn tətbiq edilmir. Mobil portret; planşet ayrıca qalır.
+- Relevant files: `BuildingArt.kt`, `FinishCosmeticScreen.kt`, `InventoryScreen.kt`, `OnlineGame.kt`, `PartsScreen.kt`, `CityScreen.kt`; core `PartsFlowTest.kt`, `PartsMutationsTest.kt`, `CitySceneReadsTest.kt`; review `docs/reviews/2026-11-13-phase4-parts-regression.md`; host `docs/reviews/parts-flow-visual/render/`. Yeganə plan `docs/PLAN.md`.
+- Checks performed: fokuslu core regression-ları, native host preview/detail testləri, normal unit/APK/lint və contrast/diff nəticələrinin son yekunu review-da. Sintetik host-dur; emulator/device/real hesab/API24runtime/inset/TalkBack/GPU yoxlanmayıb. Emulator açılmadı.
+- Exact next step: bu vahidin lokal commit nəticəsini bildir. Sonra yeni chatdə handoff+review+GameTokens/HomeButton və ekranların mövcud ölçü istifadəsini scoped yoxla; bir çox mobil səhifənin komponentlərini yığcam/responsive etmək üçün konkret nümunəni göstər. Şəhər root cause-u ayrıca açıq saxla, log/API cavabı olmadan PASS demə. Merge/push/CI avtomatik yoxdur.
+
+## Mobil yığcam ölçü nümunəsi — 13 noyabr 2026 (cari)
+- Completed: handoff/PLAN, GameTokens, HomeButton/HomeIcon, PurchaseHeader/Card/Action/Panel və mobil inventory/parts/shop ölçüləri yoxlandı. Production UI dəyişmədən ayrıca Compose host specimen hazırlandı.
+- Current state: `feat/mobile-compact-sizing`; konkret ölçü təsdiqi gözlənir. Əvvəlki owner working faylları qorunur; commit/merge/push/CI yoxdur.
+- Decisions: mobil portret; üslub/art/radius/rənglər saxlanır. Təklif compact≤360dp width və ya≤640dp height: əsas düymə min48dp/24sp, başlıq18sp, ikon24dp, kart art48dp, section gap8dp; regular min56dp action/24sp heading/72dp art/16dp gap. Toxunma min48dp, font scale saxlanır. Bunlar hələ təsdiqlənməyib/tətbiq edilməyib.
+- Relevant files: `docs/reviews/2026-11-13-mobile-compact-sizing.md`; `docs/reviews/mobile-sizing-visual/render/`; `GameTokens.kt`, `HomeScreen.kt`, `CityPurchaseChrome.kt`, `CityPurchasePanel.kt`; plan yalnız `docs/PLAN.md`.
+- Checks performed: 3 native host specimen renderi (360×640dp current font1/proposal font1/font2), şəkillərə baxıldı; kontrast4/4PASS min10.48. Tam səhifə responsive/device/inset/TalkBack testi deyil, emulator açılmadı; production build dəyişmədi.
+- Remaining work/Exact next step: istifadəçiyə konkret nümunəni göstər, ölçü təsdiqini al; sonra ortaq mobil token profili→komponentlər→ekranlar və mobil host render yoxlaması. AppBackend/API dəyişmə tələb olunmur. Yeni şəhər feature/placement işi açma.
+
+## Yeni tam səhifə UI təklifi — cari qərar
+- İstifadəçi əvvəlki ayrı komponent specimen-ini rədd etdi (“yamaq kimi”); sonra yeni UI hazırlamağı istədi. Əvvəlki ölçü təklifi təsdiqlənməyib, onu tətbiq etmə.
+- Completed: production UI dəyişmədən Home+Inventory tam səhifə Compose təklifi hazırlandı. Existing GameTokens/home art/logo/icons/BuildingPreview saxlanır. Ana ekran art→stats→Oyna→Şəhərim→secondary; inventory üç iri giriş əvəzinə ortaq toolbar və yığcam grid. Font2 üçün vertical/2row uyğunlaşma var.
+- Current state: `feat/mobile-compact-sizing`; yeni kompozisiyanın da konkret tətbiq təsdiqi gözlənir. Owner faylları qorunur; backend/commit/merge/push/CI yoxdur.
+- Relevant files: `docs/reviews/mobile-sizing-visual/full-pages-v2.png`; `render/MobileCompositionTest.kt`; `docs/reviews/2026-11-13-mobile-compact-sizing.md` son bölmə; plan yalnız `docs/PLAN.md`.
+- Checks:3 native host scenario/6PNG;360×640font1,390×844font1,320×568font2. Primary actions visibility assertions PASS, kontrast4/4PASSmin6.48; görüntülər yoxlanır. Bu review-only sintetik dizayn fixture-dir; production ekran/bütün state/inset/TalkBack/device qəbulu deyil. Emulator açılmadı.
+- Remaining/Exact next step: tam səhifə board-u istifadəçiyə göstər; konkret təsdiq gəlmədən app UI-nə qoşma. Təsdiq olarsa ortaq mobile metrics→komponentlər→mövcud ekranlar vahidini davam etdir; ayrı plan/şəhər feature-i açma.
+
+## Ana ekran navbar — son istifadəçi düzəlişi
+- İstifadəçi home düymələrini aşağı navbar-a köçürməyi və oyunu başladan Play-i tam ortada istədi. `MobileCompositionTest.kt` yalnız review preview kimi yeniləndi: Şəhər/İnventar/Play/Kolleksiya/Nailiyyətlər. Dar görünüşdə qısa label Uğurlar, a11y adı Nailiyyətlərdir. Inventar təklifi saxlanır.
+- Relevant files: `docs/reviews/mobile-sizing-visual/home-navbar-v3-preview.png`, `full-pages-v3.png`, `render/MobileCompositionTest.kt`;v2fixture `.kt.txt` saxlanır; review son navbar bölməsi.
+- Checks:3host scenario PASS11s; final360navbar və320font2-yə baxıldı, primary görünür. App/backend UI/domain dəyişməyib; preview click-ləri production start/navigation deyil. CI/emulator/commit/merge/push yoxdur.
+- Exact next step: navbar nümunəsini göstər; konkret görünüşün tətbiq təsdiqindən sonra mobil HomeScreen-in real onPlay/onPage inteqrasiyasını hazırla. Ümumi UI işi hələ tətbiq edilməyib; ayrıca plan yaratma.
+
+## Təsdiqli navbar və mobil yığcamlaşdırma — tətbiq/commit yekunu
+- Completed: istifadəçi v3navbar-ı açıq təsdiqlədi, tətbiq və yığcamlaşdırmanın davamı+lokal commit istədi. MobileHomeScreen real snapshot/onPlay/onPage ilə işləyir; mərkəzi Play mövcud AcceptedAttemptCommands.start/discard→host.enter→game axınına bağlıdır. Nav4giriş+Hesab real route-dur, recovery/onPlay null-da start bloklanır.
+- Completed: ortaq mobil width+height ölçü pillələri, HomeButton/Al, inventory toolbar/normal2sütun/font2horizontal kart, parts grid/preview/kateqoriyalar, default picker başlıq/thumbnail, dekor/land summary və hesab/nailiyyət kompakt portreti. Hesab əsas əməliyyatları scroll-dan çıxarıldı; böyük şrift qorunur. Server snapshot/wallet/API/geometry/journal və gameplay dəyişmir; AppBackend dəyişikliyi lazım deyil.
+- Current state: `feat/mobile-compact-sizing`, baza `ec84e7a`; review edilmiş bu UI vahidi source/review/harness və bu handoff ilə lokal commit-də saxlanır. Owner release/live-check/XML/QA patch və əvvəlki oyun handoff əlavələri kənarda qorunur. Merge/push/CI yoxdur.
+- Decisions: v3navbar təsdiqlidir, yenidən təsdiq istəmə. Mobil portret; planşet/landşaft ayrıca qalır. Əvvəlki “tətbiq təsdiqi gözlənir/production dəyişməyib” qeydləri tarixçədir.
+- Checks performed: native20/20PASS27s; Home6/Flow3/Purchase6/PartsPreview5.360×640font1,390×844font1,320×568font2 + Homefont2reserved24/48dp/offline/longbalance/XP. Real callback/navigation/min48dp; read/detail/picker/68art/6style. Final Java21/offline core/engine/app unit+assembleDebug/lintDebugPASS14s. Kontrast4/4PASSmin6.48,diffcheckPASS; screenshots/contact-lərə baxıldı. Sintetik host, real hesab E2E/device/API24runtime/TalkBack/GPU deyil; emulator açılmadı.
+- Relevant files: `MobileHomeScreen.kt`, `MobileUiSizing.kt`, `GameTokens.kt`, `HomeScreen.kt`, `InventoryScreen.kt`, `PartsScreen.kt`, `FinishCosmeticScreen.kt`, `CityPurchase{Chrome,Panel}.kt`, `DecorationShopScreen.kt`, `LandShopScreen.kt`, `OnlineGame.kt`; `docs/reviews/2026-11-13-mobile-compact-sizing.md`, `docs/reviews/mobile-sizing-visual/{README.md,render/,production-contact-*.png}`; plan yalnız `docs/PLAN.md`.
+- Remaining work: bu mobil ölçü vahidi fokuslu yoxlamalarla hazırdır; tam mərhələ4/oyun buraxılışı qəbulu deyil. Əvvəlki şəhər oxu root-cause və runtime məhdudiyyətləri ayrıca açıqdır, bu UI commit onları həll edilmiş saymır.
+- Exact next step: commit nəticəsini bildir. Sonrakı böyük iş yeni chatdə handoff+PLAN və bu review əsasında; ayrıca göstərişsiz merge/push/CI və yeni feature açma.

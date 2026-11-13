@@ -29,7 +29,10 @@ class WobbrikApplication : Application(), DefaultLifecycleObserver {
     sealed interface Bootstrap {
         data object MissingFirebase : Bootstrap
         data object MissingBackendOrigin : Bootstrap
-        data class Configured(val recovery: AuthenticatedRecoveryOwner, val commands: AcceptedAttemptCommands) : Bootstrap
+        data class Configured(val recovery: AuthenticatedRecoveryOwner, val commands: AcceptedAttemptCommands,
+            val inventory: appbackend.wobbrik.game.InventoryRepository, val sessions: AccountSessions,
+            val decorations: appbackend.wobbrik.game.DecorationRepository,
+            val cityScene: appbackend.wobbrik.game.CitySceneRepository) : Bootstrap
     }
 
     internal val cosmeticDefaults by lazy { AndroidCosmeticDefaultsStore(this) }
@@ -98,14 +101,16 @@ class WobbrikApplication : Application(), DefaultLifecycleObserver {
             require(!token.isNullOrBlank()) { "Firebase returned an empty ID token" }
             token
         }
+        val backend = GameplayHttpBackend(sessions, transport)
         val owner = AuthenticatedRecoveryOwner(
-            sessions, GameplayHttpBackend(sessions, transport), androidAttemptJournal(this), recoveryScope,
+            sessions, backend, androidAttemptJournal(this), recoveryScope,
             onStateChanged = engineHost::onRecoveryChanged,
             cache = androidSnapshotCache(this),
         )
         val commands = AcceptedAttemptCommands(owner)
         engineHost.bind(commands)
-        bootstrap = Bootstrap.Configured(owner, commands)
+        bootstrap = Bootstrap.Configured(owner, commands, appbackend.wobbrik.game.InventoryRepository(backend), sessions,
+            appbackend.wobbrik.game.DecorationRepository(backend), appbackend.wobbrik.game.CitySceneRepository(backend))
         authListener = FirebaseAuth.AuthStateListener {
             // Do not deduplicate by UID: a re-login must establish a new recovery epoch.
             val user = googleUser()

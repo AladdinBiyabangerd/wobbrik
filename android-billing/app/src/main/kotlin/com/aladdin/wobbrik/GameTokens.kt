@@ -35,5 +35,20 @@ internal object GameTokens {
     val Body = 16.sp
     val Title = 24.sp
     val Score = 32.sp
+    // Approved mobile Home navbar; all dimensions derive from the existing scale.
+    internal object MobileUi {
+        val CompactWidth = PanelWidth
+        val CompactHeight = 640.dp
+        val PrimaryTarget = Target + Small
+    }
+    internal object MobileHome {
+        val HeroMax = Target * 7
+        val LargeFontHero = Target * 2
+        val NavbarLabelWidth = PanelWidth - Gap * 2
+        val PlayDiameter = Target + Gap
+        val PlaySlot = Target + Inset
+        val NavbarHeight = Target + Inset + Small
+        val LargeFontNavbarHeight = Target * 2 + Gap
+    }
     val Hint = 18.sp
 }

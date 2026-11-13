@@ -1,0 +1,16 @@
+// One-off host QA only. Uses already-cached tools; not applied by the project or CI.
+gradle.beforeProject { app ->
+ if (app.path == ':app') app.plugins.withId('com.android.application') {
+    app.android.testOptions.unitTests.includeAndroidResources = true
+    app.android.sourceSets.test.java.srcDir(new File(app.rootDir, '../docs/reviews/mobile-sizing-visual/render'))
+    app.dependencies.add('testImplementation', 'org.robolectric:robolectric:4.14.1')
+    app.dependencies.add('testImplementation', 'androidx.compose.ui:ui-test-junit4:1.7.6')
+    app.dependencies.add('debugImplementation', 'androidx.compose.ui:ui-test-manifest:1.7.6')
+    app.tasks.withType(Test).configureEach {
+        systemProperty 'robolectric.offline', 'true'
+        systemProperty 'robolectric.dependency.dir', '/private/tmp/wobbrik-android-jars'
+        maxHeapSize = '2g'
+    }
+}
+
+}

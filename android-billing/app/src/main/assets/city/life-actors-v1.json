@@ -1,0 +1,61 @@
+{
+  "source": "life-actors-v1.png",
+  "sprites": [
+    {
+      "id": "resident_se",
+      "x": 144,
+      "y": 61,
+      "width": 180,
+      "height": 320
+    },
+    {
+      "id": "resident_sw",
+      "x": 591,
+      "y": 62,
+      "width": 165,
+      "height": 315
+    },
+    {
+      "id": "resident_ne",
+      "x": 1021,
+      "y": 59,
+      "width": 180,
+      "height": 323
+    },
+    {
+      "id": "resident_nw",
+      "x": 1470,
+      "y": 60,
+      "width": 159,
+      "height": 324
+    },
+    {
+      "id": "car_se",
+      "x": 80,
+      "y": 530,
+      "width": 297,
+      "height": 277
+    },
+    {
+      "id": "car_sw",
+      "x": 520,
+      "y": 530,
+      "width": 293,
+      "height": 277
+    },
+    {
+      "id": "car_ne",
+      "x": 966,
+      "y": 540,
+      "width": 288,
+      "height": 263
+    },
+    {
+      "id": "car_nw",
+      "x": 1406,
+      "y": 539,
+      "width": 289,
+      "height": 265
+    }
+  ]
+}

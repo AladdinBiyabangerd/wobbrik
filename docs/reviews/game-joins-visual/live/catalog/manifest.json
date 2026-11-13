@@ -1,0 +1,243 @@
+{
+  "fixture": true,
+  "covered_ids": [
+    "balance_entry",
+    "base_1_entrance",
+    "base_1_lighting",
+    "base_1_roof",
+    "base_1_wall",
+    "base_1_window",
+    "base_2_entrance",
+    "base_2_lighting",
+    "base_2_roof",
+    "base_2_wall",
+    "base_2_window",
+    "base_3_entrance",
+    "base_3_lighting",
+    "base_3_roof",
+    "base_3_wall",
+    "base_3_window",
+    "base_4_entrance",
+    "base_4_lighting",
+    "base_4_roof",
+    "base_4_wall",
+    "base_4_window",
+    "base_5_entrance",
+    "base_5_lighting",
+    "base_5_roof",
+    "base_5_wall",
+    "base_5_window",
+    "base_6_entrance",
+    "base_6_lighting",
+    "base_6_roof",
+    "base_6_wall",
+    "base_6_window",
+    "coins_entrance_1",
+    "coins_entrance_2",
+    "coins_entrance_3",
+    "coins_lighting_1",
+    "coins_lighting_2",
+    "coins_lighting_3",
+    "coins_roof_1",
+    "coins_roof_2",
+    "coins_roof_3",
+    "coins_wall_1",
+    "coins_wall_2",
+    "coins_wall_3",
+    "coins_window_1",
+    "coins_window_2",
+    "coins_window_3",
+    "paid_entrance_1",
+    "paid_lighting_1",
+    "paid_roof_1",
+    "paid_wall_1",
+    "paid_window_1",
+    "precision_frame",
+    "reward_entrance_1",
+    "reward_entrance_2",
+    "reward_entrance_3",
+    "reward_lighting_1",
+    "reward_lighting_2",
+    "reward_lighting_3",
+    "reward_roof_1",
+    "reward_roof_2",
+    "reward_roof_3",
+    "reward_wall_1",
+    "reward_wall_2",
+    "reward_wall_3",
+    "reward_window_1",
+    "reward_window_2",
+    "reward_window_3",
+    "summit_crown"
+  ],
+  "scenarios": [
+    {
+      "index": 1,
+      "initial_floors": 5,
+      "drift": 2,
+      "parts": {
+        "wall": "base_1_wall",
+        "window": "base_1_window",
+        "entrance": "base_1_entrance",
+        "lighting": "base_1_lighting",
+        "roof": "base_1_roof"
+      }
+    },
+    {
+      "index": 2,
+      "initial_floors": 5,
+      "drift": 2,
+      "parts": {
+        "wall": "base_2_wall",
+        "window": "base_2_window",
+        "entrance": "base_2_entrance",
+        "lighting": "base_2_lighting",
+        "roof": "base_2_roof"
+      }
+    },
+    {
+      "index": 3,
+      "initial_floors": 5,
+      "drift": 2,
+      "parts": {
+        "wall": "base_3_wall",
+        "window": "base_3_window",
+        "entrance": "base_3_entrance",
+        "lighting": "base_3_lighting",
+        "roof": "base_3_roof"
+      }
+    },
+    {
+      "index": 4,
+      "initial_floors": 5,
+      "drift": 2,
+      "parts": {
+        "wall": "base_4_wall",
+        "window": "base_4_window",
+        "entrance": "base_4_entrance",
+        "lighting": "base_4_lighting",
+        "roof": "base_4_roof"
+      }
+    },
+    {
+      "index": 5,
+      "initial_floors": 5,
+      "drift": 2,
+      "parts": {
+        "wall": "base_5_wall",
+        "window": "base_5_window",
+        "entrance": "base_5_entrance",
+        "lighting": "base_5_lighting",
+        "roof": "base_5_roof"
+      }
+    },
+    {
+      "index": 6,
+      "initial_floors": 5,
+      "drift": 2,
+      "parts": {
+        "wall": "base_6_wall",
+        "window": "base_6_window",
+        "entrance": "base_6_entrance",
+        "lighting": "base_6_lighting",
+        "roof": "base_6_roof"
+      }
+    },
+    {
+      "index": 7,
+      "initial_floors": 5,
+      "drift": 2,
+      "parts": {
+        "wall": "coins_wall_1",
+        "window": "coins_window_1",
+        "entrance": "coins_entrance_1",
+        "lighting": "coins_lighting_1",
+        "roof": "coins_roof_1"
+      }
+    },
+    {
+      "index": 8,
+      "initial_floors": 5,
+      "drift": 2,
+      "parts": {
+        "wall": "coins_wall_2",
+        "window": "coins_window_2",
+        "entrance": "coins_entrance_2",
+        "lighting": "coins_lighting_2",
+        "roof": "coins_roof_2"
+      }
+    },
+    {
+      "index": 9,
+      "initial_floors": 5,
+      "drift": 2,
+      "parts": {
+        "wall": "coins_wall_3",
+        "window": "coins_window_3",
+        "entrance": "coins_entrance_3",
+        "lighting": "coins_lighting_3",
+        "roof": "coins_roof_3"
+      }
+    },
+    {
+      "index": 10,
+      "initial_floors": 5,
+      "drift": 2,
+      "parts": {
+        "wall": "reward_wall_1",
+        "window": "reward_window_1",
+        "entrance": "reward_entrance_1",
+        "lighting": "reward_lighting_1",
+        "roof": "reward_roof_1"
+      }
+    },
+    {
+      "index": 11,
+      "initial_floors": 5,
+      "drift": 2,
+      "parts": {
+        "wall": "reward_wall_2",
+        "window": "reward_window_2",
+        "entrance": "reward_entrance_2",
+        "lighting": "reward_lighting_2",
+        "roof": "reward_roof_2"
+      }
+    },
+    {
+      "index": 12,
+      "initial_floors": 5,
+      "drift": 2,
+      "parts": {
+        "wall": "reward_wall_3",
+        "window": "reward_window_3",
+        "entrance": "reward_entrance_3",
+        "lighting": "reward_lighting_3",
+        "roof": "reward_roof_3"
+      }
+    },
+    {
+      "index": 13,
+      "initial_floors": 5,
+      "drift": 2,
+      "parts": {
+        "wall": "paid_wall_1",
+        "window": "paid_window_1",
+        "entrance": "paid_entrance_1",
+        "lighting": "paid_lighting_1",
+        "roof": "paid_roof_1"
+      }
+    },
+    {
+      "index": 14,
+      "initial_floors": 5,
+      "drift": 2,
+      "parts": {
+        "wall": "base_1_wall",
+        "window": "precision_frame",
+        "entrance": "balance_entry",
+        "lighting": "base_1_lighting",
+        "roof": "summit_crown"
+      }
+    }
+  ]
+}

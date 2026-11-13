@@ -62,6 +62,8 @@ private fun AuthenticatedGame(app: WobbrikApplication) {
     // Display-only last accepted snapshot of the current uid; never a capability.
     var cached by remember(configured) { mutableStateOf<GameSnapshot?>(null) }
     var page by rememberSaveable { mutableStateOf("home") }
+    var partsBuilding by rememberSaveable { mutableStateOf<String?>(null) }
+    var inventoryBuilding by rememberSaveable { mutableStateOf<String?>(null) }
     val host = app.engineHost
     var hostState by remember { mutableStateOf(host.snapshot()) }
     // Snapshot has no Compose dependency. Poll even when paused so lifecycle revocation is visible.
@@ -119,6 +121,27 @@ private fun AuthenticatedGame(app: WobbrikApplication) {
         AcceptedScene(hostState, ready, host, onHome = { page = "home" })
         return
     }
+    if (page == "city" && ready != null && configured != null) {
+        key(InventoryReadKey(ready)) { CityScreen(configured, ready, onHome = { page = "home" }, onInventory = { inventoryBuilding = null; page = "inventory" }) }
+        return
+    }
+    if (page == "parts" && ready != null && configured != null) {
+        key(InventoryReadKey(ready)) { PartsScreen(configured, ready, partsBuilding, onBack = { inventoryBuilding = partsBuilding; page = "inventory" }) }
+        return
+    }
+    if (page == "decorations" && ready != null && configured != null) {
+        key(InventoryReadKey(ready)) { DecorationShopScreen(configured, ready, onBack = { page = "inventory" }) }
+        return
+    }
+    if (page == "land" && ready != null && configured != null) {
+        key(InventoryReadKey(ready)) { LandShopScreen(configured, ready, onBack = { page = "inventory" }) }
+        return
+    }
+    if (page == "inventory" && ready != null && configured != null) {
+        key(InventoryReadKey(ready)) { InventoryScreen(configured, ready, selected = inventoryBuilding, onSelectBuilding = { inventoryBuilding = it }, onHome = { page = "home" },
+            onParts = { partsBuilding = it; page = "parts" }, onDecorations = { inventoryBuilding = null; page = "decorations" }, onLand = { inventoryBuilding = null; page = "land" }) }
+        return
+    }
     if (page == "collection" && ready != null) {
         val uid = ready.accountKey
         var selection by remember(ready) { mutableStateOf(ready.catalog?.let {
@@ -145,7 +168,17 @@ private fun AuthenticatedGame(app: WobbrikApplication) {
         app.bootstrap is WobbrikApplication.Bootstrap.MissingFirebase -> "Firebase konfiqurasiyası yoxdur"
         app.bootstrap is WobbrikApplication.Bootstrap.MissingBackendOrigin -> "Server ünvanı konfiqurasiya edilməyib"
         journalBlocked -> JournalRecoveryCopy.Title
-        error -> "Bağlantı yoxdur"
+        error -> when (val cause = (state as AuthenticatedRecoveryOwner.State.Error).cause) {
+            is appbackend.wobbrik.game.MutationRejected -> when (cause.code) {
+                "insufficient_balance" -> "Sikkə kifayət etmir. Hesabı yenilə."
+                "listing_conflict" -> "Bina aktiv elandadır. Əvvəl elanı geri götür."
+                "building_conflict" -> "Bina dəyişib. Yenilə və seçimi təkrar et."
+                "shop_conflict" -> "Hissə artıq açılıb. Hesabı yenilə."
+                "invalid_request" -> "Seçilmiş hissələr tətbiq edilə bilmir. Hesabı yenilə."
+                else -> "Bina artıq əlçatan deyil. Hesabı yenilə."
+            }
+            else -> "Bağlantı yoxdur"
+        }
         ready == null && !GameNavigation.showAcceptedHome(state, cached) -> "Hesab və cəhd bərpa olunur…"
         restore is AcceptedAttemptRestore.Result.Blocked -> "Cəhd bu versiyada bərpa edilə bilmir"
         else -> null
@@ -154,7 +187,7 @@ private fun AuthenticatedGame(app: WobbrikApplication) {
     // Local scroll/presentation state belongs to this destination, not to its caller.
     key(accountPage) {
         AccountScreen(accountPage, ready, status,
-            onPage = { page = it },
+            onPage = { if (it == "inventory") inventoryBuilding = null; page = it },
             onRetry = { configured?.recovery?.onForeground() },
             onPlay = if (ready != null && !hostState.choosingFinish && restore !is AcceptedAttemptRestore.Result.Blocked) ({
                 when (restore) {
@@ -188,6 +221,7 @@ internal fun AccountScreen(
     // Shown in the existing value slots only; Play, commands and status still follow [ready].
     cached: GameSnapshot? = null,
 ) {
+    val sizing = mobileUiSizing()
     var journalDetailsClosed by rememberSaveable(journalBlocked) { mutableStateOf(false) }
     if (journalBlocked && (!journalDetailsClosed || page != "home")) {
         JournalRecoveryScreen(onRetry, onHome = { journalDetailsClosed = true; onPage("home") })
@@ -202,15 +236,15 @@ internal fun AccountScreen(
         .safeDrawingPadding()) {
         // Responsive rule: short wide windows use the compact spacing/type tier.
         val compactOuter = maxWidth > maxHeight && maxHeight < GameTokens.CompactHeight
-        BoxWithConstraints(Modifier.fillMaxSize().padding(if (compactOuter) GameTokens.Gap else GameTokens.Inset)) {
+        BoxWithConstraints(Modifier.fillMaxSize().padding(if (compactOuter || sizing.portrait) GameTokens.Gap else GameTokens.Inset)) {
         val controlsMaxHeight = maxHeight / 2
         val expanded = maxWidth >= GameTokens.ExpandedWidth
         val wide = maxWidth > maxHeight
         // Approved design C2 (docs/design/account-landscape-actions-v1): short wide windows (phone landscape).
         val threePane = wide && maxHeight < GameTokens.CompactHeight
         // Type tier: compact (Hint) in short wide windows, regular (Title) elsewhere.
-        val titleSize = if (threePane) GameTokens.Hint else GameTokens.Title
-        Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(GameTokens.Gap)) {
+        val titleSize = if (threePane) GameTokens.Hint else sizing.heading
+        Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(if (sizing.portrait) GameTokens.Small else GameTokens.Gap)) {
             // Approved v3 (9 November): three-pane moves the logo into the hero pane, so there is no header row.
             if (!threePane) Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(GameTokens.Small), verticalAlignment = Alignment.CenterVertically) {
                 Box(Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
@@ -306,7 +340,7 @@ internal fun AccountScreen(
                         }
                         OnlineAction("Yenilə", true, onClick = onRetry)
                     }
-                    if (status == null) OnlineAction(if (active) "Cəhdə qayıt" else "Oyna", true, enabled = onPlay != null, onClick = { onPlay?.invoke() })
+                    if (status == null && !sizing.portrait) OnlineAction(if (active) "Cəhdə qayıt" else "Oyna", true, enabled = onPlay != null, onClick = { onPlay?.invoke() })
                     if (status == null && stacked) Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
                         secondary("Kolleksiya", R.drawable.ui_medal, "collection", Modifier.fillMaxWidth())
                         secondary("Nailiyyətlər", R.drawable.ui_trophy, "achievements", Modifier.fillMaxWidth())
@@ -314,7 +348,7 @@ internal fun AccountScreen(
                         secondary("Kolleksiya", R.drawable.ui_medal, "collection", Modifier.weight(1f))
                         secondary("Nailiyyətlər", R.drawable.ui_trophy, "achievements", Modifier.weight(1f))
                     }
-                    if (page != "home") OnlineAction("Ana ekran", false, onClick = { onPage("home") })
+                    if (page != "home" && !sizing.portrait) OnlineAction("Ana ekran", false, onClick = { onPage("home") })
             }
             val controls: @Composable (Modifier) -> Unit = { modifier ->
                 Column(modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(GameTokens.Gap), horizontalAlignment = Alignment.CenterHorizontally) {
@@ -329,6 +363,16 @@ internal fun AccountScreen(
             } else if (wide) Row(Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(GameTokens.Inset), verticalAlignment = Alignment.CenterVertically) {
                 hero(Modifier.weight(if (expanded) 2f else 1f).fillMaxHeight())
                 controls(Modifier.weight(1f))
+            } else if (sizing.portrait) {
+                Column(Modifier.weight(1f).verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+                    hero(Modifier.fillMaxWidth().height(sizing.detailArt))
+                    info()
+                    actions(androidx.compose.ui.platform.LocalDensity.current.fontScale > 1f)
+                }
+                if (status == null) OnlineAction(if (active) "Cəhdə qayıt" else "Oyna", true,
+                    enabled = onPlay != null, onClick = { onPlay?.invoke() })
+                if (page != "home") OnlineAction("Ana ekran", false, onClick = { onPage("home") })
             } else {
                 hero(Modifier.weight(1f).fillMaxWidth())
                 controls(Modifier.fillMaxWidth().heightIn(max = controlsMaxHeight))
@@ -352,9 +396,9 @@ private fun CenteredPane(modifier: Modifier, spacing: androidx.compose.ui.unit.D
 internal fun AcceptedScene(view: AcceptedEngineHost.Snapshot, ready: AuthenticatedRecoveryOwner.State.Ready,
                           host: AcceptedEngineHost, onHome: () -> Unit) {
     val scene = view.scene ?: return
-    val cosmeticArt = rememberCosmeticArt()
+    val cosmeticArt = rememberCosmeticArt() + rememberGameWindowArt()
     val art = SceneArt(ImageBitmap.imageResource(R.drawable.game_floor), ImageBitmap.imageResource(R.drawable.game_crane),
-        ImageBitmap.imageResource(R.drawable.game_island), ImageBitmap.imageResource(R.drawable.game_roof), ImageBitmap.imageResource(R.drawable.game_cloud))
+        ImageBitmap.imageResource(R.drawable.inventory_garden), ImageBitmap.imageResource(R.drawable.game_roof), ImageBitmap.imageResource(R.drawable.game_cloud), rememberGameAtlases())
     val motion = remember(ready) { SceneMotion() }
     val density = LocalDensity.current
     var hudHeight by remember { mutableStateOf(GameTokens.Target + GameTokens.Inset) }

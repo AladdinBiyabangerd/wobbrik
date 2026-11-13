@@ -1,6 +1,6 @@
 # Şəhər üçün çatışmayan dizaynlar — 9 noyabr 2026
 
-Status: **istifadəçi baxışı üçün təklif; təsdiqlənmiş dizaynları əvəz etmir**. Branch `docs/missing-city-designs-v1`. Built-in imagegen; promptlar `prompts.json`. Hər vəziyyət bir kompozisiyada verilir, eyni ekranın cihaz ölçüsü variantları hazırlanmayıb. Bunlar Android build renderləri deyil.
+Status: **13 noyabrda `04-building-detail.png` görünüşləri istifadəçi tərəfindən təsdiqlənib; `02-parts-flow-v2.png` də 13 noyabrda hissələr/mağaza və binaya tətbiq vahidi üçün açıq təsdiqlənib; digər lövhələr təklif olaraq qalır.** Branch `docs/missing-city-designs-v1`. Built-in imagegen; promptlar `prompts.json`. Hər vəziyyət bir kompozisiyada verilir, eyni ekranın cihaz ölçüsü variantları hazırlanmayıb. Bunlar Android build renderləri deyil.
 
 - [Kolleksiya və altı başlanğıc üslubu](01-collection.png).
 - [68 hissə: seçim → açılma → tətbiq — düzəliş v2](02-parts-flow-v2.png).
@@ -83,3 +83,12 @@ Generativ bina şəkillərində ayrı-ayrı mərtəbələrin sayı yazı ilə h�
 Sakin nümunəsi F=10 → R=40, pulsuz hissələr üçün B=20, maksimum24, komissiya2, satıcı22. Ərazi1: level3/150XP/200sikkə/+4 ekvivalent. Bunlar yeni balans qərarı deyil. Hissə açmaq hesab hüququdur, dekor almaq ayrıca nüsxədir; tətbiq/yerləşdirmə təsdiqi açılma/alışdan ayrıdır. Xəta, pending, insufficient coins, elan geri götürmə və hesab bağlama kimi əlavə halların tam dizaynı bu lövhələrdə yoxdur.
 
 Token kontrastı: text/background16.57, muted/surface8.22, on-accent/accent11.45 — PASS. PNG-nin hər pikseli üçün kontrast və ya touch-target testi deyil. Telefon/planşet, böyük şrift və adaptiv Android renderi aparılmayıb: bu iş dizayn/raster təklifidir, tətbiq və ya mərhələ qəbulu deyil. İstifadəçi təsdiqi olmadan UI implementasiyası başlamır. Backend/API/schema və iqtisadi qaydalar dəyişməyib; bu art-only iş üçün AppBackend dəyişikliyi lazım deyil.
+
+## 13 noyabr — silmə təsdiqi təklifi
+
+`delete-confirmation-proposal.png`: mövcud təsdiqli bina detalının üzərində tokenlərlə hazırlanmış silmə dialoqu. 13 noyabrda istifadəçi bu dialoqu və bina detalının sonundakı “Binanı sil” girişini “okeydir” cavabı ilə təsdiqlədi. Android build renderi deyil. Core adapter review-su: `../../reviews/2026-11-13-phase4-building-delete.md`.
+
+## 13 noyabr — dekor və torpaq alışının təsdiqi
+- İstifadəçi `03-decoration-flow.png` dekor dizaynını açıq təsdiqlədi.
+- `05-land-purchase.png` siyahı və alış təsdiqi hissəsi ayrıca açıq təsdiqləndi; əsas əməl “Al”dır. Xəritədə yer seçimi və placement bu vahidə daxil deyil, bağlı qalır.
+- Bu təsdiqlər Android render/vizual uyğunluq və ya mərhələ 4 qəbulu deyil.
