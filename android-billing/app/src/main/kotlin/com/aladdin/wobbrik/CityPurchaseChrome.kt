@@ -88,10 +88,11 @@ internal fun PurchasePrice(price: Long?, modifier: Modifier = Modifier) {
 @Composable
 internal fun PurchaseAction(modifier: Modifier = Modifier.fillMaxWidth(), primary: Boolean = false,
     enabled: Boolean = true, onClick: () -> Unit) {
+    val sizing = mobileUiSizing()
     val shape = RoundedCornerShape(GameTokens.CardRadius)
     val background = if (primary && enabled) GameTokens.Accent else GameTokens.Surface
     val foreground = if (!enabled) GameTokens.Muted else if (primary) GameTokens.Background else GameTokens.Text
-    Button(onClick, modifier = modifier.heightIn(min = GameTokens.Target + GameTokens.Gap)
+    Button(onClick, modifier = modifier.heightIn(min = if (sizing.portrait) GameTokens.MobileUi.PrimaryTarget else GameTokens.Target + GameTokens.Gap)
         .background(Brush.verticalGradient(listOf(if (primary && enabled)
             lerp(GameTokens.Accent, GameTokens.Text, 1f - GameTokens.DimOpacity) else GameTokens.Raised, background)), shape),
         enabled = enabled, shape = shape,
@@ -102,7 +103,7 @@ internal fun PurchaseAction(modifier: Modifier = Modifier.fillMaxWidth(), primar
         Icon(painterResource(if (primary) R.drawable.city_purchase_check else R.drawable.city_purchase_cancel),
             null, Modifier.size(GameTokens.Inset))
         Spacer(Modifier.width(GameTokens.Small))
-        Text(if (primary) "Al" else "Ləğv et", fontSize = if (primary) GameTokens.Title else GameTokens.Body,
+        Text(if (primary) "Al" else "Ləğv et", fontSize = if (primary && sizing.portrait) GameTokens.Hint else if (primary) GameTokens.Title else GameTokens.Body,
             fontWeight = FontWeight.Bold, softWrap = false)
     }
 }

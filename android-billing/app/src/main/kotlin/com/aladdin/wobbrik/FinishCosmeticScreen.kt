@@ -128,6 +128,7 @@ internal fun FinishCosmeticScreen(view: AcceptedEngineHost.Snapshot, ready: Auth
     val art = rememberCosmeticArt() + rememberGameWindowArt()
     val atlases = rememberGameAtlases()
     var category by remember { mutableStateOf("wall") }
+    val sizing = mobileUiSizing()
     val labels = listOf("Divar", "Pəncərə", "Giriş", "Dam", "İşıq")
     val catalog = ready.catalog
     val missingArt = catalog?.items?.any { it.category in FinishCosmetics.categories && it.id !in art } == true
@@ -140,7 +141,7 @@ internal fun FinishCosmeticScreen(view: AcceptedEngineHost.Snapshot, ready: Auth
         Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
                 Image(painterResource(R.drawable.wobbrik_logo), "Wobbrik", Modifier.width(GameTokens.Target * 2).height(GameTokens.Target), contentScale = ContentScale.Fit)
-                Text("Bina görünüşü", color = GameTokens.Text, fontSize = GameTokens.Title, fontWeight = FontWeight.Bold)
+                Text("Bina görünüşü", color = GameTokens.Text, fontSize = sizing.heading, fontWeight = FontWeight.Bold)
             }
             val preview: @Composable (Modifier) -> Unit = { modifier ->
                 Surface(modifier, color = GameTokens.Surface, shape = RoundedCornerShape(GameTokens.CardRadius)) {
@@ -183,7 +184,7 @@ internal fun FinishCosmeticScreen(view: AcceptedEngineHost.Snapshot, ready: Auth
                                 Column(Modifier.padding(GameTokens.Small), horizontalAlignment = Alignment.CenterHorizontally,
                                     verticalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {
                                     Box {
-                                        Canvas(Modifier.fillMaxWidth().height(GameTokens.Target + GameTokens.Inset)) {
+                                        Canvas(Modifier.fillMaxWidth().height(if (sizing.portrait && sizing.compact) GameTokens.Target else GameTokens.Target + GameTokens.Inset)) {
                                             if (!available) drawContext.canvas.saveLayer(
                                                 androidx.compose.ui.geometry.Rect(Offset.Zero, size),
                                                 androidx.compose.ui.graphics.Paint().apply { alpha = GameTokens.DimOpacity })

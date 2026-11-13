@@ -19,6 +19,8 @@ import kotlinx.coroutines.CancellationException
 @Composable
 internal fun PartsScreen(configured: WobbrikApplication.Bootstrap.Configured,
     ready: AuthenticatedRecoveryOwner.State.Ready, buildingId: String?, onBack: () -> Unit) {
+    val sizing = mobileUiSizing()
+    val largeFont = androidx.compose.ui.platform.LocalDensity.current.fontScale > 1f
     val art = rememberCosmeticArt() + rememberGameWindowArt()
     val atlases = rememberGameAtlases()
     val mutations = remember(configured) { PartsMutations(configured.recovery) }
@@ -60,9 +62,9 @@ internal fun PartsScreen(configured: WobbrikApplication.Bootstrap.Configured,
             val available = FinishCosmetics.available(item, ready.snapshot)
             Column(Modifier.weight(1f).verticalScroll(rememberScrollState()), horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(GameTokens.Gap)) {
-                Text(item.name, color = GameTokens.Text, fontSize = GameTokens.Title, fontWeight = FontWeight.Bold)
-                Canvas(Modifier.fillMaxWidth().height(GameTokens.PanelWidth)) { partPreview(atlases, art, previewParts + (item.category to item.id), item.category) }
-                Text("Bina dəyərinə +${item.weight}", color = GameTokens.Accent, fontSize = GameTokens.Title)
+                Text(item.name, color = GameTokens.Text, fontSize = sizing.heading, fontWeight = FontWeight.Bold)
+                Canvas(Modifier.fillMaxWidth().height(sizing.detailArt)) { partPreview(atlases, art, previewParts + (item.category to item.id), item.category) }
+                Text("Bina dəyərinə +${item.weight}", color = GameTokens.Accent, fontSize = sizing.heading)
                 Text(partAccess(item, ready), color = GameTokens.Text, fontWeight = FontWeight.Bold)
                 if (item.method == "coins") Text("Hesabda daimi açılır", color = GameTokens.Muted)
                 if (item.id !in art) Text("Hissənin qrafikası mövcud deyil", color = GameTokens.Danger)
@@ -72,7 +74,7 @@ internal fun PartsScreen(configured: WobbrikApplication.Bootstrap.Configured,
                 onClick = { mutations.buy(ready, item.id) })
         } else {
             Text(if (buildingId == null) "Hissələr · ${catalog?.items?.count { it.category in FinishCosmetics.categories } ?: 0}" else "Bina görünüşü",
-                color = GameTokens.Text, fontSize = GameTokens.Title, fontWeight = FontWeight.Bold)
+                color = GameTokens.Text, fontSize = sizing.heading, fontWeight = FontWeight.Bold)
             if (choosing) Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {
                 FinishCosmetics.categories.forEach { key ->
                     Button(onClick = { category = key }, modifier = Modifier.heightIn(min = GameTokens.Target),
@@ -88,18 +90,17 @@ internal fun PartsScreen(configured: WobbrikApplication.Bootstrap.Configured,
                 if (current != null) {
                     Column(Modifier.weight(1f).verticalScroll(rememberScrollState()),
                         verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-                    Row(Modifier.fillMaxWidth().height(GameTokens.PanelWidth), horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+                    val selectCategory: (String) -> Unit = { category = it; choosing = true }
+                    if (sizing.portrait && largeFont) {
+                        Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                            horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+                            BuildingCategoryButtons(category, true, selectCategory)
+                        }
+                        BuildingPreview(current.copy(parts = draft), Modifier.fillMaxWidth().height(sizing.detailArt))
+                    } else Row(Modifier.fillMaxWidth().height(sizing.detailArt), horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
                         Column(Modifier.widthIn(max = GameTokens.PanelWidth / 3).verticalScroll(rememberScrollState()),
                             verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-                            FinishCosmetics.categories.forEach { key ->
-                                Button(onClick = { category = key; choosing = true },
-                                    modifier = Modifier.fillMaxWidth().heightIn(min = GameTokens.Target),
-                                    shape = RoundedCornerShape(GameTokens.ControlRadius),
-                                    colors = ButtonDefaults.buttonColors(containerColor = if (category == key) GameTokens.Accent else GameTokens.Raised,
-                                        contentColor = if (category == key) GameTokens.Background else GameTokens.Text)) {
-                                    Text(partCategory(key), softWrap = false)
-                                }
-                            }
+                            BuildingCategoryButtons(category, false, selectCategory)
                         }
                         BuildingPreview(current.copy(parts = draft), Modifier.weight(1f).fillMaxHeight())
                     }
@@ -112,7 +113,7 @@ internal fun PartsScreen(configured: WobbrikApplication.Bootstrap.Configured,
                                 shape = RoundedCornerShape(GameTokens.ControlRadius),
                                 border = BorderStroke(GameTokens.Hairline, if (label == "Seçilmiş") GameTokens.Accent else GameTokens.Raised)) {
                                 Column(Modifier.padding(GameTokens.Small)) {
-                                    Canvas(Modifier.fillMaxWidth().height(GameTokens.Target * 2)) { partPreview(atlases, art, (if (label == "Hazırkı") current.parts else draft), category) }
+                                    Canvas(Modifier.fillMaxWidth().height(sizing.cardArt)) { partPreview(atlases, art, (if (label == "Hazırkı") current.parts else draft), category) }
                                     Text(label, color = GameTokens.Muted)
                                     Text(if (label == "Hazırkı") old else new, color = GameTokens.Text, fontWeight = FontWeight.Bold)
                                 }
@@ -132,7 +133,7 @@ internal fun PartsScreen(configured: WobbrikApplication.Bootstrap.Configured,
             }
             val items = catalog?.items.orEmpty().filter { it.category == category &&
                 (!openedOnly || FinishCosmetics.available(it, ready.snapshot)) && (!achievementOnly || it.method == "achievement") }
-            if (choosing) LazyVerticalGrid(GridCells.Adaptive(GameTokens.PanelWidth / 2 - GameTokens.Gap), Modifier.weight(1f),
+            if (choosing) LazyVerticalGrid(if (sizing.portrait) GridCells.Fixed(if (largeFont) 1 else 2) else GridCells.Adaptive(GameTokens.PanelWidth / 2 - GameTokens.Gap), Modifier.weight(1f),
                 horizontalArrangement = Arrangement.spacedBy(GameTokens.Small), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
                 items(items, key = { it.id }) { choice ->
                     val available = FinishCosmetics.available(choice, ready.snapshot)
@@ -143,7 +144,7 @@ internal fun PartsScreen(configured: WobbrikApplication.Bootstrap.Configured,
                     }, color = GameTokens.Surface, shape = RoundedCornerShape(GameTokens.ControlRadius),
                         border = BorderStroke(GameTokens.Hairline, if (active) GameTokens.Accent else GameTokens.Raised)) {
                         Column(Modifier.padding(GameTokens.Small), verticalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {
-                            Canvas(Modifier.fillMaxWidth().height(GameTokens.Target * 2)) { partPreview(atlases, art, previewParts + (choice.category to choice.id), choice.category) }
+                            Canvas(Modifier.fillMaxWidth().height(sizing.cardArt)) { partPreview(atlases, art, previewParts + (choice.category to choice.id), choice.category) }
                             Text(choice.name, color = GameTokens.Text, fontWeight = FontWeight.Bold)
                             Text(if (active) "✓ Seçilib" else partAccess(choice, ready), color = if (available) GameTokens.Success else GameTokens.Muted)
                         }
@@ -171,4 +172,18 @@ private fun partAccess(item: CatalogItem, ready: AuthenticatedRecoveryOwner.Stat
     item.method == "reward" -> "Reklam ${ready.snapshot.account?.partProgress?.firstOrNull { it.itemId == item.id }?.completed ?: 0}/${item.views ?: "—"} · Hazır deyil"
     item.method == "achievement" -> "Nailiyyətlə açılır"
     else -> "Daimi alış · Hazır deyil"
+}
+
+
+@Composable
+private fun BuildingCategoryButtons(category: String, horizontal: Boolean, onSelect: (String) -> Unit) {
+    FinishCosmetics.categories.forEach { key ->
+        Button(onClick = { onSelect(key) },
+            modifier = (if (horizontal) Modifier else Modifier.fillMaxWidth()).heightIn(min = GameTokens.Target),
+            shape = RoundedCornerShape(GameTokens.ControlRadius),
+            colors = ButtonDefaults.buttonColors(containerColor = if (category == key) GameTokens.Accent else GameTokens.Raised,
+                contentColor = if (category == key) GameTokens.Background else GameTokens.Text)) {
+            Text(partCategory(key), softWrap = false)
+        }
+    }
 }

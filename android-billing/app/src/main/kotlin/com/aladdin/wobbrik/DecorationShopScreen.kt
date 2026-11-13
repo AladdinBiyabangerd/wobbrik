@@ -79,7 +79,7 @@ internal fun DecorationShopContent(ready: AuthenticatedRecoveryOwner.State.Ready
             items(items, key = { it.id }) { item ->
                 PurchaseCard(selected?.id == item.id, onClick = { selected = item }) {
                     Column(Modifier.padding(GameTokens.Small), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-                        PurchaseArt(art[item.id], Modifier.fillMaxWidth().height(GameTokens.Target * 2))
+                        PurchaseArt(art[item.id], Modifier.fillMaxWidth().height(mobileUiSizing().cardArt))
                         Text(item.name, color = GameTokens.Text, fontWeight = FontWeight.Bold, fontSize = GameTokens.Body, minLines = 2)
                         PurchasePrice(item.price, Modifier.fillMaxWidth())
                         copies?.let { owned -> Text("Nüsxə: ${owned.count { it.itemId == item.id }}", color = GameTokens.Muted, fontSize = GameTokens.Caption) }

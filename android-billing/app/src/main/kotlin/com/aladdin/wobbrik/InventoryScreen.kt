@@ -43,6 +43,8 @@ internal class InventoryReadKey(private val ready: AuthenticatedRecoveryOwner.St
 internal fun InventoryScreen(configured: WobbrikApplication.Bootstrap.Configured,
     ready: AuthenticatedRecoveryOwner.State.Ready, selected: String?, onSelectBuilding: (String?) -> Unit, onHome: () -> Unit, onParts: (String?) -> Unit,
     onDecorations: () -> Unit, onLand: () -> Unit) {
+    val sizing = mobileUiSizing()
+    val largeFont = LocalDensity.current.fontScale > 1f
     var retry by remember { mutableIntStateOf(0) }
     var deleteCandidate by remember(ready, selected) { mutableStateOf<OwnedBuilding?>(null) }
     val deletion = remember(configured) { BuildingDeletion(configured.recovery) }
@@ -80,14 +82,20 @@ internal fun InventoryScreen(configured: WobbrikApplication.Bootstrap.Configured
         .safeDrawingPadding().padding(GameTokens.Gap)) {
         Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-                Surface(onClick = back, shape = CircleShape, color = GameTokens.Raised,
-                    border = BorderStroke(GameTokens.Hairline, GameTokens.Muted), modifier = Modifier.size(GameTokens.Target)) {
+                Surface(onClick = back, shape = if (sizing.portrait) RoundedCornerShape(GameTokens.ControlRadius) else CircleShape, color = GameTokens.Raised,
+                    border = if (sizing.portrait) null else BorderStroke(GameTokens.Hairline, GameTokens.Muted), modifier = Modifier.size(GameTokens.Target)) {
                     Box(contentAlignment = Alignment.Center, modifier = Modifier.semantics { contentDescription = "Geri" }) {
-                        Text("‹", color = GameTokens.Text, fontSize = GameTokens.Score)
+                        Text("‹", color = GameTokens.Text, fontSize = if (sizing.portrait) GameTokens.Title else GameTokens.Score)
                     }
                 }
-                Text(if (selected == null) "İnventar" else "Bina detalları", Modifier.weight(1f), color = GameTokens.Text,
-                    fontSize = GameTokens.Title, fontWeight = FontWeight.Bold)
+                if (sizing.portrait && largeFont) Spacer(Modifier.weight(1f))
+                else Text(if (selected == null) "İnventar" else "Bina detalları", Modifier.weight(1f), color = GameTokens.Text,
+                    fontSize = sizing.heading, fontWeight = FontWeight.Bold)
+                if (selected == null && sizing.portrait) IconButton(onClick = {
+                    cursor = null; buildings = emptyList(); next = null; retry++
+                }, enabled = !loading, modifier = Modifier.size(GameTokens.Target).semantics { contentDescription = "Yenilə" }) {
+                    Text("↻", color = GameTokens.Accent, fontSize = GameTokens.Title)
+                }
                 Surface(color = GameTokens.Surface, shape = RoundedCornerShape(GameTokens.CardRadius),
                     border = BorderStroke(GameTokens.Hairline, GameTokens.Raised)) {
                     Row(Modifier.padding(GameTokens.Small), verticalAlignment = Alignment.CenterVertically,
@@ -97,34 +105,52 @@ internal fun InventoryScreen(configured: WobbrikApplication.Bootstrap.Configured
                     }
                 }
             }
+            if (sizing.portrait && largeFont) Text(if (selected == null) "İnventar" else "Bina detalları",
+                color = GameTokens.Text, fontSize = sizing.heading, fontWeight = FontWeight.Bold)
             if (selected == null) {
-                InventoryButton("Hissələr · Mağaza") { onParts(null) }
-                InventoryButton("Dekor") { onDecorations() }
-                InventoryButton("Ərazi alışı") { onLand() }
-                Row(Modifier.fillMaxWidth().background(GameTokens.Raised, RoundedCornerShape(GameTokens.CardRadius))
-                    .padding(GameTokens.Small), verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-                    Image(painterResource(R.drawable.ui_inventory), null, Modifier.size(GameTokens.Inset))
-                    Text("Binalar", color = GameTokens.Accent, fontWeight = FontWeight.Bold)
+                if (sizing.portrait) {
+                    InventoryToolbar(largeFont, { onParts(null) }, onDecorations, onLand)
+                    Text("Binalar", Modifier.padding(top = GameTokens.Small, bottom = GameTokens.Quarter),
+                        color = GameTokens.Text, fontSize = GameTokens.Hint, fontWeight = FontWeight.Bold)
+                } else {
+                    InventoryButton("Hissələr · Mağaza") { onParts(null) }
+                    InventoryButton("Dekor") { onDecorations() }
+                    InventoryButton("Ərazi alışı") { onLand() }
+                    Row(Modifier.fillMaxWidth().background(GameTokens.Raised, RoundedCornerShape(GameTokens.CardRadius))
+                        .padding(GameTokens.Small), verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+                        Image(painterResource(R.drawable.ui_inventory), null, Modifier.size(GameTokens.Inset))
+                        Text("Binalar", color = GameTokens.Accent, fontWeight = FontWeight.Bold)
+                    }
                 }
-                LazyVerticalGrid(GridCells.Adaptive(GameTokens.PanelWidth / 2 - GameTokens.Gap), Modifier.weight(1f),
+                LazyVerticalGrid(if (sizing.portrait) GridCells.Fixed(if (largeFont) 1 else 2) else GridCells.Adaptive(GameTokens.PanelWidth / 2 - GameTokens.Gap), Modifier.weight(1f),
                     horizontalArrangement = Arrangement.spacedBy(GameTokens.Small), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
                     items(buildings, key = { it.id }) { building ->
                         Surface(onClick = { onSelectBuilding(building.id) }, color = GameTokens.Surface,
-                            shape = RoundedCornerShape(GameTokens.CardRadius), border = BorderStroke(GameTokens.Hairline, GameTokens.Raised)) {
-                            Column(Modifier.padding(GameTokens.Small), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-                                Surface(color = GameTokens.Background, shape = RoundedCornerShape(GameTokens.ControlRadius)) {
-                                    BuildingPreview(building, Modifier.fillMaxWidth().height(GameTokens.PanelWidth / 2))
+                            shape = RoundedCornerShape(if (sizing.portrait) GameTokens.ControlRadius else GameTokens.CardRadius), border = BorderStroke(GameTokens.Hairline, GameTokens.Raised)) {
+                            if (sizing.portrait && largeFont) Row(Modifier.padding(GameTokens.Small),
+                                verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+                                BuildingPreview(building, Modifier.size(GameTokens.Target))
+                                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {
+                                    Text(buildingName(building, ready.catalog), color = GameTokens.Text, fontSize = GameTokens.Body, fontWeight = FontWeight.SemiBold)
+                                    Text("${building.floors} mərtəbə  ›", color = GameTokens.Muted, fontSize = GameTokens.Caption)
                                 }
-                                Text(buildingName(building, ready.catalog), color = GameTokens.Text, fontWeight = FontWeight.Bold)
-                                Text("${building.floors} mərtəbə  ›", color = GameTokens.Muted)
+                            } else Column(Modifier.background(Brush.verticalGradient(if (sizing.portrait)
+                                listOf(GameTokens.Raised, GameTokens.Surface) else listOf(GameTokens.Surface, GameTokens.Surface)))
+                                .padding(GameTokens.Small), verticalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {
+                                if (sizing.portrait) BuildingPreview(building, Modifier.fillMaxWidth().height(sizing.listPreview))
+                                else Surface(color = GameTokens.Background, shape = RoundedCornerShape(GameTokens.ControlRadius)) {
+                                    BuildingPreview(building, Modifier.fillMaxWidth().height(sizing.listPreview))
+                                }
+                                Text(buildingName(building, ready.catalog), color = GameTokens.Text, fontSize = GameTokens.Body, fontWeight = FontWeight.SemiBold)
+                                Text("${building.floors} mərtəbə  ›", color = GameTokens.Muted, fontSize = if (sizing.portrait) GameTokens.Caption else GameTokens.Body)
                             }
                         }
                     }
                 }
                 if (buildings.isEmpty() && !loading && !failed) Text("Hələ bina yoxdur. Ən azı 10 mərtəbəli cəhdi tamamla.", color = GameTokens.Muted)
                 if (next != null && !loading && !failed) InventoryButton("Daha çox") { cursor = next }
-                if (!loading) TextButton(onClick = { cursor = null; buildings = emptyList(); next = null; retry++ }) { Text("Yenilə", color = GameTokens.Accent) }
+                if (!loading && !sizing.portrait) TextButton(onClick = { cursor = null; buildings = emptyList(); next = null; retry++ }) { Text("Yenilə", color = GameTokens.Accent) }
             } else if (detail != null) {
                 BuildingDetail(requireNotNull(detail), city, ready.catalog, Modifier.weight(1f))
                 InventoryButton("Bina görünüşü") { onParts(detail?.id) }
@@ -140,7 +166,9 @@ internal fun InventoryScreen(configured: WobbrikApplication.Bootstrap.Configured
                 Text("Məlumat yenilənmədi. Bağlantını yoxla və yenidən cəhd et.", color = GameTokens.Danger)
                 InventoryButton("Yenidən cəhd et") { retry++ }
             }
-            InventoryButton(if (selected == null) "Ana ekran" else "İnventara qayıt", back)
+            if (sizing.portrait) HomeButton(if (selected == null) "Ana ekran" else "İnventara qayıt",
+                icon = if (selected == null) R.drawable.ui_home else null, onClick = back)
+            else InventoryButton(if (selected == null) "Ana ekran" else "İnventara qayıt", back)
         }
     }
     deleteCandidate?.let { candidate ->
@@ -315,4 +343,32 @@ internal fun BuildingPreview(building: OwnedBuilding, modifier: Modifier) {
 @Composable
 private fun InventoryButton(label: String, onClick: () -> Unit) {
     HomeButton(label = label, primary = true, compact = true, onClick = onClick)
+}
+
+
+@Composable
+private fun InventoryToolbar(largeFont: Boolean, onParts: () -> Unit, onDecorations: () -> Unit, onLand: () -> Unit) {
+    if (largeFont) Column(verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+            InventoryToolbarEntry("Hissələr", null, Modifier.weight(1f), onParts)
+            InventoryToolbarEntry("Dekor", null, Modifier.weight(1f), onDecorations)
+        }
+        InventoryToolbarEntry("Ərazi", null, Modifier.fillMaxWidth(), onLand)
+    } else Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+        InventoryToolbarEntry("Hissələr", R.drawable.ui_inventory, Modifier.weight(1f), onParts)
+        InventoryToolbarEntry("Dekor", R.drawable.ui_city, Modifier.weight(1f), onDecorations)
+        InventoryToolbarEntry("Ərazi", R.drawable.ui_home, Modifier.weight(1f), onLand)
+    }
+}
+
+@Composable
+private fun InventoryToolbarEntry(label: String, icon: Int?, modifier: Modifier, onClick: () -> Unit) {
+    Surface(onClick = onClick, modifier = modifier.heightIn(min = GameTokens.Target),
+        shape = RoundedCornerShape(GameTokens.ControlRadius), color = GameTokens.Raised) {
+        Row(Modifier.padding(GameTokens.Small), verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(GameTokens.Quarter, Alignment.CenterHorizontally)) {
+            if (icon != null) Image(painterResource(icon), null, Modifier.size(GameTokens.Inset))
+            Text(label, fontSize = GameTokens.Caption, color = GameTokens.Text, fontWeight = FontWeight.SemiBold, softWrap = false)
+        }
+    }
 }

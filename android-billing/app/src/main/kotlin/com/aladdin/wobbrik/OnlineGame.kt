@@ -221,6 +221,7 @@ internal fun AccountScreen(
     // Shown in the existing value slots only; Play, commands and status still follow [ready].
     cached: GameSnapshot? = null,
 ) {
+    val sizing = mobileUiSizing()
     var journalDetailsClosed by rememberSaveable(journalBlocked) { mutableStateOf(false) }
     if (journalBlocked && (!journalDetailsClosed || page != "home")) {
         JournalRecoveryScreen(onRetry, onHome = { journalDetailsClosed = true; onPage("home") })
@@ -235,15 +236,15 @@ internal fun AccountScreen(
         .safeDrawingPadding()) {
         // Responsive rule: short wide windows use the compact spacing/type tier.
         val compactOuter = maxWidth > maxHeight && maxHeight < GameTokens.CompactHeight
-        BoxWithConstraints(Modifier.fillMaxSize().padding(if (compactOuter) GameTokens.Gap else GameTokens.Inset)) {
+        BoxWithConstraints(Modifier.fillMaxSize().padding(if (compactOuter || sizing.portrait) GameTokens.Gap else GameTokens.Inset)) {
         val controlsMaxHeight = maxHeight / 2
         val expanded = maxWidth >= GameTokens.ExpandedWidth
         val wide = maxWidth > maxHeight
         // Approved design C2 (docs/design/account-landscape-actions-v1): short wide windows (phone landscape).
         val threePane = wide && maxHeight < GameTokens.CompactHeight
         // Type tier: compact (Hint) in short wide windows, regular (Title) elsewhere.
-        val titleSize = if (threePane) GameTokens.Hint else GameTokens.Title
-        Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(GameTokens.Gap)) {
+        val titleSize = if (threePane) GameTokens.Hint else sizing.heading
+        Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(if (sizing.portrait) GameTokens.Small else GameTokens.Gap)) {
             // Approved v3 (9 November): three-pane moves the logo into the hero pane, so there is no header row.
             if (!threePane) Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(GameTokens.Small), verticalAlignment = Alignment.CenterVertically) {
                 Box(Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
@@ -339,7 +340,7 @@ internal fun AccountScreen(
                         }
                         OnlineAction("Yenilə", true, onClick = onRetry)
                     }
-                    if (status == null) OnlineAction(if (active) "Cəhdə qayıt" else "Oyna", true, enabled = onPlay != null, onClick = { onPlay?.invoke() })
+                    if (status == null && !sizing.portrait) OnlineAction(if (active) "Cəhdə qayıt" else "Oyna", true, enabled = onPlay != null, onClick = { onPlay?.invoke() })
                     if (status == null && stacked) Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
                         secondary("Kolleksiya", R.drawable.ui_medal, "collection", Modifier.fillMaxWidth())
                         secondary("Nailiyyətlər", R.drawable.ui_trophy, "achievements", Modifier.fillMaxWidth())
@@ -347,7 +348,7 @@ internal fun AccountScreen(
                         secondary("Kolleksiya", R.drawable.ui_medal, "collection", Modifier.weight(1f))
                         secondary("Nailiyyətlər", R.drawable.ui_trophy, "achievements", Modifier.weight(1f))
                     }
-                    if (page != "home") OnlineAction("Ana ekran", false, onClick = { onPage("home") })
+                    if (page != "home" && !sizing.portrait) OnlineAction("Ana ekran", false, onClick = { onPage("home") })
             }
             val controls: @Composable (Modifier) -> Unit = { modifier ->
                 Column(modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(GameTokens.Gap), horizontalAlignment = Alignment.CenterHorizontally) {
@@ -362,6 +363,16 @@ internal fun AccountScreen(
             } else if (wide) Row(Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(GameTokens.Inset), verticalAlignment = Alignment.CenterVertically) {
                 hero(Modifier.weight(if (expanded) 2f else 1f).fillMaxHeight())
                 controls(Modifier.weight(1f))
+            } else if (sizing.portrait) {
+                Column(Modifier.weight(1f).verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+                    hero(Modifier.fillMaxWidth().height(sizing.detailArt))
+                    info()
+                    actions(androidx.compose.ui.platform.LocalDensity.current.fontScale > 1f)
+                }
+                if (status == null) OnlineAction(if (active) "Cəhdə qayıt" else "Oyna", true,
+                    enabled = onPlay != null, onClick = { onPlay?.invoke() })
+                if (page != "home") OnlineAction("Ana ekran", false, onClick = { onPage("home") })
             } else {
                 hero(Modifier.weight(1f).fillMaxWidth())
                 controls(Modifier.fillMaxWidth().heightIn(max = controlsMaxHeight))

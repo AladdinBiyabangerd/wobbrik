@@ -22,6 +22,7 @@ internal fun LandShopScreen(configured: WobbrikApplication.Bootstrap.Configured,
 @Composable
 internal fun LandShopContent(ready: AuthenticatedRecoveryOwner.State.Ready, onBuy: (String) -> Unit,
     onBack: () -> Unit) {
+    val sizing = mobileUiSizing()
     var selected by remember { mutableStateOf<LandOffer?>(null) }
     val illustration = rememberLandArt()
     val back = { if (selected != null) selected = null else onBack() }
@@ -38,7 +39,7 @@ internal fun LandShopContent(ready: AuthenticatedRecoveryOwner.State.Ready, onBu
                 PurchaseCard(selected == offer, onClick = { selected = offer }) {
                     Row(Modifier.padding(GameTokens.Small), verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-                        PurchaseArt(illustration, Modifier.size(if (expanded) GameTokens.Target * 2 else GameTokens.Target + GameTokens.Inset))
+                        PurchaseArt(illustration, Modifier.size(if (sizing.portrait) sizing.cardArt else if (expanded) GameTokens.Target * 2 else GameTokens.Target + GameTokens.Inset))
                         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {
                             Text("Sahə ${offer.id.removePrefix("land_")}", color = GameTokens.Text, fontWeight = FontWeight.Bold)
                             Text("${offer.requiredXp} XP", color = GameTokens.Accent, fontWeight = FontWeight.Bold)
@@ -63,7 +64,7 @@ internal fun LandShopContent(ready: AuthenticatedRecoveryOwner.State.Ready, onBu
                 onBuy = { onBuy(offer.id) }, onCancel = { selected = null }) {
                 PurchaseSummary(illustration) {
                     Text("Sahə ${offer.id.removePrefix("land_")} · ${offer.price} sikkə", color = GameTokens.Text,
-                        fontSize = GameTokens.Title, fontWeight = FontWeight.Bold)
+                        fontSize = sizing.heading, fontWeight = FontWeight.Bold)
                     Text("Balans: ${ready.snapshot.coins} sikkə", color = GameTokens.Text)
                     Text("Daimi genişlənmə", color = GameTokens.Accent)
                     Text("Alış üçün ${offer.requiredXp} XP tələb olunur. Alış XP vermir.", color = GameTokens.Muted)

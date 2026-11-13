@@ -38,16 +38,17 @@ internal fun CityPurchasePanel(enabled: Boolean, onBuy: () -> Unit, onCancel: ()
 
 @Composable
 internal fun PurchaseSummary(art: CosmeticSprite?, content: @Composable ColumnScope.() -> Unit) {
+    val sizing = mobileUiSizing()
     if (LocalDensity.current.fontScale > 1f) {
         Column(verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-            PurchaseArt(art, Modifier.size(GameTokens.Target + GameTokens.Inset))
+            PurchaseArt(art, Modifier.size(if (sizing.portrait) sizing.cardArt else GameTokens.Target + GameTokens.Inset))
             content()
         }
     } else {
         Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-            PurchaseArt(art, Modifier.size(GameTokens.Target * 2))
-            Box(Modifier.width(GameTokens.Hairline).height(GameTokens.Target * 2).background(GameTokens.Muted))
+            PurchaseArt(art, Modifier.size(sizing.cardArt))
+            Box(Modifier.width(GameTokens.Hairline).height(sizing.cardArt).background(GameTokens.Muted))
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(GameTokens.Small), content = content)
         }
     }

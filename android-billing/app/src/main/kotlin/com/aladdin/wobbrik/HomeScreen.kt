@@ -27,9 +27,22 @@ import java.math.BigInteger
 import java.math.BigDecimal
 import java.math.MathContext
 
-/** Decorative city artwork never substitutes for the player's server city. */
+/** Mobile navbar approved on 13 November; existing tablet/wide compositions stay separate. */
 @Composable
 internal fun HomeScreen(snapshot: GameSnapshot?, active: Boolean, onPlay: (() -> Unit)?, onPage: (String) -> Unit,
+                        status: String? = null, onRetry: () -> Unit = {}, journalBlocked: Boolean = false) {
+    BoxWithConstraints(Modifier.fillMaxSize()) {
+        if (maxWidth < GameTokens.MediumWidth && maxHeight >= maxWidth) {
+            MobileHomeScreen(snapshot, active, onPlay, onPage, status, onRetry, journalBlocked)
+        } else {
+            LegacyHomeScreen(snapshot, active, onPlay, onPage, status, onRetry, journalBlocked)
+        }
+    }
+}
+
+/** Decorative city artwork never substitutes for the player's server city. */
+@Composable
+private fun LegacyHomeScreen(snapshot: GameSnapshot?, active: Boolean, onPlay: (() -> Unit)?, onPage: (String) -> Unit,
                         status: String? = null, onRetry: () -> Unit = {}, journalBlocked: Boolean = false) {
     BoxWithConstraints(Modifier.fillMaxSize().background(Brush.radialGradient(listOf(GameTokens.Surface, GameTokens.Background)))
         .safeDrawingPadding().padding(GameTokens.Gap)) {
@@ -220,7 +233,9 @@ private fun HomeIcon(icon: Int, description: String? = null, large: Boolean = fa
 @Composable
 internal fun HomeButton(label: String, icon: Int? = null, primary: Boolean = false, showPlayIcon: Boolean = false, enabled: Boolean = true, large: Boolean = false,
                        modifier: Modifier = Modifier.fillMaxWidth(), compact: Boolean = false, onClick: () -> Unit) {
-    Button(onClick, modifier = modifier.heightIn(min = if (large && primary) GameTokens.Target * 2 else if (large) GameTokens.Target + GameTokens.Inset else if (primary) GameTokens.Target + GameTokens.Gap else GameTokens.Target)
+    val sizing = mobileUiSizing()
+    val mobile = sizing.portrait && !large
+    Button(onClick, modifier = modifier.heightIn(min = if (mobile && primary) GameTokens.MobileUi.PrimaryTarget else if (large && primary) GameTokens.Target * 2 else if (large) GameTokens.Target + GameTokens.Inset else if (primary && !mobile) GameTokens.Target + GameTokens.Gap else GameTokens.Target)
             .background(Brush.verticalGradient(if (primary) listOf(lerp(GameTokens.Accent, GameTokens.Text, 1f - GameTokens.DimOpacity), GameTokens.Accent) else listOf(GameTokens.Raised, GameTokens.Surface)), RoundedCornerShape(GameTokens.CardRadius))
             .drawWithContent {
                 drawContent()
@@ -241,7 +256,7 @@ internal fun HomeButton(label: String, icon: Int? = null, primary: Boolean = fal
             horizontalArrangement = Arrangement.spacedBy(GameTokens.Small, Alignment.CenterHorizontally)) {
             if (icon != null) HomeIcon(icon, large = large)
             if (showPlayIcon) Text("▶", fontSize = GameTokens.Title)
-            Text(label, fontSize = if (primary && compact) GameTokens.Title else if (primary) GameTokens.Score else if (large) GameTokens.Title else GameTokens.Body, fontWeight = FontWeight.Bold)
+            Text(label, fontSize = if (mobile && primary) GameTokens.Hint else if (primary && compact) GameTokens.Title else if (primary) GameTokens.Score else if (large) GameTokens.Title else GameTokens.Body, fontWeight = FontWeight.Bold)
         }
     }
 }
