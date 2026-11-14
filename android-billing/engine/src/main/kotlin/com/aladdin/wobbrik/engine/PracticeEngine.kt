@@ -43,7 +43,7 @@ data class PracticeState(
     val perfectLandings: Int = 0,
 )
 
-/** Offline practice only: no wallet, rewards, progression, ownership or API writes. */
+/** Shared deterministic local physics; no wallet, rewards, progression, ownership or API writes. */
 class PracticeEngine {
     var state = PracticeState()
         private set

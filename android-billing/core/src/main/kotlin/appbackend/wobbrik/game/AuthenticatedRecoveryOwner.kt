@@ -17,6 +17,9 @@ class AuthenticatedRecoveryOwner(
     private val onStateChanged: (State) -> Unit = {},
     // Display-only; never consulted for Ready, submit or the journal.
     private val cache: SnapshotCache? = null,
+    private val readCache: ReadOnlyGameCache? = null,
+    onCommitted: (BillingSession, AttemptCommand) -> Unit = { _, _ -> },
+    private val reconcile: suspend (BillingSession, AttemptCoordinator, GameSnapshot) -> GameSnapshot = { _, _, snapshot -> snapshot },
 ) {
     sealed interface State {
         data object SignedOut : State
@@ -25,13 +28,15 @@ class AuthenticatedRecoveryOwner(
         data class Error(val cause: Exception) : State
     }
 
-    private val coordinator = AttemptCoordinator(sessions, backend, journal)
+    private val coordinator = AttemptCoordinator(sessions, backend, journal, onCommitted)
     private val lock = Any()
     private val mutableState = MutableStateFlow<State>(State.SignedOut)
     val state: StateFlow<State> = mutableState.asStateFlow()
     private val mutableCached = MutableStateFlow<GameSnapshot?>(null)
     /** Last accepted snapshot of the current account for display while not Ready; null otherwise unknown. */
     val cached: StateFlow<GameSnapshot?> = mutableCached.asStateFlow()
+    private val mutableReadOnly = MutableStateFlow<ReadOnlyAccount?>(null)
+    val readOnly: StateFlow<ReadOnlyAccount?> = mutableReadOnly.asStateFlow()
     private var work: Job? = null
     private var generation = 0L
 
@@ -42,6 +47,7 @@ class AuthenticatedRecoveryOwner(
         work = null
         sessions.onAuthChanged(uid)
         mutableCached.value = null
+        mutableReadOnly.value = null
         publishLocked(if (uid == null) State.SignedOut else State.Recovering)
         if (uid != null) {
             loadCachedLocked(uid)
@@ -50,19 +56,37 @@ class AuthenticatedRecoveryOwner(
     }
 
     private fun loadCachedLocked(uid: String) {
-        val cache = cache ?: return
+        if (cache == null && readCache == null) return
         val epoch = generation
         scope.launch {
-            val value = try { cache.lastKnown(uid) } catch (cancelled: CancellationException) { throw cancelled } catch (_: Exception) { null }
+            val value = try { cache?.lastKnown(uid) } catch (cancelled: CancellationException) { throw cancelled } catch (_: Exception) { null }
+            val account = try { readCache?.account(uid) } catch (cancelled: CancellationException) { throw cancelled } catch (_: Exception) { null }
             synchronized(lock) {
-                if (epoch == generation && sessions.current()?.uid == uid && mutableCached.value == null) mutableCached.value = value
+                if (epoch == generation && sessions.current()?.uid == uid) {
+                    if (mutableCached.value == null) mutableCached.value = value ?: account?.snapshot
+                    if (mutableReadOnly.value == null) mutableReadOnly.value = account
+                }
             }
         }
     }
 
-    /** Coalesces overlapping foreground events; a later event retries after any failure. */
+    /**
+     * Foreground is a lifecycle event, not a reason to destroy locally accumulated physics.
+     * An accepted active attempt needs no network until its next mutation. Auth changes
+     * still revoke it synchronously; pending/error recovery is never skipped.
+     */
     fun onForeground() = synchronized(lock) {
+        val ready = mutableState.value as? State.Ready
+        if (ready?.snapshot?.attempt?.active == true && coordinator.ready()) return@synchronized
         if (sessions.current() != null && work?.isCompleted != false) recoverLocked()
+    }
+
+    /** Scheduler may retry only the exact current transient error, never a Ready or another epoch. */
+    internal fun retryTransient(expected: State.Error): Boolean = synchronized(lock) {
+        if (mutableState.value !== expected || sessions.current() == null || work?.isCompleted == false ||
+            !RecoveryRetryScheduler.retryable(expected.cause)) return false
+        recoverLocked()
+        true
     }
 
     private fun publishLocked(state: State) {
@@ -84,7 +108,9 @@ class AuthenticatedRecoveryOwner(
         true
     }
 
-    private fun recoverLocked() = launchLocked { session -> coordinator.recover(session) }
+    private fun recoverLocked() = launchLocked { session ->
+        reconcile(session, coordinator, coordinator.recover(session))
+    }
 
     private fun launchLocked(action: suspend (BillingSession) -> GameSnapshot) {
         val session = sessions.current() ?: return
@@ -99,11 +125,13 @@ class AuthenticatedRecoveryOwner(
                     if (epoch == generation && sessions.current() == session && coordinator.ready()) {
                         work = null // Ready observers may dispatch the next durable command.
                         mutableCached.value = snapshot
+                        mutableReadOnly.value = catalog?.let { ReadOnlyAccount(session.uid, snapshot, it) }
                         publishLocked(State.Ready(snapshot, catalog, session.uid))
                         true
                     } else false
                 }
                 // Cache failures never affect gameplay; only accepted, published snapshots are written.
+                if (published && catalog != null) try { readCache?.accepted(ReadOnlyAccount(session.uid, snapshot, catalog)) } catch (cancelled: CancellationException) { throw cancelled } catch (_: Exception) { }
                 if (published) try { cache?.accepted(session.uid, snapshot) } catch (cancelled: CancellationException) { throw cancelled } catch (_: Exception) { }
             } catch (cancelled: CancellationException) {
                 throw cancelled

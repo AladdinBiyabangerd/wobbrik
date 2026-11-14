@@ -53,7 +53,7 @@ internal object CitySceneReads {
 
 /** Bracket all live reads with the city's account revision. A racing write discards the scene.
  * No placement mutation, wallet, cache or second authority is introduced here. */
-class CitySceneRepository(private val backend: GameplayHttpBackend) {
+class CitySceneRepository(private val backend: GameplayReads) {
     suspend fun load(session: BillingSession): CityScene {
         suspend fun page(cursor: String? = null): CityScenePage {
             cursor?.let(InventoryReads::id)

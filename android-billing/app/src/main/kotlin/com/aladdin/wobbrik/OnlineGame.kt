@@ -60,10 +60,13 @@ private fun AuthenticatedGame(app: WobbrikApplication) {
         mutableStateOf(configured?.recovery?.state?.value, referentialEqualityPolicy())
     }
     // Display-only last accepted snapshot of the current uid; never a capability.
-    var cached by remember(configured) { mutableStateOf<GameSnapshot?>(null) }
+    var cached by remember(configured) { mutableStateOf(configured?.recovery?.cached?.value) }
     var page by rememberSaveable { mutableStateOf("home") }
     var partsBuilding by rememberSaveable { mutableStateOf<String?>(null) }
     var inventoryBuilding by rememberSaveable { mutableStateOf<String?>(null) }
+    val localHost = app.localHost
+    var localState by remember { mutableStateOf(localHost.snapshot()) }
+    val readOnly by (configured?.recovery?.readOnly ?: kotlinx.coroutines.flow.MutableStateFlow<appbackend.wobbrik.game.ReadOnlyAccount?>(null)).collectAsState()
     val host = app.engineHost
     var hostState by remember { mutableStateOf(host.snapshot()) }
     // Snapshot has no Compose dependency. Poll even when paused so lifecycle revocation is visible.
@@ -76,10 +79,12 @@ private fun AuthenticatedGame(app: WobbrikApplication) {
             // Restart/abandon policy (9 November 2026): a left mid-game attempt is abandoned on the next Ready.
             host.enforceLeave(canonical as? AuthenticatedRecoveryOwner.State.Ready)
             hostState = host.snapshot()
+            localHost.frame(now)
+            localState = localHost.snapshot()
         }
     }
     BackHandler(page != "home") {
-        host.pause()
+        host.pause(); localHost.pause()
         if (!GameNavigation.pauseOnBack(page, host.snapshot().choosingFinish)) page = "home"
     }
     val ready = state as? AuthenticatedRecoveryOwner.State.Ready
@@ -89,18 +94,28 @@ private fun AuthenticatedGame(app: WobbrikApplication) {
     // finish and abandons an open mid-game attempt. A "game" page restored after process death was
     // left when the app closed: go home; Play then abandons that attempt instead of resuming it.
     LaunchedEffect(page) {
-        if (page != "game") host.leave(state as? AuthenticatedRecoveryOwner.State.Ready)
-        else if (!host.snapshot().playing) page = "home"
+        if (page != "game") { host.leave(state as? AuthenticatedRecoveryOwner.State.Ready); localHost.leave() }
+        else if (!host.snapshot().playing && !localHost.snapshot().playing) page = "home"
     }
     // Finish sync removes the active attempt. Always land on the canonical HomeScreen,
     // rather than rendering the generic account template with a stale "game" route.
     LaunchedEffect(page, state, hostState.playing) {
         val reconciled = state is AuthenticatedRecoveryOwner.State.Ready &&
             (restore == AcceptedAttemptRestore.Result.NoAttempt || restore is AcceptedAttemptRestore.Result.Finished)
-        if (GameNavigation.completed(page, hostState.playing, reconciled)) page = "home"
+        if (!localHost.snapshot().playing && GameNavigation.completed(page, hostState.playing, reconciled)) page = "home"
     }
     // Play pressed while an attempt from a closed app was still open: start once it is abandoned.
     var startAfterDiscard by remember(configured) { mutableStateOf(false) }
+    var localStartError by remember(configured) { mutableStateOf(false) }
+    fun startLocal(): Boolean {
+        val session = configured?.sessions?.current()
+        val account = configured?.recovery?.readOnly?.value
+        val started = session != null && account != null &&
+            runCatching { localHost.start(session, account) }.getOrDefault(false)
+        localStartError = !started
+        if (started) { host.leave(); page = "game" }
+        return started
+    }
     LaunchedEffect(startAfterDiscard, state) {
         if (!startAfterDiscard) return@LaunchedEffect
         val current = state
@@ -109,20 +124,35 @@ private fun AuthenticatedGame(app: WobbrikApplication) {
             current is AuthenticatedRecoveryOwner.State.Ready -> when (AcceptedAttemptRestore.from(current)) {
                 AcceptedAttemptRestore.Result.NoAttempt, is AcceptedAttemptRestore.Result.Finished -> {
                     startAfterDiscard = false
-                    if (configured?.commands?.start(current) == true) { host.enter(); page = "game" }
+                    startLocal()
                 }
                 else -> if (!host.leavePending()) startAfterDiscard = false
             }
             else -> Unit
         }
     }
+    LaunchedEffect(localState.playing) {
+        if (page == "game" && !localState.playing && !host.snapshot().playing) {
+            page = "home"
+            configured?.recovery?.onForeground()
+        }
+    }
+    if (page == "game" && localState.playing && localState.scene != null) {
+        GameScene(localState, localHost, onDrop = { localHost.drop() }, onPause = { localHost.pause() },
+            onResume = { if (localState.choosingFinish) localHost.retryTerminal() else localHost.resume() },
+            onHome = { localHost.leave(); page = "home" })
+        return
+    }
+    val view = ready?.let { capability -> capability.catalog?.let {
+        AccountView(appbackend.wobbrik.game.ReadOnlyAccount(requireNotNull(capability.accountKey), capability.snapshot, it), capability)
+    } } ?: readOnly?.let { AccountView(it, null) }
     if (page == "game" && hostState.playing && ready != null && hostState.scene != null &&
         (!hostState.choosingFinish || hostState.finishStorageError)) {
         AcceptedScene(hostState, ready, host, onHome = { page = "home" })
         return
     }
-    if (page == "city" && ready != null && configured != null) {
-        key(InventoryReadKey(ready)) { CityScreen(configured, ready, onHome = { page = "home" }, onInventory = { inventoryBuilding = null; page = "inventory" }) }
+    if (page == "city" && view != null && configured != null) {
+        key(InventoryReadKey(ready ?: view.account)) { CityScreen(configured, view, onHome = { page = "home" }, onInventory = { inventoryBuilding = null; page = "inventory" }) }
         return
     }
     if (page == "parts" && ready != null && configured != null) {
@@ -137,8 +167,8 @@ private fun AuthenticatedGame(app: WobbrikApplication) {
         key(InventoryReadKey(ready)) { LandShopScreen(configured, ready, onBack = { page = "inventory" }) }
         return
     }
-    if (page == "inventory" && ready != null && configured != null) {
-        key(InventoryReadKey(ready)) { InventoryScreen(configured, ready, selected = inventoryBuilding, onSelectBuilding = { inventoryBuilding = it }, onHome = { page = "home" },
+    if (page == "inventory" && view != null && configured != null) {
+        key(InventoryReadKey(ready ?: view.account)) { InventoryScreen(configured, view, selected = inventoryBuilding, onSelectBuilding = { inventoryBuilding = it }, onHome = { page = "home" },
             onParts = { partsBuilding = it; page = "parts" }, onDecorations = { inventoryBuilding = null; page = "decorations" }, onLand = { inventoryBuilding = null; page = "land" }) }
         return
     }
@@ -165,6 +195,7 @@ private fun AuthenticatedGame(app: WobbrikApplication) {
     val journalBlocked = (state as? AuthenticatedRecoveryOwner.State.Error)?.cause is UnreadableAttemptJournal
     val error = state is AuthenticatedRecoveryOwner.State.Error
     val status = when {
+        localStartError -> "Lokal yaddaş oxunmadı. Oyna düyməsinə yenidən toxun."
         app.bootstrap is WobbrikApplication.Bootstrap.MissingFirebase -> "Firebase konfiqurasiyası yoxdur"
         app.bootstrap is WobbrikApplication.Bootstrap.MissingBackendOrigin -> "Server ünvanı konfiqurasiya edilməyib"
         journalBlocked -> JournalRecoveryCopy.Title
@@ -189,10 +220,12 @@ private fun AuthenticatedGame(app: WobbrikApplication) {
         AccountScreen(accountPage, ready, status,
             onPage = { if (it == "inventory") inventoryBuilding = null; page = it },
             onRetry = { configured?.recovery?.onForeground() },
-            onPlay = if (ready != null && !hostState.choosingFinish && restore !is AcceptedAttemptRestore.Result.Blocked) ({
+            onPlay = if ((ready == null || localState.choosingFinish) && readOnly != null && !journalBlocked) ({
+                startLocal()
+            }) else if (ready != null && !hostState.choosingFinish && restore !is AcceptedAttemptRestore.Result.Blocked) ({
                 when (restore) {
                     AcceptedAttemptRestore.Result.NoAttempt, is AcceptedAttemptRestore.Result.Finished -> {
-                        if (configured?.commands?.start(ready) == true) { host.enter(); page = "game" }
+                        startLocal()
                     }
                     // Only a loss is resumable (its cosmetic finish). An open attempt is never resumed.
                     is AcceptedAttemptRestore.Result.Paused ->
@@ -218,7 +251,7 @@ internal fun AccountScreen(
     onPlay: (() -> Unit)?,
     active: Boolean,
     journalBlocked: Boolean = false,
-    // Shown in the existing value slots only; Play, commands and status still follow [ready].
+    // Display-only accepted values; local Play has its own session fence and never grants commands.
     cached: GameSnapshot? = null,
 ) {
     val sizing = mobileUiSizing()
@@ -395,23 +428,33 @@ private fun CenteredPane(modifier: Modifier, spacing: androidx.compose.ui.unit.D
 @Composable
 internal fun AcceptedScene(view: AcceptedEngineHost.Snapshot, ready: AuthenticatedRecoveryOwner.State.Ready,
                           host: AcceptedEngineHost, onHome: () -> Unit) {
+    GameScene(view, ready, onDrop = { host.drop(ready) }, onPause = { host.pause() }, onResume = {
+        if (view.choosingFinish) host.retryTerminal(ready)
+        else if (view.finishStorageError) host.retryAppearance(ready)
+        else host.resume(ready)
+    }, onHome = { host.pause(); onHome() })
+}
+
+@Composable
+internal fun GameScene(view: AcceptedEngineHost.Snapshot, motionKey: Any, onDrop: () -> Unit,
+    onPause: () -> Unit, onResume: () -> Unit, onHome: () -> Unit) {
     val scene = view.scene ?: return
     val cosmeticArt = rememberCosmeticArt() + rememberGameWindowArt()
     val art = SceneArt(ImageBitmap.imageResource(R.drawable.game_floor), ImageBitmap.imageResource(R.drawable.game_crane),
         ImageBitmap.imageResource(R.drawable.inventory_garden), ImageBitmap.imageResource(R.drawable.game_roof), ImageBitmap.imageResource(R.drawable.game_cloud), rememberGameAtlases())
-    val motion = remember(ready) { SceneMotion() }
+    val motion = remember(motionKey) { SceneMotion() }
     val density = LocalDensity.current
     var hudHeight by remember { mutableStateOf(GameTokens.Target + GameTokens.Inset) }
-    // Host is the only simulation clock. Motion merely follows accepted scene coordinates.
+    // The selected host owns the simulation clock; motion only follows its scene coordinates.
     motion.advance(scene, 1f / 60f, view.cameraX)
     BoxWithConstraints(Modifier.fillMaxSize().background(GameTokens.Background).safeDrawingPadding()) {
         val sceneTop = if (maxWidth > maxHeight) GameTokens.Hairline * 0 else hudHeight
-        Canvas(Modifier.fillMaxSize().padding(top = sceneTop, bottom = GameTokens.Target).clipToBounds().clickable(enabled = view.inputEnabled) { host.drop(ready) }) {
+        Canvas(Modifier.fillMaxSize().padding(top = sceneTop, bottom = GameTokens.Target).clipToBounds().clickable(enabled = view.inputEnabled) { onDrop() }) {
             drawGameScene(scene, art, motion, cosmeticArt, view.finishParts)
         }
         Row(Modifier.fillMaxWidth().onSizeChanged { hudHeight = with(density) { it.height.toDp() } }.padding(GameTokens.Inset), horizontalArrangement = Arrangement.SpaceBetween) {
             Text("${scene.floors.size} mərtəbə", color = GameTokens.Text, fontSize = GameTokens.Title, fontWeight = FontWeight.Bold)
-            Button(onClick = { host.pause() }, modifier = Modifier.size(GameTokens.Target).semantics { contentDescription = "Fasilə" },
+            Button(onClick = { onPause() }, modifier = Modifier.size(GameTokens.Target).semantics { contentDescription = "Fasilə" },
                 shape = CircleShape, contentPadding = PaddingValues(GameTokens.Small),
                 colors = ButtonDefaults.buttonColors(containerColor = GameTokens.Raised, contentColor = GameTokens.Text)) { Text("Ⅱ") }
         }
@@ -424,11 +467,9 @@ internal fun AcceptedScene(view: AcceptedEngineHost.Snapshot, ready: Authenticat
             Text(if (view.waiting || view.choosingFinish) "Cəhd saxlanılır…" else "Fasilə", color = GameTokens.Text, fontSize = GameTokens.Title, fontWeight = FontWeight.Bold)
             OnlineAction(if (view.choosingFinish || view.finishStorageError) "Yenidən cəhd et" else "Davam et", true,
                 enabled = !view.waiting) {
-                if (view.choosingFinish) host.retryTerminal(ready)
-                else if (view.finishStorageError) host.retryAppearance(ready)
-                else host.resume(ready)
+                onResume()
             }
-            OnlineAction("Menyuya qayıt", false) { host.pause(); onHome() }
+            OnlineAction("Menyuya qayıt", false) { onPause(); onHome() }
         }
     }
 }

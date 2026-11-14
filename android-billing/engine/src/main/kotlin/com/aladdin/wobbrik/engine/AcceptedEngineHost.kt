@@ -21,6 +21,7 @@ class AcceptedEngineHost(private val drafts: FinishDraftStore? = null, private v
         val inputEnabled: Boolean get() = foreground && !waiting && !finishStorageError && scene?.paused == false && scene.phase != Phase.FINISHED
     }
 
+    private val unsavedTerminals = mutableMapOf<Pair<String, String>, FinishDraft>()
     private var finishTriedFor: AuthenticatedRecoveryOwner.State.Ready? = null
     private var engine: PracticeEngine? = null
     private var ready: AuthenticatedRecoveryOwner.State.Ready? = null
@@ -61,9 +62,12 @@ class AcceptedEngineHost(private val drafts: FinishDraftStore? = null, private v
             } catch (_: Exception) {
                 current = current.copy(finishStorageError = true)
             }
-            val draft = expected.accountKey?.let { drafts?.read(it, restored.attemptId) }
+            val memoryDraft = expected.accountKey?.let { unsavedTerminals[it to restored.attemptId] }
+            val draft = memoryDraft ?: expected.accountKey?.let { drafts?.read(it, restored.attemptId) }
             // A local miss is reusable only against exactly the accepted progress it ended.
-            val terminal = draft?.terminal?.takeIf { sameProgress(it, restored.checkpoint) }
+            val terminal = draft?.terminal?.takeIf { sameProgress(it, restored.checkpoint) ||
+                (draft === memoryDraft && !restored.terminal && it.state.floors.take(restored.checkpoint.state.floors.size) == restored.checkpoint.state.floors &&
+                    it.state.floors.size >= restored.checkpoint.state.floors.size) }
                 ?: restored.checkpoint.takeIf { restored.terminal }
             if (terminal != null) {
                 engine = PracticeEngine().also { it.restore(terminal); it.pause() }
@@ -218,9 +222,12 @@ class AcceptedEngineHost(private val drafts: FinishDraftStore? = null, private v
         val attempt = expected.snapshot.attempt ?: return false
         return try {
             drafts?.write(uid, attempt.id, draft)
+            unsavedTerminals.remove(uid to attempt.id)
             current = current.copy(finishStorageError = false)
             true
         } catch (_: Exception) {
+            // Retain the terminal scene across auth/recovery revocation until disk accepts it.
+            unsavedTerminals[uid to attempt.id] = draft
             // Keep terminal physics paused and expose a retryable selection error; never send on failed confirm.
             current = current.copy(finishStorageError = true)
             false

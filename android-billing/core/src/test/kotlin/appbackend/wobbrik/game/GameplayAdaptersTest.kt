@@ -97,6 +97,33 @@ class GameplayAdaptersTest {
         try { backend.catalog(f.session!!); fail() } catch (_: AccountChanged) { }
     }
 
+    @Test fun accountScopedLookupsValidateIdentityStatusErrorsAndEpoch() = runBlocking {
+        val f = Fixture()
+        val attemptJson = """{"attempt_id":"wanted","status":"abandoned","sequence":0,"floors":0,"precise":0,"rescues":0,"continued":false,"rules_version":"wobbrik-v1","engine_version":"wobbrik-structural-v1","snapshot":null}"""
+        var response = GameplayResponse(200, f.snapshot.replace("\"attempt\":null", "\"attempt\":$attemptJson"))
+        var switchEpoch = false
+        val backend = GameplayHttpBackend(f.sessions, GameplayTransport { path, _, body ->
+            assertTrue(allowedReadPath(path)); assertNull(body)
+            if (switchEpoch) f.session = BillingSession("alice", "new-epoch")
+            response
+        })
+        assertTrue(backend.attempt(f.session!!, "wanted")!!.attempt!!.abandoned)
+        assertThrows(Exception::class.java) { RecoveryDtos.snapshot(response.body) }
+        try { backend.attempt(f.session!!, "wrong"); fail() } catch (_: IllegalArgumentException) { }
+        response = GameplayResponse(404, """{"error":"not_found"}""")
+        assertNull(backend.attempt(f.session!!, "wanted"))
+        assertNull(backend.receipt(f.session!!, "op", AttemptCommand.Route.FINISH))
+        for (status in listOf(401, 403, 429, 503)) {
+            response = GameplayResponse(status, """{"error":"denied"}""")
+            try { backend.attempt(f.session!!, "wanted"); fail() } catch (e: GameplayHttpError) { assertEquals(status, e.status) }
+        }
+        response = GameplayResponse(200, """{"revision":3,"accepted_at":"2026-11-14T00:00:00Z","result":{"attempt_id":"wanted","floors":0,"coins":0,"residents":0,"base_value":0,"max_price":0}}""")
+        assertEquals("wanted", (backend.receipt(f.session!!, "op", AttemptCommand.Route.FINISH)!!.result as AttemptResult.Finished).attemptId)
+        switchEpoch = true
+        try { backend.receipt(f.session!!, "op", AttemptCommand.Route.FINISH); fail() } catch (_: AccountChanged) { }
+        assertFalse(allowedReadPath("attempts/../sync")); assertFalse(allowedReadPath("operations/op?uid=bob"))
+    }
+
     @Test fun metadataMismatchAndUnexpectedFieldsAreRejected() {
         val c = GameplayWire.start("op", 0)
         assertThrows(IllegalArgumentException::class.java) { GameplayWire.validate(c.copy(operationId = "other")) }

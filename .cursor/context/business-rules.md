@@ -4,7 +4,7 @@
 
 - Bütün xərclənən sikkələr vahid AppBackend/PostgreSQL wallet/ledger-dədir. Client delta, Room və Firestore ikinci authority deyil.
 - Online cəhdin reward/progression/checkpoint nəticəsi server tərəfindən qəbul edilir; revision/dedup, retry və hesab izolyasiyası qorunur.
-- Offline məşq sikkə, XP, nailiyyət, satılan bina və leaderboard nəticəsi yaratmır.
+- 13 noyabr son qərarı: oflayn nəticələr lokal saxlanıb sonradan serverə göndərilməlidir; qəbuladək sikkə/XP/nailiyyət/bina/leaderboard təsdiqlənmir. 14 noyabr: terminal intent növbəsi/recovery replay əlavə edilib; yeni sessiyaya bağlı lokal Play və accepted snapshot+kataloq/revision-scoped read-only inventar/detail/şəhər baxış keşi branch-də inteqrasiya edilib; əvvəldən oxunmamış/köhnə baxış offline uydurulmur, mutation bağlıdır.
 - Minimum 10 uğurlu mərtəbə saxlama/satış üçün uyğundur; könüllü “Binanı tamamla” yoxdur. Bir cəhd bir yekun bina və bir dəfə nəticə mükafatı yaradır.
 - Kosmetika fiziki üstünlük vermir. Alınan bina hissələri hesabda açmır; alınan bina təkrar satılmır. Detallar məhsul planındadır.
 - Placement typed geometry/provenance və server containment/overlap yoxlamaları hazır olmadan açılmır.

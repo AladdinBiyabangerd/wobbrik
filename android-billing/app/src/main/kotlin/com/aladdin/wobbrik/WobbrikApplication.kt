@@ -32,15 +32,22 @@ class WobbrikApplication : Application(), DefaultLifecycleObserver {
         data class Configured(val recovery: AuthenticatedRecoveryOwner, val commands: AcceptedAttemptCommands,
             val inventory: appbackend.wobbrik.game.InventoryRepository, val sessions: AccountSessions,
             val decorations: appbackend.wobbrik.game.DecorationRepository,
-            val cityScene: appbackend.wobbrik.game.CitySceneRepository) : Bootstrap
+            val cityScene: appbackend.wobbrik.game.CitySceneRepository,
+            internal val views: AccountViews? = null) : Bootstrap
     }
 
     internal val cosmeticDefaults by lazy { AndroidCosmeticDefaultsStore(this) }
-    val engineHost by lazy { AcceptedEngineHost(AndroidFinishDraftStore(this), cosmeticDefaults) }
+    private val pendingResults by lazy { com.aladdin.wobbrik.engine.PendingGameResults(
+        appbackend.wobbrik.game.androidGameIntentFiles(this, "pending-game-results")) }
+    private val finishDrafts by lazy { AndroidFinishDraftStore(this, pendingResults) }
+    internal val localHost by lazy { com.aladdin.wobbrik.engine.LocalGameHost(pendingResults, cosmeticDefaults) }
+    val engineHost by lazy { AcceptedEngineHost(finishDrafts, cosmeticDefaults) }
 
     lateinit var bootstrap: Bootstrap
         private set
     private val recoveryScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+    private var retryScheduler: appbackend.wobbrik.game.RecoveryRetryScheduler? = null
+    private var connectivity: RecoveryConnectivity? = null
     private var authListener: FirebaseAuth.AuthStateListener? = null
     sealed interface AccountState {
         data object Loading : AccountState
@@ -96,25 +103,36 @@ class WobbrikApplication : Application(), DefaultLifecycleObserver {
         val sessions = AccountSessions { uid ->
             val user = googleUser() ?: throw AccountChanged()
             if (user.uid != uid) throw AccountChanged()
-            val token = user.getIdToken(false).await().token
+            val token = try { user.getIdToken(false).await().token }
+                catch (failure: com.google.firebase.FirebaseNetworkException) { throw java.io.IOException("Identity network unavailable", failure) }
             if (googleUser() !== user) throw AccountChanged()
             require(!token.isNullOrBlank()) { "Firebase returned an empty ID token" }
             token
         }
         val backend = GameplayHttpBackend(sessions, transport)
+        val readCache = appbackend.wobbrik.game.ReadOnlyGameCache(appbackend.wobbrik.game.androidGameIntentFiles(this, "read-only-game"))
         val owner = AuthenticatedRecoveryOwner(
             sessions, backend, androidAttemptJournal(this), recoveryScope,
             onStateChanged = engineHost::onRecoveryChanged,
             cache = androidSnapshotCache(this),
+            readCache = readCache,
+            onCommitted = pendingResults::committed,
+            reconcile = { session, coordinator, snapshot ->
+                snapshot.attempt?.takeIf { it.active }?.let { finishDrafts.stageExisting(session.uid, it.id) }
+                com.aladdin.wobbrik.engine.PendingResultReconciler(pendingResults).reconcile(session, coordinator, snapshot)
+            },
         )
         val commands = AcceptedAttemptCommands(owner)
         engineHost.bind(commands)
         bootstrap = Bootstrap.Configured(owner, commands, appbackend.wobbrik.game.InventoryRepository(backend), sessions,
-            appbackend.wobbrik.game.DecorationRepository(backend), appbackend.wobbrik.game.CitySceneRepository(backend))
+            appbackend.wobbrik.game.DecorationRepository(backend), appbackend.wobbrik.game.CitySceneRepository(backend), AccountViews(backend, readCache))
+        retryScheduler = appbackend.wobbrik.game.RecoveryRetryScheduler(owner, recoveryScope)
+        connectivity = RecoveryConnectivity(this) { retryScheduler?.connected(it) }
         authListener = FirebaseAuth.AuthStateListener {
             // Do not deduplicate by UID: a re-login must establish a new recovery epoch.
             val user = googleUser()
             owner.onAuthChanged(user?.uid)
+            localHost.bind(sessions.current())
             mutableAccount.value = user?.let { AccountState.Session(it.uid) }
                 ?: AccountState.SignedOut
         }.also(auth::addAuthStateListener)
@@ -123,11 +141,17 @@ class WobbrikApplication : Application(), DefaultLifecycleObserver {
     }
 
     override fun onStart(owner: LifecycleOwner) {
+        retryScheduler?.foreground(true)
+        connectivity?.start()
         engineHost.onForeground()
+        localHost.foreground(true)
         (bootstrap as? Bootstrap.Configured)?.recovery?.onForeground()
     }
 
     override fun onStop(owner: LifecycleOwner) {
+        retryScheduler?.foreground(false)
+        connectivity?.stop()
         engineHost.onPause()
+        localHost.foreground(false)
     }
 }

@@ -28,3 +28,15 @@ private fun syncDirectory(directory: File) {
         try { Os.close(fd) } catch (_: ErrnoException) { }
     }
 }
+
+/** Separate local intent/cache storage; never an additional wire command journal. */
+fun androidGameIntentFiles(context: Context, namespace: String): (String) -> JournalFile {
+    require(Regex("[a-z-]+").matches(namespace))
+    val directory = File(context.applicationContext.noBackupFilesDir, namespace)
+    check(directory.isDirectory || directory.mkdirs())
+    val fs = IoJournalFileSystem(::syncDirectory)
+    return { key ->
+        require(Regex("[a-f0-9]{64}").matches(key))
+        DurableJournalFile(directory, "$key.intent", fs)
+    }
+}
