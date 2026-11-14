@@ -125,7 +125,7 @@ class WobbrikApplication : Application(), DefaultLifecycleObserver {
         val commands = AcceptedAttemptCommands(owner)
         engineHost.bind(commands)
         bootstrap = Bootstrap.Configured(owner, commands, appbackend.wobbrik.game.InventoryRepository(backend), sessions,
-            appbackend.wobbrik.game.DecorationRepository(backend), appbackend.wobbrik.game.CitySceneRepository(backend), AccountViews(backend, readCache))
+            appbackend.wobbrik.game.DecorationRepository(backend), appbackend.wobbrik.game.CitySceneRepository(backend), AccountViews(backend, readCache, sessions))
         retryScheduler = appbackend.wobbrik.game.RecoveryRetryScheduler(owner, recoveryScope)
         connectivity = RecoveryConnectivity(this) { retryScheduler?.connected(it) }
         authListener = FirebaseAuth.AuthStateListener {

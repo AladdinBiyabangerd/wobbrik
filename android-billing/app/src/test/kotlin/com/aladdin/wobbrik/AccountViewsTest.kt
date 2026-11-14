@@ -28,23 +28,42 @@ class AccountViewsTest {
                 else if (path == "sync") snapshotBody else """{"buildings":[]}""")
         })
         cache.capture(session, account, "inventory-", backend) { InventoryRepository(it).page(session) }
-        val views = AccountViews(backend, cache)
+        val views = AccountViews(backend, cache, sessions)
         val view = AccountView(account, AuthenticatedRecoveryOwner.State.Ready(snapshot, account.catalog, "alice"))
+        // First online visit captures the view and revision; subsequent navigation is local.
+        val callerThread = Thread.currentThread()
+        views.read(view, session, "inventory-") {
+            assertNotSame(callerThread, Thread.currentThread())
+            InventoryRepository(it).page(session)
+        }
+        val capturedCalls = calls
+        views.read(view, session, "inventory-") { InventoryRepository(it).page(session) }
+        assertEquals(capturedCalls, calls)
+        views.read(view, session, "inventory-", refresh = true) { InventoryRepository(it).page(session) }
+        assertEquals(capturedCalls + 2, calls)
+        // Equal snapshots from a new capability still require fresh reads.
+        val nextView = AccountView(account, AuthenticatedRecoveryOwner.State.Ready(snapshot, account.catalog, "alice"))
+        views.read(nextView, session, "inventory-") { InventoryRepository(it).page(session) }
+        assertEquals(capturedCalls + 4, calls)
         for (failure in listOf(0, 408, 429, 500, 503)) {
             status = failure
             var cached = false
-            val page = views.read(view, session, "inventory-", onCached = { cached = true }) { InventoryRepository(it).page(session) }
+            val page = views.read(view, session, "inventory-", onCached = { cached = true }, refresh = true) { InventoryRepository(it).page(session) }
             assertTrue(cached); assertTrue(page.buildings.isEmpty())
         }
         for (denied in listOf(400, 401, 403, 404)) {
             status = denied
-            val failure = runCatching { views.read(view, session, "inventory-") { InventoryRepository(it).page(session) } }.exceptionOrNull()
+            val failure = runCatching { views.read(view, session, "inventory-", refresh = true) { InventoryRepository(it).page(session) } }.exceptionOrNull()
             assertTrue(failure is GameplayHttpError)
         }
+        // A denied refresh invalidates online reuse too.
+        assertTrue(runCatching {
+            views.read(view, session, "inventory-") { InventoryRepository(it).page(session) }
+        }.exceptionOrNull() is GameplayHttpError)
         val before = calls
         views.read(AccountView(account, null), session, "inventory-") { InventoryRepository(it).page(session) }
         assertEquals(before, calls)
         sessions.onAuthChanged("alice")
-        assertTrue(runCatching { views.read(view, session, "inventory-") { InventoryRepository(it).page(session) } }.exceptionOrNull() is AccountChanged)
+        assertTrue(runCatching { views.read(view, session, "inventory-", refresh = true) { InventoryRepository(it).page(session) } }.exceptionOrNull() is AccountChanged)
     }
 }

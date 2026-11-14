@@ -1,3 +1,16 @@
+# Cari vahid — ekran uyğunluğu və performans, 14 noyabr 2026
+
+- Completed: `main` (`aa9554e`) bazasından `fix/mobile-consistency-performance` yaradıldı. İlk ayrıca vahid: eyni BillingSession + exact Ready epoch daxilində uğurlu inventory/detail/city oxularının revision-scoped keşdən təkrar istifadəsi; cache IO/JSON UI dispatcher-dən çıxarıldı. Explicit refresh və yeni capability canlı oxuyur; session/auth və server authority saxlanır.
+- Current state: bu performans vahidi fokuslu review/yoxlamadan sonra ayrıca lokal commit edilir. Owner untracked `android-billing/app/release/` qorunur. Merge/push/CI yoxdur.
+- Decisions: istifadəçi göstərilmiş aktiv oyun+pauza görünüşlərini açıq təsdiqlədi; bütün mobil səhifələrdə eyni dizayn üslubu, kiçik/böyük telefonlarda düzgün komponent ölçüləri, ləngimənin həlli və hər məntiqi düzəliş üçün ayrıca commit tələb etdi. Bu təsdiqi yenidən istəmə. Mövcud təsdiqli dizayn/tokenlər əsasdır; mobil portret, planşet ayrıca qalır.
+- Remaining work: logo/header/düymə/kart üslub və ölçü uyğunluğu; route keçidləri və qalan performans (bitmap decode/frame polling araşdırılmayıb); mərtəbə birləşmələri və ilk mərtəbənin torpağa oturuşu. Bu işlər hazır sayılmır. Təkrar city baxışı yeni Ready yarananadək əvvəl qəbul edilmiş bundle-dır; ilk uncached read hələ serveri gözləyir.
+- Relevant files: `AccountViews.kt`, `AccountViewsTest.kt`, `WobbrikApplication.kt`, `InventoryScreen.kt`, `CityScreen.kt`; review `docs/reviews/2026-11-14-navigation-read-performance.md`. UI: `GameTokens.kt`, `MobileUiSizing.kt`, `MobileHomeScreen.kt`, `CityChrome.kt`, `CityPurchaseChrome.kt`, `PartsScreen.kt`, `FinishCosmeticScreen.kt`, `OnlineGame.kt`; bina `GameFacade.kt`, `GameScene.kt`, `BuildingArt.kt`, `GameAtlas.kt`. Yeganə plan `docs/PLAN.md`.
+- Checks performed: Java21/offline core117+engine95+app24=236 unit, APK və lint PASS25s; diffcheckPASS. Regression təkrar navigation0 əlavəHTTP/refresh/yeniReady/authfallback/IOthread yoxlayır. Device/FPS/runtime/render yoxlanmayıb, emulator açılmadı. UI/art dəyişməyib.
+- Exact next step: eyni branch-də performans commit-indən sonra ortaq mobil logo/header/ölçü vahidini hazırla, mövcud `docs/reviews/mobile-sizing-visual/render/` host harness ilə kiçik/normal/böyük portret və font2 renderlərinə bax, ayrıca review və commit et. Sonra oyun mərtəbə/ground birləşməsini mövcud game-joins render harness ilə ayrıca həll et. Yeni plan yaratma; təsdiqi təkrar istəmə.
+
+---
+Əvvəlki vahidlərin tarixçəsi (aşağıdakı Exact next step-lər cari göstərişi əvəz etmir):
+
 # Cari vahid — şəhər qalan vizual detallar, 14 noyabr 2026
 - Completed: istifadəçi city-view istinadını göstərildikdən sonra açıq təsdiqlədi. `fix/city-remaining-visuals` (baza ce12acf) üzərində geniş kafe terrası asseti və ikinci mərtəbə ön balkon inteqrasiyası hazırlandı; corner-window dar balkon və ground giriş/işıq qorunur.
 - Current state: istifadəçinin göstərişi ilə bu review edilmiş vahid lokal commit edilir. Mərhələ4 razılaşdırılmış mobil scope üzrə istifadəçi tərəfindən qəbul edilib. Merge/push/CI yoxdur; untracked app/release qorunur.

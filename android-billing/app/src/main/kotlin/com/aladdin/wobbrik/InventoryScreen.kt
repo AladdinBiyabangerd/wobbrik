@@ -65,18 +65,18 @@ internal fun InventoryScreen(configured: WobbrikApplication.Bootstrap.Configured
     var loading by remember(ready, selected) { mutableStateOf(true) }
     var failed by remember(ready, selected) { mutableStateOf(false) }
     LaunchedEffect(ready, selected, cursor, retry) {
-        loading = true; failed = false
+        loading = true; failed = false; fromCache = ready.ready == null
         try {
             val session = requireNotNull(configured.sessions.current())
             check(ready.current(configured, session))
             if (selected == null) {
-                val page = configured.views?.read(ready, session, "inventory-${cursor.orEmpty()}", onCached = { fromCache = true }) { appbackend.wobbrik.game.InventoryRepository(it).page(session, cursor) } ?: configured.inventory.page(session, cursor)
+                val page = configured.views?.read(ready, session, "inventory-${cursor.orEmpty()}", onCached = { fromCache = true }, refresh = retry > 0) { appbackend.wobbrik.game.InventoryRepository(it).page(session, cursor) } ?: configured.inventory.page(session, cursor)
                 check(ready.current(configured, session))
                 buildings = if (cursor == null) page.buildings else (buildings + page.buildings).distinctBy { it.id }
                 next = page.next
             } else {
                 detail = null; city = null
-                val (building, membership) = configured.views?.read(ready, session, "detail-$selected", onCached = { fromCache = true }) { reader ->
+                val (building, membership) = configured.views?.read(ready, session, "detail-$selected", onCached = { fromCache = true }, refresh = retry > 0) { reader ->
                     val repository = appbackend.wobbrik.game.InventoryRepository(reader)
                     repository.building(session, requireNotNull(selected)) to repository.city(session)
                 } ?: (configured.inventory.building(session, requireNotNull(selected)) to configured.inventory.city(session))
