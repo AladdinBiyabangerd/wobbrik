@@ -7,8 +7,19 @@ import appbackend.wobbrik.game.*
 class PendingResultReconciler(private val results: PendingGameResults) {
     suspend fun reconcile(session: BillingSession, coordinator: AttemptCoordinator, initial: GameSnapshot): GameSnapshot {
         var snapshot = initial
-        for (result in results.pending(session.uid)) {
+        // Drain our own active queued attempt first, even if an earlier offline result is unstarted.
+        val queued = results.pending(session.uid)
+        for (result in queued.sortedBy { if (it.attemptId == initial.attempt?.id) 0 else 1 }) {
             var attempt = snapshot.attempt?.takeIf { it.active }
+            if (attempt?.id != result.attemptId && (result.started || attempt != null)) {
+                val reconciled = coordinator.reconcileFinished(session, result.attemptId, result.id + "-finish",
+                    result.terminal.state.floors.size.toLong()) { results.confirmed(session.uid, result) }
+                if (reconciled != null) {
+                    snapshot = reconciled
+                    continue
+                }
+                error("Pending attempt unresolved; retained without abandon or restart")
+            }
             if (attempt == null) {
                 check(!result.started) { "Pending attempt no longer active; reconciliation required" }
                 snapshot = coordinator.execute(GameplayWire.start(result.attemptId, snapshot.revision, CityFloorGeometry.VERSION), session)

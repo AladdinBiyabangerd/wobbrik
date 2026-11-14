@@ -22,6 +22,19 @@ fun interface GameplayReads {
 class GameplayHttpBackend(private val sessions: Sessions, private val transport: GameplayTransport) : AttemptBackend, GameplayReads {
     override suspend fun catalog(session: BillingSession): RecoveryCatalog = RecoveryDtos.catalog(request(session, "catalog", null))
     override suspend fun sync(session: BillingSession): GameSnapshot = GameplayWire.snapshot(request(session, "sync", null))
+    override suspend fun attempt(session: BillingSession, id: String): GameSnapshot? {
+        InventoryReads.id(id)
+        val body = lookup(session, "attempts/$id") ?: return null
+        return RecoveryDtos.snapshot(body, allowAbandoned = true).also { require(it.attempt?.id == id) }
+    }
+    override suspend fun receipt(session: BillingSession, id: String, route: AttemptCommand.Route): AttemptReceipt? {
+        InventoryReads.id(id)
+        return lookup(session, "operations/$id")?.let { RecoveryDtos.attemptReceipt(it, route) }
+    }
+    private suspend fun lookup(session: BillingSession, path: String): String? = try { request(session, path, null) }
+        catch (failure: GameplayHttpError) {
+            if (failure.status == 404 && failure.code == "not_found") null else throw failure
+        }
     override suspend fun submit(session: BillingSession, command: AttemptCommand) {
         GameplayWire.validate(command)
         val path = when (command.route) {
@@ -105,4 +118,4 @@ class UrlConnectionGameplayTransport(origin: String) : GameplayTransport {
 /** Keep authenticated GET paths constrained; IDs/cursors cannot escape the game API. */
 internal fun allowedReadPath(path: String): Boolean =
     Regex("(?:inventory|city|decorations)\\?limit=20(?:&cursor=[A-Za-z0-9_-]{1,128})?").matches(path) ||
-        Regex("buildings/[A-Za-z0-9_-]{1,128}").matches(path)
+        Regex("(?:buildings|attempts|operations)/[A-Za-z0-9_-]{1,128}").matches(path)

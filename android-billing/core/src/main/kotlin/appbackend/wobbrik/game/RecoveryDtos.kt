@@ -63,18 +63,18 @@ object RecoveryDtos {
         require(BigInteger.valueOf(xp) >= start && BigInteger.valueOf(xp) < next)
         return XpInterval(start, next)
     }
-    fun snapshot(body: String): GameSnapshot {
+    fun snapshot(body: String, allowAbandoned: Boolean = false): GameSnapshot {
         val r = root(body); require(r.s("rules_version") == "wobbrik-v1")
         val attempt = r.getValue("attempt").takeUnless { it == JsonNull }?.jsonObject?.let { a ->
             versions(a)
-            val status = a.s("status"); require(status in setOf("active", "finished"))
+            val status = a.s("status"); require(status in setOf("active", "finished") || (allowAbandoned && status == "abandoned"))
             val floors = a.n("floors"); val precise = a.n("precise"); val rescues = a.n("rescues")
             require(precise <= floors && rescues <= floors)
             val snapshot = a.getValue("snapshot").takeUnless { it == JsonNull }?.toString()
             require(snapshot == null || snapshot.toByteArray(Charsets.UTF_8).size <= 16384)
             ServerAttempt(a.s("attempt_id"), status == "active", a.n("sequence"), snapshot,
                 floors, precise, rescues, a.b("continued"), a.s("rules_version"), a.s("engine_version"), a["geometry_version"]?.let { a.s("geometry_version").also { require(it == CityFloorGeometry.VERSION) } },
-                a["accepted_geometry"]?.takeUnless { it == JsonNull }?.let { AcceptedCityGeometry.parse(it.jsonObject) }).also { accepted ->
+                a["accepted_geometry"]?.takeUnless { it == JsonNull }?.let { AcceptedCityGeometry.parse(it.jsonObject) }, status == "abandoned").also { accepted ->
                     if (accepted.geometryVersion != null && floors > 0) {
                         val geometry = requireNotNull(accepted.acceptedGeometry)
                         require(geometry.attemptId == accepted.id && geometry.sequence == accepted.sequence &&

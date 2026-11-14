@@ -52,6 +52,12 @@ class PendingGameResults(private val file: (String) -> JournalFile) {
         write(session.uid, if (command.route == AttemptCommand.Route.FINISH) rows.filterNot { it.attemptId == attempt }
             else rows.map { if (it.attemptId == attempt) it.copy(started = true) else it })
     }
+    /** Only the exact terminal intent confirmed by an account-scoped finish receipt. */
+    @Synchronized fun confirmed(uid: String, result: PendingGameResult) {
+        val rows = pending(uid)
+        require(rows.firstOrNull { it.id == result.id } == result) { "Pending result changed during reconciliation" }
+        write(uid, rows.filterNot { it.id == result.id })
+    }
     private fun validate(result: PendingGameResult) {
         InventoryReads.id(result.id); InventoryReads.id(result.attemptId)
         require(result.id.length <= 110) // Leave room for stable per-stage operation suffixes.

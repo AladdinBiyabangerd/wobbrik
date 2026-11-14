@@ -1,5 +1,15 @@
 # Cari handoff — 14 noyabr 2026
 
+## Cari vahid — account/receipt reconciliation (14 noyabr 2026)
+- Completed: `fix/network-resilience` üzərində account-scoped attempt/finish-receipt GET adapterləri, abandoned status-un yalnız historical parser-də oxunması və pending reconciliation qoşuldu. Öz aktiv queued cəhdimiz əvvəl tamamlanır. Uyğun finished attempt + sabit finish receipt + fresh sync-dən sonra yalnız exact intent diskdən bağlanır.
+- Current state: HEAD `3ddc047` üzərinə vahid lokal review edildi, Bugbot actionable bug tapmadı; yalnız reconciliation source/test/review və öz PLAN/handoff hissəsi lokal commit edilir. Merge/push/CI yoxdur. Əvvəlki owner phase4/release/QA/source/render/handoff dəyişiklikləri qorunur.
+- Decisions: qeyri-müəyyən/404/abandoned/receipt-siz/uyğunsuz pending silinmir və restart edilmir; başqa-device active avtomatik abandon edilmir. Historical snapshot Ready/account cache kimi publish edilmir; son sync equal revision-da da balansı yeniləyir. Sole wire journal retry dəyişməyib. UI/scheduler dəyişməyib.
+- Checks performed: Java21/offline core110+engine94+app24=228 unit, failures/errors/skipped0; APK/lint PASS20s, son regression-lardan sonra repeat PASS3s (105up-to-date/108). Son review/commit run-u PASS979ms (107/108up-to-date); 228unit XML nəticəsi reuse. Bugbot və lokal scoped diff review/diffcheck PASS; əlavə kod düzəlişi lazım olmadı. Owner diff-i ilə working-tree yoxlamasıdır. Emulator/device/real-server/render/CI yoxdur.
+- Remaining work: connectivity scheduler ayrıca vahiddir. Başqa cihaz hələ aktivdirsə, attempt unknown/abandoned-dırsa və ya öz finish receipt yoxdur/uyğun deyil isə nəticə saxlanır və recovery bloklanır; avtomatik resolution siyasəti uydurulmur. Əvvəlki full parity/runtime məhdudiyyətləri qalır.
+- Relevant files: core `AttemptCoordinator.kt`, `GameplayHttpBackend.kt`, `RecoveryDtos.kt`, `GameplayAdaptersTest.kt`; engine `PendingResultReconciler.kt`, `PendingGameResults.kt`, `PendingGameResultsTest.kt`; review `docs/reviews/2026-11-14-account-receipt-reconciliation.md`; yeganə plan `docs/PLAN.md` §§2–4. AppBackend `docs/wobbrik-game-api.md`, `internal/wobbrik/read.go` və `finish.go` read-only yoxlandı; API/schema dəyişikliyi lazım deyil, backend dəyişməyib.
+- Exact next step: lokal reconciliation commit nəticəsini bildir. Scheduler və başqa böyük vahid yalnız ayrıca istifadəçi tapşırığı ilə başlayır. Pending-i silmə/restart etmə, owner diff-i qorunsun. Merge/CI/push avtomatik yoxdur.
+
+
 ## Cari davam — network-resilience lokal review/commit (14 noyabr 2026)
 - Completed: offline Play/read-cache və pending nəticə diff-i lokal review edildi; yeni konkret bug tapılmadı, production kod dəyişmədi. İstifadəçi həm review/commit, həm ayrıca reconciliation vahidini açıq istədi.
 - Current state: `fix/network-resilience`, baza `a2ebcce`; network vahidi `8d7ab4b` lokal commit-ində saxlanıldı. Owner phase4 DetailRow/acceptance/render/handoff və release/oyun QA faylları kənarda qorunur. Merge/push/CI yoxdur.

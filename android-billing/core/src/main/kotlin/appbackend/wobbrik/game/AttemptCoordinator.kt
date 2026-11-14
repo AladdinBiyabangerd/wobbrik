@@ -12,7 +12,7 @@ import kotlinx.coroutines.sync.withLock
 data class AttemptCommand(val operationId: String, val expectedRevision: Long, val route: Route, val envelope: String) {
     enum class Route { START, CHECKPOINT, FINISH, ABANDON, SHOP_BUY, BUILDING_EDIT, BUILDING_DELETE }
 }
-data class ServerAttempt(val id: String, val active: Boolean, val sequence: Long, val checkpointJson: String?, val floors: Long = 0, val precise: Long = 0, val rescues: Long = 0, val continued: Boolean = false, val rulesVersion: String = "wobbrik-v1", val engineVersion: String = "wobbrik-structural-v1", val geometryVersion: String? = null, val acceptedGeometry: AcceptedCityGeometry? = null)
+data class ServerAttempt(val id: String, val active: Boolean, val sequence: Long, val checkpointJson: String?, val floors: Long = 0, val precise: Long = 0, val rescues: Long = 0, val continued: Boolean = false, val rulesVersion: String = "wobbrik-v1", val engineVersion: String = "wobbrik-structural-v1", val geometryVersion: String? = null, val acceptedGeometry: AcceptedCityGeometry? = null, val abandoned: Boolean = false)
 data class GameSnapshot(val rulesVersion: String, val revision: Long, val coins: Long, val xp: Long, val attempt: ServerAttempt?, val account: AccountRecovery? = null) {
     /** Exact validated `/sync` body this snapshot was parsed from; not part of equality or copies. */
     var wire: String? = null
@@ -21,6 +21,8 @@ data class GameSnapshot(val rulesVersion: String, val revision: Long, val coins:
 
 interface AttemptBackend {
     suspend fun catalog(session: BillingSession): RecoveryCatalog? = null
+    suspend fun attempt(session: BillingSession, id: String): GameSnapshot? = null
+    suspend fun receipt(session: BillingSession, id: String, route: AttemptCommand.Route): AttemptReceipt? = null
     suspend fun sync(session: BillingSession): GameSnapshot
     /** Return only after a committed receipt; HTTP/network errors must throw. */
     suspend fun submit(session: BillingSession, command: AttemptCommand)
@@ -80,6 +82,33 @@ class AttemptCoordinator(
         journal.save(session.uid, command)
         stillCurrent(session)
         drain(session, command)
+    }
+
+    /** Historical reads never become the current account state or reopen an attempt. */
+    suspend fun reconcileFinished(
+        session: BillingSession, attemptId: String, operationId: String, floors: Long,
+        onConfirmed: () -> Unit,
+    ): GameSnapshot? = mutex.withLock {
+        stillCurrent(session)
+        check(accepted?.first == session && journal.pending(session.uid) == null) { "Recover before reconciliation" }
+        val historical = backend.attempt(session, attemptId)
+        stillCurrent(session)
+        val attempt = historical?.attempt ?: return@withLock null
+        require(attempt.id == attemptId)
+        if (attempt.active || attempt.abandoned) return@withLock null
+        val receipt = backend.receipt(session, operationId, AttemptCommand.Route.FINISH)
+        stillCurrent(session)
+        if (receipt == null) return@withLock null
+        val finish = receipt.result as? AttemptResult.Finished ?: error("Not a finish receipt")
+        require(finish.attemptId == attemptId && finish.floors == floors && attempt.floors == floors)
+        accepted = null
+        val current = backend.sync(session)
+        stillCurrent(session)
+        require(current.rulesVersion == "wobbrik-v1" && current.revision >= historical.revision && current.revision >= receipt.revision)
+        onConfirmed() // Durable acknowledgement before publication; disk failure retains the intent.
+        stillCurrent(session)
+        accepted = session to current
+        current
     }
 
     private suspend fun drain(session: BillingSession, command: AttemptCommand): GameSnapshot {
