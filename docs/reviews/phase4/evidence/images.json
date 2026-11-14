@@ -1,0 +1,67 @@
+[
+  {
+    "source": "docs/reviews/mobile-sizing-visual/production-building-detail-360-font1.png",
+    "evidence": "production-building-detail-360-font1.png",
+    "sha256": "bc607eed17435030db154dbff6103f6600845380b5918ae3bcd7a48154048431"
+  },
+  {
+    "source": "docs/reviews/mobile-sizing-visual/production-contact-320-font2.png",
+    "evidence": "production-contact-320-font2.png",
+    "sha256": "5cd375b90ea44f97b32a3d65d2a5bef61e0550ce860aea821ddd28c99edbd329"
+  },
+  {
+    "source": "docs/reviews/mobile-sizing-visual/production-delete-360-font1.png",
+    "evidence": "production-delete-360-font1.png",
+    "sha256": "31e5fd1be3eb106a8a411152ec20a975caab674d1e427ece0252fa7f7278dbbd"
+  },
+  {
+    "source": "docs/reviews/mobile-sizing-visual/production-delete-320-font2.png",
+    "evidence": "production-delete-320-font2.png",
+    "sha256": "23a746c7c62220a07be2bb44a70b85a1f2a0734c1767df9dcdc6d7365fed3fb2"
+  },
+  {
+    "source": "docs/reviews/mobile-sizing-visual/production-home-360-font1.png",
+    "evidence": "production-home-360-font1.png",
+    "sha256": "a74c368e7141191df67d79415ffbf7533500185d42f418b354c74c602712ef15"
+  },
+  {
+    "source": "docs/reviews/city-balcony-visual/representative-390-font1.png",
+    "evidence": "representative-390-font1.png",
+    "sha256": "6e2d8495013fde3bfd340de9ef8f4eca498c54a9ae53e59cc86e4e6c1a8a820c"
+  },
+  {
+    "source": "docs/reviews/city-balcony-visual/representative-320-font2.png",
+    "evidence": "representative-320-font2.png",
+    "sha256": "f213b86b8a30ffd8887579b70fc5edd7bc7e314b9789f1e77b503d33ef0d5520"
+  },
+  {
+    "source": "docs/reviews/mobile-sizing-visual/purchase-decor-360-font1-confirmation.png",
+    "evidence": "purchase-decor-360-font1-confirmation.png",
+    "sha256": "ad4fcc05ae9b36ed4a6a8f64a7e25a0894ed99136d6b4a17df3b99775b6fa189"
+  },
+  {
+    "source": "docs/reviews/mobile-sizing-visual/purchase-land-360-font2-confirmation.png",
+    "evidence": "purchase-land-360-font2-confirmation.png",
+    "sha256": "3c826d7844a90f93d93a0449213426f493e203953b82695bcbed2ba5a76220e5"
+  },
+  {
+    "source": "QA composite: approved reference + production host render",
+    "evidence": "city-comparison.png",
+    "sha256": "632159995fd6e3a8f27e5b3a5a4998ed3d24aa6e1c6a120241c3254435673747"
+  },
+  {
+    "source": "QA composite: approved reference + production host render",
+    "evidence": "delete-comparison.png",
+    "sha256": "83eab331fc4e6e51c121e1d7e0dbeb504c036964e22bd722ebe07c27d00c0383"
+  },
+  {
+    "source": "QA composite: approved reference + production host render",
+    "evidence": "detail-comparison.png",
+    "sha256": "1113715478cd4575dc40877cf40e47fc6fe9630be9d2309580d84f39e21618cd"
+  },
+  {
+    "source": "QA composite: approved reference + production host render",
+    "evidence": "home-comparison.png",
+    "sha256": "b0e833c281a0a44a9d5e070127beb2f9d1a9305eb3a30f436bc75cc53e699afd"
+  }
+]

@@ -1,5 +1,14 @@
 # Cari handoff — 14 noyabr 2026
 
+## Qalan phase4 və QA fayllarının lokal commit-i — 14 noyabr 2026
+- Completed: detail/parts `5362c44`, tarixçəli merge `7ef170e` ilə main/origin-main-ə push edildi; həmin merge-də owner dəyişiklikləri daxil edilmədi, CI işlədilmədi. Son istifadəçi qalan commit edilməli dəyişiklikləri də saxlamağı tapşırdı.
+- Current state: `chore/remaining-phase4-evidence`, baza `7ef170e`. Əvvəlki owner detail responsive fix/test/acceptance/PLAN/handoff/renderləri indi ayrıca phase4 commit-inə, əvvəlki live QA qeyd/patch/XML isə ayrıca docs commit-inə daxildir. Aşağıdakı pending/commit edilməyib statusları tarixidir.
+- Decisions: generated `android-billing/app/release/` APK/DM/metadata saxlanır, commit edilmir. QA patch yalnız sənəd kimi saxlanır, production-a tətbiq olunmur. Bu yeni commit-lər üçün merge/push/CI yoxdur.
+- Remaining work: tam mərhələ4 qəbulu/şəhər parity və əvvəlki runtime məhdudiyyətləri açıqdır. Yeni böyük vahid bu chatdə başlanmır.
+- Relevant files: `docs/reviews/phase4/acceptance.md`, `docs/reviews/2026-11-14-remaining-phase4-review.md`, `InventoryScreen.kt`, iki mövcud render harness; `docs/reviews/2026-11-13-game-release-live-check.md`, game-joins QA patch/XML; yeganə plan `docs/PLAN.md`.
+- Checks performed: source dəyişdirilmədən lokal diff review; adi unit/APK/lint eyni production source-da əvvəlki PASS2s/236unit reuse. Tarixi phase4 image SHA256/JSON və QA XML formatları yoxlandı. Cari fokuslu host15/15PASS43s; son üç contact şəklinə baxıldı; diffcheckPASS. Emulator/CI açılmadı.
+- Exact next step: lokal commit nəticələrini təhvil ver; yeni iş yeni chatdə bu handoff+PLAN+review-dan davam et. Yeni merge/push/CI ayrıca göstəriş tələb edir.
+
 ## Detail/parts vizual tamamlama — cari yekun, 14 noyabr 2026
 - Completed: istifadəçinin bu chatdəki açıq tətbiq göstərişi ilə təsdiqli board-ların detail tab/metadata və beş parts kateqoriya ikonları, gradient/cyan çərçivə/aktiv glow tamamlandı. Owner dar DetailRow adaptasiyası saxlanıb; əlaqəsiz tracked owner baseline və iki contact PNG bayt eyniliyi yoxlanıb.
 - Current state: `fix/phase4-detail-parts-parity`, HEAD/baza `eaf43e3`; source/review/harness lokal review-dan sonra ayrıca lokal commit-də saxlanır. Owner diff-i index-dən kənardadır. Merge/push/CI yoxdur.
@@ -9,6 +18,15 @@
 - Checks performed: final native8/8PASS23s; normal unit/APK/lintPASS28s (core117+engine95UP-TO-DATE,app24icra); kontrast4/4min8.22,diffcheckPASS; təsdiqli board-larla yanaşı müqayisə və final görüntülərə baxış. Synthetic host; emulator/CI açılmayıb.
 - Exact next step: lokal commit nəticəsini istifadəçiyə təhvil ver. Ayrı göstərişsiz merge/push/CI və yeni böyük vahid başlama. Aşağıdakı əvvəlki başlanğıc qeydinin pending konkret UI təsdiqi statusu artıq tarixçədir.
 
+## Cari vahid — mərhələ 4 detail/parts vizual tamamlama (14 noyabr 2026)
+- Completed: scheduler review/commit `92c306b`; bütün mövcud branch commit-ləri `eaf43e3` ilə main-ə merge və origin/main-ə push edildi; lokal/remote main eyni idi. Owner19fayl SHA256 ilə dəyişməz qaldı. İstifadəçi mərhələ4davamını istədi; PLAN və acceptance qalan fərqləri oxundu, mövcud iki təsdiqli detail/parts board-una baxıldı.
+- Current state: `fix/phase4-detail-parts-parity`, baza `eaf43e3`; UI implementasiyası başlamayıb. Mövcud owner InventoryScreen/phase4/render/release/QA/PLAN/handoff diff-i qorunur. Əvvəlki “merge/push yoxdur” scheduler qeydləri tarixçədir.
+- Decisions: ilk kiçik vahid detail tab/metadata ikonları, parts kateqoriya ikonları və təsdiqli çərçivə detallarıdır. Son compact/navbar/modular art qərarları qorunur; board-dakı köhnə navbar qaytarılmır. Placement bağlıdır, bazar mərhələ5/reklam mərhələ6bu vahidə daxil deyil. AGENTS konkret UI təqdimatı+təsdiqi gözlənir; ümumi başlama göstərişi bu təsdiqi əvəz etmir.
+- Remaining work: konkret göstərilən dizaynın tətbiq təsdiqi, sonra scoped source/token/asset baxışı və implementasiya, mobil portret host render+görüntüyə baxış, fokuslu yoxlamalar və review. Şəhər tam parity ayrıca növbəti vahiddir; mərhələ qəbulu yoxdur.
+- Relevant files: docs/PLAN.md; docs/reviews/phase4/acceptance.md; docs/design/city-completion-v1/{04-building-detail.png,02-parts-flow-v2.png}; app {GameTokens.kt,InventoryScreen.kt,PartsScreen.kt}; mövcud docs/reviews/mobile-sizing-visual/render/.
+- Checks performed: bu başlanğıcda yalnız sənəd/status/istinad görüntüləri yoxlanıb; yeni source/build/test/render yoxdur. Əvvəlki scheduler unit/APK/lint və callback host nəticələri onun review-sundadır. Emulator/CI açılmadı.
+- Exact next step: yeni chatdə bu bölmə+PLAN+acceptance oxunsun; istifadəçinin detail/parts konkret tətbiq təsdiqi varsa yenidən soruşmadan həmin kiçik vahidi mövcud owner diff-i qoruyaraq tamamla; təsdiq yoxdursa göstərilən iki board üçün onu al. Merge/push/CI üçün yeni ayrıca göstəriş tələb olunur.
+
 ## Cari vahid — connectivity retry scheduler (14 noyabr 2026)
 - Completed: `fix/network-resilience`, HEAD `83212be` üzərinə process-owned foreground/connectivity backoff scheduler əlavə edildi. Mövcud owner exact transient Error-u retry edir; sole journal/terminal reconciliation dəyişmir. Default network callback foreground-da register, stop-da unregister olur; stale callback-lər rədd edilir. ACCESS_NETWORK_STATE əlavə edildi, Firebase token network xətası retryable IO kimi ötürülür.
 - Current state: scheduler source/test/review ayrıca lokal review edildi və bu vahid lokal commit-də saxlanır. Owner InventoryScreen/phase4/render/release/QA və qarışıq PLAN/handoff hissələri qorunur. Merge/push/CI yoxdur.
@@ -17,6 +35,7 @@
 - Remaining work: scheduler lokal review/commit vahidi tamamlandı; ayrıca istifadəçi göstərişi olmadan yeni iş yoxdur. Proses bağlıykən retry zəmanəti yoxdur; durable queue növbəti auth/foreground-da bərpa edilir. API24–25 üçün initial capabilities fallback var, runtime yoxlanmayıb. Qeyri-müəyyən/başqa-device pending-in avtomatik resolution siyasəti və əvvəlki full parity/runtime məhdudiyyətləri qalır.
 - Relevant files: core `RecoveryRetryScheduler.kt`, `AuthenticatedRecoveryOwner.kt`, `RecoveryRetrySchedulerTest.kt`; app `RecoveryConnectivity.kt`, `WobbrikApplication.kt`, `AndroidManifest.xml`; engine `PendingGameResultsTest.kt`; review `docs/reviews/2026-11-14-connectivity-retry-scheduler.md`, host `docs/reviews/connectivity-retry/host/`. Yeganə plan `docs/PLAN.md` §§2–4. AppBackend müqaviləsi dəyişmir, backend dəyişikliyi lazım deyil.
 - Exact next step: scheduler lokal commit nəticəsini bildir; yeni vahid yalnız ayrıca istifadəçi tapşırığı ilə başlayır. Owner fayllarını və sənədlərin unrelated hissələrini commit-ə qatma; qeyri-müəyyən pending-i silmə/restart etmə. Yeni böyük feature başlama, merge/push/CI işlətmə.
+
 
 ## Cari vahid — account/receipt reconciliation (14 noyabr 2026)
 - Completed: `fix/network-resilience` üzərində account-scoped attempt/finish-receipt GET adapterləri, abandoned status-un yalnız historical parser-də oxunması və pending reconciliation qoşuldu. Öz aktiv queued cəhdimiz əvvəl tamamlanır. Uyğun finished attempt + sabit finish receipt + fresh sync-dən sonra yalnız exact intent diskdən bağlanır.
@@ -65,6 +84,14 @@
 - Remaining work: hesab üzrə durable pending nəticələr (birdən çox offline cəhd, process death/storage failure); mövcud sole wire journal üzərindən server qəbuluna təhlükəsiz göndərmə (start→checkpoint→finish, lost response, exact retry, revision conflict, başqa cihaz aktiv cəhdi, account/epoch izolyasiyası); server qəbulunda nəticənin bir dəfə bağlanması; accepted catalog/snapshot və inventory/detail/city üçün ayrıca read-only cache və offline route (cache Ready capability deyil). Mövcud dizayn saxlanmalıdır; pending status üçün konkret UI dəyişərsə dizayn qaydasını tətbiq et.
 - Relevant files: `docs/PLAN.md`, `docs/reviews/2026-11-14-network-foreground.md`, `docs/reviews/phase4/acceptance.md`; `AuthenticatedRecoveryOwner.kt`, `AttemptCoordinator.kt`, `DiskAttemptJournal.kt`, `SnapshotCache.kt`, `InventoryReads.kt`, `CitySceneReads.kt`; engine `AcceptedEngineHost.kt`, `AcceptedAttemptCommands.kt`, `FinishDraftStore.kt`; app `OnlineGame.kt`, `WobbrikApplication.kt`, `AndroidFinishDraftStore.kt`; AppBackend `docs/wobbrik-game-api.md` və `AGENTS.md`.
 - Exact next step: yeni chat-də yalnız bu referenced fayllarla offline nəticənin durable lifecycle/reconciliation vahidini implementasiya et. Mövcud tək journal-a ikinci wire outbox yaratma; draft/command sərhədini aydın saxla. `/sync` yalnız active attempt verir: finish receipt-dən sonra journal silinməsi ilə draft completion arasındakı crash boşluğunu həll etmədən nəticəni yenidən start etmə. Mövcud API ilə atomik/idempotent qəbul mümkün deyilsə AppBackend-in öz handoff/README/AGENTS-ni oxuyub ayrıca branch və müqavilə/test dəyişikliyini et. Backend faylları hələ dəyişməyib. Araşdırma və qərar bu chat-də tamamlandığı üçün AGENTS context qaydasına əsasən yeni böyük offline implementasiya növbəti chat-dədir.
+
+## Əvvəlki vahid — mərhələ 4 yekun regression/qəbul
+- Baza: `a2ebcce` (lokal və remote main merge); branch `chore/phase4-acceptance`. İstifadəçi regression+dizayn yoxlaması, problem düzəlişi və qəbul qeydi istəyib; emulator/CI yoxdur. Commit/merge/push bu vahid üçün istənməyib.
+- Completed: ilk69host run bir köhnəlmiş Home→City testini tutdu; contentDescription navbar seçimi ilə düzəldi. Silmə dialoqu üçün3ölçüdə native render/ləğv→0submit və detail söz qırılması regression-u əlavə edildi. Dar detail etiket/dəyər paneli token həddi ilə alt-alta keçir; redesign deyil.
+- Current state / Checks: final69/69host PASS66s; core104+engine67+app23 unit/APK/lintPASS13s (core cached); son test təmizləməsindən sonra flow3/3PASS18s. Kontrast4/4min8.22,diffcheckPASS. Son detail/dialog və4yanaşı müqayisə şəklinə baxıldı. Qəbul qeydi `docs/reviews/phase4/acceptance.md` və evidence hazırdır. Tam vizual parity açıq fərqlərlədir; tam mərhələ qəbulu iddia edilmir. Owner faylları qorunur; commit/merge/push/CI yoxdur.
+- Yeni istifadəçi göstərişi: bundan SONRA zəif/kəsilmiş internet istifadəçini oyun və digər mümkün işlərdən məhrum etməməlidir. Bu, ayrıca növbəti vahiddir; hazır offline implementation sayılmır. Planın server wallet/ownership authority sərhədi saxlanır; offline mükafat/alışı təsdiqlənmiş kimi göstərmə. Aktiv oyun offline pause/abandon qaydası ilə son istək arasında konkret siyasət fərqi implementasiyadan əvvəl dəqiqləşdirilməlidir.
+- Relevant files: `InventoryScreen.kt`, `mobile-sizing-visual/render/CompactFlowRenderTest.kt`, `city-scene-visual/render/CityRenderTest.kt`; plan `docs/PLAN.md`.
+- Exact next step: acceptance nəticəsini təhvil ver; internet davamlılığını yeni chatdə PLAN §2–3, OnlineGame/AcceptedEngineHost/Room cache/journal əsasında ayrıca kiçik vahid kimi araşdır. Mövcud istifadəçi fayllarını commit-ə qatma; commit/merge/push ayrıca göstərişlə. Zəif internetdə hansı işlərin cached/local davam edə bilməsini müəyyənləşdir, server təsdiqini uydurma.
 
 ## Son aktiv vahid — şəhər oxu düzəlişi
 - Completed: `ad0a396` bazasından `fix/city-decoration-read`; production transport-un decorations GET yolunu rədd etməsi regression ilə təkrarlandı və düzəldildi. Mobil dizayn dəyişməyib; owner diff/untracked faylları qorunur.
@@ -263,6 +290,13 @@
 - Remaining work / Exact next step: növbəti kiçik vahid şəhərin mövcud təsdiqli dizayna uyğun başlıq və aşağı naviqasiya/“Binaya bax” panelinin tamamlanmasıdır; placement/market endpoint-ləri bu vahidə uydurulmur, kamera sabit qalır. Sonra ayrıca V1 canlılıq. AGENTS context-growth qaydasına görə bu chatdə ikinci böyük implementasiya başlamır; yeni chatdə buradan davam et.
 - Relevant files: `docs/PLAN.md` §§1/4/7/9; `docs/design/city-view.png`; `CityScreen.kt`, `GameTokens.kt`, `HomeScreen.kt`, `OnlineGame.kt`, mövcud city host harness və son terrain review. V1 canlılıq hələ implementasiya edilməyib.
 
+## Oyun atlaslarının əlavə emulator şəkilləri — 13 noyabr 2026
+- Completed: istifadəçinin digər oyun eskizlərini emulatorda göstər göstərişi üzrə firuzəyi +suvaq/panel/taxta/beton baza dəstlərində sıfırdan bir mərtəbə canlı yerləşdirilib PNG çəkildi; əvvəlki purple ilə6üslub contact sheet və firuzəyi pause var. Bu hesabsız lokal debug gameplay-dir, serverli release flow deyil.
+- Current state/Decisions: paralel şəhər işinə toxunmamaq üçün üslub seçicisi yalnız `/private/tmp/wobbrik-variant-qa` surətindədir; repo app sources/physics dəyişməyib, commit/merge/push/CI yoxdur. Cari şəhər handoff-u yuxarıda qüvvədə qalır.
+- Checks: temp Java21 offline assembleDebug PASS18s; beş yeni görüntüdə1mərtəbə, betonda əlavə2mərtəbə;6üslub contact və teal pause vizual baxış. Google hesablı real seçilmiş parts yoxlanmayıb. Legacy3–6 hələ panel artıdır, yeni həcmli atlasla eynilik iddiası yoxdur.
+- Relevant files: `docs/reviews/2026-11-13-game-release-live-check.md`; `docs/reviews/game-joins-visual/live/variants/all-six-emulator.png`, `teal-pause.png`; QA patch `docs/reviews/game-joins-visual/render/qa-style-selector.patch`; plan `docs/PLAN.md`.
+- Remaining work/Exact next step: PNG-ləri istifadəçiyə göstər; yeni implementasiya başlamadan növbəti konkret göstərişi gözlə. Emulator5592 WobbrikLive teal pause-dadır, digər emulator toxunulmayıb.
+
 ## Cari vahid — şəhər chrome-u — 13 noyabr 2026
 - Completed: `8b4a6a4` üzərindən `feat/city-chrome`; şəhər başlığı/əhali, cyan görünüş zolağı, kamera illüstrasiyalı “Binaya bax”/Bax/Geri paneli və Şəhər/İnventar/Bazar aşağı naviqasiyası qoşuldu. Real Home/inventory və mövcud bina focus/return işləyir. Plan/Bazar deaktivdir, placement/market uydurulmur.
 - Current state: istifadəçinin “commit” göstərişi ilə bu vahid lokal commit edilir; merge/push/CI yoxdur; owner release faylları və əvvəlcədən untracked live-check review qorunub.
@@ -271,6 +305,33 @@
 - Remaining work: tam city-view piksel uyğunluğu/qəbulu və V1 canlılıq açıqdır. Mövcud bina artı/terrain sərhədi bu vahiddə dəyişməyib. Yeni feature başlamır; backend dəyişməsi lazım deyil və edilmədi.
 - Relevant files: `CityChrome.kt`, `CityScreen.kt`, `res/drawable-nodpi/city_view_camera_v1.png`; review `docs/reviews/2026-11-13-phase4-city-chrome.md`; host `city-scene-visual/render/`, yeni evidence `docs/reviews/city-chrome-visual/`; yeganə plan `docs/PLAN.md`.
 - Exact next step: lokal commit nəticəsini bildir; ayrıca göstəriş olmadan merge/push/CI və V1 canlılıq başlama. Sabit kamera/city-view/cutout təsdiqlərini yenidən soruşma.
+
+## Oyun atlası — istifadəçinin rəddi və yeni chat handoff-u (cari oyun tapşırığı)
+### Completed / Current state
+- Atlas inteqrasiyası `937f5ea` commit-indədir, lakin istifadəçi altı emulator görüntüsünü gördükdən sonra yalnız ilk iki (purple/teal) görünüşün düzgün, digər dördünün səhv olduğunu açıq bildirdi. İstifadəçi: “hamısı birdəfəlik fix olmalı idi”. Buna görə əvvəlki review/commit və build PASS bütün görünüşlərin tamamlanması/qəbulu deyil. Agentin partial fallback həllini tamamlanmış kimi təqdim etməsi səhv idi.
+- Kök səbəb: `gameAtlasStyle(parts)` yalnız partless və tam `base_1_*`/`base_2_*` dəstlərini yeni kompozit atlasa yönləndirir. `base_3..6` və qarışıq/digər seçimlər köhnə dayaz panel atlaslarına qayıdır; həcm/perspektiv/anchor/hissə layering uyğunluğu itir. Bu, açıq düzəldilməli problemdir; “köhnə art məhdudiyyətidir” deyib bağlama.
+- Repo hazırda başqa şəhər vahidinin `feat/city-chrome` branch-ində, HEAD `8b4a6a4`; şəhər working diff-i və owner `app/release/` mövcuddur. Onlara toxunma, stash/reset/checkout ilə itirmə. Oyun fix-i üçün mövcud git vəziyyətini yoxlayıb ayrıca uyğun fix branch təşkil et; şəhər diff-ini oyun commit-inə qatma. Main merge/push/CI icazəsi yoxdur.
+### Decisions
+- Purple/teal formaları və təmizlənmiş iki atlas təsdiqlidir; istifadəçi onların emulator görünüşünü düzgün sayıb. Yenidən həmin təsdiqi soruşma, alternativ dizayn uydurma.
+- Bütün oyun görünüşləri və mövcud hissə kombinasiyaları birlikdə uyğun həcm/perspektiv və joins ilə işləməlidir. Yalnız iki bütöv dəsti düzəldib qalanları səhv panel fallback-ında saxlamaq qəbul edilmir. 68-item ownership/ID/kataloqu silmə, seçimləri səssiz dəyişmə və bütün hissələri baked-in eyni fasadla əvəz etmə.
+- Fizika, SceneMotion, accepted geometry, collision/scoring və backend authority dəyişməsin. Mobil yalnız portret; planşet ayrıca işdir.
+- İstifadəçi bu konkret oyun görünüşünü emulatorla yoxlamağı açıq istəyib; əvvəlki avtomatik emulator açmamaq qaydası bu tapşırıq üçün maneə deyil. Hesabsız debug lokal yoxlama qəbul edilib; onu serverli release/hesab PASS kimi təqdim etmə. Merge/push/CI etmə.
+### Remaining work
+- Bütün dəst və qarışıq hissələr üçün yeni həcmli forma ilə işləyən uyğun modul art/atlas və ortaq crop/anchor/layering həlli qur. Yeni sprite-lər/texniki ayrılma lazım olsa mövcud təsdiqli vizual dili saxla; əlavə vizual qərar həqiqətən tələb olunarsa yalnız o konkret fərqi göstər.
+- Pəncərə/giriş/işıq kompozit atlasda baked-in-dir. Universal kompozit üstündən əlavə overlay çəkmək duplicate hissə və səhv ownership görünüşü yaradar; bunu real modul ayrılma ilə həll et. Köhnə atlasları consumer/ID uyğunluğu tamamlanmadan silmə.
+- Bütün baza dəstləri + qarışıq və açılan/satın alınan hissələrdən nümayəndə kombinasiyaları: aktiv/yellənmə/drop/joins/foundation/finish və oyun sonu yoxlansın. Bir mərtəbəlik capture seams yoxlaması deyil; çoxmərtəbəli real emulator görüntüsü də tələb olunur. Yalnız host PNG və build PASS ilə bağlama.
+### Relevant files
+- Plan yalnız `docs/PLAN.md`; ui-craft və `AGENTS.md` tətbiq edilir.
+- app `GameAtlas.kt`, `GameScene.kt`, `FinishCosmeticScreen.kt` (`CosmeticSprite`, loader), `MainActivity.kt` (`PracticeGame`), `OnlineGame.kt` (`AcceptedScene`), `BuildingArt.kt`; debug `ScenePreviewActivity.kt`.
+- `assets/game-v3/{atlas.json,purple.png,teal.png}`, `assets/finish/catalog-map.json` +mövcud68hissə atlasları; `scripts/clean-game-atlases.py`.
+- Təsdiqli istinadlar `docs/design/game-tap-v2/phone.png`, `atlas-v3-proposal/{purple,teal}.png`; review `docs/reviews/2026-11-13-game-scene-joins.md`, `docs/reviews/2026-11-13-game-release-live-check.md`.
+- Səhvin emulator sübutu: `docs/reviews/game-joins-visual/live/variants/all-six-emulator.png` (ilk2düzgün,qalan4rədd); orijinal ayrı PNG-lər eyni qovluqdadır. PNG-lər lokal ignored ola bilər; fayllar diskdə yoxdursa bunu açıq qeyd et.
+### Checks performed
+- `937f5ea` üçün əvvəlki host12/12 +engine/app unit/APK/lint PASS mövcuddur, lakin bütün art uyğunluğu PASS deyil. Yeni test/implementation bu handoff-da edilmədi.
+- Hesabsız canlı PracticeEngine: purple və digər5dəstdə sıfırdan1mərtəbə real touch ilə yerləşdirildi. Teal pause çəkildi. Digər4art bu görüntülər əsasında istifadəçi tərəfindən rədd edildi. QA style selector yalnız `/private/tmp/wobbrik-variant-qa` surətindədir; repo app source-a tətbiq edilməyib. Təkrarlamaq üçün `docs/reviews/game-joins-visual/render/qa-style-selector.patch` var. Temp build Java21 assembleDebug PASS18s.
+- Disposable WobbrikLive emulator5592 istifadə edildi; emulator5586 başqa iş üçündür, toxunma. Real release APK assets game-v3 ilə byte-identikdir, amma Google girişində qalıb; real hesabın saved parts-i yoxlanmayıb. Source/physics/backend bu emulator yoxlamalarında dəyişməyib.
+### Exact next step
+- Yeni chatdə bu son oyun handoff-unu və PLAN-ı oxu, yalnız göstərilən art/renderer/metadata fayllərini və altı real emulator görüntüsünü yoxla. Əvvəl bütün seçimlərin niyə səhv fallback-a düşdüyünü və kompozit/bölünən hissə sərhədini müəyyənləşdir; sonra mövcud təsdiqli purple/teal geometry-si üzərində bütün seçimləri bir yerdə düzəldən həlli hazırla. Şəhər diff-inə və fizikaya toxunma. Yeni chat üçün kontekst istənib; bu chatdə implementasiyaya başlama.
 
 ## Oyun modul atlası — pəncərə preview-su, 13 noyabr 2026 (cari)
 - Completed: `826a441` bazasından `fix/game-modular-atlas`; bütün qeyri-tam purple/teal seçimləri təmiz həcmli shell+material+ayrı hissə qatlarına yönəldilib. Köhnə panel hull fallback silinib. İki generated clean shell, GameFacade.kt və debug selector/read-only telemetry əlavə edilib. Şəhər source-u, fizika, SceneMotion, accepted geometry, 68 ID/ownership/kataloq/backend dəyişməyib.

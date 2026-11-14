@@ -57,10 +57,11 @@ class CompactFlowRenderTest {
    path.startsWith("city?")->"""{"rules_version":"wobbrik-v1","revision":1,"population":"0","buildings":[]}"""
    else->error(path)
   })})
+  var submissions=0
   val backend=object:AttemptBackend {
    override suspend fun sync(session:appbackend.wobbrik.billing.BillingSession)=snapshot
    override suspend fun catalog(session:appbackend.wobbrik.billing.BillingSession)=catalog
-   override suspend fun submit(session:appbackend.wobbrik.billing.BillingSession,command:AttemptCommand)=Unit
+   override suspend fun submit(session:appbackend.wobbrik.billing.BillingSession,command:AttemptCommand) { submissions++ }
   }
   val journal=object:AttemptJournal {
    override fun pending(uid:String):AttemptCommand?=null
@@ -94,6 +95,27 @@ class CompactFlowRenderTest {
    compose.onNodeWithText("Bina görünüşü").assertIsDisplayed()
    compose.onNodeWithText("İnventara qayıt").assertIsDisplayed()
    capture("building-detail-$name")
+   compose.onNodeWithText("Binanı sil").assertIsDisplayed().performClick()
+   compose.onNodeWithText("Bina silinsin?").assertIsDisplayed()
+   compose.onNodeWithText("Ləğv et").assertIsDisplayed()
+   compose.runOnUiThread {
+    val v=requireNotNull(org.robolectric.shadows.ShadowDialog.getLatestDialog()).window!!.decorView
+    val b=Bitmap.createBitmap(v.width,v.height,Bitmap.Config.ARGB_8888)
+    v.draw(Canvas(b))
+    File(out,"production-delete-$name.png").outputStream().use {b.compress(Bitmap.CompressFormat.PNG,100,it)}
+   }
+   compose.onNodeWithText("Ləğv et").performClick()
+   compose.onNodeWithText("Bina silinsin?").assertDoesNotExist()
+   compose.runOnIdle {assertEquals(0,submissions);assertEquals("b-1",selected)}
+   val layouts=mutableListOf<androidx.compose.ui.text.TextLayoutResult>()
+   compose.onNodeWithText("Hər mərtəbəyə").performScrollTo()
+    .performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.GetTextLayoutResult) {it(layouts)}
+   val layout=layouts.single()
+   for(line in 0 until layout.lineCount-1) {
+    val end=layout.getLineEnd(line,visibleEnd=true)
+    val text=layout.layoutInput.text.text
+    assertFalse("Detail label breaks inside a word",end>0 && end<text.length && text[end-1].isLetter() && text[end].isLetter())
+   }
    compose.runOnIdle {page="edit"}
    compose.onNodeWithText("✓ Tətbiq et").assertIsDisplayed()
    capture("parts-edit-$name")

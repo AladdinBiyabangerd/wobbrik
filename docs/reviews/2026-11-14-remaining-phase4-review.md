@@ -1,0 +1,13 @@
+# Qalan phase4 dəyişikliklərinin lokal review-u
+
+14 noyabr 2026. Branch `chore/remaining-phase4-evidence`, baza `7ef170e`. İstifadəçi əvvəlki owner diff-ində qalan commit edilməli faylləri lokal saxlamağı açıq tapşırıb. Bu qeyd yeni plan/mərhələ qəbulu deyil.
+
+Source: `InventoryScreen.kt` dar detail panelində etiket və dəyəri mövcud Target/fontScale həddinə görə alt-alta yerləşdirir. Rəng/art/domain/API dəyişmir. `CompactFlowRenderTest` silmə dialoqunun ləğvini, sıfır mutation və selection saxlanmasını, etiketdə söz qırılmamasını yoxlayır. `CityRenderTest` təsdiqli navbar-ın accessibility adını istifadə edir. Diff üzrə yeni konkret bug tapılmadı; əvvəlki source dəyişdirilmədi. Detail/parts commit-indən kənarda qalmış responsive asılılıq indi bu ayrıca vahiddə saxlanır.
+
+Son fokuslu native host **15/15 PASS43s**: CompactFlow3,DetailPartsParity3,CityRender9; failure/error/skipped0. 360×640/font1,390×844/font1,320×568/font2 və City360font2/status/navigation əhatəsi. Son üç production contact şəklinə baxıldı. Böyük şrift tab/secondary məzmun scroll-u saxlanır; bütün məzmunun eyni anda görünməsi iddia edilmir. Unit/APK/lint eyni production source-da əvvəlki review run-unda PASS2s,107/108UP-TO-DATE idi;236unit nəticəsi reuse edilir. Yeni production source dəyişməsi yoxdur. Kontrast əvvəlki4/4min8.22 qüvvədədir; diffcheckPASS. Host synthetic-dir; emulator/device/real-server yoxlaması və CI aparılmayıb. Mobil portret scope-u saxlanır.
+
+`phase4/evidence/{host-results,unit-results,final-flow-results,images}.json` əvvəlki qəbul yoxlamasının tarixli sübutudur, cari15host nəticəsi kimi təqdim edilmir. images.json-dakı saxlanmış lokal evidence PNG-lərinin SHA256-ları, JSON və QA XML formatları yoxlandı. Yeni host nəticəsi `phase4/evidence/remaining-host-results.json`-dədir. PNG-lər üçün mövcud gitignore siyasəti saxlanır; artıq tracked üç contact son renderlə yenilənir. Tarixi phase4 PNG-ləri və digər ignored şəkillər lokal qalır.
+
+PLAN/acceptance/handoff əvvəlki qərar/statusların traceability-sini saxlayır; cari handoff başlığı köhnə pending qeydlərini tarixçə kimi göstərir. Tam vizual parity/mərhələ4qəbulu açıqdır. AppBackend müqaviləsinə təsir yoxdur və dəyişiklik tələb olunmadı.
+
+Ayrıca docs commit-i əvvəlki `2026-11-13-game-release-live-check.md`, QA-only patch və iki account-free practice hierarchy XML-ni saxlayır. Patch production-a tətbiq edilmir, cari production-a tətbiq uyğunluğu/testi iddia edilmir. Həmin live müşahidələr13noyabr tarixidir; yeni emulator yoxlaması kimi göstərilmir. Generated `app/release/` APK/DM/metadata commit edilmir və diskdə qorunur. Bu yeni vahidlər üçün merge/push/CI yoxdur.

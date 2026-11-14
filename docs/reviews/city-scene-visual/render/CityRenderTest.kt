@@ -67,9 +67,9 @@ class CityRenderTest {
  @Test fun homeEntry() {
   var destination = "home"
   compose.setContent { HomeScreen(GameSnapshot("wobbrik-v1",1,0,0,null),false,{}, { destination=it }) }
-  compose.onNodeWithText("Şəhərim").performScrollTo().assertIsEnabled()
+  compose.onNodeWithContentDescription("Şəhərim").assertIsDisplayed().assertIsEnabled()
   capture("home-city-entry")
-  compose.onNodeWithText("Şəhərim").performClick()
+  compose.onNodeWithContentDescription("Şəhərim").performClick()
   org.junit.Assert.assertEquals("city",destination)
  }
  @Test fun small()=render(1f,"city-360-font1")

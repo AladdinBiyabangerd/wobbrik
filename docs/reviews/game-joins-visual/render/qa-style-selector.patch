@@ -1,0 +1,42 @@
+--- a/app/src/main/kotlin/com/aladdin/wobbrik/MainActivity.kt
++++ b/app/src/main/kotlin/com/aladdin/wobbrik/MainActivity.kt
+@@ -70,6 +70,7 @@
+     engine: PracticeEngine,
+     renderOnly: Boolean = false,
+     previewMotion: SceneMotion? = null,
++    previewParts: Map<String, String> = emptyMap(),
+     frameTiming: FrameTiming = remember { FrameTiming() },
+ ) {
+     // Coordinates are read in the draw phase; HUD only observes discrete changes.
+@@ -87,6 +88,7 @@
+         ImageBitmap.imageResource(R.drawable.game_floor), ImageBitmap.imageResource(R.drawable.game_crane),
+         ImageBitmap.imageResource(R.drawable.inventory_garden), ImageBitmap.imageResource(R.drawable.game_roof),
+         ImageBitmap.imageResource(R.drawable.game_cloud), rememberGameAtlases())
++    val previewCosmetics = if (previewParts.isEmpty()) emptyMap() else rememberCosmeticArt()
+     val density = LocalDensity.current
+     var hudHeight by remember { mutableStateOf(GameTokens.Target + GameTokens.Inset) }
+     fun publish() {
+@@ -162,7 +164,7 @@
+                     interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }) {
+                     if (engine.drop()) learned = true
+                     publish()
+-                }) { motionFrame; drawGameScene(snapshot.value, art, motion) }
++                }) { motionFrame; drawGameScene(snapshot.value, art, motion, previewCosmetics, previewParts) }
+             Row(Modifier.fillMaxWidth().safeDrawingPadding()
+                 .onSizeChanged { hudHeight = with(density) { it.height.toDp() } }.padding(GameTokens.Inset),
+                 horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Top) {
+--- a/app/src/debug/kotlin/com/aladdin/wobbrik/ScenePreviewActivity.kt
++++ b/app/src/debug/kotlin/com/aladdin/wobbrik/ScenePreviewActivity.kt
+@@ -47,7 +47,11 @@
+                 // Reject Android's stale task-snapshot starting window in capture tooling.
+                 val marker = "Wobbrik fixture floors=$count crane=${state.craneX.toInt()} paused=${state.paused} drift=$drift finished=${state.phase == Phase.FINISHED}"
+                 Box(Modifier.fillMaxSize().semantics { contentDescription = marker }) {
+-                    PracticeGame(engine, renderOnly = !intent.getBooleanExtra("animate", false), previewMotion = motion)
++                    PracticeGame(engine, renderOnly = !intent.getBooleanExtra("animate", false), previewMotion = motion,
++                        previewParts = intent.getIntExtra("style", 0).coerceIn(0,6).let { style ->
++                            if (style == 0) emptyMap() else listOf("wall", "window", "entrance", "lighting", "roof")
++                                .associateWith { "base_${style}_$it" }
++                        })
+                 }
+             }
+         }
