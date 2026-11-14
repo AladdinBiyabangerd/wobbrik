@@ -49,7 +49,7 @@ class CityParityRenderTest {
             val view=compose.activity.window.decorView
             val image=Bitmap.createBitmap(view.width,view.height,Bitmap.Config.ARGB_8888)
             view.draw(Canvas(image))
-            val file=File("/Users/mac/My Workspace/Wobbrik/docs/reviews/city-balcony-visual/$name.png")
+            val file=File("/Users/mac/My Workspace/Wobbrik/docs/reviews/city-remaining-visual/$name.png")
             file.parentFile!!.mkdirs()
             file.outputStream().use { image.compress(Bitmap.CompressFormat.PNG,100,it) }
         }
