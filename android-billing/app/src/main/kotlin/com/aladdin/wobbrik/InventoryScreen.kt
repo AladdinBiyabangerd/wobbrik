@@ -355,11 +355,12 @@ private fun DetailRow(label: String, value: String) {
     }
 }
 
-/** Uses accepted coordinates without inventing a straight footprint for legacy buildings. */
+/** Server metadata stays real; approved art is a decorative owned-building presentation. */
 @Composable
 internal fun BuildingPreview(building: OwnedBuilding, modifier: Modifier) {
     val art = rememberCosmeticArt() + rememberGameWindowArt()
     val atlases = rememberGameAtlases()
+    val purple = rememberPurpleBuildingArt()
     val gardenImage = ImageBitmap.imageResource(R.drawable.inventory_garden)
     val garden = remember(gardenImage) { CosmeticSprite(gardenImage, androidx.compose.ui.unit.IntOffset.Zero,
         androidx.compose.ui.unit.IntSize(gardenImage.width, gardenImage.height)) }
@@ -372,7 +373,8 @@ internal fun BuildingPreview(building: OwnedBuilding, modifier: Modifier) {
         return
     }
     Canvas(modifier.semantics { contentDescription = "${building.floors} mərtəbəli bina" }) {
-        buildingPreview(atlases, art, building.parts, centers, garden)
+        if (usesPurpleTemplate(building.parts)) purpleBuilding(purple, art, atlases, building.parts, centers)
+        else buildingPreview(atlases, art, building.parts, centers, garden)
     }
 }
 

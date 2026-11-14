@@ -395,6 +395,12 @@ Bir dənə hər seçimdən almaq 1.000 sikkədir. Sahə tuturlar, inventara qayt
 
 ## 7. Şəhər həndəsəsi və yerləşdirmə
 
+**14 noyabr — modul template inteqrasiyası:** təsdiqli `building-purple-v1/modular` atlası inventar/detail və shared hissə redaktəsinin mövcud `parts` ID xəritəsinə bağlanır. Bütöv bina bitmap istisnası çıxarılır. `base_1` hissəsi olan seçimlər bu template-də, hər kateqoriya öz seçilmiş ID-si ilə çəkilir; tam digər üslublar mövcud renderer-də qalır. `base_1_window/roof/entrance/lighting` atlasın arch/roof/entrance/lamp qatlarını seçir; başqa ID-lər mövcud kataloq artıdır, square yeni ID deyil. Bu template maksimum6nümayəndə mərtəbə göstərir; real say/accepted geometry dəyişmir. İstifadəçinin son şəkli mərtəbələrin vahid bina kimi oturuşu və təməl–torpaq/pilləkən birləşməsi üçün əlavə istinaddır (`design/building-purple-v1/join-reference.png`). Şəhər/aktiv oyun/server dəyişmir; bütün kataloqun yeni art-a çevrilməsi iddia edilmir.
+
+**14 noyabr son dəqiqləşdirmə: istifadəçi 40 real mərtəbəni vizualda6–8 təbii nisbətli nümayəndə mərtəbə ilə göstərməyi açıq təsdiqlədi; real mərtəbə sayı metadata-da qalır. Üfüqi dartılma/yastılanma rədd edildi. Owned inventory/detail preview maksimum8mərtəbə və yumşaldılmış ofsetlə çəkilir; server məlumatı və aktiv oyun dəyişmir. Şəhər renderer-inə həmin retuşun tətbiqi ayrıca qalan işdir.**
+
+**14 noyabr 2026 — son təqdimat qərarı:** istifadəçinin tikdiyi binanı şəhər/inventar/detal təqdimatında 100% eyni göstərmək məcburi deyil. Mövcud `design/city-view.png` nümunəsindəki kimi kiçik estetik retuşlarla daha yaxşı görünüşə gətirmək olar; bu qərar aşağıdakı əvvəlki dəqiq siluet/ofset sadiqliyi tələbindən üstündür. Serverdə saxlanan accepted geometry, ownership, mərtəbə sayı və oyun fizikası dəyişmir. Aktiv oyun binasının eni dəyişdirilmir. İlk vahid tam binanı saxlayan geniş preview və daha geniş alt torpaqdır; retuş həmin vahiddən sonra ayrıca tətbiq olunur. Bu göstəriş fontan və ya yeni kataloq əlavə etmir.
+
 1. **Əhatə.** Siyasət yalnız şəhərdə yerləşdirməyə (placement) və şəhər UI-da yerləşdirilmiş binaya
    baxışa aiddir. Canlı oyun (oyun içi) görünüşünə aid deyil: istifadəçinin düzəlişinə görə oyun
    içindəki hazırkı görünüş qaydasındadır və olduğu kimi saxlanılır. Bu siyasətə görə canlı oyun

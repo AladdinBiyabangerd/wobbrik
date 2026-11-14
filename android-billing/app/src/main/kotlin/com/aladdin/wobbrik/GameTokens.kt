@@ -51,4 +51,11 @@ internal object GameTokens {
         val LargeFontNavbarHeight = Target * 2 + Gap
     }
     val Hint = 18.sp
+    // Approved decorative inventory/detail presentation; never active gameplay.
+    internal object BuildingPreview {
+        const val MaxFloors = 8
+        const val PurpleMaxFloors = 6 // approved 6–8 representative floors; broad modular art
+        const val MaxOffsetTicks = 30000.0
+        const val GardenWidth = 260f // preview scene units; floor width is 100
+    }
 }

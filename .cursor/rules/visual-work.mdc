@@ -5,6 +5,8 @@ alwaysApply: true
 
 ## Visual work
 
+- 14 noyabr son istifadəçi qərarı (PLAN §7): oyun xarici bina təqdimatında `docs/design/city-view.png` kimi kiçik estetik retuş icazəlidir; 100% həndəsə eyniliyi tələb olunmur. Server accepted geometry və aktiv oyun eni dəyişdirilmir. Cari preview en/torpaq vahidindən sonra retuş ayrıca tətbiq edilir.
+
 - **13 noyabr 2026 — mobil əvvəl:** mobil oyun və ekranlar tam bitmədən planşet dizaynına keçilmir. Hər mobil vahid üçün ayrıca planşet dizaynı/nümunəsi hazırlanmaz; planşet dizaynı və ona aid ayrıca implementasiya/render işi mobil tamamlandıqdan sonra istifadəçinin ayrıca tapşırığı ilə başlayır. Mövcud təsdiqlənmiş planşet görünüşləri qorunur. Bu ardıcıllıq əvvəlki hər vizual vahiddə telefon+planşet işi tələbindən üstündür; mobil yalnız portret rejimindədir. Mobil üçün landşaft dizaynı/implementasiyası tələb edilmir; əvvəlki telefon landşaftı yoxlama tələblərini bu qərar əvəz edir. Müxtəlif portret ölçüləri, böyük şrift, inset və əlçatanlıq uyğunlaşdırması qüvvədə qalır. Mobil portret kilidi app manifestində `MainActivity` üçün `screenOrientation="portrait"` ilə tətbiq edilir.
 
 - UI hazırlayanda implementasiyaya başlamazdan əvvəl tətbiq ediləcək dizaynı/vizual nümunəni istifadəçiyə göstər və açıq təsdiqini al; təsdiq gələnədək UI implementasiyasına başlama. Mövcud təsdiqlənmiş dizayn varsa, həmin dizaynı təqdim et, yeni alternativ uydurma. Ümumi işə başlama icazəsini bu konkret UI təsdiqinin əvəzi sayma.
@@ -32,3 +34,7 @@ the token, contrast and screenshot workflow. Two things hold regardless of it:
 - **Don't report a visual change as working without having rendered it and
   looked at the image.** If rendering wasn't possible, say that plainly instead
   of implying the result was checked.
+
+- 14 noyabr son dəqiqləşdirmə: istifadəçi 40 real mərtəbəni vizualda6–8 təbii nisbətli nümayəndə mərtəbə ilə göstərməyi açıq təsdiqlədi; real mərtəbə sayı metadata-da qalır. Üfüqi dartılma/yastılanma rədd edildi. Owned inventory/detail preview maksimum8mərtəbə və yumşaldılmış ofsetlə çəkilir; server məlumatı və aktiv oyun dəyişmir. Şəhər renderer-inə həmin retuşun tətbiqi ayrıca qalan işdir.
+
+- 14 noyabr — modul template inteqrasiyası: təsdiqli `building-purple-v1/modular` atlası inventar/detail və shared hissə redaktəsinin mövcud `parts` ID xəritəsinə bağlanır. Bütöv bina bitmap istisnası çıxarılır. `base_1` hissəsi olan seçimlər bu template-də, hər kateqoriya öz seçilmiş ID-si ilə çəkilir; tam digər üslublar mövcud renderer-də qalır. `base_1_window/roof/entrance/lighting` atlasın arch/roof/entrance/lamp qatlarını seçir; başqa ID-lər mövcud kataloq artıdır, square yeni ID deyil. Bu template maksimum6nümayəndə mərtəbə göstərir; real say/accepted geometry dəyişmir. İstifadəçinin son şəkli mərtəbələrin vahid bina kimi oturuşu və təməl–torpaq/pilləkən birləşməsi üçün əlavə istinaddır (`design/building-purple-v1/join-reference.png`). Şəhər/aktiv oyun/server dəyişmir; bütün kataloqun yeni art-a çevrilməsi iddia edilmir.

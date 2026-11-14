@@ -1,3 +1,60 @@
+# Cari vahid — purple template selected-part inteqrasiyası, 14 noyabr 2026
+
+- Completed: təsdiqli modul atlas production shared BuildingPreview-a bağlandı; bütöv bitmap istisnası çıxarıldı. Mövcud server parts ID-ləri ilə ayrı window/roof/entrance/light/wall və mixed qatlar inventar/detaildə çəkilir. Son istifadəçi mərtəbə/təməl–torpaq birləşmə referansı saxlanıldı və renderlə tutuşduruldu.
+- Current state: `fix/mobile-consistency-performance`, HEAD `4ae6f87`; owner diff/release qorunur. İstifadəçi nəticəni təsdiqlədi və lokal commit tapşırdı; bu vahid commit edilir. Merge/push/CI yoxdur.
+- Decisions: `base_1` hissəsi olan mixed seçim purple template saxlayır; tam digər üslublar əvvəlki renderer-dədir. base_1 window→arch, roof→roof, entrance→entrance, lighting→lamp, wall→blank shell; square yeni ID deyil. Maksimum6nümayəndə mərtəbə; real say/accepted geometry/server dəyişmir. Alternativ damın boşluğu öz aspect ratio/eave ilə düzəldildi. Şəhər/aktiv oyun scope deyil.
+- Remaining work: tam68IDart pariteti yoxlanmayıb; digər üslubların artı/şəhər retuşu ayrıca. Təkrarlanan karnizlər referansdan daha müntəzəm/qalındır; bespoke ofset masonry ilə piksel eyniliyi iddia edilmir. Font2 inner scroll/tab scroll saxlanır.
+- Relevant files: `PurpleBuildingArt.kt`, `InventoryScreen.kt`, `GameTokens.kt`; `assets/building-purple/`; `docs/design/building-purple-v1/modular/README.md`, `join-reference.png`; `docs/reviews/2026-11-14-purple-template-integration.md`; `docs/reviews/purple-inventory-visual/`; `PurpleInventoryRenderTest.kt`. Yeganə plan `docs/PLAN.md`§7.
+- Checks performed: final native3/3PASS31s,27production-screen capture(360/390font1,320font2;8detail variants incl40floors); final board/roof/mixed/wall/font2 və reference comparison görüntülərinə baxıldı. Son production editdən sonra adi app24unit/APK/lintPASS18s; diffcheckPASS. Backend müqaviləsi dəyişmədiyindən AppBackend dəyişməsi lazım deyil. Device/emulator/real hesab/GPU/TalkBack/inset/tablet/landşaft/alllocale yoxlanmayıb; CI yoxdur.
+- Exact next step: lokal commit nəticəsini bildir; ayrıca göstərişsiz merge/push/CI və yeni feature başlama.
+
+---
+Əvvəlki qeydlər tarixçədir; cari status yuxarıdadır.
+
+# Cari vahid — modullu bənövşəyi template sınağı, 14 noyabr 2026
+
+- Completed: istifadəçinin təsdiqli bina üçün modul yanaşma göstərişi ilə9qatlı atlas və Compose/Canvas birləşdirmə nümunəsi hazırlandı. Gövdə/ground/dam/pəncərə/giriş/lampa/balkon/torpaq ayrı çəkilir. İki pəncərə və4/6mərtəbə renderi var; bütöv bina şəkli ilə dəyişmə deyil.
+- Current state: fix/mobile-consistency-performance, HEAD4ae6f87; yeni atlas+harness review-only-dir, production-a qoşulmayıb. Əvvəlki production/owner diff və release qorunur. Commit/merge/push/CI yoxdur.
+- Decisions: istifadəçi dəqiqləşdirdi və təsdiqlədi: mövcud oyundakı kimi inventardan seçilən hissələr uyğun yeni template-də işləməlidir; ikinci sistem qurulmur. Hazırda yalnız layer swap və birləşmə sınağı var, real catalog ID mapping yoxdur. PLAN mövcud authority olaraq qalır; ayrıca plan yaradılmır.
+- Remaining work: mövcud selected-part renderer müqaviləsinə uyğun dəqiq catalog mapping, divar/dam/giriş/işıq və mixed hissələrin dəyişməsi, sonra real inventory/detail inteqrasiyası/renderi. Digər üslublar və şəhər hələ dəyişməyib.
+- Relevant files: docs/design/building-purple-v1/modular/{atlas-v1.png,atlas-v1.json,README.md}; docs/reviews/mobile-sizing-visual/render/ModularBuildingStudyTest.kt; docs/reviews/2026-11-14-modular-building-study.md; docs/reviews/modular-building-visual/; production GameFacade.kt,BuildingArt.kt,InventoryScreen.kt; docs/PLAN.md§7.
+- Checks performed: native2/2PASS10s,6capture(390font1/320font2;arch/square/6floors). Final arch/squarefont1 və6floorfont2görüntülərinə baxıldı. İlkin dam boşluğu/lampa üst-üstə düşməsi düzəldildi. DiffcheckPASS. Production dəyişmədiyindən adi APK/lint təkrarlanmadı. Backend dəyişməsi lazım deyil; emulator/CI yoxdur.
+- Exact next step: modullu nümunəni göstər; yeni chatdə bu atlas+harness və GameFacade seçilmiş hissə müqaviləsini oxuyub tək purple template-i mövcud real ID-lərə bağla, hissə dəyişmələrinin real inventory/detail renderini hazırla. Tam kataloq hazır sayılmır.
+
+---
+# Cari vahid — təsdiqli bina artının inventar/detala tətbiqi, 14 noyabr 2026
+
+- Completed: əvvəlki preview vizualı istifadəçi tərəfindən istinada yaxın sayılmadı. Yeni dolğun bənövşəyi imagegen nümunəsi açıq təsdiqləndi; şəffaf derivative production BuildingPreview-a qoşuldu. İnventar/detal və shared parts-edit istifadə edir.
+- Current state: `fix/mobile-consistency-performance`, HEAD4ae6f87; bu və əvvəlki owner diff-ləri commit edilməyib. Owner release qorunur; merge/push/CI yoxdur.
+- Decisions: yalnız tam base_1 dəsti,≥10real mərtəbə və mövcud geometry/art üçün təsdiqli sabit nümayəndə asseti. Real mərtəbə/ownership/server geometry dəyişmir; başqa/mixed dəstlər modular qalır. Bütün kataloqun çevrilməsi hazır deyil. İstinad docs/design/building-purple-v1/approved-reference.png; PLAN§7 və güzgülər yeniləndi.
+- Remaining work: digər dəstlər üçün uyğun art/modular yanaşma, şəhər retuşu və əvvəlki mobil uyğunluq/keçid/floor-foundation işləri. Bu tək nümunə onları bağlamır.
+- Relevant files: InventoryScreen.kt; drawable-nodpi/building_purple_approved.png; docs/design/building-purple-v1/; docs/reviews/2026-11-14-approved-building-preview.md; docs/reviews/approved-building-visual/; CompactFlowRenderTest.kt/render.init.gradle.
+- Checks performed: native3/3PASS25s(360/390font1,320font2);390inventory/detail və320font2detail görüntülərinə baxıldı. Adi app24unit/APK/lintPASS13s; diffcheckPASS. Backend dəyişikliyi lazım deyil. Emulator/CI yoxdur; real hesab/device yoxlanmayıb.
+- Exact next step: inventar və detalın real Compose host renderlərini istifadəçiyə göstər; tək base_1 dəsti məhdudiyyətini açıq de. Ayrıca göstərişsiz şəhərə/kataloqa keçmə, merge/push/CI etmə.
+
+---
+# Cari vahid — təbii nisbətli nümayəndə bina, 14 noyabr 2026
+
+- Completed: əvvəlki yastılanan3×üfüqi stretch çıxarıldı. Owned inventory/detail/part-edit preview-da maksimum8nümayəndə mərtəbə,30scene-vahid diapazona yumşaldılmış ofset və uniform sprite scale tətbiq edilir. Torpaq260vahid enlə öz nisbətlərini saxlayır. Real mərtəbə sayı metadata/accessibility və server məlumatında qalır. Aktiv oyun eni/fizikası dəyişmir.
+- Current state: `fix/mobile-consistency-performance`, baza `4ae6f87`; bu chat dəyişiklikləri commit edilməyib. Owner release qorunur; merge/push/CI yoxdur.
+- Decisions: istifadəçi40mərtəbəni6–8iri vizual mərtəbə ilə göstərməyi açıq təsdiqlədi. Əvvəlki full-floor stretch nəticəsini rədd etdi; aşağıdakı width qeydi tarixidir. PLAN §7 və qərar güzgüləri yenilənib. Əsas referans `docs/design/city-view.png`.
+- Remaining work: eyni estetik yanaşmanın şəhər səhnəsinə uyğunlaşdırılması; əvvəlki digər mobil uyğunluq/keçid/floor-foundation işləri. Bu vahid şəhər renderer-ini dəyişmir.
+- Relevant files: `BuildingArt.kt`, `GameTokens.kt`, `docs/reviews/2026-11-14-building-preview-width.md`, `docs/reviews/mobile-sizing-visual/render/BuildingWidthRenderTest.kt`, `docs/PLAN.md` §7.
+- Checks performed: final native5/5PASS26s;390font1/320font2nümayəndə bina renderlərinə vəproduction360contact-a baxıldı. Adi app unit/APK/lintPASS16s; diffcheckPASS. Backend/domain/API dəyişmir, AppBackend dəyişikliyi lazım deyil. Emulator/CI açılmır.
+- Exact next step: yoxlanmış təbii nisbətli preview nəticəsini təhvil ver; şəhər retuşunu ayrıca kiçik vahid kimi davam et. Aktiv oyun/server həndəsəsini dəyişmə. Merge/push/CI avtomatik yoxdur.
+
+---
+# Cari vahid — preview eni və torpaq, 14 noyabr 2026
+
+- Completed: `BuildingArt.kt` owned-building preview üçün ayrıca üfüqi miqyas (maksimum3×, mövcud enə sığır) və torpaq eni180→260 scene vahidi. Bütün mərtəbələr görünür; accepted koordinatlar dəyişmir. Aktiv oyun renderer/engine dəyişməyib.
+- Current state: `fix/mobile-consistency-performance`, baza `4ae6f87`; dəyişikliklər commit edilməyib. Owner untracked `android-billing/app/release/` qorunur. Merge/push/CI yoxdur.
+- Decisions: istifadəçi tam bina+geniş preview/torpağı açıq seçib. Son əlavə qərar: şəhər/inventar/detail görünüşündə 100% həndəsə eyniliyi tələb deyil, `docs/design/city-view.png` kimi kiçik estetik retuş icazəlidir. Yeni attachment mövcud city-view ilə SHA256 eynidir. Bu retuş hələ implementasiya edilməyib; cari width vahidindən sonra gəlir. Server geometry/fizika/aktiv oyun eni dəyişmir. PLAN §7 və qərar güzgüləri yenilənib.
+- Remaining work: estetik retuş; əvvəlki digər mobil uyğunluq, keçid və floor/foundation işləri açıqdır. Bu vahid onları bağlamır.
+- Relevant files: `BuildingArt.kt`, `GameTokens.kt`; `docs/reviews/2026-11-14-building-preview-width.md`; `docs/reviews/mobile-sizing-visual/render/BuildingWidthRenderTest.kt`; `docs/PLAN.md` §7, `docs/design/city-view.png`.
+- Checks performed: Java21/offline native5/5PASS22s (1/16/40mərtəbə, düz/ofsetli,390×844font1 və320×568font2; real screen flow360/390/320font2). Before/after normal və compact renderlərə, production360contact-a baxıldı. Adi app unit/APK/lintPASS19s. Diffreview/diffcheckPASS. Palette dəyişmir. Backend/API dəyişmir, AppBackend dəyişikliyi lazım deyil. Synthetic host; device/emulator/CI/TalkBack/GPU/tablet yoxlanmayıb.
+- Exact next step: cari width diff-i təhvil ver; sonra istifadəçinin artıq verdiyi city-view retuş göstərişini ayrıca kiçik vahid kimi hazırla. Qəbul edilmiş server məlumatını dəyişmə, aktiv oyun eninə toxunma. Merge/push/CI avtomatik yoxdur.
+
+---
 # Cari vahid — mobil uyğunluq davamı, 14 noyabr 2026
 
 - Completed: performans `e0ad8ae` artıq commit olunub. Bu davamda `PurchaseHeader` uzun balans/font2 zamanı loqonu sıxışdırmır; balans ayrıca sətirdədir, dar başlıq mövcud heading tokenindən istifadə edir. Alış header vahidi ayrıca lokal commit edilir.
