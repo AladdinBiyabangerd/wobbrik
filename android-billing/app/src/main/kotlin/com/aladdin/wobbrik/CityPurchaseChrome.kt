@@ -24,6 +24,9 @@ import androidx.compose.ui.text.font.FontWeight
 @Composable
 internal fun PurchaseHeader(title: String, coins: Long, onBack: () -> Unit) {
     BoxWithConstraints {
+        val separateBalance = coins.toString().length > 6 ||
+            androidx.compose.ui.platform.LocalDensity.current.fontScale > 1f
+        val sizing = mobileUiSizing()
         val inline = maxWidth >= GameTokens.PanelWidth - GameTokens.Gap * 2 &&
             androidx.compose.ui.platform.LocalDensity.current.fontScale <= 1f && coins.toString().length <= 4
         Column(verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
@@ -44,16 +47,23 @@ internal fun PurchaseHeader(title: String, coins: Long, onBack: () -> Unit) {
                             fontSize = GameTokens.Body, fontWeight = FontWeight.Bold, softWrap = false)
                     }
                 } else Image(painterResource(R.drawable.wobbrik_logo), "Wobbrik", Modifier.weight(1f).height(GameTokens.Target))
-                Surface(shape = RoundedCornerShape(GameTokens.CardRadius), color = GameTokens.Surface,
-                    border = BorderStroke(GameTokens.Hairline, GameTokens.Raised)) {
-                    Row(Modifier.padding(GameTokens.Small), verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {
-                        Image(painterResource(R.drawable.ui_coin), "Sikkə", Modifier.size(GameTokens.Inset))
-                        Text(coins.toString(), color = GameTokens.Text, fontWeight = FontWeight.Bold)
-                    }
-                }
+                if (!separateBalance) PurchaseBalance(coins)
             }
-            if (!inline) Text(title, color = GameTokens.Text, fontSize = GameTokens.Title, fontWeight = FontWeight.Bold)
+            if (separateBalance) PurchaseBalance(coins)
+            if (!inline) Text(title, color = GameTokens.Text, fontSize = sizing.heading, fontWeight = FontWeight.Bold)
+        }
+    }
+}
+
+@Composable
+private fun PurchaseBalance(coins: Long) {
+    Surface(shape = RoundedCornerShape(GameTokens.CardRadius), color = GameTokens.Surface,
+        border = BorderStroke(GameTokens.Hairline, GameTokens.Raised)) {
+        Row(Modifier.padding(GameTokens.Small), verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {
+            Image(painterResource(R.drawable.ui_coin), "Sikkə", Modifier.size(GameTokens.Inset))
+            Text(coins.toString(), color = GameTokens.Text, fontSize = GameTokens.Body,
+                fontWeight = FontWeight.Bold)
         }
     }
 }

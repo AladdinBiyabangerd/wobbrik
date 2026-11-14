@@ -1,0 +1,114 @@
+{
+  "image": "atlas.png",
+  "size": [
+    1254,
+    1254
+  ],
+  "status": "approved-art-v2-integrated",
+  "cells": {
+    "floor": [
+      30,
+      77,
+      370,
+      262
+    ],
+    "roof": [
+      424,
+      72,
+      403,
+      276
+    ],
+    "ground": [
+      853,
+      70,
+      366,
+      283
+    ],
+    "arch": [
+      96,
+      480,
+      231,
+      268
+    ],
+    "square": [
+      527,
+      509,
+      188,
+      226
+    ],
+    "entrance": [
+      883,
+      441,
+      306,
+      331
+    ],
+    "balcony": [
+      17,
+      897,
+      384,
+      299
+    ],
+    "garden": [
+      418,
+      944,
+      414,
+      222
+    ],
+    "lamp": [
+      960,
+      894,
+      160,
+      267
+    ]
+  },
+  "floor_pitch": 180,
+  "catalog_layers": {
+    "base_1_wall": "floor/ground",
+    "base_1_window": "arch",
+    "base_1_roof": "roof",
+    "base_1_entrance": "entrance",
+    "base_1_lighting": "lamp"
+  },
+  "foreground_image": "foreground-v1.png",
+  "foreground_cells": {
+    "front_left": [32, 155, 655, 415],
+    "path": [730, 210, 705, 410],
+    "front_right": [1505, 220, 605, 350]
+  },
+  "foundation_image": "foundation.png",
+  "foundation_cells": {
+    "garden": [
+      15,
+      280,
+      845,
+      445
+    ],
+    "steps": [
+      910,
+      330,
+      592,
+      375
+    ]
+  },
+  "ground_floor_image": "ground-floor-v1.png",
+  "ground_floor_cells": {
+    "ground_masonry": [
+      0,
+      0,
+      1120,
+      710
+    ],
+    "ground_side_roof": [
+      1245,
+      300,
+      395,
+      260
+    ],
+    "ground_entrance": [
+      1760,
+      175,
+      380,
+      445
+    ]
+  }
+}

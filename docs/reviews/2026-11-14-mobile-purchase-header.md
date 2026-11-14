@@ -1,0 +1,10 @@
+# Mobil alış başlığı — 14 noyabr 2026
+
+- Branch: `fix/mobile-consistency-performance`; baza `e0ad8ae`.
+- Scoped diff: `CityPurchaseChrome.kt`, mövcud `CompactPurchaseRenderTest.kt`. Mövcud mobil təsdiq və GameTokens istifadə olunur; redesign/yeni palette yoxdur.
+- Tapıntı: alış header-ində uzun balans və böyük şrift çəkili loqonun enini sıxışdırırdı. Home-dakı uyğun davranış əsasında altı rəqəmdən uzun balans və fontScale>1 ayrıca sətirə keçir. Dar mobil başlıq `mobileUiSizing().heading` istifadə edir. Normal 360/390/440dp qısa balans kompozisiyası saxlanır.
+- Lokal diff review: balans formatı/Long sərhədi, logo sahəsi, mövcud geri callback, title ölçüsü və helper yerləşməsi yoxlandı. Domain/API/server müqaviləsi dəyişmir; AppBackend dəyişməsi lazım deyil.
+- Yoxlamalar: Java21/offline adi core/engine/app unit + APK + lint PASS23s. Son production source dəyişməyib. İlkin synthetic host 8/8 PASS15s; final fixture 8/8 PASS18s. İlk yanlış relative fixture yolu və sandbox Gradle lock cəhdi işləmədi; düzəldildi, PASS sayılmır.
+- Vizual baxış: 320×568/font2/Long.MAX_VALUE, 360×640/font1, 390×844/font1, 440×956/font1 list və land 360/font2 confirmation renderləri açılıb baxıldı. Loqo görünür; balans bütün rəqəmləri ilə iki sətirə keçir. Kartlarda mövcud scroll və kateqoriya horizontal scroll qorunur; footer yerindədir. Son fixture 390×844 və land/decor font2 confirmation-da da Al/Ləğv et görünməsini yoxlayır. Raster konseptlə tam piksel pariteti iddiası yoxdur; palette dəyişmədiyindən yeni contrast ölçümü tələb olunmadı.
+- Məhdudiyyətlər: synthetic host, device/FPS/TalkBack/GPU/API24 runtime yoxlanmayıb. Emulator/CI/merge/push açılmadı. Bu yalnız ortaq alış başlığı vahididir; digər ekran üslubları, route keçidləri, bitmap/frame performansı və bina/foundation birləşmələri açıqdır.
+- Evidence: `mobile-sizing-visual/purchase-{decor-360-font1,decor-390-font1,440-font1,320-font2-long}-list.png`, final host fixture. PNG-lər mövcud ignore qaydasına uyğundur; seçilmiş son nümunələr bu commit-də ayrıca saxlanır.

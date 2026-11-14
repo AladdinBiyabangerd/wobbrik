@@ -8,6 +8,7 @@ gradle.beforeProject { app ->
     app.dependencies.add('debugImplementation', 'androidx.compose.ui:ui-test-manifest:1.7.6')
     app.tasks.withType(Test).configureEach {
         systemProperty 'robolectric.offline', 'true'
+        if (System.getProperty('wobbrik.render.output')) systemProperty 'wobbrik.render.output', System.getProperty('wobbrik.render.output')
         systemProperty 'robolectric.dependency.dir', '/private/tmp/wobbrik-android-jars'
         maxHeapSize = '2g'
     }

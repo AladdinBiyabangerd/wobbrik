@@ -31,7 +31,7 @@ import java.io.File
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 class CompactFlowRenderTest {
  @get:Rule val compose=createAndroidComposeRule<ComponentActivity>()
- private val out=File("/Users/mac/My Workspace/Wobbrik/docs/reviews/mobile-sizing-visual")
+ private val out=File(System.getProperty("wobbrik.render.output", "/Users/mac/My Workspace/Wobbrik/docs/reviews/mobile-sizing-visual")).apply { mkdirs() }
  private fun capture(name:String) {
   compose.waitForIdle()
   compose.runOnUiThread {

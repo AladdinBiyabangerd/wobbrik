@@ -34,11 +34,11 @@ internal fun CityScreen(configured: WobbrikApplication.Bootstrap.Configured,
     var failed by remember { mutableStateOf(false) }
     var retry by remember { mutableIntStateOf(0) }
     LaunchedEffect(retry) {
-        scene = null; failed = false
+        scene = null; failed = false; fromCache = ready.ready == null
         try {
             val session = requireNotNull(configured.sessions.current())
             check(ready.current(configured, session))
-            val loaded = configured.views?.read(ready, session, "city", onCached = { fromCache = true }) { CitySceneRepository(it).load(session) } ?: configured.cityScene.load(session)
+            val loaded = configured.views?.read(ready, session, "city", onCached = { fromCache = true }, refresh = retry > 0) { CitySceneRepository(it).load(session) } ?: configured.cityScene.load(session)
             check(ready.current(configured, session))
             scene = loaded
         } catch (cancelled: CancellationException) { throw cancelled }
