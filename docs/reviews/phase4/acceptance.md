@@ -2,7 +2,11 @@
 
 13 noyabr 2026. Branch: `chore/phase4-acceptance`; baza: `a2ebcce` (mərhələ 4 və fix-lər main/remote main-də). Yeganə plan: `../../PLAN.md`. Bu qeyd yeni plan və ya mərhələ 5-ə başlama icazəsi deyil.
 
-## Qəbul nəticəsi
+## Cari qəbul — 14 noyabr 2026
+
+İstifadəçi mövcud kataloqla tamamlama qərarından sonra “commit et 4 cu merhelede is qalmadisa tesdiqledim men” göstərişi verdi. Razılaşdırılmış mobil scope-də açıq implementasiya bəndi qalmadığı üçün mərhələ4 istifadəçi tərəfindən qəbul edilmiş kimi qeyd olunur. Detail/parts və terras davamları aşağıdadır. Placement əvvəlki istifadəçi qərarı ilə bağlıdır; fontan əlavə edilmir. Statik konseptlə real server torpağı/binaları arasındakı məlumat fərqləri və yoxlanmamış runtime/a11y/performance halları saxlanır, PASS kimi dəyişdirilmir. Qəbul tam piksel eyniliyi, ictimai buraxılış və mərhələ5-ə başlama icazəsi deyil. Branch lokal commit edilir; merge/push/CI bu göstərişə daxil edilmir.
+
+## İlkin qəbul nəticəsi — 13 noyabr
 
 Yoxlanmış mobil portret funksional regression dəsti PASS-dır. Aşağıdakı bir responsive problem düzəldildi, son renderlərinə baxıldı. Yeni domain/API problemi aşkarlanmadı. **Tam birəbir vizual uyğunluq və bütöv məhsul qəbulu PASS kimi bağlanmır**: aşağıda konkret fərqlər və yoxlama sərhədləri göstərilir. İstifadəçinin mərhələ qəbulu ayrıca qərardır; emulator/canlı yoxlama gate deyil.
 
@@ -45,3 +49,7 @@ Lokal diff review: dəyişiklik yalnız dar DetailRow və opt-in host testlərin
 ## 14 noyabr — detail/parts ikon və çərçivə davamı
 
 İstifadəçinin açıq göstərişi ilə yuxarıdakı detail/parts ikon və çərçivə fərqləri `fix/phase4-detail-parts-parity` working diff-də tamamlandı. Son compact/navbar/modular art qərarları saxlanır. Final8/8native host və adi unit/APK/lint PASS; nəticə, yanaşı render müqayisəsi və məhdudiyyətlər [ayrıca review-da](../2026-11-14-phase4-detail-parts-parity.md). Əvvəlki acceptance nəticələri tarixidir; bu əlavə şəhər parity fərqlərini, tam piksel uyğunluğunu və mərhələ4qəbulunu bağlamır. Merge/push/CI yoxdur.
+
+## 14 noyabr — terras və kataloq sərhədi
+
+Kafe terrası şəhər fasadına qoşuldu; native üç mobil portret/focus-return və adi236unit/APK/lint yoxlamaları keçdi. Təfərrüat: [review](../2026-11-14-city-remaining-visuals.md). İstifadəçi “Mövcud kataloqla tamamla” qərarı verdi: fontan əlavə edilmir, onun olmaması bu vahiddə açıq implementasiya tapşırığı deyil. Real parcel union və seçilmiş hissələr statik konseptlə eyniləşdirilmir. Bu qeyd bütöv mərhələ4 qəbulu deyil.

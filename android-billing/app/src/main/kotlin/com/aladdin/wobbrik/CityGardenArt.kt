@@ -25,7 +25,7 @@ internal data class CityGardenArt(val sprites: Map<String, CosmeticSprite>)
 internal fun rememberCityGardenArt(): CityGardenArt {
     val context = LocalContext.current
     return remember(context) {
-        CityGardenArt(listOf("garden-v1", "balcony-v1").flatMap { name ->
+        CityGardenArt(listOf("garden-v1", "balcony-v1", "terrace-v1").flatMap { name ->
             val data = JSONObject(context.assets.open("city/$name.json").bufferedReader().use { it.readText() })
             val image = context.assets.open("city/$name.png").use { requireNotNull(BitmapFactory.decodeStream(it)) }.asImageBitmap()
             val cells = data.getJSONObject("sprites")
@@ -113,10 +113,11 @@ internal fun DrawScope.cityGardenShore(surface: Path, cliff: Path, shore: CitySh
     }
 }
 
-/** Modest fixed-camera facade planting. Selected windows, doors and lamps remain visible. */
-internal fun DrawScope.cityFacadeGarden(art: CityGardenArt, x: Float, base: Float, width: Float, ground: Boolean, cornerWindow: Boolean) {
+/** Fixed-camera facade ornaments; cafe furniture is presentation, never an owned catalog item. */
+internal fun DrawScope.cityFacadeGarden(art: CityGardenArt, x: Float, base: Float, width: Float, ground: Boolean, cornerWindow: Boolean, cafe: Boolean = false) {
     if (ground) return // Ground door, selected lighting and accepted footprint stay unobscured.
-    val front = art.sprites.getValue("balcony_front")
+    // Keep the narrow selected corner-window kit unobscured by parasols.
+    val front = art.sprites.getValue(if (cafe && !cornerWindow) "cafe_front" else "balcony_front")
     val side = art.sprites.getValue("balcony_side")
     // Coordinates refer to the same approved 464x288 shell as GameFacade, not world geometry.
     val upper = base - width*288f/464f
@@ -126,10 +127,10 @@ internal fun DrawScope.cityFacadeGarden(art: CityGardenArt, x: Float, base: Floa
     // The front sample is horizontal. Shear it to the measured shell front
     // (16px fall across 326px), rather than putting a level sticker on that plane.
     val left = if (cornerWindow) .47f else .08f
-    val span = if (cornerWindow) .25f else .46f
+    val span = if (cornerWindow) .25f else if (cafe) .62f else .46f
     val w = width * span
     val h = w * front.size.height / front.size.width
-    val top = upper + width * .36f
+    val top = upper + width * (if (cafe && !cornerWindow) .25f else .36f)
     drawIntoCanvas { canvas ->
         val matrix = Matrix().apply { setPolyToPoly(
             floatArrayOf(0f,0f,front.size.width.toFloat(),0f,0f,front.size.height.toFloat()),0,

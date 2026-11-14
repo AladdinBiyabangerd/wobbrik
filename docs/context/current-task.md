@@ -1,3 +1,12 @@
+# Cari vahid — şəhər qalan vizual detallar, 14 noyabr 2026
+- Completed: istifadəçi city-view istinadını göstərildikdən sonra açıq təsdiqlədi. `fix/city-remaining-visuals` (baza ce12acf) üzərində geniş kafe terrası asseti və ikinci mərtəbə ön balkon inteqrasiyası hazırlandı; corner-window dar balkon və ground giriş/işıq qorunur.
+- Current state: istifadəçinin göstərişi ilə bu review edilmiş vahid lokal commit edilir. Mərhələ4 razılaşdırılmış mobil scope üzrə istifadəçi tərəfindən qəbul edilib. Merge/push/CI yoxdur; untracked app/release qorunur.
+- Decisions: mövcud təsdiqli sahil/balkon/glow/navbar/sabit kamera və server geometry/ownership dəyişmir. Yeni asset faithful reference reconstruction-dır; cafe iqtisadiyyatı deyil. AppBackend dəyişikliyi tələb olunmadı.
+- Remaining work: istifadəçi mövcud kataloqla tamamlamağı seçdi; fontan əlavə edilmir, bu qərar açıq sual deyil. Mərhələ4 mobil scope-də açıq implementasiya işi qalmır; istifadəçinin şərtli təsdiqi qəbul kimi qeydə alınıb. Tam piksel eyniliyi və yoxlanmamış runtime halları PASS sayılmır.
+- Relevant files: CityGardenArt.kt,CityScreen.kt; assets/city/terrace-v1.{png,json}; docs/design/city-garden-v1/terrace-v1.md; docs/reviews/2026-11-14-city-remaining-visuals.md; city-scene-visual/render/CityParityRenderTest.kt; yeganə plan docs/PLAN.md.
+- Checks performed: native parity3/3PASS17s (3portrait +5focus/return hər ssenari); üç overview+390focus0 baxıldı. Adi236unit/APK/lintPASS20s(core/engine up-to-date); kontrast4/4min8.22. Synthetic host; device/emulator/CI yoxdur.
+- Exact next step: lokal commit nəticəsini bildir. Mərhələ5 və planşet ayrıca tapşırıq tələb edir; fontan əlavə etmə. Merge/push/CI avtomatik yoxdur.
+
 # Cari handoff — 14 noyabr 2026
 
 ## Qalan phase4 və QA fayllarının lokal commit-i — 14 noyabr 2026

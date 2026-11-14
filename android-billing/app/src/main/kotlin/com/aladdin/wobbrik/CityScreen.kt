@@ -151,7 +151,7 @@ internal fun CityContent(scene: CityScene?, failed: Boolean, onRetry: () -> Unit
                             val base = (view.y + (point.y + CityBuildingProjection.FoundationFront) * view.scale).toFloat()
                             cityBuildingFloor(atlases, art, parts, x, base, scale, index == 0, index == projected.floors.lastIndex,
                                 windowAlpha = if (moving) cityWindowAlpha(projected.source.building.id,index,seconds) else 1f)
-                            cityFacadeGarden(gardenArt,x,base,CityBuildingProjection.ArtWidth.toFloat()*scale,index == 0,parts["window"] == "coins_window_2")
+                            cityFacadeGarden(gardenArt,x,base,CityBuildingProjection.ArtWidth.toFloat()*scale,index == 0,parts["window"] == "coins_window_2", cafe = index == 1)
                         }
                     }
                 }

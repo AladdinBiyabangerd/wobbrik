@@ -1,0 +1,11 @@
+{
+  "reference": "docs/design/city-view.png",
+  "sprites": {
+    "cafe_front": [
+      305,
+      190,
+      1130,
+      524
+    ]
+  }
+}
