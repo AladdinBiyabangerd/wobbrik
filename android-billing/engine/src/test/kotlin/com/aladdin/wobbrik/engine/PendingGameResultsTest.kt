@@ -2,7 +2,8 @@ package com.aladdin.wobbrik.engine
 
 import appbackend.wobbrik.billing.*
 import appbackend.wobbrik.game.*
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.Channel
 import kotlinx.serialization.json.*
 import org.junit.Assert.*
 import org.junit.Test
@@ -280,6 +281,34 @@ class PendingGameResultsTest {
         f.replay()
         assertEquals(listOf("active-finish", "older", "older-finish"), f.sent.map { it.operationId })
         assertTrue(f.results.pending("alice").isEmpty())
+    }
+
+    @Test fun connectivityRetryDrainsDurableTerminalThroughExistingOwnerAndSoleJournal() = runBlocking {
+        val f = Fixture()
+        val scope = CoroutineScope(SupervisorJob() + Dispatchers.Unconfined)
+        val ticks = Channel<CompletableDeferred<Unit>>(Channel.UNLIMITED)
+        val owner = AuthenticatedRecoveryOwner(f.sessions, f.backend, f.journal, scope,
+            onCommitted = f.results::committed,
+            reconcile = { session, coordinator, snapshot -> PendingResultReconciler(f.results).reconcile(session, coordinator, snapshot) })
+        val scheduler = RecoveryRetryScheduler(owner, scope) {
+            val tick = CompletableDeferred<Unit>(); ticks.send(tick); tick.await()
+        }
+        try {
+            f.results.enqueue("alice", result("first", 2)); f.loseResponse = true
+            owner.onAuthChanged("alice"); repeat(20) { yield() }
+            assertTrue(owner.state.value is AuthenticatedRecoveryOwner.State.Error)
+            val exact = requireNotNull(f.journal.pending("alice"))
+            assertEquals(1, f.results.pending("alice").size)
+            scheduler.foreground(true); scheduler.connected(true)
+            withTimeout(2_000) { ticks.receive() }.complete(Unit)
+            repeat(30) { yield() }
+            assertTrue(owner.state.value is AuthenticatedRecoveryOwner.State.Ready)
+            assertEquals(exact, f.sent[1]); assertTrue(f.results.pending("alice").isEmpty())
+            assertNull(f.journal.pending("alice")); assertEquals(3, f.receipts.size)
+            assertEquals(listOf(AttemptCommand.Route.START, AttemptCommand.Route.START,
+                AttemptCommand.Route.CHECKPOINT, AttemptCommand.Route.FINISH), f.sent.map { it.route })
+            assertTrue(ticks.tryReceive().isFailure)
+        } finally { scheduler.close(); scope.cancel() }
     }
 
     @Test fun storageCapacityNeverEvictsAPendingResult() {

@@ -81,6 +81,14 @@ class AuthenticatedRecoveryOwner(
         if (sessions.current() != null && work?.isCompleted != false) recoverLocked()
     }
 
+    /** Scheduler may retry only the exact current transient error, never a Ready or another epoch. */
+    internal fun retryTransient(expected: State.Error): Boolean = synchronized(lock) {
+        if (mutableState.value !== expected || sessions.current() == null || work?.isCompleted == false ||
+            !RecoveryRetryScheduler.retryable(expected.cause)) return false
+        recoverLocked()
+        true
+    }
+
     private fun publishLocked(state: State) {
         onStateChanged(state)
         mutableState.value = state

@@ -46,6 +46,8 @@ class WobbrikApplication : Application(), DefaultLifecycleObserver {
     lateinit var bootstrap: Bootstrap
         private set
     private val recoveryScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+    private var retryScheduler: appbackend.wobbrik.game.RecoveryRetryScheduler? = null
+    private var connectivity: RecoveryConnectivity? = null
     private var authListener: FirebaseAuth.AuthStateListener? = null
     sealed interface AccountState {
         data object Loading : AccountState
@@ -101,7 +103,8 @@ class WobbrikApplication : Application(), DefaultLifecycleObserver {
         val sessions = AccountSessions { uid ->
             val user = googleUser() ?: throw AccountChanged()
             if (user.uid != uid) throw AccountChanged()
-            val token = user.getIdToken(false).await().token
+            val token = try { user.getIdToken(false).await().token }
+                catch (failure: com.google.firebase.FirebaseNetworkException) { throw java.io.IOException("Identity network unavailable", failure) }
             if (googleUser() !== user) throw AccountChanged()
             require(!token.isNullOrBlank()) { "Firebase returned an empty ID token" }
             token
@@ -123,6 +126,8 @@ class WobbrikApplication : Application(), DefaultLifecycleObserver {
         engineHost.bind(commands)
         bootstrap = Bootstrap.Configured(owner, commands, appbackend.wobbrik.game.InventoryRepository(backend), sessions,
             appbackend.wobbrik.game.DecorationRepository(backend), appbackend.wobbrik.game.CitySceneRepository(backend), AccountViews(backend, readCache))
+        retryScheduler = appbackend.wobbrik.game.RecoveryRetryScheduler(owner, recoveryScope)
+        connectivity = RecoveryConnectivity(this) { retryScheduler?.connected(it) }
         authListener = FirebaseAuth.AuthStateListener {
             // Do not deduplicate by UID: a re-login must establish a new recovery epoch.
             val user = googleUser()
@@ -136,12 +141,16 @@ class WobbrikApplication : Application(), DefaultLifecycleObserver {
     }
 
     override fun onStart(owner: LifecycleOwner) {
+        retryScheduler?.foreground(true)
+        connectivity?.start()
         engineHost.onForeground()
         localHost.foreground(true)
         (bootstrap as? Bootstrap.Configured)?.recovery?.onForeground()
     }
 
     override fun onStop(owner: LifecycleOwner) {
+        retryScheduler?.foreground(false)
+        connectivity?.stop()
         engineHost.onPause()
         localHost.foreground(false)
     }

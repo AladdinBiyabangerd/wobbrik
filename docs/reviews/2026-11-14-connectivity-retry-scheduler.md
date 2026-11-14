@@ -1,0 +1,33 @@
+# Connectivity retry scheduler — 14 noyabr 2026
+
+Branch `fix/network-resilience`, baza HEAD `83212be`. Scheduler source/test/review ayrıca lokal review-dan sonra bu vahidin lokal commit-ində saxlanır. Owner InventoryScreen/phase4/render/release/QA və qarışıq PLAN/handoff hissələri qorunur; 17 owner faylının əvvəlki SHA256-ları eynidir. Merge/push/CI/deploy yoxdur.
+
+## Davranış
+
+`RecoveryRetryScheduler` process-owned scope-da mövcud recovery state + foreground + validated default internet axınını izləyir. Yalnız müvəqqəti Error-da 1/2/4/8/16/32/60 saniyə cap60 backoff-dan sonra owner-in exact Error instance-ına retry təklif edir. IO, HTTP408/429/5xx və definitive RevisionConflict retry edilə bilər. Ready/SignedOut backoff-u reset edir. Duplicate capability callback-ləri timer-i çoxaltmır. Offline/background/state dəyişəndə gözləmə ləğv edilir; dispatch öncəsi şərtlər və coroutine cancellation yenidən yoxlanır.
+
+Owner həmin error-un hələ cari olduğunu, sessiyanın mövcudluğunu və başqa recovery işinin getmədiyini lock altında yoxlayır; mövcud recover → sole journal exact retry → pending terminal reconciliation işləyir. Yeni mutation ID, ikinci writer/outbox/wallet yoxdur. Aktiv Ready, accepted physics və local host callback ilə invalidate edilmir. Unknown/abandoned/receipt-siz və auth/format/server rədd Error-u avtomatik retry dövrü yaratmır. Pending saxlanır, avtomatik abandon/restart yoxdur; əl ilə və foreground recovery əvvəlki kimi qalır. Background yeni timer retry-sini dayandırır, artıq başlanmış recovery-ni cancel etmir.
+
+`RecoveryConnectivity` Android default network observer-ini foreground-da bir dəfə register, stop-da unregister edir. Main-ə ötürülən callback-lər registration identity və current default network ilə yoxlanır; köhnə network loss və stop-dan əvvəl queued callback yeni recovery yaratmır. Internet+validated tələb edilir. API24–25-də initial capabilities callback zəmanəti olmadığından onAvailable-dan main queue-ya ötürülən fallback snapshot eyni network-un hələ default olmasını da yoxlayır; API26+ capabilities event-i gözləyir. Qeydiyyat unavailable olarsa avtomatik retry bağlı qalır və log var; manual/foreground recovery saxlanır. Manifest normal `ACCESS_NETWORK_STATE` icazəsini verir. Mövcud Firebase token oxusunda `FirebaseNetworkException` IO-ya çevrilir; auth rəddi retryable elan edilmir.
+
+Callback/lifecycle qaydaları [Android network state](https://developer.android.com/develop/connectivity/network-ops/reading-network-state) və [NetworkCallback API](https://developer.android.com/reference/android/net/ConnectivityManager.NetworkCallback) ilə yoxlandı. Yeni dependency/pin/framework, WorkManager, service və OS background job əlavə edilmədi. Process death zamanı timer itir, durable journal/terminal queue növbəti auth/foreground recovery-də qalır. AppBackend API/DTO/schema müqaviləsi dəyişmir; scheduler yalnız mövcud recovery entrypoint-dir, backend dəyişikliyi lazım deyil və backend dəyişməyib.
+
+## Yoxlamalar və lokal review
+
+- Java21/offline `:core:test :engine:test :app:testDebugUnitTest :app:assembleDebug :app:lintDebug` final PASS13s,108task/84up-to-date. XML core117+engine95+app24=236 unit; failures/errors/skipped0. İlkin run PASS19s idi; son dəyişikliklərdən sonra final run yeniləndi.
+- Yeni7 scheduler regression-u: lost committed response exact sole journal retry; bounded backoff/duplicate event; background/offline cancellation; permanent/auth/unresolved/corrupt blokları; HTTP transient/revision retry; logout/same UID epoch/stale timer; in-flight recovery + active Ready preservation.
+- Yeni engine integration regression-u real PendingGameResults + PendingResultReconciler + AuthenticatedRecoveryOwner + scheduler ilə lost start response-dan sonra eyni start envelope-u replay edir, checkpoint→finish tamamlayır. Üç receipt, dörd dispatch (start exact retry daxil), sıfır qalan pending/journal.
+- Disposable cached Robolectric host: `-I ../docs/reviews/connectivity-retry/host/host.init.gradle :app:testDebugUnitTest --tests '*RecoveryConnectivityHostTest'` PASS4s, API28/34 2/2, failures/errors/skipped0. Register dedup, unvalidated/captive hal, handover, validation loss, stop/unregister/queued callback və re-entry-dən sonra köhnə registration yoxlanır. Host init project dependency və CI-yə qoşulmur.
+- Scoped manual diff review: placement/imports, state/coroutine cancellation, in-flight serialization, UID/epoch, sole journal, owner preservation yoxlandı; konkret əlavə problem qalmadı. `git diff --check` PASS. Timer cancellation yoxlaması `currentCoroutineContext()` istifadə edir; async callback-lər owner-ə yalnız main queue-dan ötürülür.
+
+İlk terminal çağırışı repo kökündə `./gradlew` axtardığından başlamadı; düzgün android-billing qovluğunda run edildi. İlk host compile cəhdi test fixture-də gizli NetworkCapabilities mutation API və artıq generic argument səbəbindən uğursuz oldu; fixture Robolectric shadow API-sinə düzəldildi, son host PASS-dır. Bunlar PASS kimi hesablanmadı.
+
+Yoxlamalar qorunan owner diff-i ilə working tree-dədir; isolated commit-only sübutu deyil. API24–25 fallback runtime, real cihaz/Firebase/server E2E və real connectivity callback timing yoxlanmayıb; emulator açılmayıb. UI/token/art dəyişmədiyindən render işi aparılmadı. Qeyri-müəyyən account reconciliation blokları və əvvəlki full design parity/mərhələ qəbulu məhdudiyyətləri qalır. Davamlı process-dead/background delivery zəmanəti verilmir.
+
+## Ayrıca lokal review və commit — 14 noyabr 2026
+
+İstifadəçinin göstərişi ilə `83212be` üzərində yalnız scheduler diff-i yenidən review edildi: timer/backoff cancellation, exact Error identity, login epoch, owner serialization, journal replay, default-network callback lifecycle və Firebase network error təsnifatı. Yeni konkret bug tapılmadı, source/test düzəlişi lazım olmadı. AppBackend müqaviləsi dəyişmir.
+
+Java21/offline adi core/engine/app unit + APK/lint PASS1s (108 task,107 up-to-date); əvvəlki core117+engine95+app24=236 unit nəticəsi reuse edildi. Ardınca disposable callback host API28/34 2/2PASS5s, failure/error/skipped0. İlk sandbox cəhdi Gradle cache lock icazəsi olmadığından başlamadı; icazəli təkrar run uğurludur. CI işlədilmədi.
+
+Commit scope: scheduler production/test faylları, callback host harness, bu review və yalnız scheduler PLAN/handoff hissələri. Owner InventoryScreen/phase4/render/release/QA və unrelated sənəd hissələri commit-dən kənardadır; əvvəl/son SHA256 ilə qorunur. `git diff --check` və staged diff review yoxlanır. Merge/push/CI yoxdur. Əvvəlki runtime/API24–25/process-dead və mərhələ qəbulu məhdudiyyətləri qüvvədədir; yoxlamalar owner diff-i ilə working tree-dədir.
