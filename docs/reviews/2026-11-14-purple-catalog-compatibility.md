@@ -64,3 +64,5 @@ The opt-in native-host init script and cache prerequisites are documented in `mo
 ## Commit / merge / push authorization
 
 The user subsequently requested commit, merge and push. The reviewed renderer unit includes its preceding uncommitted template/ground-floor dependencies, approved design assets, opt-in render harness and review notes. Existing branch ancestry has four commits beyond local main and will be retained by a non-fast-forward merge. Unrelated release output and the unused whole-building bitmap remain outside the commit. CI was not requested and is not run. The final commit/merge/remote identities are reported in the chat and Git history.
+
+Implementation commit: `d63029f`. Staged source diff passed local review and whitespace checks; production sources are identical to the final 6/6 native, 24/24 unit, assemble/lint validation. Subsequent documentation records authorization/status only.
