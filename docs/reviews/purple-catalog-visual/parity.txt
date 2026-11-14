@@ -1,0 +1,3 @@
+PASS approved base1 template (catalog cell)
+PASS inventory detail 1 full-image
+PASS inventory detail 9 full-image

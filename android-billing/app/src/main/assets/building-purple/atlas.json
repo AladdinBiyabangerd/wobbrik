@@ -4,61 +4,61 @@
     1254,
     1254
   ],
-  "status": "approved-preview-template",
+  "status": "approved-art-v2-integrated",
   "cells": {
     "floor": [
       30,
-      98,
+      77,
       370,
-      268
+      262
     ],
     "roof": [
-      420,
-      100,
-      410,
-      270
+      424,
+      72,
+      403,
+      276
     ],
     "ground": [
-      865,
-      88,
-      370,
-      287
+      853,
+      70,
+      366,
+      283
     ],
     "arch": [
-      85,
-      478,
-      245,
-      295
+      96,
+      480,
+      231,
+      268
     ],
     "square": [
-      494,
-      502,
-      250,
-      251
+      527,
+      509,
+      188,
+      226
     ],
     "entrance": [
-      851,
-      444,
-      373,
-      363
+      883,
+      441,
+      306,
+      331
     ],
     "balcony": [
-      18,
-      925,
-      390,
-      288
+      17,
+      897,
+      384,
+      299
     ],
     "garden": [
-      425,
-      948,
-      415,
-      202
+      418,
+      944,
+      414,
+      222
     ],
     "lamp": [
-      872,
-      942,
-      133,
-      200
+      960,
+      894,
+      160,
+      267
     ]
   },
   "floor_pitch": 180,
@@ -68,5 +68,47 @@
     "base_1_roof": "roof",
     "base_1_entrance": "entrance",
     "base_1_lighting": "lamp"
+  },
+  "foreground_image": "foreground-v1.png",
+  "foreground_cells": {
+    "front_left": [32, 155, 655, 415],
+    "path": [730, 210, 705, 410],
+    "front_right": [1505, 220, 605, 350]
+  },
+  "foundation_image": "foundation.png",
+  "foundation_cells": {
+    "garden": [
+      15,
+      280,
+      845,
+      445
+    ],
+    "steps": [
+      910,
+      330,
+      592,
+      375
+    ]
+  },
+  "ground_floor_image": "ground-floor-v1.png",
+  "ground_floor_cells": {
+    "ground_masonry": [
+      0,
+      0,
+      1120,
+      710
+    ],
+    "ground_side_roof": [
+      1245,
+      300,
+      395,
+      260
+    ],
+    "ground_entrance": [
+      1760,
+      175,
+      380,
+      445
+    ]
   }
 }

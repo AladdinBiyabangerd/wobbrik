@@ -50,7 +50,7 @@ class PurpleInventoryRenderTest {
   fun json(id:Int):String {
    val category = mapOf(2 to "window",3 to "roof",4 to "entrance",5 to "lighting",6 to "wall")[id]
    val parts=FinishCosmetics.categories.joinToString(",") {
-    val style=if(it==category || (id==7 && it!="wall")) 2 else 1
+    val style=if(id==9 || it==category || (id==7 && it!="wall")) 2 else 1
     "\"$it\":\"base_${style}_$it\""
    }
    val floors=if(id==8) 40 else 10
@@ -91,7 +91,7 @@ class PurpleInventoryRenderTest {
    }
    compose.onNodeWithText("Ana ekran").assertIsDisplayed()
    capture("inventory-$name")
-   for(id in 1..8) {
+   for(id in 1..9) {
     compose.runOnIdle {selected="b-$id"}
     compose.onNodeWithText("İnventara qayıt").assertIsDisplayed()
     compose.onNodeWithContentDescription("${if(id==8) 40 else 10} mərtəbəli bina").assertExists()

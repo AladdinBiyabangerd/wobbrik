@@ -1,0 +1,3 @@
+{'name': 'com.aladdin.wobbrik.PurpleCatalogRenderTest', 'tests': '1', 'failures': '0', 'errors': '0', 'time': '16.851'}
+{'name': 'com.aladdin.wobbrik.PurpleInventoryRenderTest', 'tests': '3', 'failures': '0', 'errors': '0', 'time': '19.836'}
+{'name': 'com.aladdin.wobbrik.PurpleModuleBoundaryRenderTest', 'tests': '2', 'failures': '0', 'errors': '0', 'time': '4.349'}
