@@ -35,14 +35,17 @@ class CompactPurchaseRenderTest {
     LandOffer("land_4",3900,1500),LandOffer("land_5",7650,2500)))
  private val ready = AuthenticatedRecoveryOwner.State.Ready(GameSnapshot("wobbrik-v1",1,1250,150,null,
   AccountRecovery("now","first","later",3,0,emptyList(),emptyList(),emptyList(),emptyList())),catalog,"render-only")
- private fun render(land: Boolean, font: Float, name: String) {
+ private fun render(land: Boolean, font: Float, name: String, coins: Long = 1250) {
   compose.setContent {
    val density = LocalDensity.current
    CompositionLocalProvider(LocalDensity provides Density(density.density, font)) {
-    if (land) LandShopContent(ready, {}, {}) else DecorationShopContent(ready, emptyList(), false, {}, {}, {})
+    if (land) LandShopContent(ready.copy(snapshot = ready.snapshot.copy(coins = coins)), {}, {}) else DecorationShopContent(ready.copy(snapshot = ready.snapshot.copy(coins = coins)), emptyList(), false, {}, {}, {})
    }
   }
   compose.waitForIdle()
+  compose.onNodeWithText(coins.toString()).assertIsDisplayed()
+  val logo = compose.onNodeWithContentDescription("Wobbrik").assertIsDisplayed().fetchSemanticsNode().boundsInRoot
+  org.junit.Assert.assertTrue("Logo must retain its width", logo.width >= GameTokens.Target.value * compose.density.density)
   capture(name+"-list")
   compose.onNodeWithText(if (land) "Sahə 1" else "Tək ağac").performClick()
   compose.waitForIdle()
@@ -60,6 +63,8 @@ class CompactPurchaseRenderTest {
    f.outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG,100,it) }
   }
  }
+ @Test @Config(qualifiers="w320dp-h568dp-xxhdpi") fun longBalance() = render(false,2f,"320-font2-long",Long.MAX_VALUE)
+ @Test @Config(qualifiers="w440dp-h956dp-xxhdpi") fun large() = render(false,1f,"440-font1")
  @Test fun decorSmall() = render(false,1f,"decor-360-font1")
  @Test fun decorLargeFont() = render(false,2f,"decor-360-font2")
  @Test fun landSmall() = render(true,1f,"land-360-font1")
