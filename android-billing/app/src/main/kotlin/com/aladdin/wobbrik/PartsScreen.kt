@@ -77,10 +77,13 @@ internal fun PartsScreen(configured: WobbrikApplication.Bootstrap.Configured,
                 color = GameTokens.Text, fontSize = sizing.heading, fontWeight = FontWeight.Bold)
             if (choosing) Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {
                 FinishCosmetics.categories.forEach { key ->
-                    Button(onClick = { category = key }, modifier = Modifier.heightIn(min = GameTokens.Target),
+                    Button(onClick = { category = key }, modifier = Modifier.heightIn(min = GameTokens.Target).partsEdge(category == key).partsTabFill(category == key),
+                        border = if (sizing.portrait) BorderStroke(GameTokens.Hairline, if (category == key) GameTokens.Text else GameTokens.Raised) else null,
                         shape = RoundedCornerShape(GameTokens.ControlRadius),
-                        colors = ButtonDefaults.buttonColors(containerColor = if (category == key) GameTokens.Accent else GameTokens.Raised,
+                        colors = ButtonDefaults.buttonColors(containerColor = if (mobileUiSizing().portrait) androidx.compose.ui.graphics.Color.Transparent else if (category == key) GameTokens.Accent else GameTokens.Raised,
                             contentColor = if (category == key) GameTokens.Background else GameTokens.Text)) {
+                        DetailIcon(partCategoryIcon(key), category == key)
+                        if (mobileUiSizing().portrait) Spacer(Modifier.width(GameTokens.Quarter))
                         Text("${partCategory(key)} ${catalog?.items?.count { it.category == key } ?: 0}", softWrap = false)
                     }
                 }
@@ -109,10 +112,10 @@ internal fun PartsScreen(configured: WobbrikApplication.Bootstrap.Configured,
                     val new = catalog?.items?.firstOrNull { it.id == draft[category] }?.name ?: draft[category].orEmpty()
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
                         listOf("Hazırkı", "Seçilmiş").forEach { label ->
-                            Surface(onClick = { choosing = true }, modifier = Modifier.weight(1f), color = GameTokens.Surface,
+                            Surface(onClick = { choosing = true }, modifier = Modifier.weight(1f).partsEdge(label == "Seçilmiş"), color = GameTokens.Surface,
                                 shape = RoundedCornerShape(GameTokens.ControlRadius),
-                                border = BorderStroke(GameTokens.Hairline, if (label == "Seçilmiş") GameTokens.Accent else GameTokens.Raised)) {
-                                Column(Modifier.padding(GameTokens.Small)) {
+                                border = partsBorder(label == "Seçilmiş")) {
+                                Column(Modifier.partsFrame().padding(GameTokens.Small)) {
                                     Canvas(Modifier.fillMaxWidth().height(sizing.cardArt)) { partPreview(atlases, art, (if (label == "Hazırkı") current.parts else draft), category) }
                                     Text(label, color = GameTokens.Muted)
                                     Text(if (label == "Hazırkı") old else new, color = GameTokens.Text, fontWeight = FontWeight.Bold)
@@ -141,9 +144,9 @@ internal fun PartsScreen(configured: WobbrikApplication.Bootstrap.Configured,
                     Surface(onClick = {
                         if (building != null && available && choice.id in art) { draft = draft + (category to choice.id); choosing = false }
                         else selected = choice
-                    }, color = GameTokens.Surface, shape = RoundedCornerShape(GameTokens.ControlRadius),
-                        border = BorderStroke(GameTokens.Hairline, if (active) GameTokens.Accent else GameTokens.Raised)) {
-                        Column(Modifier.padding(GameTokens.Small), verticalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {
+                    }, modifier = Modifier.partsEdge(active), color = GameTokens.Surface, shape = RoundedCornerShape(GameTokens.ControlRadius),
+                        border = partsBorder(active)) {
+                        Column(Modifier.partsFrame().padding(GameTokens.Small), verticalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {
                             Canvas(Modifier.fillMaxWidth().height(sizing.cardArt)) { partPreview(atlases, art, previewParts + (choice.category to choice.id), choice.category) }
                             Text(choice.name, color = GameTokens.Text, fontWeight = FontWeight.Bold)
                             Text(if (active) "✓ Seçilib" else partAccess(choice, ready), color = if (available) GameTokens.Success else GameTokens.Muted)
@@ -179,10 +182,13 @@ private fun partAccess(item: CatalogItem, ready: AuthenticatedRecoveryOwner.Stat
 private fun BuildingCategoryButtons(category: String, horizontal: Boolean, onSelect: (String) -> Unit) {
     FinishCosmetics.categories.forEach { key ->
         Button(onClick = { onSelect(key) },
-            modifier = (if (horizontal) Modifier else Modifier.fillMaxWidth()).heightIn(min = GameTokens.Target),
+            modifier = (if (horizontal) Modifier else Modifier.fillMaxWidth()).heightIn(min = GameTokens.Target).partsEdge(category == key).partsTabFill(category == key),
+            border = if (mobileUiSizing().portrait) BorderStroke(GameTokens.Hairline, if (category == key) GameTokens.Text else GameTokens.Raised) else null,
             shape = RoundedCornerShape(GameTokens.ControlRadius),
-            colors = ButtonDefaults.buttonColors(containerColor = if (category == key) GameTokens.Accent else GameTokens.Raised,
+            colors = ButtonDefaults.buttonColors(containerColor = if (mobileUiSizing().portrait) androidx.compose.ui.graphics.Color.Transparent else if (category == key) GameTokens.Accent else GameTokens.Raised,
                 contentColor = if (category == key) GameTokens.Background else GameTokens.Text)) {
+            DetailIcon(partCategoryIcon(key), category == key)
+            if (mobileUiSizing().portrait) Spacer(Modifier.width(GameTokens.Quarter))
             Text(partCategory(key), softWrap = false)
         }
     }

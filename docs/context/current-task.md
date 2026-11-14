@@ -1,5 +1,14 @@
 # Cari handoff — 14 noyabr 2026
 
+## Detail/parts vizual tamamlama — cari yekun, 14 noyabr 2026
+- Completed: istifadəçinin bu chatdəki açıq tətbiq göstərişi ilə təsdiqli board-ların detail tab/metadata və beş parts kateqoriya ikonları, gradient/cyan çərçivə/aktiv glow tamamlandı. Owner dar DetailRow adaptasiyası saxlanıb; əlaqəsiz tracked owner baseline və iki contact PNG bayt eyniliyi yoxlanıb.
+- Current state: `fix/phase4-detail-parts-parity`, HEAD/baza `eaf43e3`; source/review/harness lokal review-dan sonra ayrıca lokal commit-də saxlanır. Owner diff-i index-dən kənardadır. Merge/push/CI yoxdur.
+- Decisions: son compact/navbar/modular art və mobil portret qərarları qüvvədədir. Backend/domain/API dəyişmir; AppBackend dəyişikliyi lazım deyil. Təsdiqli görünüş yenidən seçimə çıxarılmır.
+- Remaining work: bu scoped ikon/çərçivə vahidi yoxlanıb. Tam raster piksel eyniliyi/mərhələ4 qəbulu və şəhər parity işi bağlanmır.320/font2 secondary metadata scroll tələb edir; cihaz/inset/TalkBack/GPU/API24runtime və planşet/landşaft yoxlanmayıb.
+- Relevant files: InventoryScreen.kt,PartsScreen.kt,PartsChrome.kt; drawable/detail_*.xml; `docs/reviews/2026-11-14-phase4-detail-parts-parity.md`; `docs/reviews/mobile-sizing-visual/render/DetailPartsParityRenderTest.kt`; `docs/reviews/detail-parts-visual/`; plan yalnız `docs/PLAN.md`.
+- Checks performed: final native8/8PASS23s; normal unit/APK/lintPASS28s (core117+engine95UP-TO-DATE,app24icra); kontrast4/4min8.22,diffcheckPASS; təsdiqli board-larla yanaşı müqayisə və final görüntülərə baxış. Synthetic host; emulator/CI açılmayıb.
+- Exact next step: lokal commit nəticəsini istifadəçiyə təhvil ver. Ayrı göstərişsiz merge/push/CI və yeni böyük vahid başlama. Aşağıdakı əvvəlki başlanğıc qeydinin pending konkret UI təsdiqi statusu artıq tarixçədir.
+
 ## Cari vahid — connectivity retry scheduler (14 noyabr 2026)
 - Completed: `fix/network-resilience`, HEAD `83212be` üzərinə process-owned foreground/connectivity backoff scheduler əlavə edildi. Mövcud owner exact transient Error-u retry edir; sole journal/terminal reconciliation dəyişmir. Default network callback foreground-da register, stop-da unregister olur; stale callback-lər rədd edilir. ACCESS_NETWORK_STATE əlavə edildi, Firebase token network xətası retryable IO kimi ötürülür.
 - Current state: scheduler source/test/review ayrıca lokal review edildi və bu vahid lokal commit-də saxlanır. Owner InventoryScreen/phase4/render/release/QA və qarışıq PLAN/handoff hissələri qorunur. Merge/push/CI yoxdur.
