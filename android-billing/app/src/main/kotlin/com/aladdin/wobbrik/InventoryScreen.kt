@@ -242,16 +242,20 @@ private fun BuildingDetail(building: OwnedBuilding, city: CityMembership?, catal
         Row(Modifier.fillMaxWidth().then(if (largeFont) Modifier.horizontalScroll(rememberScrollState()) else Modifier),
             horizontalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {
             listOf("Sakin", "Dəyər", "Hissələr").forEachIndexed { index, title ->
-                Button(onClick = { tab = index }, modifier = (if (largeFont) Modifier.widthIn(min = GameTokens.Target * 2) else Modifier.weight(1f)).heightIn(min = GameTokens.Target),
+                Button(onClick = { tab = index }, modifier = (if (largeFont) Modifier.widthIn(min = GameTokens.Target * 2) else Modifier.weight(1f)).heightIn(min = GameTokens.Target).partsEdge(tab == index).partsTabFill(tab == index),
+                    border = if (mobileUiSizing().portrait) BorderStroke(GameTokens.Hairline, if (tab == index) GameTokens.Text else GameTokens.Raised) else null,
                     contentPadding = PaddingValues(GameTokens.Quarter), shape = RoundedCornerShape(GameTokens.ControlRadius),
-                    colors = ButtonDefaults.buttonColors(containerColor = if (tab == index) GameTokens.Accent else GameTokens.Raised,
-                        contentColor = if (tab == index) GameTokens.Background else GameTokens.Text)) { Text(title, softWrap = false,
+                    colors = ButtonDefaults.buttonColors(containerColor = if (mobileUiSizing().portrait) androidx.compose.ui.graphics.Color.Transparent else if (tab == index) GameTokens.Accent else GameTokens.Raised,
+                        contentColor = if (tab == index) GameTokens.Background else GameTokens.Text)) {
+                        DetailIcon(listOf(R.drawable.detail_residents, R.drawable.detail_coins, R.drawable.detail_parts)[index], tab == index)
+                        if (mobileUiSizing().portrait) Spacer(Modifier.width(GameTokens.Quarter))
+                        Text(title, softWrap = false,
                         fontSize = if (LocalDensity.current.fontScale > 1f) GameTokens.Caption else GameTokens.Body) }
             }
         }
         Surface(Modifier.weight(1f), color = GameTokens.Surface,
             shape = RoundedCornerShape(GameTokens.CardRadius),
-            border = BorderStroke(GameTokens.Hairline, GameTokens.Raised)) {
+            border = partsBorder()) {
             if (largeFont) {
                 Column(Modifier.fillMaxSize().padding(GameTokens.Small)) {
                     BuildingPreview(building, Modifier.fillMaxWidth().height(GameTokens.Target * 3))
@@ -303,7 +307,7 @@ private fun BuildingDetailContent(building: OwnedBuilding, city: CityMembership?
             2 -> FinishCosmetics.categories.forEach { category ->
                 val item = catalog?.items?.firstOrNull { it.id == building.parts[category] }
                 Surface(color = GameTokens.Surface, shape = RoundedCornerShape(GameTokens.ControlRadius),
-                    border = BorderStroke(GameTokens.Hairline, GameTokens.Raised)) {
+                    border = partsBorder()) {
                     Row(Modifier.fillMaxWidth().padding(GameTokens.Small), verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
                         Canvas(Modifier.size(GameTokens.Target)) {
@@ -324,10 +328,20 @@ private fun BuildingDetailContent(building: OwnedBuilding, city: CityMembership?
 @Composable
 private fun DetailRow(label: String, value: String) {
     Surface(color = GameTokens.Surface, shape = RoundedCornerShape(GameTokens.ControlRadius),
-        border = BorderStroke(GameTokens.Hairline, GameTokens.Raised)) {
-        Row(Modifier.fillMaxWidth().padding(GameTokens.Small), horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-            Text(label, Modifier.weight(1f), color = GameTokens.Muted)
-            Text(value, Modifier.weight(1f), color = GameTokens.Text, fontWeight = FontWeight.Bold)
+        border = partsBorder()) {
+        Row(Modifier.fillMaxWidth().partsFrame().padding(GameTokens.Small), horizontalArrangement = Arrangement.spacedBy(GameTokens.Small), verticalAlignment = Alignment.CenterVertically) {
+            DetailIcon(when (label) {
+                "Mərtəbə" -> R.drawable.city_plan_layers
+                "Sakin", "Sakin tutumu" -> R.drawable.detail_residents
+                "Tikinti" -> R.drawable.detail_construction
+                "Hissələr" -> R.drawable.detail_parts
+                "Baza dəyəri", "Maksimum satış", "Satıcıya" -> R.drawable.detail_coins
+                else -> R.drawable.detail_info
+            })
+            Row(Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+                Text(label, Modifier.weight(1f), color = GameTokens.Muted)
+                Text(value, Modifier.weight(1f), color = GameTokens.Text, fontWeight = FontWeight.Bold)
+            }
         }
     }
 }
