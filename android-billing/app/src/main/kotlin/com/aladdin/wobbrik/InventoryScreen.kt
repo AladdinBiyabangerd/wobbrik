@@ -338,9 +338,18 @@ private fun DetailRow(label: String, value: String) {
                 "Baza dəyəri", "Maksimum satış", "Satıcıya" -> R.drawable.detail_coins
                 else -> R.drawable.detail_info
             })
-            Row(Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-                Text(label, Modifier.weight(1f), color = GameTokens.Muted)
-                Text(value, Modifier.weight(1f), color = GameTokens.Text, fontWeight = FontWeight.Bold)
+            BoxWithConstraints(Modifier.weight(1f)) {
+                // The portrait detail panel shares its width with the building preview.
+                // Keep whole labels readable when two equal text columns cannot fit.
+                if (maxWidth < GameTokens.Target * 4 * LocalDensity.current.fontScale) {
+                    Column(verticalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {
+                        Text(label, color = GameTokens.Muted)
+                        Text(value, color = GameTokens.Text, fontWeight = FontWeight.Bold)
+                    }
+                } else Row(horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+                    Text(label, Modifier.weight(1f), color = GameTokens.Muted)
+                    Text(value, Modifier.weight(1f), color = GameTokens.Text, fontWeight = FontWeight.Bold)
+                }
             }
         }
     }

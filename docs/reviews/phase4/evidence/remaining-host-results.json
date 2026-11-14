@@ -1,0 +1,23 @@
+[
+  {
+    "name": "com.aladdin.wobbrik.DetailPartsParityRenderTest",
+    "tests": "3",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0"
+  },
+  {
+    "name": "com.aladdin.wobbrik.CityRenderTest",
+    "tests": "9",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0"
+  },
+  {
+    "name": "com.aladdin.wobbrik.CompactFlowRenderTest",
+    "tests": "3",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0"
+  }
+]
