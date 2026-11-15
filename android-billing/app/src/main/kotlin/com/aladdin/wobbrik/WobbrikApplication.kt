@@ -26,6 +26,8 @@ import com.google.firebase.auth.AuthCredential
 
 /** Process-owned account bootstrap, recovery, durable commands and accepted online physics. */
 class WobbrikApplication : Application(), DefaultLifecycleObserver {
+    internal val settings by lazy { DeviceSettings(this) }
+
     sealed interface Bootstrap {
         data object MissingFirebase : Bootstrap
         data object MissingBackendOrigin : Bootstrap

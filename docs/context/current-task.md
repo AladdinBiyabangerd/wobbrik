@@ -1,3 +1,47 @@
+# Android settings review və lokal commit — 15 noyabr 2026
+
+- Completed: settings diff review edildi; SoundPool callback qeydiyyatı load-dan əvvələ keçirildi; sürətli completion/sound-off/background regression testi əlavə edildi. İstifadəçinin göstərişi ilə settings source/assets/review/harness lokal commit edilir.
+- Current state: feat/settings-flow, baza a192f4d; owner release baseline və ayrıca compact proposal faylları commit-dən kənarda qorunur. Aşağıdakı əvvəlki uncommitted statuslar tarixçədir.
+- Decisions: yalnız lokal commit; Android merge/push/CI/deploy yoxdur. Təsdiqli settings görünüşü dəyişmir, yeni dizayn yoxdur.
+- Checks performed: Java21/offline app unit/APK/lint PASS29s; host8/8PASS42s; beş yeni renderə baxıldı; üç settings PNG approved fixture ilə byte-identical; contrast3/3min8.22, JSON parity/diff checkPASS.
+- Remaining work: real device/audio/haptic/focus interruption/API24/TalkBack və tam mərhələ qəbulu yoxlanmayıb. Backend public HTTPS ayrıca deploy tələb edir.
+- Relevant files: docs/reviews/2026-11-15-settings-implementation.md; settings-implementation-visual/render/; DeviceSettings/GameFeedback/SettingsScreen/SettingsRoute/LegalDocuments.kt; docs/PLAN.md.
+- Exact next step: lokal commit hash-ini və review nəticəsini bildir; növbəti konkret göstəriş olmadan yeni mərhələ/merge/CI/push başlama.
+
+---
+# AppBackend commit/merge/push — 15 noyabr 2026
+
+- Completed: Wobbrik public profil/ad limiti/rekord identity və hüquqi sənədlər ayrıca ca0d9c8 və 0075791 commit-ləri ilə tarixçə saxlanaraq AppBackend main-ə merge və origin/main-ə push edildi.
+- Current state: backend lokal main=origin/main=cbd0eebc64e5afc6936a5b32b9d82031afa0b660; integration worktree /private/tmp/wobbrik-backend-main təmizdir. Android settings working diff dəyişməyib. Backend owner recipe/.gitignore işi qorunub.
+- Decisions: istifadəçi backend commit/merge/remote main push istədi; CI/deploy/Console yoxdur.
+- Checks performed: feature race/vet/build; merged focused race/vet/build və disposable PostgreSQL18 profile/leaderboard PASS; remote hash equality PASS. Müvəqqəti DB dayandırıldı.
+- Relevant files: AppBackend docs/reviews/2026-11-15-wobbrik-backend-integration.md; aşağıdakı settings review və docs/PLAN.md.
+- Remaining work: Android settings uncommitted; deployment/public HTTPS və tam mərhələ qəbulu ayrıca açıqdır.
+- Exact next step: nəticəni bildir; növbəti konkret istifadəçi göstərişini gözlə.
+
+---
+# Cari vahid — Parametrlər və hüquqi məzmun, 15 noyabr 2026
+
+- Completed: təsdiqli SettingsScreen və Hesab route, DataStore səs/musiqi/haptic, CC0 audio; təsdiqli dəstək mailto `aladdinbiyabangerd@gmail.com`; real offline privacy/terms/delete-account sənədləri və seçimi. Əsas settings görünüşü saxlanır.
+- Current state: Android `feat/settings-flow`, baza `a192f4d`, uncommitted. Backend `feat/wobbrik-legal-pages`, baza `b2cd617`, daimi worktree `/Users/mac/My Workspace/AppBackend-wobbrik-legal-pages`, uncommitted. Fasilədə silinmiş tmp worktree bu daimi nüsxə ilə əvəz edilib. Owner release baseline/proposal və backend profil/recipe işi qorunur.
+- Decisions: görünüş yenidən təsdiqə çıxarılmır. User DailyPlate public legal mexanizmini Wobbrik üçün istədi; sağlamlıq/subscription qaydaları köçürülmür. Sənədlər en+az, Android UI hazırda az; yeni UI dil siyahısı yoxdur. Backend JSON və Android asset bayt-bayt eynidir. Deploy olmadan da offline oxunur.
+- Remaining work: bu vahiddə implementasiya tamamlanır; public HTTPS URL-lərin işləməsi ayrıca backend deploy tələb edir. Real cihaz/audio/haptic/TalkBack/API24 runtime və tam mərhələ5 qəbulu yoxlanmayıb. CI/commit/merge/push/deploy yoxdur.
+- Relevant files: `SettingsScreen.kt`, `SettingsRoute.kt`, `DeviceSettings.kt`, `GameFeedback.kt`, `LegalDocuments.kt`, `assets/wobbrik-legal.json`; `docs/reviews/2026-11-15-settings-implementation.md`, `docs/reviews/settings-implementation-visual/`; backend `internal/legalpages/content/wobbrik.json`, `wobbrik_test.go`, `internal/platform/legal_pages_test.go`, `docs/public-legal-pages.md`; yeganə plan `docs/PLAN.md`.
+- Checks performed: normal Android app unit/APK/lint38sPASS; settings3render əvvəl approved0pixel fərq; real route+persistence və legal normal/font2 host testləri PASS, final7/7PASS44s, mailto keçidi və3sənəd seçimi daxil. Hüquqi real window renderlərinə baxıldı. Backend focus race/vet/buildPASS; web390px/1280px renderlərə baxıldı, horizontal overflow0. Kontrast mobilemin8.22/webmin4.88PASS; JSON parity/diffcheckPASS.
+- Exact next step: nəticəni istifadəçiyə bildir. Əlavə mərhələ/merge/CI/deploy başlama. Commit və deploy ayrıca göstərişlə; gələcək böyük işdə bu handoff+review və `docs/PLAN.md`-dən davam et.
+
+---
+# Cari vahid — Arrowz əsaslı Parametrlər nümunəsi, 15 noyabr 2026
+
+- Completed: iri profil düymələri və settings üçün review-only Compose nümunəsi; son istifadəçi düzəlişi ilə settings Arrowz telefon sətir quruluşuna yenidən çəkildi. Köhnə grouped settings nümunəsi cari deyil.
+- Current state: `docs/compact-account-preview`, baza `a192f4d`; production dəyişmir; istifadəçi son settings-390 nümunəsini “yes” ilə açıq təsdiqlədi.
+- Decisions: Wobbrik tokens/palitra saxlanır; ayrıca kart+dairəvi xətti ikon+mətn+kiçik toggle/ox. Settings aşağı iri Geri əvəzinə48dp başlıq geri. Profil preview ayrıca pending. Arrowz read-only, yeni funksiya/lokal siyahı qərarı yoxdur.
+- Remaining work: təsdiqli Parametrlər dizaynının real UI/domain inteqrasiyası. Settings production ekranı/persistence hələ yoxdur; səs/haptic, dəstəklənən dillər, dəstək və məxfilik məzmunu/ünvanlarının mövcud müqaviləsini dəqiqləşdir; saxta işlək settings kimi təqdim etmə.
+- Relevant files: `docs/reviews/2026-11-15-account-compact-proposal.md`, `docs/reviews/account-compact-visual/{settings-390.png,settings-360.png,settings-font2.png,render/CompactAccountProposalTest.kt}`; `GameTokens.kt`, `PublicAccountScreen.kt`; yeganə plan `docs/PLAN.md`.
+- Checks performed: final settings native3/3PASS;390/360font1,320font2 renderlərinə baxıldı, font2 scroll; kontrast3/3PASSmin8.22. Sintetik fixture; production build/device/real settings deyil; emulator/CI yoxdur.
+- Exact next step: yeni chatdə PLAN və bu review əsasında təsdiqli settings-390 dizaynını real axına tətbiq et. Yalnız açıq funksional sualları dəqiqləşdir; görünüşü yenidən təsdiqə çıxarma. Profilin ayrıca ölçü nümunəsi hələ təsdiqlənməyib. Commit/merge/push/CI ayrıca göstərişsiz yoxdur.
+
+---
 # Lokal commit — 15 noyabr 2026
 
 - Completed: istifadəçi bütün cari commit edilməmiş Wobbrik dəyişikliklərinin lokal commit-ini istədi. Bazar/profil/rekord source, test, asset, plan və review qeydləri saxlanılır; release metadata/profilləri ayrıca commit olunur.

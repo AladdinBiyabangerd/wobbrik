@@ -152,6 +152,10 @@ private fun AuthenticatedGame(app: WobbrikApplication) {
         AcceptedScene(hostState, ready, host, onHome = { page = "home" })
         return
     }
+    if (page == "settings") {
+        SettingsRoute(app.settings, onBack = { page = "account" })
+        return
+    }
     if (page == "city" && view != null && configured != null) {
         key(InventoryReadKey(ready ?: view.account)) { CityScreen(configured, view, onHome = { page = "home" }, onInventory = { inventoryBuilding = null; page = "inventory" }) }
         return
@@ -452,6 +456,7 @@ internal fun AcceptedScene(view: AcceptedEngineHost.Snapshot, ready: Authenticat
 @Composable
 internal fun GameScene(view: AcceptedEngineHost.Snapshot, motionKey: Any, onDrop: () -> Unit,
     onPause: () -> Unit, onResume: () -> Unit, onHome: () -> Unit) {
+    val feedback = LocalGameFeedback.current
     val scene = view.scene ?: return
     val cosmeticArt = rememberCosmeticArt() + rememberGameWindowArt()
     val art = SceneArt(ImageBitmap.imageResource(R.drawable.game_floor), ImageBitmap.imageResource(R.drawable.game_crane),
@@ -463,7 +468,7 @@ internal fun GameScene(view: AcceptedEngineHost.Snapshot, motionKey: Any, onDrop
     motion.advance(scene, 1f / 60f, view.cameraX)
     BoxWithConstraints(Modifier.fillMaxSize().background(GameTokens.Background).safeDrawingPadding()) {
         val sceneTop = if (maxWidth > maxHeight) GameTokens.Hairline * 0 else hudHeight
-        Canvas(Modifier.fillMaxSize().padding(top = sceneTop, bottom = GameTokens.Target).clipToBounds().clickable(enabled = view.inputEnabled) { onDrop() }) {
+        Canvas(Modifier.fillMaxSize().padding(top = sceneTop, bottom = GameTokens.Target).clipToBounds().clickable(enabled = view.inputEnabled) { feedback(); onDrop() }) {
             drawGameScene(scene, art, motion, cosmeticArt, view.finishParts)
         }
         Row(Modifier.fillMaxWidth().onSizeChanged { hudHeight = with(density) { it.height.toDp() } }.padding(GameTokens.Inset), horizontalArrangement = Arrangement.SpaceBetween) {

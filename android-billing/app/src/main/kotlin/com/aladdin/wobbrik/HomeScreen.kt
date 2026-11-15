@@ -235,7 +235,8 @@ internal fun HomeButton(label: String, icon: Int? = null, primary: Boolean = fal
                        modifier: Modifier = Modifier.fillMaxWidth(), compact: Boolean = false, leading: (@Composable () -> Unit)? = null, onClick: () -> Unit) {
     val sizing = mobileUiSizing()
     val mobile = sizing.portrait && !large
-    Button(onClick, modifier = modifier.heightIn(min = if (mobile && primary) GameTokens.MobileUi.PrimaryTarget else if (large && primary) GameTokens.Target * 2 else if (large) GameTokens.Target + GameTokens.Inset else if (primary && !mobile) GameTokens.Target + GameTokens.Gap else GameTokens.Target)
+    val feedback = LocalGameFeedback.current
+    Button({ feedback(); onClick() }, modifier = modifier.heightIn(min = if (mobile && primary) GameTokens.MobileUi.PrimaryTarget else if (large && primary) GameTokens.Target * 2 else if (large) GameTokens.Target + GameTokens.Inset else if (primary && !mobile) GameTokens.Target + GameTokens.Gap else GameTokens.Target)
             .background(Brush.verticalGradient(if (primary) listOf(lerp(GameTokens.Accent, GameTokens.Text, 1f - GameTokens.DimOpacity), GameTokens.Accent) else listOf(GameTokens.Raised, GameTokens.Surface)), RoundedCornerShape(GameTokens.CardRadius))
             .drawWithContent {
                 drawContent()

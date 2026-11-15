@@ -79,6 +79,7 @@ internal fun PublicAccountScreen(configured: WobbrikApplication.Bootstrap.Config
                 }
                 CommunityLink("Nailiyyətlər", R.drawable.ui_trophy) { onPage("achievements") }
                 CommunityLink("Rekordlar", R.drawable.ui_crown) { onPage("leaderboard") }
+                CommunityLink("Parametrlər", R.drawable.ui_account) { onPage("settings") }
             } else {
                 Text("Oyunçu adı", color = GameTokens.Text, fontWeight = FontWeight.Bold)
                 OutlinedTextField(name, { if (it.codePointCount(0, it.length) <= PublicProfiles.MaxNameLength ||

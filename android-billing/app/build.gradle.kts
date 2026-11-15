@@ -33,6 +33,8 @@ android {
 kotlin { jvmToolchain(21) }
 dependencies {
     testImplementation("junit:junit:4.13.2")
+    // Device settings; same DataStore pin as the Arrowz reference.
+    implementation("androidx.datastore:datastore-preferences:1.1.1")
     implementation(project(":engine"))
     implementation(project(":android"))
     implementation("androidx.lifecycle:lifecycle-process:2.8.7")

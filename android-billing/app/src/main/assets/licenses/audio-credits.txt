@@ -1,0 +1,13 @@
+Wobbrik bundled audio — CC0 1.0
+
+music_main.ogg: Space City by MintoDog
+https://opengameart.org/content/space-city
+https://creativecommons.org/publicdomain/zero/1.0/
+Loopable track; same Vorbis q1 re-encoding used by Arrowz (~74 kbps stereo).
+
+sfx_ui_click.ogg: select_002.ogg, Interface Sounds by Kenney
+https://kenney.nl/assets/interface-sounds
+CC0 1.0; see Kenney-CC0.txt. Same mono Vorbis q4 encoding used by Arrowz.
+
+Copied from local Arrowz licensed assets on 15 November 2026.
+Original author pages independently checked on that date.
