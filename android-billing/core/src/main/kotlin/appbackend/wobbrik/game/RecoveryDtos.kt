@@ -102,6 +102,7 @@ object RecoveryDtos {
     fun attemptReceipt(body: String, route: AttemptCommand.Route): AttemptReceipt {
         val receipt = receipt(body); val r = receipt.result
         val result = when (route) {
+            AttemptCommand.Route.MARKET_LIST, AttemptCommand.Route.MARKET_WITHDRAW, AttemptCommand.Route.MARKET_BUY,
             AttemptCommand.Route.SHOP_BUY, AttemptCommand.Route.BUILDING_EDIT, AttemptCommand.Route.BUILDING_DELETE -> error("Not an attempt receipt")
             AttemptCommand.Route.START -> AttemptResult.Started(r.s("attempt_id"))
             AttemptCommand.Route.CHECKPOINT -> AttemptResult.Checkpointed(r.n("xp"), r.n("level"), r.n("rescues"), r.ids("granted"), r.n("coins"))

@@ -79,6 +79,7 @@ class AcceptedAttemptCommandsTest {
                     fun number(k: String) = request.getValue(k).jsonPrimitive.long
                     fun string(k: String) = request.getValue(k).jsonPrimitive.content
                     val attempt = when (command.route) {
+                        AttemptCommand.Route.MARKET_LIST, AttemptCommand.Route.MARKET_WITHDRAW, AttemptCommand.Route.MARKET_BUY,
                         AttemptCommand.Route.SHOP_BUY, AttemptCommand.Route.BUILDING_EDIT, AttemptCommand.Route.BUILDING_DELETE -> error("Not an attempt command")
                         AttemptCommand.Route.START -> {
                             check(old.attempt?.active != true)
@@ -456,7 +457,8 @@ class AcceptedAttemptCommandsTest {
             if (route == AttemptCommand.Route.FINISH) { f.commands.checkpoint(f.ready(), landed(true)); yield() }
             f.afterCommit = { error("lost committed response") }
             when (route) {
-                AttemptCommand.Route.SHOP_BUY, AttemptCommand.Route.BUILDING_EDIT, AttemptCommand.Route.BUILDING_DELETE -> error("Not an attempt command")
+                AttemptCommand.Route.MARKET_LIST, AttemptCommand.Route.MARKET_WITHDRAW, AttemptCommand.Route.MARKET_BUY,
+                        AttemptCommand.Route.SHOP_BUY, AttemptCommand.Route.BUILDING_EDIT, AttemptCommand.Route.BUILDING_DELETE -> error("Not an attempt command")
                 AttemptCommand.Route.START -> f.commands.start(f.ready())
                 AttemptCommand.Route.CHECKPOINT -> f.commands.checkpoint(f.ready(), landed(true))
                 AttemptCommand.Route.FINISH -> f.commands.finish(f.ready(), landed(true), parts)

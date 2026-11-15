@@ -1,0 +1,10 @@
+Final ordinary Gradle (no render init): :core:test :engine:test :app:testDebugUnitTest :app:assembleDebug :app:lintDebug
+BUILD SUCCESSFUL in 15s
+core: {'tests': 136, 'failures': 0, 'errors': 0, 'skipped': 0}
+engine: {'tests': 95, 'failures': 0, 'errors': 0, 'skipped': 0}
+app: {'tests': 24, 'failures': 0, 'errors': 0, 'skipped': 0}
+Contrast 4/4 PASS; minimum8.22
+git diff --check PASS; original/copied approved assets SHA256 identical
+Native16/16 PASS55s (separate host run, before ordinary Gradle); parity3/3 changed0; back-region15/15 PASS
+AppBackend TestValidProfileName normal/race PASS; go vet ./internal/wobbrik PASS; no PG integration rerun
+No emulator/device/real HTTP/CI/merge/push/deploy

@@ -1,0 +1,366 @@
+package com.aladdin.wobbrik
+
+import android.app.Application
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import androidx.activity.ComponentActivity
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.*
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.test.*
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.unit.Density
+import appbackend.wobbrik.billing.*
+import appbackend.wobbrik.game.*
+import com.aladdin.wobbrik.engine.AcceptedAttemptCommands
+import kotlinx.coroutines.*
+import org.junit.Assert.*
+import org.junit.Rule
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
+import org.robolectric.annotation.GraphicsMode
+import java.io.File
+
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk=[34],application=Application::class,qualifiers="w360dp-h640dp-xxhdpi")
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
+abstract class ProfileLeaderboardRenderHost {
+ @get:Rule val compose=createAndroidComposeRule<ComponentActivity>()
+ private val out=File(requireNotNull(System.getProperty("wobbrik.render.output", "/Users/mac/My Workspace/Wobbrik/docs/reviews/profile-leaderboard-visual/final"))).apply {mkdirs()}
+ private var wantedCapture = "account"
+ private fun capture(name:String) {
+  val selected = System.getProperty("wobbrik.render.state") ?: wantedCapture
+  if (!name.startsWith("$selected-")) return
+  compose.mainClock.advanceTimeByFrame();compose.waitForIdle();compose.runOnUiThread {
+   val view=compose.activity.window.decorView
+   fun invalidateTree(v: android.view.View) {
+    v.invalidate()
+    // View.invalidate alone does not invalidate Compose's cached OwnedLayers.
+    if(v.javaClass.name == "androidx.compose.ui.platform.AndroidComposeView")
+     v.javaClass.getMethod("invalidateDescendants").invoke(v)
+    if(v is android.view.ViewGroup) for(i in 0 until v.childCount) invalidateTree(v.getChildAt(i))
+   }
+   invalidateTree(view)
+   fun draw():Bitmap {
+    invalidateTree(view)
+    return Bitmap.createBitmap(view.width,view.height,Bitmap.Config.ARGB_8888).also {view.draw(Canvas(it))}
+   }
+   val bitmap=draw()
+   val repeated=draw()
+   assertTrue("A second full capture must retain every unchanged layer: $name", bitmap.sameAs(repeated))
+   repeated.recycle()
+   var headerInk=0
+   var footerAccent=0
+   for(y in 0 until minOf(bitmap.height, (96 * view.resources.displayMetrics.density).toInt()))
+    for(x in 0 until bitmap.width) {
+     val pixel=bitmap.getPixel(x,y)
+     if(android.graphics.Color.red(pixel)>170 && android.graphics.Color.green(pixel)>170 && android.graphics.Color.blue(pixel)>170) headerInk++
+    }
+   for(y in maxOf(0,bitmap.height - (144 * view.resources.displayMetrics.density).toInt()) until bitmap.height)
+    for(x in 0 until bitmap.width) {
+     val pixel=bitmap.getPixel(x,y)
+     if(android.graphics.Color.red(pixel)<160 && android.graphics.Color.green(pixel)>180 && android.graphics.Color.blue(pixel)>180) footerAccent++
+    }
+   assertTrue("Header must contain its title/logo: $name",headerInk>100)
+   assertTrue("Footer must contain the primary action: $name",footerAccent>100)
+   File(out,"$name.png").outputStream().use {bitmap.compress(Bitmap.CompressFormat.PNG,100,it)}
+   bitmap.recycle()
+  }
+ }
+ protected fun flow(font:Float,name:String,stress:Boolean=false,state:String="account") {
+  wantedCapture = state
+  val coroutineScope=CoroutineScope(SupervisorJob()+Dispatchers.Unconfined)
+  val sessions=AccountSessions {"token"}
+  val snapshot=GameSnapshot("wobbrik-v1",1,1250,1050,null,AccountRecovery("now","first","later",7,0,emptyList(),emptyList(),emptyList(),emptyList(),if(stress) Long.MAX_VALUE else 28, XpInterval(java.math.BigInteger.valueOf(470), java.math.BigInteger.valueOf(1270))))
+  val catalog=RecoveryCatalog("wobbrik-v1","wobbrik-structural-v1",emptyList(),emptyList())
+  val backend=object:AttemptBackend {
+   override suspend fun sync(session:BillingSession)=snapshot
+   override suspend fun catalog(session:BillingSession)=catalog
+   override suspend fun submit(session:BillingSession,command:AttemptCommand)=error("No economic write expected")
+  }
+  val journal=object:AttemptJournal {
+   override fun pending(uid:String):AttemptCommand?=null
+   override fun save(uid:String,command:AttemptCommand)=error("No economic write expected")
+   override fun remove(uid:String,command:AttemptCommand)=Unit
+  }
+  var profile=PublicProfile(0,if(stress) "Əli".repeat(8) else "Əli","builder")
+  var puts=0
+  val replacements=mutableListOf<ProfileReplacement>()
+  val access=object:ProfileAccess {
+   override suspend fun profile(session:BillingSession)=profile
+   override suspend fun replaceProfile(session:BillingSession,replacement:ProfileReplacement):PublicProfile {
+    puts++;replacements+=replacement
+    if(puts==3) throw java.io.IOException()
+    if(puts==1) {profile=PublicProfile(1,"Başqa cihaz","pilot");throw RevisionConflict()}
+    return PublicProfile(2,replacement.displayName,replacement.avatarId).also {profile=it}
+   }
+  }
+  var fail=false
+  var empty=false
+  val requests=mutableListOf<String>()
+  val fixtureReads=object:GameplayReads {
+   override suspend fun read(session:BillingSession,path:String):String {
+    requests+=path
+    if(fail) throw java.io.IOException()
+    val weekly=path.contains("scope=weekly")
+    val more=path.contains("cursor=")
+    val entries=if(empty) "" else if(more) """{"rank":${if(stress) Long.MAX_VALUE else 7},"result_id":"r7","floors":${if(stress) Long.MAX_VALUE else 28},"accepted_at":"2026-11-14T00:00:00Z","is_self":true,"display_name":"${if(stress) "Əli".repeat(8) else "Əli"}","avatar_id":"builder"}""" else
+      listOf(Triple("Əli","builder",42),Triple("Aydan","pilot",38),Triple("Murad","architect",35)).mapIndexed {i,e->
+       """{"rank":${i+1},"result_id":"r${i+1}","floors":${e.third - if(weekly) 0 else 1},"accepted_at":"2026-11-14T00:00:00Z","is_self":false,"display_name":"${e.first}","avatar_id":"${if(weekly) e.second else listOf("architect","builder","pilot")[i]}"}"""
+      }.joinToString(",")
+    return """{"scope":"${if(weekly) "weekly" else "all"}",${if(weekly) "\"week_start\":\"2026-11-09\"," else ""}"snapshot_at":"2026-11-14T00:00:00Z","expires_at":"2026-11-14T01:00:00Z","entries":[$entries]${if(!empty&&!more) ",\"next_cursor\":\"next\"" else ""}}"""
+   }
+  }
+  val reads=GameplayHttpBackend(sessions,GameplayTransport {path,_,_->GameplayResponse(200,fixtureReads.read(requireNotNull(sessions.current()),path))})
+  try {
+   val owner=AuthenticatedRecoveryOwner(sessions,backend,journal,coroutineScope);owner.onAuthChanged("alice")
+   val ready=owner.state.value as AuthenticatedRecoveryOwner.State.Ready
+   val configured=WobbrikApplication.Bootstrap.Configured(owner,AcceptedAttemptCommands(owner),InventoryRepository(reads),sessions,
+     DecorationRepository(reads),CitySceneRepository(reads),profiles=access,leaderboard=LeaderboardRepository(reads))
+   var route by mutableStateOf("account")
+   compose.setContent {val density=LocalDensity.current
+    CompositionLocalProvider(LocalDensity provides Density(density.density,font)) {MaterialTheme {
+     if(route=="leaderboard") LeaderboardScreen(configured,ready,{route="account"})
+     else PublicAccountScreen(configured,ready,{route="home"},{route=it})
+    }}
+   }
+   compose.waitUntil(15000) {compose.onAllNodesWithText("Profili dəyiş").fetchSemanticsNodes().isNotEmpty()}
+   capture("account-$name")
+   compose.onNodeWithText("Profili dəyiş").performScrollTo().performClick()
+   capture("editor-$name")
+   compose.onNodeWithText("Yadda saxla").assertIsDisplayed().performClick()
+   compose.waitUntil(15000) {compose.onAllNodesWithText("Profil başqa yerdə",substring=true).fetchSemanticsNodes().isNotEmpty()}
+   assertEquals(1,puts)
+   compose.onNodeWithText("Yadda saxla").assertIsDisplayed().performClick()
+   compose.waitUntil(15000) {compose.onAllNodesWithText("Profili dəyiş").fetchSemanticsNodes().isNotEmpty()}
+   assertEquals(2,puts)
+   compose.onNodeWithText("Profili dəyiş").performScrollTo().performClick()
+   compose.onNodeWithText("Yadda saxla").performClick()
+   compose.waitUntil(15000) {compose.onAllNodesWithText("Təkrar saxla").fetchSemanticsNodes().isNotEmpty()}
+   compose.onNodeWithText("Təkrar saxla").assertIsDisplayed().performClick()
+   compose.waitUntil(15000) {compose.onAllNodesWithText("Profili dəyiş").fetchSemanticsNodes().isNotEmpty()}
+   assertEquals(replacements[2],replacements[3])
+   compose.onNodeWithText("Rekordlar").performScrollTo().performClick()
+   compose.waitUntil(15000) {compose.onAllNodesWithText("Həftə:",substring=true).fetchSemanticsNodes().isNotEmpty()}
+   capture("weekly-$name")
+   compose.onNodeWithTag("records-list").performScrollToNode(hasText("Daha çox"))
+   compose.onNodeWithText("Daha çox").performClick()
+   compose.waitForIdle()
+   compose.onNodeWithTag("records-list").performScrollToNode(hasText("Sən"))
+   compose.onNodeWithText("Sən").performScrollTo();capture("self-page-$name")
+   compose.onNodeWithText("Bütün vaxtlar").performClick()
+   compose.waitUntil(15000) {requests.any {it.contains("scope=all")}}
+   compose.waitUntil(15000) {compose.onAllNodesWithText("41",substring=true).fetchSemanticsNodes().isNotEmpty()}
+   capture("all-$name")
+   fail=true
+   compose.onNodeWithText("Yenilə").performClick()
+   compose.waitForIdle()
+   compose.onNodeWithTag("records-list").performScrollToNode(hasText("Yenidən cəhd et"))
+   compose.onNodeWithText("Yenidən cəhd et").performScrollTo();capture("error-$name")
+   fail=false;empty=true
+   compose.onNodeWithText("Yenilə").performClick()
+   compose.waitUntil(15000) {compose.onAllNodesWithText("Hələ qəbul edilmiş nəticə yoxdur.").fetchSemanticsNodes().isNotEmpty()}
+   capture("empty-$name")
+   compose.onNodeWithText("Hesaba qayıt").assertIsDisplayed().performClick()
+   assertEquals("account",route)
+  } finally {coroutineScope.cancel()}
+ }
+}
+
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk=[34], application=Application::class, qualifiers="w360dp-h640dp-xxhdpi")
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
+class ProfileLeaderboardCompact360AccountRenderTest : ProfileLeaderboardRenderHost() {
+ @Test fun render()=flow(1f,"360-font1",false,"account")
+}
+
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk=[34], application=Application::class, qualifiers="w360dp-h640dp-xxhdpi")
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
+class ProfileLeaderboardCompact360EditorRenderTest : ProfileLeaderboardRenderHost() {
+ @Test fun render()=flow(1f,"360-font1",false,"editor")
+}
+
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk=[34], application=Application::class, qualifiers="w360dp-h640dp-xxhdpi")
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
+class ProfileLeaderboardCompact360WeeklyRenderTest : ProfileLeaderboardRenderHost() {
+ @Test fun render()=flow(1f,"360-font1",false,"weekly")
+}
+
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk=[34], application=Application::class, qualifiers="w360dp-h640dp-xxhdpi")
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
+class ProfileLeaderboardCompact360AllRenderTest : ProfileLeaderboardRenderHost() {
+ @Test fun render()=flow(1f,"360-font1",false,"all")
+}
+
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk=[34], application=Application::class, qualifiers="w360dp-h640dp-xxhdpi")
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
+class ProfileLeaderboardCompact360SelfPageRenderTest : ProfileLeaderboardRenderHost() {
+ @Test fun render()=flow(1f,"360-font1",false,"self-page")
+}
+
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk=[34], application=Application::class, qualifiers="w360dp-h640dp-xxhdpi")
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
+class ProfileLeaderboardCompact360ErrorRenderTest : ProfileLeaderboardRenderHost() {
+ @Test fun render()=flow(1f,"360-font1",false,"error")
+}
+
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk=[34], application=Application::class, qualifiers="w360dp-h640dp-xxhdpi")
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
+class ProfileLeaderboardCompact360EmptyRenderTest : ProfileLeaderboardRenderHost() {
+ @Test fun render()=flow(1f,"360-font1",false,"empty")
+}
+
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk=[34], application=Application::class, qualifiers="w390dp-h844dp-xxhdpi")
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
+class ProfileLeaderboardRegular390AccountRenderTest : ProfileLeaderboardRenderHost() {
+ @Test fun render()=flow(1f,"390-font1",false,"account")
+}
+
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk=[34], application=Application::class, qualifiers="w390dp-h844dp-xxhdpi")
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
+class ProfileLeaderboardRegular390EditorRenderTest : ProfileLeaderboardRenderHost() {
+ @Test fun render()=flow(1f,"390-font1",false,"editor")
+}
+
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk=[34], application=Application::class, qualifiers="w390dp-h844dp-xxhdpi")
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
+class ProfileLeaderboardRegular390WeeklyRenderTest : ProfileLeaderboardRenderHost() {
+ @Test fun render()=flow(1f,"390-font1",false,"weekly")
+}
+
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk=[34], application=Application::class, qualifiers="w390dp-h844dp-xxhdpi")
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
+class ProfileLeaderboardRegular390AllRenderTest : ProfileLeaderboardRenderHost() {
+ @Test fun render()=flow(1f,"390-font1",false,"all")
+}
+
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk=[34], application=Application::class, qualifiers="w390dp-h844dp-xxhdpi")
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
+class ProfileLeaderboardRegular390SelfPageRenderTest : ProfileLeaderboardRenderHost() {
+ @Test fun render()=flow(1f,"390-font1",false,"self-page")
+}
+
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk=[34], application=Application::class, qualifiers="w390dp-h844dp-xxhdpi")
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
+class ProfileLeaderboardRegular390ErrorRenderTest : ProfileLeaderboardRenderHost() {
+ @Test fun render()=flow(1f,"390-font1",false,"error")
+}
+
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk=[34], application=Application::class, qualifiers="w390dp-h844dp-xxhdpi")
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
+class ProfileLeaderboardRegular390EmptyRenderTest : ProfileLeaderboardRenderHost() {
+ @Test fun render()=flow(1f,"390-font1",false,"empty")
+}
+
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk=[34], application=Application::class, qualifiers="w320dp-h568dp-xxhdpi")
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
+class ProfileLeaderboardFont2AccountRenderTest : ProfileLeaderboardRenderHost() {
+ @Test fun render()=flow(2f,"320-font2",false,"account")
+}
+
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk=[34], application=Application::class, qualifiers="w320dp-h568dp-xxhdpi")
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
+class ProfileLeaderboardFont2EditorRenderTest : ProfileLeaderboardRenderHost() {
+ @Test fun render()=flow(2f,"320-font2",false,"editor")
+}
+
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk=[34], application=Application::class, qualifiers="w320dp-h568dp-xxhdpi")
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
+class ProfileLeaderboardFont2WeeklyRenderTest : ProfileLeaderboardRenderHost() {
+ @Test fun render()=flow(2f,"320-font2",false,"weekly")
+}
+
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk=[34], application=Application::class, qualifiers="w320dp-h568dp-xxhdpi")
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
+class ProfileLeaderboardFont2AllRenderTest : ProfileLeaderboardRenderHost() {
+ @Test fun render()=flow(2f,"320-font2",false,"all")
+}
+
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk=[34], application=Application::class, qualifiers="w320dp-h568dp-xxhdpi")
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
+class ProfileLeaderboardFont2SelfPageRenderTest : ProfileLeaderboardRenderHost() {
+ @Test fun render()=flow(2f,"320-font2",false,"self-page")
+}
+
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk=[34], application=Application::class, qualifiers="w320dp-h568dp-xxhdpi")
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
+class ProfileLeaderboardFont2ErrorRenderTest : ProfileLeaderboardRenderHost() {
+ @Test fun render()=flow(2f,"320-font2",false,"error")
+}
+
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk=[34], application=Application::class, qualifiers="w320dp-h568dp-xxhdpi")
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
+class ProfileLeaderboardFont2EmptyRenderTest : ProfileLeaderboardRenderHost() {
+ @Test fun render()=flow(2f,"320-font2",false,"empty")
+}
+
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk=[34], application=Application::class, qualifiers="w320dp-h568dp-xxhdpi")
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
+class ProfileLeaderboardLongIdentityAccountRenderTest : ProfileLeaderboardRenderHost() {
+ @Test fun render()=flow(2f,"320-font2-long",true,"account")
+}
+
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk=[34], application=Application::class, qualifiers="w320dp-h568dp-xxhdpi")
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
+class ProfileLeaderboardLongIdentityEditorRenderTest : ProfileLeaderboardRenderHost() {
+ @Test fun render()=flow(2f,"320-font2-long",true,"editor")
+}
+
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk=[34], application=Application::class, qualifiers="w320dp-h568dp-xxhdpi")
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
+class ProfileLeaderboardLongIdentityWeeklyRenderTest : ProfileLeaderboardRenderHost() {
+ @Test fun render()=flow(2f,"320-font2-long",true,"weekly")
+}
+
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk=[34], application=Application::class, qualifiers="w320dp-h568dp-xxhdpi")
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
+class ProfileLeaderboardLongIdentityAllRenderTest : ProfileLeaderboardRenderHost() {
+ @Test fun render()=flow(2f,"320-font2-long",true,"all")
+}
+
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk=[34], application=Application::class, qualifiers="w320dp-h568dp-xxhdpi")
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
+class ProfileLeaderboardLongIdentitySelfPageRenderTest : ProfileLeaderboardRenderHost() {
+ @Test fun render()=flow(2f,"320-font2-long",true,"self-page")
+}
+
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk=[34], application=Application::class, qualifiers="w320dp-h568dp-xxhdpi")
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
+class ProfileLeaderboardLongIdentityErrorRenderTest : ProfileLeaderboardRenderHost() {
+ @Test fun render()=flow(2f,"320-font2-long",true,"error")
+}
+
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk=[34], application=Application::class, qualifiers="w320dp-h568dp-xxhdpi")
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
+class ProfileLeaderboardLongIdentityEmptyRenderTest : ProfileLeaderboardRenderHost() {
+ @Test fun render()=flow(2f,"320-font2-long",true,"empty")
+}

@@ -19,7 +19,12 @@ fun interface GameplayReads {
     suspend fun read(session: BillingSession, path: String): String
 }
 
-class GameplayHttpBackend(private val sessions: Sessions, private val transport: GameplayTransport) : AttemptBackend, GameplayReads {
+class GameplayHttpBackend(private val sessions: Sessions, private val transport: GameplayTransport) : AttemptBackend, GameplayReads, ProfileAccess {
+    override suspend fun profile(session: BillingSession): PublicProfile = PublicProfiles.parse(request(session, "profile", null))
+    override suspend fun replaceProfile(session: BillingSession, replacement: ProfileReplacement): PublicProfile =
+        PublicProfiles.parse(request(session, "profile", replacement.json())).also {
+            require(it.revision > 0 && it.displayName == replacement.displayName && it.avatarId == replacement.avatarId)
+        }
     override suspend fun catalog(session: BillingSession): RecoveryCatalog = RecoveryDtos.catalog(request(session, "catalog", null))
     override suspend fun sync(session: BillingSession): GameSnapshot = GameplayWire.snapshot(request(session, "sync", null))
     override suspend fun attempt(session: BillingSession, id: String): GameSnapshot? {
@@ -38,6 +43,9 @@ class GameplayHttpBackend(private val sessions: Sessions, private val transport:
     override suspend fun submit(session: BillingSession, command: AttemptCommand) {
         GameplayWire.validate(command)
         val path = when (command.route) {
+            AttemptCommand.Route.MARKET_LIST -> "market/list"
+            AttemptCommand.Route.MARKET_WITHDRAW -> "market/withdraw"
+            AttemptCommand.Route.MARKET_BUY -> "market/buy"
             AttemptCommand.Route.SHOP_BUY -> "shop/buy"
             AttemptCommand.Route.BUILDING_EDIT -> "buildings/edit"
             AttemptCommand.Route.BUILDING_DELETE -> "buildings/delete"
@@ -45,13 +53,14 @@ class GameplayHttpBackend(private val sessions: Sessions, private val transport:
         }
         val body = try { request(session, path, command.envelope) }
         catch (failure: GameplayHttpError) {
-            if (command.route in setOf(AttemptCommand.Route.SHOP_BUY, AttemptCommand.Route.BUILDING_EDIT, AttemptCommand.Route.BUILDING_DELETE) &&
+            if (command.route in MarketMutations.routes + setOf(AttemptCommand.Route.SHOP_BUY, AttemptCommand.Route.BUILDING_EDIT, AttemptCommand.Route.BUILDING_DELETE) &&
                 ((failure.status == 409 && failure.code in setOf("shop_conflict", "insufficient_balance", "building_conflict", "listing_conflict")) ||
                  (failure.status == 404 && failure.code == "not_found") ||
                  (failure.status == 400 && failure.code == "invalid_request"))) throw MutationRejected(requireNotNull(failure.code))
             throw failure
         }
         when (command.route) {
+            AttemptCommand.Route.MARKET_LIST, AttemptCommand.Route.MARKET_WITHDRAW, AttemptCommand.Route.MARKET_BUY -> MarketMutations.receipt(body, command)
             AttemptCommand.Route.SHOP_BUY, AttemptCommand.Route.BUILDING_EDIT -> PartsMutations.receipt(body, command)
             AttemptCommand.Route.BUILDING_DELETE -> BuildingDeletion.receipt(body, command)
             else -> RecoveryDtos.attemptReceipt(body, command.route)
@@ -82,9 +91,9 @@ class UrlConnectionGameplayTransport(origin: String) : GameplayTransport {
         require(it.path.isNullOrEmpty() || it.path == "/")
     }.toString().trimEnd('/')
     override suspend fun request(path: String, bearer: String, body: String?): GameplayResponse = withContext(Dispatchers.IO) {
-        require(allowedReadPath(path) || path in setOf("sync", "catalog", "shop/buy", "buildings/edit", "buildings/delete", "attempts/start", "attempts/checkpoint", "attempts/finish", "attempts/abandon"))
+        require(allowedReadPath(path) || path in setOf("sync", "catalog", "market/list", "market/withdraw", "market/buy", "shop/buy", "buildings/edit", "buildings/delete", "attempts/start", "attempts/checkpoint", "attempts/finish", "attempts/abandon"))
         val suffix = if (path == "catalog") "catalog?rules_version=wobbrik-v1" else path
-        val responseLimit = if (path.startsWith("inventory?")) 1_048_576 else 65_536
+        val responseLimit = if (path.startsWith("inventory?") || path.startsWith("market/")) 1_048_576 else 65_536
         val connection = URI("$base/v1/apps/wobbrik/game/$suffix").toURL().openConnection() as HttpURLConnection
         try {
             connection.instanceFollowRedirects = false
@@ -93,7 +102,7 @@ class UrlConnectionGameplayTransport(origin: String) : GameplayTransport {
             connection.setRequestProperty("Accept", "application/json")
             if (body != null) {
                 val bytes = body.toByteArray(Charsets.UTF_8); require(bytes.size <= 32768)
-                connection.requestMethod = "POST"; connection.doOutput = true
+                connection.requestMethod = if (path == "profile") "PUT" else "POST"; connection.doOutput = true
                 connection.setRequestProperty("Content-Type", "application/json")
                 connection.setFixedLengthStreamingMode(bytes.size)
                 connection.outputStream.use { it.write(bytes) }
@@ -117,5 +126,6 @@ class UrlConnectionGameplayTransport(origin: String) : GameplayTransport {
 
 /** Keep authenticated GET paths constrained; IDs/cursors cannot escape the game API. */
 internal fun allowedReadPath(path: String): Boolean =
+    path == "profile" || LeaderboardReads.allowedPath(path) || MarketReads.allowedPath(path) ||
     Regex("(?:inventory|city|decorations)\\?limit=20(?:&cursor=[A-Za-z0-9_-]{1,128})?").matches(path) ||
         Regex("(?:buildings|attempts|operations)/[A-Za-z0-9_-]{1,128}").matches(path)

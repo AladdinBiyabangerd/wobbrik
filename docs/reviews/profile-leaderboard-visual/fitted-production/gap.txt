@@ -1,0 +1,3 @@
+Göstərilən oyunçular: 8
+leaderboard?scope=weekly&limit=7
+leaderboard?scope=weekly&limit=1&cursor=g1_n7

@@ -1,0 +1,204 @@
+{
+  "id": "wobbrik",
+  "name": "Wobbrik",
+  "package": "com.aladdin.wobbrik",
+  "developer": "Aladdin Biyabangerd",
+  "email": "aladdinbiyabangerd@gmail.com",
+  "updated": "2026-11-15",
+  "locales": {
+    "en": {
+      "name": "English",
+      "updated_label": "Updated",
+      "contact_label": "Contact",
+      "documents": {
+        "privacy": {
+          "title": "Privacy policy",
+          "intro": "How Wobbrik processes your account, game activity and device information.",
+          "sections": [
+            {
+              "title": "Who is responsible",
+              "body": "Wobbrik (com.aladdin.wobbrik) is developed by Aladdin Biyabangerd. This policy applies only to Wobbrik. Contact: aladdinbiyabangerd@gmail.com."
+            },
+            {
+              "title": "Account and game data",
+              "body": "Google/Firebase sign-in identifies your account. We process your account identifier and authentication information, game attempts and results, progress, achievements, coins, purchases, building ownership, selected parts, inventory, city and market transactions. If you set a public player name and bundled avatar, they are used to identify you in supported public game features. Do not put private information in your public name."
+            },
+            {
+              "title": "Public features",
+              "body": "Leaderboards show player names, bundled avatars, scores and ranks. Public names and avatars are separate from your Google name and photo; the game does not use those Google identity fields as public profile content. Other players may see game information made public through leaderboards and market features. Your account email and authentication tokens are not public profile fields."
+            },
+            {
+              "title": "Purpose and storage",
+              "body": "We use this information to sign you in, operate gameplay and the game economy, save accepted progress, prevent duplicate rewards and purchases, and provide market and leaderboard features. Our backend stores account-linked game and transaction records. Your device stores settings, available cached game data and pending results or commands for retry. Offline results become confirmed progress only after server acceptance. Uninstalling clears app-local data but does not request deletion of your server account."
+            },
+            {
+              "title": "Providers and diagnostics",
+              "body": "Google/Firebase provides authentication, Analytics, Crashlytics and Remote Config. These services may process app-instance or device identifiers, app usage events, device and app versions, crash reports and diagnostic information. Hosting and network providers process connection information such as IP addresses to operate and protect the service. We do not sell your personal data. The app does not require contacts, precise location, camera or microphone access for gameplay."
+            },
+            {
+              "title": "Payments and advertising",
+              "body": "Where purchases are offered, Google Play handles checkout and payment details; we do not receive your bank card details. The backend processes purchase tokens, product status and account-linked delivery records to verify purchases and prevent duplicate credit. Coins and game items are game content, not money or a promise of cash redemption. Any future advertising or additional data use requires its own applicable disclosure and controls before activation; this policy alone does not enable it."
+            },
+            {
+              "title": "Retention and deletion",
+              "body": "We retain live account-linked game data until account deletion is completed; no automatic expiry period is currently defined. On a verified deletion request we remove the Wobbrik account and associated live game, ownership, wallet and purchase records through the account-deletion process. Minimal pseudonymous account and purchase-token hashes may remain to prevent abuse and token reuse, without a fixed expiry currently defined. Existing backups and copies already made by other people cannot be immediately recalled; automatic repeat deletion after an old backup is restored is not implemented. Contact us if data reappears."
+            },
+            {
+              "title": "Your choices and requests",
+              "body": "You can change available device settings and public profile fields in the app. For access, correction or account deletion, email aladdinbiyabangerd@gmail.com and identify Wobbrik. We verify ownership before disclosing or deleting account data. Never send a password, sign-in code, authentication token or bank card details. The account-deletion page explains the request process. Deletion does not delete your Google account or automatically refund Google Play payments."
+            },
+            {
+              "title": "Children and changes",
+              "body": "If a child has provided personal data or you have a privacy concern, contact us so we can review the request. We update this policy when processing changes and provide relevant information before introducing new uses of personal data."
+            }
+          ]
+        },
+        "terms": {
+          "title": "Terms of service",
+          "intro": "Conditions for using Wobbrik and its online game features.",
+          "sections": [
+            {
+              "title": "Using Wobbrik",
+              "body": "Use Wobbrik lawfully, protect your Google account and do not access another person’s account. Online account features require sign-in and internet access. Do not exploit errors, automate abuse, manipulate game requests, impersonate others or interfere with the service. Do not use offensive or privacy-infringing public names."
+            },
+            {
+              "title": "Progress and game economy",
+              "body": "The server confirms progress, rewards, coins, ownership and market transactions. Pending offline results are not confirmed rewards and may require reconnection and successful validation. In-game coins, buildings and items are limited to Wobbrik; they are not legal tender and cannot be redeemed for cash or transferred to other apps. Market trades follow the price, ownership and fee rules shown by the game."
+            },
+            {
+              "title": "Purchases",
+              "body": "Where Google Play purchases are available, the product and price are shown before checkout. Credit or access is delivered only after purchase verification; pending or rejected payments do not grant content. Use Google Play’s applicable payment and refund procedures. Deleting the app or account does not itself request a refund. Mandatory consumer rights remain unaffected."
+            },
+            {
+              "title": "Availability and updates",
+              "body": "Features depend on device compatibility, network and service availability. Cached views and supported local gameplay may be available offline, but accepted account changes depend on the server. We may correct errors and update game rules, content and these terms. Material changes will be explained through the service or these pages; no uninterrupted service or error-free operation is promised."
+            },
+            {
+              "title": "Privacy, deletion and contact",
+              "body": "The privacy policy explains personal-data processing. You may request Wobbrik account deletion at aladdinbiyabangerd@gmail.com after ownership verification. Game progress and items removed by deletion may not be recoverable. These terms do not restrict rights that cannot lawfully be waived. Contact the same address about the service or these terms."
+            }
+          ]
+        },
+        "delete-account": {
+          "title": "Delete your Wobbrik account",
+          "intro": "Request deletion without reinstalling the app or buying anything.",
+          "sections": [
+            {
+              "title": "Request from inside or outside the app",
+              "body": "In Wobbrik, open Account → Settings → Support to contact aladdinbiyabangerd@gmail.com. If you cannot use the app, email the same address directly. Use the subject “Wobbrik account deletion” and identify the Google email used for Wobbrik. We verify account ownership before acting; an email by itself does not automatically delete an account. Never send passwords, sign-in codes, authentication tokens or payment-card details."
+            },
+            {
+              "title": "What is removed",
+              "body": "After verification and completion of the account-deletion process, the Wobbrik authentication account and associated live game records, progress, results, public profile, buildings, inventory, city, market participation, wallet and purchase records are removed. Deleting Wobbrik does not delete your Google account or other apps’ accounts. This is not an automatic Google Play refund request."
+            },
+            {
+              "title": "What may remain",
+              "body": "Minimal pseudonymous account and purchase-token hashes are retained for abuse prevention and to prevent a previously delivered purchase from being credited again; no fixed expiry is currently defined. Existing backups and copies made by other people are not immediately recalled. Restoring an old backup may reintroduce records; automatic repeat deletion after restore is not implemented. Contact support if that happens."
+            },
+            {
+              "title": "Device data and confirmation",
+              "body": "Support can explain the request status and completion; no fixed completion deadline is promised here. App-local settings and cached files can remain on your device until you clear app storage or uninstall. Do not rely on reinstalling or signing in again to restore deleted progress, coins or buildings."
+            }
+          ]
+        }
+      }
+    },
+    "az": {
+      "name": "Azərbaycan",
+      "updated_label": "Yenilənmə",
+      "contact_label": "Əlaqə",
+      "documents": {
+        "privacy": {
+          "title": "Məxfilik siyasəti",
+          "intro": "Wobbrik hesab, oyun fəaliyyəti və cihaz məlumatlarını necə emal edir.",
+          "sections": [
+            {
+              "title": "Məsul şəxs",
+              "body": "Wobbrik (com.aladdin.wobbrik) Aladdin Biyabangerd tərəfindən hazırlanır. Bu siyasət yalnız Wobbrik-ə aiddir. Əlaqə: aladdinbiyabangerd@gmail.com."
+            },
+            {
+              "title": "Hesab və oyun məlumatları",
+              "body": "Google/Firebase girişi hesabınızı müəyyənləşdirir. Hesab identifikatoru və autentifikasiya məlumatları, oyun cəhdləri və nəticələri, irəliləyiş, nailiyyətlər, sikkələr, alışlar, bina mülkiyyəti, seçilmiş hissələr, inventar, şəhər və bazar əməliyyatları emal olunur. İctimai oyunçu adı və hazır avatar seçdikdə bunlar uyğun ictimai oyun funksiyalarında sizi göstərmək üçün istifadə edilir. İctimai adınıza şəxsi məlumat yazmayın."
+            },
+            {
+              "title": "İctimai funksiyalar",
+              "body": "Rekord siyahıları oyunçu adı, hazır avatar, nəticə və mövqeyi göstərir. İctimai ad və avatar Google adınızdan və şəklinizdən ayrıdır; həmin Google məlumatları ictimai profil kimi istifadə edilmir. Digər oyunçular rekord və bazar funksiyalarında ictimai edilən oyun məlumatlarını görə bilər. Hesab e-poçtu və autentifikasiya tokenləri ictimai profil sahələri deyil."
+            },
+            {
+              "title": "Məqsəd və saxlanma",
+              "body": "Məlumatlar giriş, oyun və oyun iqtisadiyyatının işləməsi, qəbul edilmiş irəliləyişin saxlanması, təkrar mükafat və alış kreditinin qarşısının alınması, bazar və rekord funksiyaları üçün istifadə olunur. Serverimiz hesabla bağlı oyun və əməliyyat qeydlərini saxlayır. Cihazda seçimlər, mövcud oyun keşi və təkrar göndəriləcək nəticə və əmrlər saxlanır. Oflayn nəticələr yalnız server qəbulundan sonra təsdiqlənmiş irəliləyiş olur. Tətbiqi silmək cihazdakı məlumatları təmizləyir, server hesabının silinməsi sorğusu deyil."
+            },
+            {
+              "title": "Provayderlər və diaqnostika",
+              "body": "Google/Firebase autentifikasiya, Analytics, Crashlytics və Remote Config xidmətlərini təmin edir. Bu xidmətlər tətbiq nüsxəsi və ya cihaz identifikatorları, istifadə hadisələri, cihaz və tətbiq versiyaları, çökmə hesabatları və diaqnostika məlumatlarını emal edə bilər. Hostinq və şəbəkə provayderləri xidməti işlətmək və qorumaq üçün IP ünvanı kimi bağlantı məlumatlarını emal edir. Şəxsi məlumatlarınızı satmırıq. Oyun kontaktlara, dəqiq məkana, kameraya və mikrofona giriş tələb etmir."
+            },
+            {
+              "title": "Ödənişlər və reklam",
+              "body": "Alışlar təqdim edildikdə ödəniş Google Play üzərindən aparılır; bank kartı məlumatlarınızı almırıq. Server alışı yoxlamaq və təkrar kreditin qarşısını almaq üçün alış tokeni, məhsul statusu və hesaba bağlı çatdırılma qeydlərini emal edir. Sikkə və oyun əşyaları oyun məzmunudur, pul və nağdlaşdırma vədi deyil. Gələcək reklam və əlavə məlumat istifadəsi aktivləşmədən əvvəl uyğun ayrıca açıqlama və idarəetmələr tələb edir; bu siyasət onları öz-özünə aktivləşdirmir."
+            },
+            {
+              "title": "Saxlanma müddəti və silinmə",
+              "body": "Hesabla bağlı canlı oyun məlumatları hesabın silinməsi tamamlananadək saxlanır; hazırda avtomatik bitmə müddəti müəyyən edilməyib. Təsdiqlənmiş silinmə sorğusundan sonra hesabın silinməsi prosesi Wobbrik hesabını və əlaqəli canlı oyun, mülkiyyət, wallet və alış qeydlərini silir. Sui-istifadə və alış tokeninin təkrar istifadəsinin qarşısını almaq üçün minimal psevdonim hesab və alış-tokeni heşləri sabit bitmə müddəti olmadan qala bilər. Mövcud ehtiyat nüsxələri və başqalarının artıq yaratdığı surətlər dərhal geri çağırılmır; köhnə backup bərpasından sonra avtomatik təkrar silinmə tətbiq edilməyib. Məlumat yenidən görünərsə əlaqə saxlayın."
+            },
+            {
+              "title": "Seçimləriniz və sorğular",
+              "body": "Tətbiqdə mövcud cihaz seçimlərini və ictimai profil sahələrini dəyişə bilərsiniz. Məlumata çıxış, düzəliş və hesabın silinməsi üçün Wobbrik adını qeyd edərək aladdinbiyabangerd@gmail.com ünvanına yazın. Məlumatı təqdim etməzdən və ya silməzdən əvvəl hesab sahibliyi yoxlanır. Şifrə, giriş kodu, autentifikasiya tokeni və bank kartı məlumatı göndərməyin. Hesabın silinməsi səhifəsi prosesi izah edir. Silinmə Google hesabını silmir və Google Play ödənişini avtomatik geri qaytarmır."
+            },
+            {
+              "title": "Uşaqlar və dəyişikliklər",
+              "body": "Uşaq şəxsi məlumat təqdim edibsə və ya məxfiliklə bağlı narahatlığınız varsa sorğunu araşdırmağımız üçün əlaqə saxlayın. Emal dəyişəndə bu siyasəti yeniləyir, şəxsi məlumatların yeni istifadə məqsədlərini tətbiq etməzdən əvvəl uyğun məlumat veririk."
+            }
+          ]
+        },
+        "terms": {
+          "title": "Xidmət şərtləri",
+          "intro": "Wobbrik-dən və onun onlayn oyun funksiyalarından istifadə şərtləri.",
+          "sections": [
+            {
+              "title": "Wobbrik-dən istifadə",
+              "body": "Wobbrik-dən qanuni istifadə edin, Google hesabınızı qoruyun və başqa şəxsin hesabına daxil olmayın. Onlayn hesab funksiyaları giriş və internet tələb edir. Xətalardan sui-istifadə, avtomatlaşdırılmış hücum, oyun sorğularının manipulyasiyası, başqasının adından çıxış və xidmətə müdaxilə qadağandır. Təhqiramiz və başqasının məxfiliyini pozan ictimai adlardan istifadə etməyin."
+            },
+            {
+              "title": "İrəliləyiş və oyun iqtisadiyyatı",
+              "body": "İrəliləyiş, mükafat, sikkə, mülkiyyət və bazar əməliyyatlarını server təsdiqləyir. Gözləyən oflayn nəticələr təsdiqlənmiş mükafat deyil; yenidən bağlantı və uğurlu yoxlama tələb oluna bilər. Oyun sikkələri, binalar və əşyalar yalnız Wobbrik daxilindədir; qanuni ödəniş vasitəsi deyil, nağdlaşdırılmır və başqa tətbiqlərə köçürülmür. Bazar əməliyyatlarına oyunda göstərilən qiymət, mülkiyyət və komissiya qaydaları tətbiq edilir."
+            },
+            {
+              "title": "Alışlar",
+              "body": "Google Play alışları mövcud olduqda məhsul və qiymət ödənişdən əvvəl göstərilir. Kredit və ya hüquq yalnız alış yoxlandıqdan sonra verilir; gözləyən və ya rədd edilmiş ödəniş məzmun vermir. Ödəniş və geri qaytarma üçün Google Play-in uyğun prosedurlarından istifadə edin. Tətbiqi və ya hesabı silmək ödənişin geri qaytarılması sorğusu deyil. Məcburi istehlakçı hüquqları qüvvədə qalır."
+            },
+            {
+              "title": "Əlçatanlıq və yeniləmələr",
+              "body": "Funksiyalar cihaz uyğunluğu, şəbəkə və xidmətin əlçatanlığından asılıdır. Keşlənmiş baxışlar və dəstəklənən lokal oyun oflayn işləyə bilər, qəbul edilmiş hesab dəyişiklikləri isə serverdən asılıdır. Xətaları düzəldə, oyun qaydalarını, məzmunu və bu şərtləri yeniləyə bilərik. Əhəmiyyətli dəyişikliklər xidmət və ya bu səhifələr vasitəsilə açıqlanacaq; fasiləsiz və xətasız iş vəd edilmir."
+            },
+            {
+              "title": "Məxfilik, silinmə və əlaqə",
+              "body": "Məxfilik siyasəti şəxsi məlumatların emalını izah edir. Hesab sahibliyi təsdiqləndikdən sonra Wobbrik hesabının silinməsini aladdinbiyabangerd@gmail.com vasitəsilə istəyə bilərsiniz. Silinən oyun irəliləyişi və əşyalar bərpa olunmaya bilər. Bu şərtlər qanunla imtina edilə bilməyən hüquqları məhdudlaşdırmır. Xidmət və şərtlər barədə eyni ünvana yazın."
+            }
+          ]
+        },
+        "delete-account": {
+          "title": "Wobbrik hesabını sil",
+          "intro": "Tətbiqi yenidən quraşdırmadan və alış etmədən hesabın silinməsini istə.",
+          "sections": [
+            {
+              "title": "Tətbiqdən və ya kənardan sorğu",
+              "body": "Wobbrik-də Hesab → Parametrlər → Dəstək vasitəsilə aladdinbiyabangerd@gmail.com ünvanına yazın. Tətbiqdən istifadə edə bilmirsinizsə eyni ünvana birbaşa e-poçt göndərin. Mövzuda “Wobbrik hesabının silinməsi” yazın və Wobbrik üçün istifadə etdiyiniz Google e-poçtunu qeyd edin. Əməliyyatdan əvvəl hesab sahibliyi yoxlanır; təkcə e-poçt göndərmək hesabı avtomatik silmir. Şifrə, giriş kodu, autentifikasiya tokeni və kart məlumatı göndərməyin."
+            },
+            {
+              "title": "Nələr silinir",
+              "body": "Yoxlama və hesabın silinməsi prosesi tamamlandıqdan sonra Wobbrik autentifikasiya hesabı və əlaqəli canlı oyun qeydləri, irəliləyiş, nəticələr, ictimai profil, binalar, inventar, şəhər, bazarda iştirak, wallet və alış qeydləri silinir. Wobbrik hesabının silinməsi Google hesabını və digər tətbiqlərin hesablarını silmir. Bu, Google Play-dən avtomatik geri ödəniş sorğusu deyil."
+            },
+            {
+              "title": "Nələr qala bilər",
+              "body": "Sui-istifadənin və əvvəllər çatdırılmış alışın yenidən kreditlənməsinin qarşısını almaq üçün minimal psevdonim hesab və alış-tokeni heşləri saxlanır; hazırda sabit bitmə müddəti müəyyən edilməyib. Mövcud ehtiyat nüsxələri və başqalarının yaratdığı surətlər dərhal geri çağırılmır. Köhnə backup bərpası qeydləri geri gətirə bilər; bundan sonra avtomatik təkrar silinmə tətbiq edilməyib. Belə hal olarsa dəstəyə yazın."
+            },
+            {
+              "title": "Cihaz məlumatları və təsdiq",
+              "body": "Dəstək sorğunun vəziyyətini və tamamlanmasını izah edə bilər; burada sabit tamamlanma müddəti vəd edilmir. Tətbiqin lokal seçimləri və keş faylları tətbiq yaddaşını təmizləyənədək və ya onu silənədək cihazda qala bilər. Silinmiş irəliləyiş, sikkə və binaların yenidən quraşdırma və ya girişlə bərpa olunacağına güvənməyin."
+            }
+          ]
+        }
+      }
+    }
+  }
+}

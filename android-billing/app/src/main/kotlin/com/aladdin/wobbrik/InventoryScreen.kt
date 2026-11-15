@@ -42,14 +42,14 @@ internal class InventoryReadKey(private val ready: Any) {
 @Composable
 internal fun InventoryScreen(configured: WobbrikApplication.Bootstrap.Configured,
     ready: AuthenticatedRecoveryOwner.State.Ready, selected: String?, onSelectBuilding: (String?) -> Unit, onHome: () -> Unit, onParts: (String?) -> Unit,
-    onDecorations: () -> Unit, onLand: () -> Unit) {
-    InventoryScreen(configured, AccountView(appbackend.wobbrik.game.ReadOnlyAccount(requireNotNull(ready.accountKey), ready.snapshot, requireNotNull(ready.catalog)), ready), selected, onSelectBuilding, onHome, onParts, onDecorations, onLand)
+    onDecorations: () -> Unit, onLand: () -> Unit, onMarket: (() -> Unit)? = null) {
+    InventoryScreen(configured, AccountView(appbackend.wobbrik.game.ReadOnlyAccount(requireNotNull(ready.accountKey), ready.snapshot, requireNotNull(ready.catalog)), ready), selected, onSelectBuilding, onHome, onParts, onDecorations, onLand, onMarket)
 }
 
 @Composable
 internal fun InventoryScreen(configured: WobbrikApplication.Bootstrap.Configured,
     ready: AccountView, selected: String?, onSelectBuilding: (String?) -> Unit, onHome: () -> Unit, onParts: (String?) -> Unit,
-    onDecorations: () -> Unit, onLand: () -> Unit) {
+    onDecorations: () -> Unit, onLand: () -> Unit, onMarket: (() -> Unit)? = null) {
     var fromCache by remember(ready) { mutableStateOf(ready.ready == null) }
     val canMutate = ready.ready != null && !fromCache
     val sizing = mobileUiSizing()
@@ -165,6 +165,8 @@ internal fun InventoryScreen(configured: WobbrikApplication.Bootstrap.Configured
             } else if (detail != null) {
                 BuildingDetail(requireNotNull(detail), city, ready.catalog, Modifier.weight(1f))
                 InventoryButton(if (fromCache) "Yalnız baxış" else "Bina görünüşü", enabled = canMutate) { onParts(detail?.id) }
+                if (onMarket != null) HomeButton("Bazara çıxar", icon = R.drawable.ui_market,
+                    enabled = canMutate && detail?.traded == false, onClick = onMarket)
                 TextButton(enabled = canMutate, onClick = { deleteCandidate = detail }, modifier = Modifier.fillMaxWidth().heightIn(min = GameTokens.Target)) {
                     Text("Binanı sil", color = if (canMutate) GameTokens.Danger else GameTokens.Muted)
                 }
@@ -229,7 +231,7 @@ private fun DeleteDialogButton(label: String, destructive: Boolean, modifier: Mo
     }
 }
 
-private fun buildingName(building: OwnedBuilding, catalog: RecoveryCatalog?): String =
+internal fun buildingName(building: OwnedBuilding, catalog: RecoveryCatalog?): String =
     catalog?.items?.firstOrNull { it.id == building.parts["wall"] }?.name ?: "Bina"
 
 @Composable

@@ -1,0 +1,4 @@
+390-font1: changed=0 (identical)
+360-font1: changed=0 (identical)
+320-font2: changed=0 (identical)
+Post-PNG back-region integrity: 15 captures PASS

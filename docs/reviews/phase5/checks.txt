@@ -1,0 +1,16 @@
+Fitted leaderboard native: {'tests': 16, 'failures': 0, 'errors': 0, 'skipped': 0}; PASS62s
+Market native3/3PASS22s
+
+core: {'tests': 136, 'failures': 0, 'errors': 0, 'skipped': 0}
+engine: {'tests': 95, 'failures': 0, 'errors': 0, 'skipped': 0}
+app: {'tests': 24, 'failures': 0, 'errors': 0, 'skipped': 0}
+Final Java21/offline normal unit/APK/lint PASS18s;255 tests; failures/errors/skipped0.
+Profile native12/12PASS42s; feedback callback-only final picker/save1/1PASS16s.
+Contrast4/4PASSmin8.22; approved source/drawable byte parity PASS; diff whitespace PASS.
+No emulator, CI, merge, push or deploy.
+c56b1ea01208548d2af30f89458185d2a96d9e569cb5223af79d8b94b436bd53 android-billing/app/src/main/kotlin/com/aladdin/wobbrik/PublicAccountScreen.kt
+f8109cf261c9709b511e58a044c392076efa025dcb2e2791d3f252d995362de6 android-billing/app/src/main/kotlin/com/aladdin/wobbrik/ProfilePresentation.kt
+4ff9e53bfd15074a7ddd9f5e8972dd51d6330b2b11890b97bdaf98c8dc1439a5 android-billing/app/src/main/kotlin/com/aladdin/wobbrik/CommunityArt.kt
+4a238677d38784126d5fb7538203dd032d33aaf69a67f2ba1a0bc368e0c42caf android-billing/app/src/main/kotlin/com/aladdin/wobbrik/GameTokens.kt
+
+P1 follow-up: normal255unit/APK/lintPASS34s; native14/14PASS55s; contrast4/4min8.22; source/drawable parityPASS. See ../profile-v2-visual/p1-checks.txt. Full visual P1 remains OPEN; phase5 acceptance not granted.

@@ -61,7 +61,7 @@ class MainActivity : ComponentActivity() {
             primary = GameTokens.Accent, onPrimary = GameTokens.Background,
             surface = GameTokens.Surface, onSurface = GameTokens.Text,
             background = GameTokens.Background, onBackground = GameTokens.Text,
-        )) { OnlineGame(application as WobbrikApplication) } }
+        )) { WithGameFeedback((application as WobbrikApplication).settings) { OnlineGame(application as WobbrikApplication) } } }
     }
 }
 

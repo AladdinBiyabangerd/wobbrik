@@ -1,3 +1,201 @@
+# Profil v2 — müstəqil lokal review (15 noyabr 2026, cari)
+
+- Completed: hazır profile-v2 source/assets/harness diff-i son clean-skin review və docs/PLAN.md əsasında lokal review edildi; yeni konkret bug tapılmadı, production source dəyişmədi.
+- Current state: `feat/profile-approved-design`, HEAD `3e9af84`; review tamamlandı. İstifadəçinin göstərişi ilə yalnız profil vahidi lokal commit-də saxlanır, owner release .dm/proposal və əvvəlki əlaqəsiz handoff saxlanır.
+- Decisions: yeganə plan `docs/PLAN.md`; backend müqaviləsi dəyişmir, AppBackend dəyişikliyi lazım deyil. Tam ekran piksel pariteti/mərhələ5 qəbulu ayrıca açıqdır; planşet/mərhələ6 başlamır.
+- Checks performed: təkrar native15/15PASS59s; normal255unit/APK/lintPASS3s; kontrast4/4min8.22, asset SHA parity və diffcheckPASS. Mövcud comparison/contact və təkrar raw reference-profile/small-edit/font-profile/font-edit görüntüləri oxundu.
+- Remaining work: real device/API24/HTTP/IME/inset/TalkBack/GPU/locale yoxlanmayıb. CI/emulator/merge/push/deploy yoxdur.
+- Relevant files: `docs/reviews/2026-11-15-profile-v2-implementation.md` son lokal review; `docs/reviews/profile-v2-visual/local-review-*`; əvvəlki cari clean-skin handoff aşağıdadır.
+- Exact next step: lokal review/commit nəticəsini bildir; ayrıca göstərişsiz merge/push/CI və yeni feature başlama.
+
+---
+# Profil v2 — mətnsiz skin/lent/stat/navbar/capture tamamlandı (15 noyabr 2026)
+
+- Completed: istifadəçinin göstərişi ilə built-in ImageGen edit-dən clean chromeV2+panelV3 hazırlandı/qoşuldu; approved PNG dəyişmir. Lent+rail vahid slice, geniş text-free interior, tam alt kontur; köhnə maska/interpolasiya/texture təkrarı çıxarıldı. Stat separator/ölçü və navbar nisbətləri yeniləndi; compact Dəyiş tam48dp görünür. Native hardware PixelCopy, real input scroll, glyph+üst/alt outline piksel assertion-ları işləyir.
+- Current state: `feat/profile-approved-design`, baza `3e9af84`, iş uncommitted; owner release .dm/proposal/başqa working fayllar qorunur. Bu konkret düzəliş vahidi hazırdır; tam mərhələ5/pixel-identical bütün ekran qəbulu deyil.
+- Decisions: son istifadəçi clean skin-i özümün hazırlamağı açıq tapşırıb; asset çatışmazlığı artıq blok deyil. Yeganə plan `docs/PLAN.md`; native Nunito və real server məzmunu saxlanır. Save/cancel/draft/exact retry/session fencing/API dəyişmir; AppBackend dəyişikliyi lazım deyil. Mobil portret; planşet/mərhələ6 başlamır.
+- Remaining work: bu vahiddə açıq konkret skin/maska/stat/navbar/input-capture qüsuru müşahidə olunmadı. Real cihaz/API24/HTTP/IME/inset/TalkBack/GPU/locale yoxlanmayıb; phase5 ümumi qəbul ayrıca qalır. Font2 input capture real scroll vəziyyətidir; portretin bir hissəsi viewport-dan yuxarıdır.
+- Relevant files: `ProfilePresentation.kt`, `GameTokens.kt`; drawable-nodpi `profile_{skin,panel}_clean.png`; `docs/design/profile-v2/{README.md,skin-generation-prompts.md,profile-skin-clean-v2.png,profile-panel-clean-v3.png}`; profil-v2 review-un son bölməsi; `docs/reviews/phase5/final-review.md`; `profile-v2-visual/p3-{profile-comparison.png,contact.png,native-final.log,native-results.txt,normal-final.log,normal-results.txt,contrast.txt}` və input-proof.txt-lər; render harness.
+- Checks performed: final native15/15PASS1m; normal255unit/APK/lintPASS23s; kontrast4/4min8.22, approved/production PNG byte parity və diffcheckPASS.390×844font1,360×640font1,320×568font2 contact və eyni390×761 comparison oxundu. Son lokal source/diff review aparıldı. Emulator/CI/commit/merge/push/deploy yoxdur.
+- Exact next step: bu hazır vahidi təhvil ver. Ayrı göstərişsiz yeni feature/mərhələ/commit/merge/push/CI başlama. Sonrakı istifadəçi review/commit istəsə yeni chatdə bu handoff + son review + docs/PLAN.md əsasında owner fayllarını ayıraraq davam et.
+
+---
+# Profil v2 P1 tekstura/lent/nisbət davamı — 15 noyabr 2026 (cari)
+
+- Completed: source yazısız texture strip; təkrarlanan portret kölgəsi sınağı rədd edildi; mənbənin alt konturundan bütöv üst rail; lent silhouette düzəlişi; normal profil portreti136/badge144/navbar56, compact navbar40; profil horizontal inset8. Editor ölçüləri saxlanır.
+- Current state: `feat/profile-approved-design`, baza `3e9af84`, uncommitted owner diff qorunur. P1 qismən düzəlib; tam paritet/mərhələ5 PASS deyil.
+- Decisions: yeganə plan `docs/PLAN.md`; approved PNG dəyişmir; alternativ art/ümumi istisna yoxdur. Server data/callback/save/cancel/retry/API dəyişmir; backend dəyişikliyi lazım deyil. Mobil portret, planşet/mərhələ6 başlamır.
+- Remaining work: source texture təkrarı orijinal bütöv fon deyil; lent overlap və header/stat/nav nisbətləri açıqdır. Dəqiq örtülü fon üçün clean skin/layer asset-i yoxdur. Son editor route input glyph/border capture fraqmentləri natamamdır; visual PASS deyil. Device/API24/HTTP/IME/inset/TalkBack/GPU/locale yoxlanmayıb.
+- Relevant files: `ProfilePresentation.kt`, `GameTokens.kt`; `docs/design/profile-v2/README.md`; `docs/reviews/2026-11-15-profile-v2-implementation.md` son bölmə; `docs/reviews/profile-v2-visual/p2-{profile-comparison.png,contact.png,native.log,normal.log,contrast.txt}`; `docs/reviews/phase5/final-review.md`.
+- Checks performed: native14/14PASS54s; normal255unit/APK/lintPASS21s; kontrast4/4min8.22; source byte parity/diffcheckPASS.390×844font1,360×640font1,320×568font2 contact və comparison oxundu. Emulator/CI/commit/merge/push/deploy yoxdur.
+- Exact next step: P1-i bitmiş saymadan cari müqayisəni təhvil ver; dəqiq clean skin mənbə çatışmazlığını və qalan lent/stat/navbar/capture fərqlərini açıq saxla. Yeni plan/stack/feature açma.
+
+---
+# Profil v2 P1 davam turu — 15 noyabr 2026 (cari)
+
+- Completed: profilin öz relyefli panel/wallet/identity/navbar source skin-ləri, dairəvi identity crop, real pencil callback48dp; badge/stat/XP/nav ölçü-boşluq düzəlişləri. Frame+idle invalidate-dən sonra capture ilə son9route başlığı tam görünür. Save/cancel/exact retry/server authority saxlanır.
+- Current state: `feat/profile-approved-design`, baza `3e9af84`, iş uncommitted. Owner release .dm/proposal və əvvəlki iş qorunur. Commit/merge/push/CI/deploy/emulator yoxdur.
+- Decisions: təsdiqli PNG-lər dəyişmir, şrift əvvəlki Nunito qərarıdır; ümumi vizual istisna yoxdur. Backend müqaviləsi dəyişmir, DB suite təkrarlanmayıb. Mobil portret; planşet/mərhələ6 başlamır.
+- Remaining work: P1 açıq: panel interior teksturası interpolasiya ilə tam bərpa olunmur; lent maska/overlap konturu və header/portrait/stat/nav nisbətləri istinadla birəbir deyil. Wallet/pencil/identity və route prefix capture əvvəlki açıq statusları bu turla yenilənir. Real cihaz/API24/HTTP/IME/inset/TalkBack/GPU/locale yoxlanmayıb.
+- Relevant files: `docs/PLAN.md`; `docs/design/profile-v2/README.md`+approved PNG-lər; `ProfilePresentation.kt`, `PublicAccountScreen.kt`, `GameTokens.kt`; `docs/reviews/2026-11-15-profile-v2-implementation.md` son bölmə; `docs/reviews/phase5/final-review.md`; `profile-v2-visual/p1-profile-comparison.png`, `p1-continuation-contact.png`, render harness.
+- Checks performed: final native14/14PASS51s; normal136+95+24=255unit/APK/lintPASS32s; explicit text contrast4/4min8.22; diffcheckPASS.390×844font1,360×640font1,320×568font2 profil/editor/picker contact və final390müqayisə oxundu. Tam P1/mərhələ5 PASS deyil.
+- Exact next step: son müqayisə əsasında yalnız qalan source tekstura/lent konturu/kompozisiya nisbətlərini davam etdir; digər scope açma. Header capture artıq son9route-də tamdır. Təkrar böyük repo scan/yeni plan/stack/CI/merge/push yoxdur.
+
+---
+# Profil v2 P1 vizual düzəliş turu — 15 noyabr 2026 (cari)
+
+- Completed: Nunito400/700/900 statik native font+OFL (istifadəçi “özün tap hazırla”), Az cmap; text-free single-source skin/nine-slice, ilkin seams/bitmap təkrarı təmizləndi; tam builder/pilot/memar çərçivə crop-ları; source lent maskası/overlap; badge baked7 düzbucaqlı patch əvəzinə interior gradient+real rəqəm; XP/editor sayğacı/üç-avatar sheet nisbətləri düzəldildi. Save/cancel/retry/server authority saxlanır.
+- Current state: `feat/profile-approved-design`, baza `3e9af84`, bütün iş uncommitted. Owner release .dm/proposal və əvvəlki iş qorunur. Commit/merge/push/CI/deploy/emulator yoxdur.
+- Decisions: Nunito seçimini agent hazırlayır; təsdiqli PNG-lər dəyişmir. Bu, digər vizual fərqlərə ümumi istisna deyil. Backend API/schema/domain dəyişmir; backend dəyişikliyi lazım deyil, DB suite təkrarlanmayıb. Mobil portret; mərhələ6/planşet başlamır.
+- Remaining work: **P1 hələ açıqdır:** source panel relyefi/gradient, lent maskasının konturu, wallet pill, identity pencil/aşağı identity kartı və profil/stat/nav ölçü-boşluqları təsdiqli nümunə ilə birəbir deyil. `p1-profile-comparison.png` konkret fərqləri göstərir. Frame+idle seçilmiş picker-i capture-a çatdırdı, lakin bəzi route header glyph-ləri hələ natamamdır; cold editor başlıqları tamdır. Natamam capture/paritet PASS deyil. Real device/API24/HTTP/IME/inset/TalkBack/GPU/locale yoxlanmayıb.
+- Relevant files: `docs/PLAN.md`, `docs/design/profile-v2/README.md`+approved PNG-lər; `ProfilePresentation.kt`, `PublicAccountScreen.kt`, `GameTokens.kt`, `CommunityArt.kt`; res/font/profile_nunito_*.ttf; assets/licenses/Nunito-OFL.txt; `docs/reviews/2026-11-15-profile-v2-implementation.md` son P1 bölməsi; `docs/reviews/phase5/final-review.md`; `docs/reviews/profile-v2-visual/p1-*` və render harness.
+- Checks performed: final source+frame-flushed harness14/14PASS55s; normal core136+engine95+app24=255unit/APK/lintPASS34s; kontrast4/4min8.22; statik font/Az cmap/source parity/diffcheckPASS.390×844font1,360×640font1,320×568font2 profil/editor/picker, əlavə cold editor PNG-lər və yanaşı müqayisə oxundu. Müqayisə production composable renderidir, generativ yeni nümunə deyil. Tam P1/mərhələ5 qəbul edilmir.
+- Exact next step: yeni chatdə yalnız qalan P1 mask/skin/kompozisiya və host capture vahidini bu konkret müqayisədən davam etdir; yeni dizayn/stack/plan uydurma. Review-lardakı son P1 bölmələri cari authority-dir; aşağıdakı qeydlər tarixçədir. İstifadəçiyə cari native müqayisəni və açıq statusu göstər. Yeni böyük addım/merge/CI/push avtomatik yoxdur.
+
+---
+# Profil v2 funksional inteqrasiya və mərhələ5 review — 15 noyabr 2026
+
+- Completed: istifadəçi profil/redaktə/ayrı avatar grid dizaynlarını təsdiqlədi; real ProfileEditor axınına qoşuldu. Mənbə PNG-lər docs/design/profile-v2-də saxlanır; art/skin source kəsikləri istifadə olunur. Navbar, server səviyyə/XP/rekord, ad15, draft cancel, avatar apply→Save, exact retry/conflict sərhədləri qorunur. Mərhələ5 lokal review aparılıb; tam qəbul verilməyib.
+- Current state: `feat/profile-approved-design`, baza `3e9af84`, working diff uncommitted. Source bitmap-lər provider ilə paylaşılır. Owner iki release baseline .dm və köhnə compact proposal qorunur. Commit/merge/push/CI/deploy yoxdur.
+- Decisions: yeni profil-v2 dizaynı təsdiqlidir, əvvəlki account-states profilini əvəz edir; yenidən dizayn seçim sualı açma. Çox-avatar nümunəsinin əlavə personajları real kataloqa keçirilmir; mövcud3ID qalır. Settings/fitted rekord görünüşü dəyişmir. User bitəndə real ekran şəklini istəyir: native production renderini model-generated nümunə ilə qarışdırma.
+- Remaining work: **P1 — tam vizual paritet açıqdır:** native typo, skin seams/crop və dinamik badge mərkəzi təsdiqli generativ PNG ilə birəbir deyil; bəzi small/font2 native header capture-ları natamamdır. Ümumi vizual istisna təsdiqi yoxdur. Funksional inteqrasiya tam dizayn qəbulu kimi göstərilmir. Real device/API24/HTTP/IME/TalkBack/GPU/locale matris yoxlanmayıb; emulator tələb olunmur/açılmır. Mərhələ6 başlanmır.
+- Relevant files: `docs/PLAN.md`; `docs/design/profile-v2/{README.md,profile-approved.png,edit-avatar-approved.png,avatar-grid-approved.png}`; `PublicAccountScreen.kt`, `ProfilePresentation.kt`, `GameTokens.kt`, `CommunityArt.kt`; review `docs/reviews/2026-11-15-profile-v2-implementation.md`, `docs/reviews/phase5/final-review.md`; `docs/reviews/profile-v2-visual/{regular-profile.png,regular-edit.png,regular-picker.png,small-*.png,font-*.png,render/,native-results.txt,checks.txt}`.
+- Checks performed: son profil native12/12PASS42s; 30sintetikID grid-scroll/fixed apply, real route save/cancel/picker,3portret ölçü. Son feedback callback-only sonrası picker→save1/1PASS16s. Market3/3PASS22s, fitted16/16PASS62s. Final normal core136+engine95+app24=255 unit/APK/lint PASS18s; checks.txt-də saxlanır. Kontrast4/4min8.22, source/drawable byte parity və diffcheckPASS. Regular3 və small/font2 UI renderlərinə baxılıb; natamam capture/paritet məhdudiyyəti review-dadır. Backend müqaviləsi main integration cbd0eeb-də read-only yoxlandı; API/schema dəyişikliyi lazım deyil, DB suite bu tur təkrarlanmadı.
+- Exact next step: yeni chatdə bu handoff+profil review+phase5 final-review+PLAN əsasında yalnız P1 vizual paritet vahidini tamamla; təsdiqli görünüşün composition/font/skin/source crop nisbətlərini düzəlt, real renderləri yanaşı yoxla və istifadəçiyə göstər, sonra mərhələ5 review-u yenilə. Yeni mərhələ və avtomatik commit/merge/CI/push yoxdur.
+
+---
+# Android settings review və lokal commit — 15 noyabr 2026
+
+- Completed: settings diff review edildi; SoundPool callback qeydiyyatı load-dan əvvələ keçirildi; sürətli completion/sound-off/background regression testi əlavə edildi. İstifadəçinin göstərişi ilə settings source/assets/review/harness lokal commit edilir.
+- Current state: feat/settings-flow, baza a192f4d; owner release baseline və ayrıca compact proposal faylları commit-dən kənarda qorunur. Aşağıdakı əvvəlki uncommitted statuslar tarixçədir.
+- Decisions: yalnız lokal commit; Android merge/push/CI/deploy yoxdur. Təsdiqli settings görünüşü dəyişmir, yeni dizayn yoxdur.
+- Checks performed: Java21/offline app unit/APK/lint PASS29s; host8/8PASS42s; beş yeni renderə baxıldı; üç settings PNG approved fixture ilə byte-identical; contrast3/3min8.22, JSON parity/diff checkPASS.
+- Remaining work: real device/audio/haptic/focus interruption/API24/TalkBack və tam mərhələ qəbulu yoxlanmayıb. Backend public HTTPS ayrıca deploy tələb edir.
+- Relevant files: docs/reviews/2026-11-15-settings-implementation.md; settings-implementation-visual/render/; DeviceSettings/GameFeedback/SettingsScreen/SettingsRoute/LegalDocuments.kt; docs/PLAN.md.
+- Exact next step: lokal commit hash-ini və review nəticəsini bildir; növbəti konkret göstəriş olmadan yeni mərhələ/merge/CI/push başlama.
+
+---
+# AppBackend commit/merge/push — 15 noyabr 2026
+
+- Completed: Wobbrik public profil/ad limiti/rekord identity və hüquqi sənədlər ayrıca ca0d9c8 və 0075791 commit-ləri ilə tarixçə saxlanaraq AppBackend main-ə merge və origin/main-ə push edildi.
+- Current state: backend lokal main=origin/main=cbd0eebc64e5afc6936a5b32b9d82031afa0b660; integration worktree /private/tmp/wobbrik-backend-main təmizdir. Android settings working diff dəyişməyib. Backend owner recipe/.gitignore işi qorunub.
+- Decisions: istifadəçi backend commit/merge/remote main push istədi; CI/deploy/Console yoxdur.
+- Checks performed: feature race/vet/build; merged focused race/vet/build və disposable PostgreSQL18 profile/leaderboard PASS; remote hash equality PASS. Müvəqqəti DB dayandırıldı.
+- Relevant files: AppBackend docs/reviews/2026-11-15-wobbrik-backend-integration.md; aşağıdakı settings review və docs/PLAN.md.
+- Remaining work: Android settings uncommitted; deployment/public HTTPS və tam mərhələ qəbulu ayrıca açıqdır.
+- Exact next step: nəticəni bildir; növbəti konkret istifadəçi göstərişini gözlə.
+
+---
+# Cari vahid — Parametrlər və hüquqi məzmun, 15 noyabr 2026
+
+- Completed: təsdiqli SettingsScreen və Hesab route, DataStore səs/musiqi/haptic, CC0 audio; təsdiqli dəstək mailto `aladdinbiyabangerd@gmail.com`; real offline privacy/terms/delete-account sənədləri və seçimi. Əsas settings görünüşü saxlanır.
+- Current state: Android `feat/settings-flow`, baza `a192f4d`, uncommitted. Backend `feat/wobbrik-legal-pages`, baza `b2cd617`, daimi worktree `/Users/mac/My Workspace/AppBackend-wobbrik-legal-pages`, uncommitted. Fasilədə silinmiş tmp worktree bu daimi nüsxə ilə əvəz edilib. Owner release baseline/proposal və backend profil/recipe işi qorunur.
+- Decisions: görünüş yenidən təsdiqə çıxarılmır. User DailyPlate public legal mexanizmini Wobbrik üçün istədi; sağlamlıq/subscription qaydaları köçürülmür. Sənədlər en+az, Android UI hazırda az; yeni UI dil siyahısı yoxdur. Backend JSON və Android asset bayt-bayt eynidir. Deploy olmadan da offline oxunur.
+- Remaining work: bu vahiddə implementasiya tamamlanır; public HTTPS URL-lərin işləməsi ayrıca backend deploy tələb edir. Real cihaz/audio/haptic/TalkBack/API24 runtime və tam mərhələ5 qəbulu yoxlanmayıb. CI/commit/merge/push/deploy yoxdur.
+- Relevant files: `SettingsScreen.kt`, `SettingsRoute.kt`, `DeviceSettings.kt`, `GameFeedback.kt`, `LegalDocuments.kt`, `assets/wobbrik-legal.json`; `docs/reviews/2026-11-15-settings-implementation.md`, `docs/reviews/settings-implementation-visual/`; backend `internal/legalpages/content/wobbrik.json`, `wobbrik_test.go`, `internal/platform/legal_pages_test.go`, `docs/public-legal-pages.md`; yeganə plan `docs/PLAN.md`.
+- Checks performed: normal Android app unit/APK/lint38sPASS; settings3render əvvəl approved0pixel fərq; real route+persistence və legal normal/font2 host testləri PASS, final7/7PASS44s, mailto keçidi və3sənəd seçimi daxil. Hüquqi real window renderlərinə baxıldı. Backend focus race/vet/buildPASS; web390px/1280px renderlərə baxıldı, horizontal overflow0. Kontrast mobilemin8.22/webmin4.88PASS; JSON parity/diffcheckPASS.
+- Exact next step: nəticəni istifadəçiyə bildir. Əlavə mərhələ/merge/CI/deploy başlama. Commit və deploy ayrıca göstərişlə; gələcək böyük işdə bu handoff+review və `docs/PLAN.md`-dən davam et.
+
+---
+# Cari vahid — Arrowz əsaslı Parametrlər nümunəsi, 15 noyabr 2026
+
+- Completed: iri profil düymələri və settings üçün review-only Compose nümunəsi; son istifadəçi düzəlişi ilə settings Arrowz telefon sətir quruluşuna yenidən çəkildi. Köhnə grouped settings nümunəsi cari deyil.
+- Current state: `docs/compact-account-preview`, baza `a192f4d`; production dəyişmir; istifadəçi son settings-390 nümunəsini “yes” ilə açıq təsdiqlədi.
+- Decisions: Wobbrik tokens/palitra saxlanır; ayrıca kart+dairəvi xətti ikon+mətn+kiçik toggle/ox. Settings aşağı iri Geri əvəzinə48dp başlıq geri. Profil preview ayrıca pending. Arrowz read-only, yeni funksiya/lokal siyahı qərarı yoxdur.
+- Remaining work: təsdiqli Parametrlər dizaynının real UI/domain inteqrasiyası. Settings production ekranı/persistence hələ yoxdur; səs/haptic, dəstəklənən dillər, dəstək və məxfilik məzmunu/ünvanlarının mövcud müqaviləsini dəqiqləşdir; saxta işlək settings kimi təqdim etmə.
+- Relevant files: `docs/reviews/2026-11-15-account-compact-proposal.md`, `docs/reviews/account-compact-visual/{settings-390.png,settings-360.png,settings-font2.png,render/CompactAccountProposalTest.kt}`; `GameTokens.kt`, `PublicAccountScreen.kt`; yeganə plan `docs/PLAN.md`.
+- Checks performed: final settings native3/3PASS;390/360font1,320font2 renderlərinə baxıldı, font2 scroll; kontrast3/3PASSmin8.22. Sintetik fixture; production build/device/real settings deyil; emulator/CI yoxdur.
+- Exact next step: yeni chatdə PLAN və bu review əsasında təsdiqli settings-390 dizaynını real axına tətbiq et. Yalnız açıq funksional sualları dəqiqləşdir; görünüşü yenidən təsdiqə çıxarma. Profilin ayrıca ölçü nümunəsi hələ təsdiqlənməyib. Commit/merge/push/CI ayrıca göstərişsiz yoxdur.
+
+---
+# Lokal commit — 15 noyabr 2026
+
+- Completed: istifadəçi bütün cari commit edilməmiş Wobbrik dəyişikliklərinin lokal commit-ini istədi. Bazar/profil/rekord source, test, asset, plan və review qeydləri saxlanılır; release metadata/profilləri ayrıca commit olunur.
+- Current state: `feat/market-leaderboard`; aşağıdakı əvvəlki uncommitted qeydləri commitdən əvvəlki tarixçədir. AppBackend ayrıca repository-dir və bu commit tapşırığının scope-una daxil edilməyib.
+- Decisions: merge/push/deploy/CI yoxdur. Profilin bütöv ekran vizual fərqləri və mərhələ5 qəbulu açıq qalır.
+- Checks performed: mövcud lokal review və son 255 unit/assembleDebug/lintDebug PASS sübutları yoxlandı; bu tur source dəyişməyib, testlər təkrarlanmayıb. Commit öncəsi diff whitespace yoxlaması PASS.
+- Remaining work: profil vizual pariteti, mərhələ5 yekun review/qəbul; PLAN §1-də mərhələ6 reklam/alış və mərhələ7 tamamlama açıqdır. Planşet ayrıca tapşırıqdır.
+- Relevant files: `docs/PLAN.md`, `docs/reviews/2026-11-15-records-fitted-implementation.md`, `docs/reviews/2026-11-15-local-commit.md`.
+- Exact next step: lokal commit nəticəsini və tətbiqdə qalan işləri istifadəçiyə bildir; əlavə implementasiya/merge/CI başlama.
+
+---
+# Cari vahid — təsdiqli panelsiz rekordlar tətbiqi, 15 noyabr 2026
+
+- Completed: istifadəçi fit-preview-board-u açıq təsdiqlədi, real LeaderboardScreen/Board və bounded traversal/data axınına tətbiq edildi. Header Back/Refresh, podium3+tam sığan real sətirlər, no footer/More/list scroll. Əvvəlki aşağıdakı pending nümunə qeydləri tarixçədir.
+- Current state: feat/market-leaderboard, baza9653b98, uncommitted; inherited market/profile/data/owner/release işi qorunur. AppBackend feat/wobbrik-public-profiles-də input validation-only ad limiti15 də uyğunlaşdırılıb; onun ayrıca review-u var. Commit/merge/push/deploy/CI yoxdur.
+- Decisions: hədəf4–20/fallback8; shrink reuse, grow yalnız çatışmayan1–N nəticə/eyni opaque snapshot cursor. Server rank/score/Bakı həftəsi/is_self/session authority qalır. User: rank>9999 UI-də99999+; ad max15 Unicode simvol (PUT/editor), köhnə24 ad oxunur/qısaldılır. Arrowz yalnız göstərilən say prinsipidir. Təsdiqli PNG-lər dəyişməyib, yenidən təsdiq tələb olunmur.
+- Relevant files: docs/PLAN.md §1/§4; docs/reviews/2026-11-15-records-fitted-implementation.md; profile-leaderboard-visual/fitted-production/{production-board,approved-comparison,long,profile-name15}.png, native-results/parity/checks.txt; render/FittedLeaderboardProductionRenderTest.kt; LeaderboardScreen/Board/Art, CommunityArt, GameTokens, PublicAccountScreen; core LeaderboardReads/PublicProfiles və testləri. Köhnə ProfileLeaderboardRenderTest.kt.txt arxivdir.
+- Checks performed: native16/16 PASS55s, final3raw təsdiqli fitted-proposal ilə changed0;15PNG back-region integrity PASS; normal/font2/long/error/empty/profile15/board görüntülərinə baxıldı; kontrast4/4PASSmin8.22. Backend ad normal/race focus+vet PASS; DB suite bu validation-only dəyişiklikdə təkrarlanmayıb. Son adi core136/engine95/app24=255 unit, APK/lint PASS15s; review/checks.txt-də saxlanır.
+- Remaining work: bu rekord vahidi mərhələ5 qəbulu deyil; profilin əvvəlki bütün ekran paritet fərqləri ayrıca açıqdır. Native SDK34/sintetik server, device/realHTTP/IME/TalkBack/GPU/API24/bütün locale yoxlanmayıb. Mobil portret, planşet/landşaft ayrıca tapşırıqdır; emulator açılmadı.
+- Exact next step: tamamlanmış bu vahidin nəticəsini və production renderlərini göstər. Sonrakı iş ayrıca istifadəçi göstərişi ilə; avtomatik merge/CI/push və növbəti mərhələ yoxdur.
+
+---
+# Cari vahid — ekran tutumuna görə rekord sayı və yeni nümunə, 15 noyabr 2026
+
+- Completed: `/Users/mac/My Workspace/arrowz` HEAD8ca9c86a current UI/fit/query-size source və testləri read-only yoxlandı. Sabit top50 deyil: podium3 + sığan tam sətirlər, scroll/More yoxdur; request4–20/fallback8. Yalnız bu say prinsipi istifadəçi qərarı kimi PLAN-a qeyd edildi. Alt panelsiz yeni Wobbrik nümunəsi render edilib: Geri solda, Yenilə sağda, podium/adlar, davam sətirləri, passiv dots.
+- Current state: `feat/market-leaderboard`, inherited working diff qorunur. **Yeni dizayn təsdiq gözləyir; production UI/data/API bu tur dəyişməyib.** Köhnə Daha çox dock/flow artıq tətbiq üçün cari nümunə deyil. Arrowz layihəsi dəyişdirilməyib; commit/merge/push/CI yoxdur.
+- Decisions: yalnız göstərilən say/qabiliyyət prinsipi köçürülür; Arrowz Firestore/cache/country/tie/reward/UTC/pinned-own-row qaydaları yox. Wobbrik real data/AppBackend/Bakı həftəsi/is_self qalır. UI-yə sığmayan oyunçu minimum4 adı ilə məcbur edilmir; font2-də əvvəlki podiumsuz adaptasiya qalır.
+- Relevant files: `docs/PLAN.md` §4 Rekord; `docs/reviews/2026-11-15-records-fit-count-proposal.md`; `profile-leaderboard-visual/fitted-proposal/{fit-preview-board.png,*.png,*count.txt}`; `render/FittedRecordsProposalTest.kt`, iki ortaq test helper-i, `tools/DockProposalSheet.java`; real implementation üçün `LeaderboardScreen.kt`, `LeaderboardReads.kt`.
+- Checks performed: son native3/3PASS21s; bütün yerləşdirilən sətirlər tam board daxilində, unikal say, no More, header48×48dp və visibility. 390font1=7 (3+4), 360font1=5 (3+2), 320font2=2; rəqəmlər sabit deyil, faktiki ölçüdəndir. Son raw və board-a baxıldı; kontrast4/4min8.22; diffcheckPASS. Sintetik UI fixture-dir, HTTP/device/emulator yoxdur.
+- Remaining work: yeni görünüş təsdiqi; sonra real screen-fit count/request budget və UI-ni mövcud session/scope/revision/cursor sərhədləri ilə birləşdirmək, real empty/error/few-player/rank-gap/uzun ad və ölçü dəyişməsini yoxlamaq. Yeni server authority/phantom me-rank yaratma.
+- Exact next step: fit-preview-board-u istifadəçiyə göstər və görünüş cavabını gözlə. Təsdiqdən sonra yalnız bu yeni panelsiz dizaynı real UI/data axınına tətbiq et. Təsdiqli PNG-ləri təkrar təsdiqə çıxarma; köhnə Daha çox nümunəsini implement etmə. Ayrıca göstərişsiz merge/push/CI yoxdur.
+
+---
+# Cari vahid — rekordlar üçün yığcam alt panel nümunəsi, 15 noyabr 2026
+
+- Completed: istifadəçinin Daha çox/Yenilə/Hesaba qayıt düzülüşü iradı əsasında tək yığcam alt panel nümunəsi render edilib: solda Hesab, ortada Daha çox, sağda Yenilə. Mövcud tokens/source art saxlanır; font2-də yanlar icon-dur. Daha çox üçün loading → əlavə 4–8-ci yerlər → hamısı yükləndi state board-u da göstərilir.
+- Current state: `feat/market-leaderboard`, inherited working diff qorunur. **Yeni nümunə istifadəçi təsdiqi gözləyir; production UI/data bu tur dəyişməyib.** Preview sintetikdir; Daha çox state-lərini host idarə edir, server callback-i deyil. Commit/merge/push/CI yoxdur.
+- Decisions: istifadəçi əvvəl nümunə, yalnız konkret təsdiqdən sonra implementasiya istəyib. Üç böyük alt-alta düymə bu təklifdə tək panelə yığılır; source PNG-lərin ümumi təkrar təsdiqi tələb olunmur.
+- Relevant files: `docs/reviews/2026-11-15-records-compact-footer-proposal.md`; `profile-leaderboard-visual/compact-proposal/{preview-board,more-flow-board}.png` və rawPNG-lər; `render/CompactRecordsProposalTest.kt`, `tools/DockProposalSheet.java`; production `LeaderboardScreen.kt`/CommunityArt/GameTokens; yeganə plan `docs/PLAN.md`.
+- Checks performed: son native3/3PASS20s, 390×844font1/360×640font1/320×568font2; 48×48dp targets+visibility assert; raw-lara və son board-a baxıldı. Əlavə click-flow native3/3PASS21s: loading disabled, köhnə/yeni sətrlərin saxlanması, end disabled; 390font1 flow board-a baxıldı. Kontrast3/3PASSmin6.48; diffcheckPASS. Emulator yoxdur; real callback/server/runtime yoxlaması deyil.
+- Remaining work: konkret footer dizaynının təsdiqi; sonra real loading/retry/pagination-end/disabled state-ləri və mövcud session/cursor/onBack callback-ləri ilə tətbiq. Əvvəlki bütöv ekran pariteti məhdudiyyətləri ayrıca qalır.
+- Exact next step: preview-board və more-flow-board-u istifadəçiyə göstər və cavabını gözlə; konkret təsdiq gəlmədən production-a qoşma. Təsdiq gəlsə bu paneli mövcud real axına tətbiq et, əlavə alternativ dizayn uydurma.
+
+---
+# Cari vahid — profil/rekord source art və capture, 15 noyabr 2026
+
+- Completed: təsdiqli source-dan podium fon clip-i, dar daxili avatar/xal overlay-ləri, orijinal rank/təqvim/mərtəbə/geri art-ı; hesabın orijinal hero-su, real XP pill-i, profil link chrome-u. Board ekran üzrə bir dəfə decode edilir. Header/footer üçün ayrıca snapshot sinfi+təzə JVM və piksel-region QA həlli hazırdır. PNG yenidən təsdiqə çıxarılmadı.
+- Current state: `feat/market-leaderboard`, baza `9653b98`, uncommitted; inherited bazar/data/owner/release işi qorunur. Review-dakı source art/capture məsələləri düzəldilib; bütöv ekranların tam vizual/piksel pariteti və mərhələ5 qəbulu açıqdır. Commit/merge/push/deploy/CI yoxdur.
+- Decisions: real GET/PUT, explicit konflikt/eyni replacement retry, epoch/Ready fencing, server scope/week/rank/score/cursor/is_self və sole journal saxlanır. Saxta settings/statistika/me rank əlavə edilmir. AppBackend müqaviləsi read-only yoxlandı, bu vizual vahid üçün backend dəyişikliyi tələb olunmadı. Mobil portret; emulator açılmır.
+- Relevant files: `docs/reviews/2026-11-15-phase5-profile-leaderboard-parity.md`; `profile-leaderboard-visual/{README.md,final-preview.png,final-font2.png,approved-comparison.png,final/,native-results.txt,render/,tools/}`; `CommunityArt.kt`, `LeaderboardArt.kt`, `LeaderboardScreen.kt`, `PublicAccountScreen.kt`, `GameTokens.kt`, `HomeScreen.kt`; dəyişdirilməmiş `account_approved_board.png` və `leaderboard_approved_board.png`; yeganə plan `docs/PLAN.md` §§1–2,4.
+- Checks performed: son native28/28PASS1m40s, 28PNG/4window-font-data×7state; geri düyməsi və rekord header/footer bölgələrinin piksel eyniliyi PASS. Son adi core130/engine95/app24 + assembleDebug/lintDebugPASS30s; kontrast4/4min8.22, hər iki approved source/copySHA256 eyni, diffcheckPASS. Final board-lara və seçmə raw/mobile/font2/error/empty/self/long-name renderlərə baxıldı. Sintetik production host, real HTTP/device deyil.
+- Remaining work: `approved-comparison.png`-də bütöv ekran chrome/typo/ölçü/boşluq/kompozisiya fərqləri qalır; bunlar ümumi təsdiqli istisna deyil və source art düzəlişi tam ekran qəbulunu əvəz etmir. Bütün locale/state/IME/inset/TalkBack/GPU/API24 yoxlanmayıb; planşet ayrıca qalır. Mərhələ5 qəbulu deyil.
+- Exact next step: yeni chatdə əvvəl bu review+approved-comparison+PLAN əsasında qalan bütöv ekran vizual fərqlərini scoped həll et; real data, təsdiqli source və son mobil ölçü qərarlarını qoru. Təsdiqli PNG-ləri yenidən təsdiqə çıxarma. Final capture üçün `ProfileLeaderboard*RenderTest` və `CaptureIntegrityCheck.java` istifadə et; köhnə root/ara PNG-ləri final sayma. Ayrıca göstərişsiz merge/push/CI yoxdur.
+
+---
+# Cari vahid — mərhələ 5: profil/rekord real UI, 14 noyabr 2026
+
+- Completed: real PublicAccountScreen GET/PUT editoru, ad/avatar seçimi, explicit revision conflict və exact replacement retry; LeaderboardScreen həftəlik/ümumi server siyahısı, refresh/pagination/loading/error/empty/is_self; Application/OnlineGame hesab→rekordlar naviqasiyası qoşuldu. Təsdiqli PNG-lər üçün yenidən təsdiq istənmədi.
+- Current state: `feat/market-leaderboard`, baza `9653b98`, inherited bazar/data/owner/release working diff qorunur; bu davam da uncommitted-dir. Funksional UI inteqrasiyası var, tam vizual paritet hazır deyil. Commit/merge/push/deploy/CI yoxdur.
+- Decisions: profil iqtisadi journal-dan ayrıdır, Google identity deyil; konflikt avtomatik overwrite etmir. Exact Ready/session epoch fencing saxlanır. Yeni server müqaviləsi tələb olunmadı; AppBackend docs/wobbrik-game-api.md public profile/leaderboard read-only yoxlandı. Mobil portret; emulator açılmır. İlkin generativ avatar/podium uyğun gəlmədiyindən production-dan çıxarıldı. `leaderboard_approved_board.png` orijinal play-progress-v2 ilə SHA256-identikdir; source hissələri Canvas-da çəkilir, score/avatar real data ilə üstündən dəyişir.
+- Relevant files: `PublicAccountScreen.kt`, `LeaderboardScreen.kt`, `GameTokens.kt`, `OnlineGame.kt`, `WobbrikApplication.kt`; `res/drawable-nodpi/leaderboard_approved_board.png`; `docs/reviews/2026-11-14-phase5-profile-leaderboard-ui.md`, `docs/reviews/profile-leaderboard-visual/{render/,*.png}`; data review və yeganə `docs/PLAN.md` §§1–2,4.
+- Checks performed: final native production host3/3 PASS19s; 360×640font1,390×844font1,320×568font2; conflict/no-auto-save, unknown PUT/exact retry, weekly/all fərqli avatar/score, paging/self/error/empty/back. 21PNG-yə seçmə baxıldı; final normal core130/engine95/app24+assembleDebug+lintDebugPASS28s. Contrast4/4PASSmin8.22, approved raster SHA256 identical, diffcheckPASS. Bəzi native transition captures-da dəyişməyən başlıq/footer çəkilişi natamamdır; PixelCopy timeout PASS deyil. Emulator/device/real HTTP yoxdur.
+- Remaining work: source podiumun fon düzbucaqlısı, 60px avatarların böyüdülmə keyfiyyəti və köhnə portraiti örtən geniş overlay-lərin laurels/frame ölçülərinə təsiri; tam PNG parity hazır deyil və bu fərqlər istifadəçi təsdiqli istisna deyil. Bütün locale/state/uzun ad/rank/balance, real HTTP/device/IME/inset/TalkBack/GPU/API24 yoxlanmayıb. Mərhələ5 qəbulu deyil.
+- Exact next step: yeni chatdə bu UI review+PLAN və təsdiqli play-progress-v2/account-states əsasında yalnız profil/rekord vizual paritet vahidini tamamla; real UI/data axınını qoruyub original art source/overlay sərhədlərini və etibarlı host capture-ı həll et. Mövcud təsdiqli PNG-ni yenidən təsdiqə çıxarma, yeni alternativi səssiz tətbiq etmə. Main merge/push/CI ayrıca göstərişsiz yoxdur.
+
+---
+# Cari vahid — mərhələ 5: rekordlar/profil data inteqrasiyası, 14 noyabr 2026
+
+- Completed: PLAN+aktiv bazar handoff+AppBackend profil/rekord müqavilələri oxundu. PublicProfiles/ProfileAccess GET/PUT, Unicode ad/avatar allowlist, ProfileEditor exact retry+conflict/refetch, LeaderboardRepository və login epoch-a bağlı immutable səhifələmə əlavə edildi. Təsdiqli PNG yenidən təsdiqə çıxarılmadı.
+- Current state: `feat/market-leaderboard`, inherited bazar/owner working diff qorunur. Bu davam da uncommitted-dir. UI hələ qoşulmayıb. Commit/merge/push/deploy/CI yoxdur.
+- Decisions: profil revision-u iqtisadi journal/revision-dan ayrıdır; konflikt avtomatik overwrite etmir, yeni save ayrıca istifadəçi əməliyyatıdır. Rekordlar server həftəsini/rank/snapshot/cursor-u saxlayır; öz nəticəsini göstərmək üçün uydurma me endpoint yoxdur. Backend müqaviləsi yoxlandı, əlavə server dəyişikliyi lazım deyil.
+- Relevant files: docs/PLAN.md §§1–2,4; docs/reviews/2026-11-14-phase5-profile-leaderboard-data.md; core game/{PublicProfiles,ProfileEditor,LeaderboardReads,GameplayHttpBackend}.kt; PublicProfilesLeaderboardTest.kt; əvvəlki bazar review-u və aşağıdakı bazar handoff-u. Təsdiqli docs/design/mobile-v1/{play-progress-v2,inventory-market-v2}.png.
+- Checks performed: Java21/offline `:core:test :app:compileDebugKotlin` PASS5s; core130/130, yeni7/7; lokal scoped review və diffcheck PASS. UI dəyişməyib/render yoxdur; emulator/CI açılmayıb. Backend read-only yoxlandı.
+- Remaining work: təsdiqli art-dan builder/pilot/architect və dəyişən nəticələr üçün təmiz podium asset-ləri; real rekordlar all/weekly/error/empty/paging ekranı; real profil editoru və naviqasiya. UI save Conflict-i göstərib yenidən Save istifadəçi əməliyyatını tələb etməlidir. Real hesab/device/HTTP/render/large font yoxlanmayıb; mərhələ5qəbulu deyil.
+- Exact next step: yeni chatdə bu data vahidi+PLAN+bazar review-u əsasında təsdiqli PNG-lərin art asset-lərini hazırla və real rekordlar/profil UI-ni qoş; PNG təsdiqini təkrar istəmə. Mövcud GameTokens/mobile sizing/purchase chrome təkrar istifadə olunsun; placeholder/yeni alternativ dizayn yox. Hər vizual nəticəni production host render edib PNG ilə müqayisə et. Ayrıca göstərişsiz merge/push/CI yoxdur.
+
+---
+# Cari vahid — mərhələ 5: Android bazar, 14 noyabr 2026
+
+- Completed: handoff/PLAN və AppBackend profil review-u oxundu. Android MarketReads/Repository, list/withdraw/buy wire+receipt və sole durable journal retry inteqrasiyası, bazar alış/elanlarım/filter/detail/pagination, inventardan satış seçimi və birbaşa detail→sale girişi hazırlanıb. Təsdiqli inventory-market-v2 üslubu, mövcud tokens/production BuildingPreview istifadə olunur; dizayn təsdiqi yenidən istənilməyib.
+- Current state: Wobbrik `feat/market-leaderboard`, baza `9653b98`, bu vahid uncommitted working diff-dir. AppBackend `feat/wobbrik-public-profiles` əvvəlki review üzrə hazırdır, main/deploy deyil. Owner PLAN/handoff/release/untracked purple asset qorunur. Commit/merge/push/deploy/CI yoxdur.
+- Decisions: mobil portret əvvəl; planşet ayrıca, emulator açılmır. Vahid wallet/sole journal, exact retry, hesab epoch/Ready fencing və fresh server sync saxlanır. Backend bazar müqaviləsi yoxlandı, əlavə server dəyişikliyi lazım deyil. İctimai ad/avatar Google identity deyil; profil revision-u iqtisadi revision-dan ayrıdır. Placement bağlıdır. Son istifadəçi satış forması screenshot-unu dəyişməyi istədi: böyük boş sahə çıxarılır, mövcud kompozisiya/token üslubunda bounded yığcam sale dialog tətbiq olunur; böyük şrift scroll body/fixed footer saxlanır. Son yığcamlaşdırma render/build yoxlamalarından keçib; native dialog daxilində parent fontScale də qorunur.
+- Remaining work: leaderboard all/weekly pagination+epoch, profile GET/PUT editor/revision conflict və PNG-yə uyğun ayrıca builder/pilot/architect avatar/podium asset-ləri hələ yoxdur; placeholder qoyulmayıb. Bazar real iki hesab/device E2E və bütün empty/error/closed/filter/paging kombinasiyaları yoxlanmayıb. Tam PNG pixel parity və mərhələ5 qəbulu deyil.
+- Relevant files: docs/PLAN.md §§1–2,4; docs/reviews/2026-11-14-phase5-market-android.md; docs/reviews/market-visual/{render/,checks.txt,*.png}; MarketScreen.kt, GameTokens.kt, OnlineGame.kt, InventoryScreen.kt, WobbrikApplication.kt; core game/{MarketReads,MarketMutations,GameplayWire,GameplayHttpBackend,AttemptCoordinator,RecoveryDtos}.kt; MarketIntegrationTest.kt; AppBackend docs/wobbrik-game-api.md və docs/reviews/2026-11-14-wobbrik-public-profiles.md; təsdiqli docs/design/mobile-v1/{inventory-market-v2,play-progress-v2}.png.
+- Checks performed: final Java21/offline core123 (bazar6)/engine95/app24 unit+assembleDebug+lintDebug PASS26s; final native3/3 PASS26s, 12 production PNG360×640font1/390×844font1/320×568font2, market/detail/sale/inventory-entry; son yığcam sale hər üç ölçüdə render edilib baxıldı, font2 dialog real böyük şriftlə scroll olunur. Kontrast4/4PASSmin8.22 və diffcheckPASS. Əvvəlki iki ilişmiş host run PASS deyil; son bounded host3/3PASS-dır. Backend əvvəlki disposablePG18 full race PASS profil review-dadır; bu tur backend dəyişməyib. Canlı runtime/device/IME/TalkBack/GPU/planşet yoxlanmayıb.
+- Exact next step: əvvəlcə son yığcam satış dialogunun render/build yoxlamasını və nəticə şəklini yekunlaşdır. Sonra yeni chatdə bu handoff+PLAN mərhələ5+market review+AppBackend profil müqaviləsi əsasında rekordlar/profil vahidini davam et. Təsdiqli PNG-ləri yenidən təsdiq sualına çevirmə; avatar/podium-u ayrıca həmin təsdiqli art-dan hazırla, saxta UI/placeholder yaratma. Bazar working diff-ni qoruyub review et; ayrıca göstərişsiz merge/push/CI yoxdur.
+
+---
 # Cari davam — purple template: bütün hissə ID-lərinin uyğunluğu, 14 noyabr 2026
 
 - Completed: son annex/dam birləşməsi istifadəçinin cari tapşırığı ilə təsdiqli əsas kimi qorundu. Bütün68ID (wall13/window14/entrance14/roof14/lighting13),32qarışıq və5tam-üslub nəzarəti production BuildingPreview-də render edildi. Alternativ divarların purple kənar zolaqları, əsas damların saçaq proyeksiyası, annex-də bütöv dam hüceyrəsinin sıxılması və girişdə təkrar pilləkən/sağ-yan proyeksiyası düzəldildi.

@@ -63,6 +63,17 @@ object GameplayWire {
             put("building_id", buildingId); put("building_revision", buildingRevision)
         })
     }
+    fun listBuilding(id: String, revision: Long, buildingId: String, buildingRevision: Long, price: Long): AttemptCommand {
+        InventoryReads.id(buildingId); require(buildingRevision > 0 && price > 0)
+        return command(id, revision, AttemptCommand.Route.MARKET_LIST, buildJsonObject {
+            put("building_id", buildingId); put("building_revision", buildingRevision); put("price", price)
+        })
+    }
+    fun marketListing(id: String, revision: Long, route: AttemptCommand.Route, listingId: String, listingRevision: Long): AttemptCommand {
+        require(route == AttemptCommand.Route.MARKET_BUY || route == AttemptCommand.Route.MARKET_WITHDRAW)
+        InventoryReads.id(listingId); require(listingRevision > 0)
+        return command(id, revision, route, buildJsonObject { put("listing_id", listingId); put("listing_revision", listingRevision) })
+    }
     fun validate(command: AttemptCommand) {
         val root = Json.parseToJsonElement(command.envelope).jsonObject
         require(root.keys == setOf("operation_id", "expected_revision", "rules_version", "request"))
@@ -70,6 +81,10 @@ object GameplayWire {
         require(root.string("rules_version") == "wobbrik-v1")
         val r = root.getValue("request").jsonObject
         val rebuilt = when (command.route) {
+            AttemptCommand.Route.MARKET_LIST -> listBuilding(command.operationId, command.expectedRevision,
+                r.string("building_id"), r.number("building_revision"), r.number("price"))
+            AttemptCommand.Route.MARKET_BUY, AttemptCommand.Route.MARKET_WITHDRAW -> marketListing(command.operationId,
+                command.expectedRevision, command.route, r.string("listing_id"), r.number("listing_revision"))
             AttemptCommand.Route.BUILDING_DELETE -> deleteBuilding(command.operationId, command.expectedRevision,
                 r.string("building_id"), r.number("building_revision"))
             AttemptCommand.Route.SHOP_BUY -> buyPart(command.operationId, command.expectedRevision, r.string("item_id"))

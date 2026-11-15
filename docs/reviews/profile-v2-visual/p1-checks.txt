@@ -1,0 +1,20 @@
+Final normal: core136+engine95+app24=255 tests; failures/errors/skipped0; APK/lint PASS34s.
+Final native source + frame-flushed harness:14/14PASS55s; p1-native-results.txt and p1-native-build.log.
+P1 remains OPEN: comparison shows panel/ribbon/composition differences and some route header captures remain incomplete.
+Approved PNG/drawable byte parity PASS. Nunito source/static font provenance: docs/design/profile-v2/README.md.
+No backend contract change, DB suite not repeated; no emulator/CI/commit/merge/push/deploy.
+
+android-billing/app/src/main/kotlin/com/aladdin/wobbrik/GameTokens.kt  —  tokens
+    Muted              on Surface              8.22  needs 4.5  OK
+    Background         on Accent              11.45  needs 4.5  OK
+    Text               on Surface             13.00  needs 4.5  OK
+    Text               on Background          16.57  needs 4.5  OK
+
+9f35fea2f30e35b9b80cd845f6ca5f78d1dcc60d4ffad7b0020bdf69c344a64a  android-billing/app/src/main/res/font/profile_nunito_bold.ttf
+781349da4dde88ff39b793291d9215343ca6563565430a3764e581653873778a  android-billing/app/src/main/res/font/profile_nunito_black.ttf
+68d0c99271f3d8da5058ab644bbcf5485f27911474827db4c8d924fca26221ea  android-billing/app/src/main/res/font/profile_nunito_regular.ttf
+74c35ec2e5ab6d0b81d967813a7ba2873ec562334faf2421521bbc6b726f7367  android-billing/app/src/main/kotlin/com/aladdin/wobbrik/ProfilePresentation.kt
+10c8233773bf8d8c3123838cc46e2593635d29496012aa868197289c7dc439f7  android-billing/app/src/main/kotlin/com/aladdin/wobbrik/PublicAccountScreen.kt
+a6b5768dbf2f827fc584617f4b69beb2b8c65d4263b8eda12de288d6a5e38c11  android-billing/app/src/main/kotlin/com/aladdin/wobbrik/GameTokens.kt
+8d1242dccd5825f3a3c55237b4cb5418bfc5d5d088692259b9f38530586830ce  android-billing/app/src/main/kotlin/com/aladdin/wobbrik/CommunityArt.kt
+e1e022c497e807b1f2c993e76f7036c8cbc97e6d4462b19b95b6cc5220016b9f  docs/reviews/profile-v2-visual/render/ProfileV2RenderTest.kt
