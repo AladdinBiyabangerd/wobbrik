@@ -1,0 +1,19 @@
+Native SDK34 Compose production host; synthetic transport/recovery
+{'tests': 16, 'failures': 0, 'errors': 0, 'skipped': 0}
+BUILD SUCCESSFUL in 55s
+TEST-com.aladdin.wobbrik.FittedLeaderboardAllRenderTest.xml
+TEST-com.aladdin.wobbrik.FittedLeaderboardEmptyRenderTest.xml
+TEST-com.aladdin.wobbrik.FittedLeaderboardErrorRenderTest.xml
+TEST-com.aladdin.wobbrik.FittedLeaderboardExpiredRenderTest.xml
+TEST-com.aladdin.wobbrik.FittedLeaderboardFewRenderTest.xml
+TEST-com.aladdin.wobbrik.FittedLeaderboardFontRenderTest.xml
+TEST-com.aladdin.wobbrik.FittedLeaderboardGapRenderTest.xml
+TEST-com.aladdin.wobbrik.FittedLeaderboardGrowthErrorRenderTest.xml
+TEST-com.aladdin.wobbrik.FittedLeaderboardLoadingRenderTest.xml
+TEST-com.aladdin.wobbrik.FittedLeaderboardLongRenderTest.xml
+TEST-com.aladdin.wobbrik.FittedLeaderboardProfileNameRenderTest.xml
+TEST-com.aladdin.wobbrik.FittedLeaderboardRefreshRenderTest.xml
+TEST-com.aladdin.wobbrik.FittedLeaderboardRegularRenderTest.xml
+TEST-com.aladdin.wobbrik.FittedLeaderboardResizeRenderTest.xml
+TEST-com.aladdin.wobbrik.FittedLeaderboardSessionRenderTest.xml
+TEST-com.aladdin.wobbrik.FittedLeaderboardSmallRenderTest.xml

@@ -1,0 +1,3 @@
+Visible unique players=2; includes podium when present.
+Preview request budget=4 (no network).
+Visible ranks=[1, 2]

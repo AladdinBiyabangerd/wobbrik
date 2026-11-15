@@ -232,7 +232,7 @@ private fun HomeIcon(icon: Int, description: String? = null, large: Boolean = fa
 
 @Composable
 internal fun HomeButton(label: String, icon: Int? = null, primary: Boolean = false, showPlayIcon: Boolean = false, enabled: Boolean = true, large: Boolean = false,
-                       modifier: Modifier = Modifier.fillMaxWidth(), compact: Boolean = false, onClick: () -> Unit) {
+                       modifier: Modifier = Modifier.fillMaxWidth(), compact: Boolean = false, leading: (@Composable () -> Unit)? = null, onClick: () -> Unit) {
     val sizing = mobileUiSizing()
     val mobile = sizing.portrait && !large
     Button(onClick, modifier = modifier.heightIn(min = if (mobile && primary) GameTokens.MobileUi.PrimaryTarget else if (large && primary) GameTokens.Target * 2 else if (large) GameTokens.Target + GameTokens.Inset else if (primary && !mobile) GameTokens.Target + GameTokens.Gap else GameTokens.Target)
@@ -254,6 +254,7 @@ internal fun HomeButton(label: String, icon: Int? = null, primary: Boolean = fal
             contentColor = if (primary) GameTokens.Background else GameTokens.Text), contentPadding = PaddingValues(GameTokens.Small)) {
         Row(verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(GameTokens.Small, Alignment.CenterHorizontally)) {
+            leading?.invoke()
             if (icon != null) HomeIcon(icon, large = large)
             if (showPlayIcon) Text("▶", fontSize = GameTokens.Title)
             Text(label, fontSize = if (mobile && primary) GameTokens.Hint else if (primary && compact) GameTokens.Title else if (primary) GameTokens.Score else if (large) GameTokens.Title else GameTokens.Body, fontWeight = FontWeight.Bold)

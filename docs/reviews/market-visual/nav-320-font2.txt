@@ -1,0 +1,1 @@
+measured=290 x 144; glyphLeft=0.0; glyphRight=288.54297; parentParagraph=372.0x144.0

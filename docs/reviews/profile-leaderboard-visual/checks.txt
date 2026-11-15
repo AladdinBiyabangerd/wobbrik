@@ -1,0 +1,9 @@
+Branch feat/market-leaderboard, base 9653b98, working diff; no commit/merge/push/deploy/CI.
+2026-11-15 final native production host 28/28 PASS1m40s; each screenshot class fresh JVM, maxParallelForks2.
+28 PNG: four window/font/data scenarios x seven states; exact back + records header/footer pixel regions PASS.
+Ordinary Java21/offline core130/engine95/app24 unit + assembleDebug + lintDebug PASS30s; failures/errors/skipped0.
+Conflict requires explicit second Save; unknown PUT exact replacement retry; no economic write; all/weekly/paging/is_self/back.
+Contrast4/4PASSmin8.22. Both original/copy approved board SHA256 pairs identical. diffcheckPASS.
+Final preview/font2/approved-comparison and selected raw screenshots inspected.
+Source art/overlay and capture issues corrected; whole-frame pixel parity and phase5 acceptance NOT claimed.
+Synthetic fixture host. No real HTTP/device/emulator/IME/insets/TalkBack/GPU/API24/full locales/state coverage. Mobile portrait only.

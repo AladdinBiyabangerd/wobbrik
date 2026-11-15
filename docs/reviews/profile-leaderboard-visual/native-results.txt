@@ -1,0 +1,8 @@
+Final Java21/offline native Compose host: 28 classes, 28 tests, failures/errors/skipped 0.
+Wall time: 1m40s. Each snapshot class uses a fresh JVM; maxParallelForks=2.
+Production screens with synthetic server fixtures, not device/real HTTP.
+Four scenarios: 360x640 font1; 390x844 font1; 320x568 font2; 320x568 font2 with 24-character name and Long.MAX_VALUE rank/score.
+Seven captures per scenario: account/editor/weekly/all/self-page/error/empty.
+CaptureIntegrityCheck: 28 PNG PASS, identical back regions; records header/footer exact across states; visible arrow and primary border.
+Conflict requires explicit second save; unknown PUT exact replacement retry; no economic write; paging/is_self/weekly/all/back.
+Log: /private/tmp/wobbrik-profile-parity-native-final.log

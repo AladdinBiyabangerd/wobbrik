@@ -33,7 +33,10 @@ class WobbrikApplication : Application(), DefaultLifecycleObserver {
             val inventory: appbackend.wobbrik.game.InventoryRepository, val sessions: AccountSessions,
             val decorations: appbackend.wobbrik.game.DecorationRepository,
             val cityScene: appbackend.wobbrik.game.CitySceneRepository,
-            internal val views: AccountViews? = null) : Bootstrap
+            internal val views: AccountViews? = null,
+            val market: appbackend.wobbrik.game.MarketRepository? = null,
+            val profiles: appbackend.wobbrik.game.ProfileAccess? = null,
+            val leaderboard: appbackend.wobbrik.game.LeaderboardRepository? = null) : Bootstrap
     }
 
     internal val cosmeticDefaults by lazy { AndroidCosmeticDefaultsStore(this) }
@@ -125,7 +128,7 @@ class WobbrikApplication : Application(), DefaultLifecycleObserver {
         val commands = AcceptedAttemptCommands(owner)
         engineHost.bind(commands)
         bootstrap = Bootstrap.Configured(owner, commands, appbackend.wobbrik.game.InventoryRepository(backend), sessions,
-            appbackend.wobbrik.game.DecorationRepository(backend), appbackend.wobbrik.game.CitySceneRepository(backend), AccountViews(backend, readCache, sessions))
+            appbackend.wobbrik.game.DecorationRepository(backend), appbackend.wobbrik.game.CitySceneRepository(backend), AccountViews(backend, readCache, sessions), appbackend.wobbrik.game.MarketRepository(backend), backend, appbackend.wobbrik.game.LeaderboardRepository(backend))
         retryScheduler = appbackend.wobbrik.game.RecoveryRetryScheduler(owner, recoveryScope)
         connectivity = RecoveryConnectivity(this) { retryScheduler?.connected(it) }
         authListener = FirebaseAuth.AuthStateListener {

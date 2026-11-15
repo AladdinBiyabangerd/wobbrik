@@ -63,6 +63,7 @@ private fun AuthenticatedGame(app: WobbrikApplication) {
     var cached by remember(configured) { mutableStateOf(configured?.recovery?.cached?.value) }
     var page by rememberSaveable { mutableStateOf("home") }
     var partsBuilding by rememberSaveable { mutableStateOf<String?>(null) }
+    var marketBuilding by rememberSaveable { mutableStateOf<String?>(null) }
     var inventoryBuilding by rememberSaveable { mutableStateOf<String?>(null) }
     val localHost = app.localHost
     var localState by remember { mutableStateOf(localHost.snapshot()) }
@@ -167,9 +168,22 @@ private fun AuthenticatedGame(app: WobbrikApplication) {
         key(InventoryReadKey(ready)) { LandShopScreen(configured, ready, onBack = { page = "inventory" }) }
         return
     }
+    if (page in setOf("account", "leaderboard") && ready != null && configured?.profiles != null && configured.leaderboard != null) {
+        key(InventoryReadKey(ready)) {
+            if (page == "account") PublicAccountScreen(configured, ready, { page = "home" }, { page = it })
+            else LeaderboardScreen(configured, ready, { page = "account" })
+        }
+        return
+    }
+    if (page == "market" && ready != null && configured?.market != null) {
+        key(InventoryReadKey(ready)) { MarketScreen(configured, ready, onHome = { page = "home" },
+            onInventory = { inventoryBuilding = null; page = "inventory" }, onCity = { page = "city" }, initialBuilding = marketBuilding, onInitialConsumed = { marketBuilding = null }) }
+        return
+    }
     if (page == "inventory" && view != null && configured != null) {
         key(InventoryReadKey(ready ?: view.account)) { InventoryScreen(configured, view, selected = inventoryBuilding, onSelectBuilding = { inventoryBuilding = it }, onHome = { page = "home" },
-            onParts = { partsBuilding = it; page = "parts" }, onDecorations = { inventoryBuilding = null; page = "decorations" }, onLand = { inventoryBuilding = null; page = "land" }) }
+            onParts = { partsBuilding = it; page = "parts" }, onDecorations = { inventoryBuilding = null; page = "decorations" }, onLand = { inventoryBuilding = null; page = "land" },
+            onMarket = { marketBuilding = inventoryBuilding; page = "market" }) }
         return
     }
     if (page == "collection" && ready != null) {
@@ -202,10 +216,10 @@ private fun AuthenticatedGame(app: WobbrikApplication) {
         error -> when (val cause = (state as AuthenticatedRecoveryOwner.State.Error).cause) {
             is appbackend.wobbrik.game.MutationRejected -> when (cause.code) {
                 "insufficient_balance" -> "Sikkə kifayət etmir. Hesabı yenilə."
-                "listing_conflict" -> "Bina aktiv elandadır. Əvvəl elanı geri götür."
+                "listing_conflict" -> "Elan dəyişib və ya bina aktiv elandadır. Hesabı yenilə."
                 "building_conflict" -> "Bina dəyişib. Yenilə və seçimi təkrar et."
                 "shop_conflict" -> "Hissə artıq açılıb. Hesabı yenilə."
-                "invalid_request" -> "Seçilmiş hissələr tətbiq edilə bilmir. Hesabı yenilə."
+                "invalid_request" -> "Seçilmiş əməliyyat tətbiq edilə bilmir. Hesabı yenilə."
                 else -> "Bina artıq əlçatan deyil. Hesabı yenilə."
             }
             else -> "Bağlantı yoxdur"
@@ -218,7 +232,7 @@ private fun AuthenticatedGame(app: WobbrikApplication) {
     // Local scroll/presentation state belongs to this destination, not to its caller.
     key(accountPage) {
         AccountScreen(accountPage, ready, status,
-            onPage = { if (it == "inventory") inventoryBuilding = null; page = it },
+            onPage = { if (it == "inventory") inventoryBuilding = null; if (it == "market") marketBuilding = null; page = it },
             onRetry = { configured?.recovery?.onForeground() },
             onPlay = if ((ready == null || localState.choosingFinish) && readOnly != null && !journalBlocked) ({
                 startLocal()

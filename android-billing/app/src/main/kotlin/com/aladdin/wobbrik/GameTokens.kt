@@ -32,6 +32,7 @@ internal object GameTokens {
     val PanelWidth = 360.dp
     val PanelElevation = 12.dp
     val Caption = 12.sp // --type-caption
+    val Label = 14.sp // --type-label
     val Body = 16.sp
     val Title = 24.sp
     val Score = 32.sp
@@ -49,6 +50,84 @@ internal object GameTokens {
         val PlaySlot = Target + Inset
         val NavbarHeight = Target + Inset + Small
         val LargeFontNavbarHeight = Target * 2 + Gap
+    }
+    internal object Leaderboard {
+        // Pixel source bounds on the unchanged approved play-progress-v2 board.
+        const val ArtX = 1340
+        const val ArtY = 205
+        const val ArtWidth = 418
+        const val ArtHeight = 264
+        // Source portrait interiors; destination circles extend to the inner metallic rim.
+        const val FirstAvatarX = 1505
+        const val FirstAvatarY = 243
+        const val FirstAvatarWidth = 84
+        const val FirstAvatarHeight = 82
+        const val SecondAvatarX = 1384
+        const val SecondAvatarY = 273
+        const val SecondAvatarWidth = 84
+        const val SecondAvatarHeight = 76
+        const val ThirdAvatarX = 1638
+        const val ThirdAvatarY = 279
+        const val ThirdAvatarWidth = 74
+        const val ThirdAvatarHeight = 73
+        const val PortraitSize = 72
+        const val SidePortraitSize = 68
+        const val BuilderPortraitX = 1512
+        const val BuilderPortraitY = 245
+        const val PilotPortraitX = 1391
+        const val PilotPortraitY = 276
+        const val ArchitectPortraitX = 1641
+        const val ArchitectPortraitY = 281
+        // Independent, clean small circles keep their original rim in list/editor rows.
+        const val RowAvatarX = 1427
+        const val RowAvatarSize = 60
+        const val BuilderRowY = 494
+        const val PilotRowY = 568
+        const val ArchitectRowY = 644
+        const val FirstScoreX = 1511
+        const val FirstScoreY = 330
+        const val FirstScoreWidth = 72
+        const val FirstScoreHeight = 26
+        const val SecondScoreX = 1396
+        const val SecondScoreY = 348
+        const val SecondScoreWidth = 64
+        const val SecondScoreHeight = 24
+        const val ThirdScoreX = 1644
+        const val ThirdScoreY = 357
+        const val ThirdScoreWidth = 66
+        const val ThirdScoreHeight = 25
+        const val ScoreTextSize = 24
+        const val MaxPodiumDigits = 4
+        const val BackgroundX = 1337
+        const val BackgroundY = 100
+        const val BackgroundStep = 200
+        const val BackgroundSamples = 4
+        const val BackX = 1351
+        const val BackY = 32
+        const val BackSize = 54
+        const val CalendarX = 1390
+        const val CalendarY = 157
+        const val CalendarWidth = 30
+        const val CalendarHeight = 34
+        const val FloorsX = 1652
+        const val FloorsY = 505
+        const val FloorsWidth = 32
+        const val FloorsHeight = 31
+        const val RankX = 1363
+        const val RankY = 501
+        const val RankStep = 75
+        const val RankWidth = 58
+        const val RankHeight = 44
+    }
+    internal object AccountArt {
+        const val HeroX = 24
+        const val HeroY = 99
+        const val HeroWidth = 400
+        const val HeroHeight = 245
+    }
+    internal object Market {
+        // Portrait sale form: content and actions stay together; font2 can use the available height.
+        val SaleDialogHeight = Target * 7 + Gap
     }
     val Hint = 18.sp
     // Approved decorative inventory/detail presentation; never active gameplay.

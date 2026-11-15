@@ -1,0 +1,11 @@
+Branch: feat/market-leaderboard; base 9653b98; working diff, no commit/merge/push/CI.
+Final Java21 offline core/engine/app unit + assembleDebug + lintDebug: PASS, 26s.
+Core 123 (MarketIntegrationTest 6), engine 95, app 24; failures/errors/skips 0.
+Final native MarketRenderTest: PASS 3/3, 26s; sdk34 synthetic HTTP fixtures, no emulator/device.
+360x640 font1; 390x844 font1; 320x568 font2. 12 PNG: market/detail/sale/inventory-sale-entry.
+Final sale dialog requested by user: compact normal font; actual parent fontScale2 inside Dialog; body scroll/fixed footer.
+Contract tests: durable lost response/restart, all 3 routes; reject vs unknown failure, identity/fee/revision, filters/cursors/read validation, same-UID epoch.
+Contrast 4/4 PASS min 8.22; git diff --check PASS.
+Logs: /private/tmp/wobbrik-market-checks.log and /private/tmp/wobbrik-market-render-final.log.
+No real account/two-buyer E2E, API24 runtime, GPU, IME/inset, TalkBack, all locales/states, tablet/landscape claim.
+Leaderboard/profile editor/art assets remain; not phase5 acceptance.
