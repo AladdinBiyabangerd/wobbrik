@@ -5,6 +5,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -140,7 +141,7 @@ internal fun FinishCosmeticScreen(view: AcceptedEngineHost.Snapshot, ready: Auth
         val gridColumns = if (maxWidth >= GameTokens.ExpandedWidth && wide) 3 else 2
         Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-                Image(painterResource(R.drawable.wobbrik_logo), "Wobbrik", Modifier.width(GameTokens.Target * 2).height(GameTokens.Target), contentScale = ContentScale.Fit)
+                if (!LocalMobileMenuShell.current) Image(painterResource(R.drawable.wobbrik_logo), "Wobbrik", Modifier.width(GameTokens.Target * 2).height(GameTokens.Target), contentScale = ContentScale.Fit)
                 Text("Bina görünüşü", color = GameTokens.Text, fontSize = sizing.heading, fontWeight = FontWeight.Bold)
             }
             val preview: @Composable (Modifier) -> Unit = { modifier ->
@@ -210,6 +211,16 @@ internal fun FinishCosmeticScreen(view: AcceptedEngineHost.Snapshot, ready: Auth
             if (wide) Row(Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(GameTokens.Gap)) {
                 preview(Modifier.weight(1f).fillMaxHeight())
                 picker(Modifier.weight(2f).fillMaxHeight())
+            } else if (LocalMobileMenuShell.current && androidx.compose.ui.platform.LocalDensity.current.fontScale > 1f) {
+                BoxWithConstraints(Modifier.weight(1f)) {
+                    val contentHeight = maxHeight.coerceAtLeast(GameTokens.CompactHeight)
+                    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
+                        Column(Modifier.fillMaxWidth().height(contentHeight), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+                            preview(Modifier.fillMaxWidth().weight(1f))
+                            picker(Modifier.fillMaxWidth().weight(2f))
+                        }
+                    }
+                }
             } else Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
                 preview(Modifier.fillMaxWidth().weight(1f))
                 picker(Modifier.fillMaxWidth().weight(2f))

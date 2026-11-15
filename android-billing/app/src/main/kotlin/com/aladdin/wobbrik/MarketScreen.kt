@@ -108,12 +108,12 @@ internal fun MarketScreen(configured: WobbrikApplication.Bootstrap.Configured,
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
                 HomeButton("‹", modifier = Modifier.width(GameTokens.Target).semantics { contentDescription = "Geri" }, onClick = { back() })
                 Text("Bazar", Modifier.weight(1f), color = GameTokens.Text, fontSize = sizing.heading, fontWeight = FontWeight.Bold)
-                if (!separateBalance) {
+                if (!LocalMobileMenuShell.current && !separateBalance) {
                     Image(painterResource(R.drawable.ui_coin), "Sikkə", Modifier.size(GameTokens.Inset))
                     Text(ready.snapshot.coins.toString(), color = GameTokens.Text, fontWeight = FontWeight.Bold)
                 }
             }
-            if (separateBalance) Row(Modifier.horizontalScroll(rememberScrollState()), verticalAlignment = Alignment.CenterVertically,
+            if (!LocalMobileMenuShell.current && separateBalance) Row(Modifier.horizontalScroll(rememberScrollState()), verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
                 Image(painterResource(R.drawable.ui_coin), "Sikkə", Modifier.size(GameTokens.Inset))
                 Text(ready.snapshot.coins.toString(), color = GameTokens.Text, fontWeight = FontWeight.Bold)
@@ -171,12 +171,12 @@ internal fun MarketScreen(configured: WobbrikApplication.Bootstrap.Configured,
                 enabled = !loading && (own || value.listing.price <= ready.snapshot.coins)) { confirming = true }
             else if (own && !picker && detailId == null) HomeButton("Bazara çıxar", icon = R.drawable.ui_market, primary = true) { picker = true; inventoryCursor = null }
             val marketHome = { detailId = null; picker = false; refresh() }
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+            if (!LocalMobileMenuShell.current) Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
                 MarketNavigation("Şəhər", R.drawable.ui_city, false, Modifier.weight(1f), onCity)
                 MarketNavigation("İnventar", R.drawable.ui_inventory, false, Modifier.weight(1f), onInventory)
                 if (!separateBalance) MarketNavigation("Bazar", R.drawable.ui_market, true, Modifier.weight(1f), marketHome)
             }
-            if (separateBalance) MarketTab("Bazar", true, Modifier.fillMaxWidth(), marketHome)
+            if (!LocalMobileMenuShell.current && separateBalance) MarketTab("Bazar", true, Modifier.fillMaxWidth(), marketHome)
 
         }
     }

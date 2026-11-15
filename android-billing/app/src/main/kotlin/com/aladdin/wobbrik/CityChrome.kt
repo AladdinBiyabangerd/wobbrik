@@ -30,7 +30,7 @@ internal fun CityHeader(population: String?, onHome: () -> Unit, cached: Boolean
     val largeFont = LocalDensity.current.fontScale > 1f
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-        Image(painterResource(R.drawable.wobbrik_logo), null,
+        if (!LocalMobileMenuShell.current) Image(painterResource(R.drawable.wobbrik_logo), null,
             Modifier.size(width = if (largeFont) GameTokens.Target else GameTokens.Target * 2,
                 height = GameTokens.Target).clickable(onClick = onHome)
                 .semantics { contentDescription = "Ana ekran" })
@@ -124,6 +124,7 @@ private fun CityViewSummary(building: OwnedBuilding?, focused: Boolean) {
 
 @Composable
 internal fun CityNavigation(onInventory: () -> Unit) {
+    if (LocalMobileMenuShell.current) return
     val largeFont = LocalDensity.current.fontScale > 1f
     CityFrame(Modifier.fillMaxWidth()) {
         BoxWithConstraints(Modifier.fillMaxWidth()) {

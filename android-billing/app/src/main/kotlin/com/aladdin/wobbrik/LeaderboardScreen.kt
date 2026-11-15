@@ -4,6 +4,8 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -118,44 +120,48 @@ internal fun CommunityFrame(title: String, onBack: () -> Unit, coins: Long? = nu
     content: @Composable ColumnScope.() -> Unit) {
     val board = ImageBitmap.imageResource(R.drawable.leaderboard_approved_board)
     CompositionLocalProvider(LocalCommunityBoard provides board) {
-        Box(Modifier.fillMaxSize().background(GameTokens.Background)) {
+        BoxWithConstraints(Modifier.fillMaxSize().background(GameTokens.Background)) {
+            val scrollFrame = LocalMobileMenuShell.current && LocalDensity.current.fontScale > 1f
+            val frameHeight = if (scrollFrame) maxHeight.coerceAtLeast(GameTokens.MobileUi.CompactHeight) else maxHeight
             CommunityBackdrop(Modifier.matchParentSize())
-            Column(Modifier.fillMaxSize().safeDrawingPadding().imePadding().padding(GameTokens.Gap),
-                verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-                if (coins == null) Box(Modifier.fillMaxWidth().height(GameTokens.Target)) {
-                    Image(painterResource(R.drawable.wobbrik_logo), "Wobbrik",
-                        Modifier.align(Alignment.Center).width(GameTokens.Target * 3).height(GameTokens.Target))
-                    CommunityBackArt(Modifier.align(Alignment.CenterStart).size(GameTokens.Target)
-                        .clickable(role = androidx.compose.ui.semantics.Role.Button, onClick = onBack)
-                        .semantics { contentDescription = if (onRefresh != null) "Hesaba qayıt" else "Geri" })
-                    if (onRefresh != null) Surface(onClick = onRefresh, enabled = refreshEnabled,
-                        modifier = Modifier.align(Alignment.CenterEnd).size(GameTokens.Target).testTag("records-refresh")
-                            .semantics { contentDescription = "Yenilə" },
-                        shape = androidx.compose.foundation.shape.CircleShape, color = GameTokens.Surface,
-                        border = BorderStroke(GameTokens.Hairline, GameTokens.Raised)) {
-                        Box(Modifier.background(Brush.verticalGradient(listOf(GameTokens.Raised, GameTokens.Surface))), contentAlignment = Alignment.Center) {
-                            if (refreshing) CircularProgressIndicator(Modifier.size(GameTokens.Inset), color = GameTokens.Text, strokeWidth = GameTokens.Hairline * 2)
-                            else CommunityRefreshArt(Modifier.size(GameTokens.Inset))
+            Box(Modifier.fillMaxSize().then(if (scrollFrame) Modifier.verticalScroll(rememberScrollState()) else Modifier)) {
+                Column(Modifier.fillMaxWidth().height(frameHeight).safeDrawingPadding().imePadding().padding(GameTokens.Gap),
+                    verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+                    if (coins == null) Box(Modifier.fillMaxWidth().height(GameTokens.Target)) {
+                        if (!LocalMobileMenuShell.current) Image(painterResource(R.drawable.wobbrik_logo), "Wobbrik",
+                            Modifier.align(Alignment.Center).width(GameTokens.Target * 3).height(GameTokens.Target))
+                        CommunityBackArt(Modifier.align(Alignment.CenterStart).size(GameTokens.Target)
+                            .clickable(role = androidx.compose.ui.semantics.Role.Button, onClick = onBack)
+                            .semantics { contentDescription = if (onRefresh != null) "Hesaba qayıt" else "Geri" })
+                        if (onRefresh != null) Surface(onClick = onRefresh, enabled = refreshEnabled,
+                            modifier = Modifier.align(Alignment.CenterEnd).size(GameTokens.Target).testTag("records-refresh")
+                                .semantics { contentDescription = "Yenilə" },
+                            shape = androidx.compose.foundation.shape.CircleShape, color = GameTokens.Surface,
+                            border = BorderStroke(GameTokens.Hairline, GameTokens.Raised)) {
+                            Box(Modifier.background(Brush.verticalGradient(listOf(GameTokens.Raised, GameTokens.Surface))), contentAlignment = Alignment.Center) {
+                                if (refreshing) CircularProgressIndicator(Modifier.size(GameTokens.Inset), color = GameTokens.Text, strokeWidth = GameTokens.Hairline * 2)
+                                else CommunityRefreshArt(Modifier.size(GameTokens.Inset))
+                            }
+                        }
+                    } else Row(verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+                        CommunityBackArt(Modifier.size(GameTokens.Target).clickable(role = androidx.compose.ui.semantics.Role.Button, onClick = onBack)
+                            .semantics { contentDescription = "Geri" })
+                        Text(title, Modifier.weight(1f), color = GameTokens.Text, fontSize = mobileUiSizing().heading, fontWeight = FontWeight.Bold)
+                        if (coins.toString().length <= 6 && LocalDensity.current.fontScale <= 1f) {
+                            Image(painterResource(R.drawable.ui_coin), "Sikkə", Modifier.size(GameTokens.Inset))
+                            Text(coins.toString(), color = GameTokens.Text, fontWeight = FontWeight.Bold)
                         }
                     }
-                } else Row(verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-                    CommunityBackArt(Modifier.size(GameTokens.Target).clickable(role = androidx.compose.ui.semantics.Role.Button, onClick = onBack)
-                        .semantics { contentDescription = "Geri" })
-                    Text(title, Modifier.weight(1f), color = GameTokens.Text, fontSize = mobileUiSizing().heading, fontWeight = FontWeight.Bold)
-                    if (coins.toString().length <= 6 && LocalDensity.current.fontScale <= 1f) {
-                        Image(painterResource(R.drawable.ui_coin), "Sikkə", Modifier.size(GameTokens.Inset))
-                        Text(coins.toString(), color = GameTokens.Text, fontWeight = FontWeight.Bold)
+                    if (coins != null && (coins.toString().length > 6 || LocalDensity.current.fontScale > 1f)) Text("$coins sikkə", color = GameTokens.Text)
+                    if (coins == null) Row(Modifier.align(Alignment.CenterHorizontally), verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+                        Text("›", color = GameTokens.Accent, fontSize = mobileUiSizing().heading, fontWeight = FontWeight.ExtraBold)
+                        Text(title, color = GameTokens.Text, fontSize = mobileUiSizing().heading, fontWeight = FontWeight.ExtraBold)
+                        Text("‹", color = GameTokens.Accent, fontSize = mobileUiSizing().heading, fontWeight = FontWeight.ExtraBold)
                     }
+                    content()
                 }
-                if (coins != null && (coins.toString().length > 6 || LocalDensity.current.fontScale > 1f)) Text("$coins sikkə", color = GameTokens.Text)
-                if (coins == null) Row(Modifier.align(Alignment.CenterHorizontally), verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-                    Text("›", color = GameTokens.Accent, fontSize = mobileUiSizing().heading, fontWeight = FontWeight.ExtraBold)
-                    Text(title, color = GameTokens.Text, fontSize = mobileUiSizing().heading, fontWeight = FontWeight.ExtraBold)
-                    Text("‹", color = GameTokens.Accent, fontSize = mobileUiSizing().heading, fontWeight = FontWeight.ExtraBold)
-                }
-                content()
             }
         }
     }

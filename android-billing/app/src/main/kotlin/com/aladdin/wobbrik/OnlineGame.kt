@@ -152,93 +152,8 @@ private fun AuthenticatedGame(app: WobbrikApplication) {
         AcceptedScene(hostState, ready, host, onHome = { page = "home" })
         return
     }
-    if (page == "settings") {
-        SettingsRoute(app.settings, onBack = { page = "account" })
-        return
-    }
-    if (page == "city" && view != null && configured != null) {
-        key(InventoryReadKey(ready ?: view.account)) { CityScreen(configured, view, onHome = { page = "home" }, onInventory = { inventoryBuilding = null; page = "inventory" }) }
-        return
-    }
-    if (page == "parts" && ready != null && configured != null) {
-        key(InventoryReadKey(ready)) { PartsScreen(configured, ready, partsBuilding, onBack = { inventoryBuilding = partsBuilding; page = "inventory" }) }
-        return
-    }
-    if (page == "decorations" && ready != null && configured != null) {
-        key(InventoryReadKey(ready)) { DecorationShopScreen(configured, ready, onBack = { page = "inventory" }) }
-        return
-    }
-    if (page == "land" && ready != null && configured != null) {
-        key(InventoryReadKey(ready)) { LandShopScreen(configured, ready, onBack = { page = "inventory" }) }
-        return
-    }
-    if (page in setOf("account", "leaderboard") && ready != null && configured?.profiles != null && configured.leaderboard != null) {
-        key(InventoryReadKey(ready)) {
-            if (page == "account") PublicAccountScreen(configured, ready, { page = "home" }, { page = it })
-            else LeaderboardScreen(configured, ready, { page = "account" })
-        }
-        return
-    }
-    if (page == "market" && ready != null && configured?.market != null) {
-        key(InventoryReadKey(ready)) { MarketScreen(configured, ready, onHome = { page = "home" },
-            onInventory = { inventoryBuilding = null; page = "inventory" }, onCity = { page = "city" }, initialBuilding = marketBuilding, onInitialConsumed = { marketBuilding = null }) }
-        return
-    }
-    if (page == "inventory" && view != null && configured != null) {
-        key(InventoryReadKey(ready ?: view.account)) { InventoryScreen(configured, view, selected = inventoryBuilding, onSelectBuilding = { inventoryBuilding = it }, onHome = { page = "home" },
-            onParts = { partsBuilding = it; page = "parts" }, onDecorations = { inventoryBuilding = null; page = "decorations" }, onLand = { inventoryBuilding = null; page = "land" },
-            onMarket = { marketBuilding = inventoryBuilding; page = "market" }) }
-        return
-    }
-    if (page == "collection" && ready != null) {
-        val uid = ready.accountKey
-        var selection by remember(ready) { mutableStateOf(ready.catalog?.let {
-            FinishCosmetics.selection(it, ready.snapshot, uid?.let(app.cosmeticDefaults::read).orEmpty())
-        }.orEmpty()) }
-        var storageError by remember(ready) { mutableStateOf(false) }
-        FinishCosmeticScreen(AcceptedEngineHost.Snapshot(finishParts = selection, finishStorageError = storageError), ready,
-            onSelect = { category, id ->
-                if (ready.catalog?.items?.any { it.id == id && it.category == category && FinishCosmetics.available(it, ready.snapshot) } == true)
-                    selection = selection + (category to id)
-            }, onConfirm = {
-                if (configured?.recovery?.state?.value === ready && uid != null && ready.catalog?.let {
-                    FinishCosmetics.valid(it, ready.snapshot, selection)
-                } == true) {
-                    storageError = runCatching { app.cosmeticDefaults.write(uid, selection) }.isFailure
-                    if (!storageError) page = "home"
-                }
-            }, onBack = { page = "home" })
-        return
-    }
     val journalBlocked = (state as? AuthenticatedRecoveryOwner.State.Error)?.cause is UnreadableAttemptJournal
-    val error = state is AuthenticatedRecoveryOwner.State.Error
-    val status = when {
-        localStartError -> "Lokal yaddaş oxunmadı. Oyna düyməsinə yenidən toxun."
-        app.bootstrap is WobbrikApplication.Bootstrap.MissingFirebase -> "Firebase konfiqurasiyası yoxdur"
-        app.bootstrap is WobbrikApplication.Bootstrap.MissingBackendOrigin -> "Server ünvanı konfiqurasiya edilməyib"
-        journalBlocked -> JournalRecoveryCopy.Title
-        error -> when (val cause = (state as AuthenticatedRecoveryOwner.State.Error).cause) {
-            is appbackend.wobbrik.game.MutationRejected -> when (cause.code) {
-                "insufficient_balance" -> "Sikkə kifayət etmir. Hesabı yenilə."
-                "listing_conflict" -> "Elan dəyişib və ya bina aktiv elandadır. Hesabı yenilə."
-                "building_conflict" -> "Bina dəyişib. Yenilə və seçimi təkrar et."
-                "shop_conflict" -> "Hissə artıq açılıb. Hesabı yenilə."
-                "invalid_request" -> "Seçilmiş əməliyyat tətbiq edilə bilmir. Hesabı yenilə."
-                else -> "Bina artıq əlçatan deyil. Hesabı yenilə."
-            }
-            else -> "Bağlantı yoxdur"
-        }
-        ready == null && !GameNavigation.showAcceptedHome(state, cached) -> "Hesab və cəhd bərpa olunur…"
-        restore is AcceptedAttemptRestore.Result.Blocked -> "Cəhd bu versiyada bərpa edilə bilmir"
-        else -> null
-    }
-    val accountPage = GameNavigation.accountPage(page)
-    // Local scroll/presentation state belongs to this destination, not to its caller.
-    key(accountPage) {
-        AccountScreen(accountPage, ready, status,
-            onPage = { if (it == "inventory") inventoryBuilding = null; if (it == "market") marketBuilding = null; page = it },
-            onRetry = { configured?.recovery?.onForeground() },
-            onPlay = if ((ready == null || localState.choosingFinish) && readOnly != null && !journalBlocked) ({
+    val menuPlay: (() -> Unit)? = if ((ready == null || localState.choosingFinish) && readOnly != null && !journalBlocked) ({
                 startLocal()
             }) else if (ready != null && !hostState.choosingFinish && restore !is AcceptedAttemptRestore.Result.Blocked) ({
                 when (restore) {
@@ -251,11 +166,109 @@ private fun AuthenticatedGame(app: WobbrikApplication) {
                         else if (host.discardOpen(ready)) startAfterDiscard = true
                     else -> Unit
                 }
-            }) else null,
-            active = false, // Terminal attempts finish automatically; Home never offers to reopen them.
-            journalBlocked = journalBlocked,
-            cached = if (ready == null) cached else null)
+            }) else null
+    val navigate: (String) -> Unit = {
+        if (it == "inventory") inventoryBuilding = null
+        if (it == "market") marketBuilding = null
+        page = it
     }
+    val mobileMenu = mobileUiSizing().portrait && page != "home" && page != "game"
+    val menuContent: @Composable () -> Unit = menuContent@ {
+        if (page == "settings") {
+            SettingsRoute(app.settings, onBack = { page = "account" })
+            return@menuContent
+        }
+        if (page == "city" && view != null && configured != null) {
+            key(InventoryReadKey(ready ?: view.account)) { CityScreen(configured, view, onHome = { page = "home" }, onInventory = { inventoryBuilding = null; page = "inventory" }) }
+            return@menuContent
+        }
+        if (page == "parts" && ready != null && configured != null) {
+            key(InventoryReadKey(ready)) { PartsScreen(configured, ready, partsBuilding, onBack = { inventoryBuilding = partsBuilding; page = "inventory" }) }
+            return@menuContent
+        }
+        if (page == "decorations" && ready != null && configured != null) {
+            key(InventoryReadKey(ready)) { DecorationShopScreen(configured, ready, onBack = { page = "inventory" }) }
+            return@menuContent
+        }
+        if (page == "land" && ready != null && configured != null) {
+            key(InventoryReadKey(ready)) { LandShopScreen(configured, ready, onBack = { page = "inventory" }) }
+            return@menuContent
+        }
+        if (page in setOf("account", "leaderboard") && ready != null && configured?.profiles != null && configured.leaderboard != null) {
+            key(InventoryReadKey(ready)) {
+                if (page == "account") PublicAccountScreen(configured, ready, { page = "home" }, { page = it })
+                else LeaderboardScreen(configured, ready, { page = if (mobileMenu) "achievements" else "account" })
+            }
+            return@menuContent
+        }
+        if (page == "market" && ready != null && configured?.market != null) {
+            key(InventoryReadKey(ready)) { MarketScreen(configured, ready, onHome = { page = "home" },
+                onInventory = { inventoryBuilding = null; page = "inventory" }, onCity = { page = "city" }, initialBuilding = marketBuilding, onInitialConsumed = { marketBuilding = null }) }
+            return@menuContent
+        }
+        if (page == "inventory" && view != null && configured != null) {
+            key(InventoryReadKey(ready ?: view.account)) { InventoryScreen(configured, view, selected = inventoryBuilding, onSelectBuilding = { inventoryBuilding = it }, onHome = { page = "home" },
+                onParts = { partsBuilding = it; page = "parts" }, onDecorations = { inventoryBuilding = null; page = "decorations" }, onLand = { inventoryBuilding = null; page = "land" },
+                onMarket = { marketBuilding = inventoryBuilding; page = "market" }) }
+            return@menuContent
+        }
+        if (page == "collection" && ready != null) {
+            val uid = ready.accountKey
+            var selection by remember(ready) { mutableStateOf(ready.catalog?.let {
+                FinishCosmetics.selection(it, ready.snapshot, uid?.let(app.cosmeticDefaults::read).orEmpty())
+            }.orEmpty()) }
+            var storageError by remember(ready) { mutableStateOf(false) }
+            FinishCosmeticScreen(AcceptedEngineHost.Snapshot(finishParts = selection, finishStorageError = storageError), ready,
+                onSelect = { category, id ->
+                    if (ready.catalog?.items?.any { it.id == id && it.category == category && FinishCosmetics.available(it, ready.snapshot) } == true)
+                        selection = selection + (category to id)
+                }, onConfirm = {
+                    if (configured?.recovery?.state?.value === ready && uid != null && ready.catalog?.let {
+                        FinishCosmetics.valid(it, ready.snapshot, selection)
+                    } == true) {
+                        storageError = runCatching { app.cosmeticDefaults.write(uid, selection) }.isFailure
+                        if (!storageError) page = "inventory"
+                    }
+                }, onBack = { page = "inventory" })
+            return@menuContent
+        }
+        val error = state is AuthenticatedRecoveryOwner.State.Error
+        val status = when {
+            localStartError -> "Lokal yaddaş oxunmadı. Oyna düyməsinə yenidən toxun."
+            app.bootstrap is WobbrikApplication.Bootstrap.MissingFirebase -> "Firebase konfiqurasiyası yoxdur"
+            app.bootstrap is WobbrikApplication.Bootstrap.MissingBackendOrigin -> "Server ünvanı konfiqurasiya edilməyib"
+            journalBlocked -> JournalRecoveryCopy.Title
+            error -> when (val cause = (state as AuthenticatedRecoveryOwner.State.Error).cause) {
+                is appbackend.wobbrik.game.MutationRejected -> when (cause.code) {
+                    "insufficient_balance" -> "Sikkə kifayət etmir. Hesabı yenilə."
+                    "listing_conflict" -> "Elan dəyişib və ya bina aktiv elandadır. Hesabı yenilə."
+                    "building_conflict" -> "Bina dəyişib. Yenilə və seçimi təkrar et."
+                    "shop_conflict" -> "Hissə artıq açılıb. Hesabı yenilə."
+                    "invalid_request" -> "Seçilmiş əməliyyat tətbiq edilə bilmir. Hesabı yenilə."
+                    else -> "Bina artıq əlçatan deyil. Hesabı yenilə."
+                }
+                else -> "Bağlantı yoxdur"
+            }
+            ready == null && !GameNavigation.showAcceptedHome(state, cached) -> "Hesab və cəhd bərpa olunur…"
+            restore is AcceptedAttemptRestore.Result.Blocked -> "Cəhd bu versiyada bərpa edilə bilmir"
+            else -> null
+        }
+        val accountPage = GameNavigation.accountPage(page)
+        // Local scroll/presentation state belongs to this destination, not to its caller.
+        key(accountPage) {
+            AccountScreen(accountPage, ready, status,
+                onPage = navigate,
+                onRetry = { configured?.recovery?.onForeground() },
+                onPlay = menuPlay,
+                active = false, // Terminal attempts finish automatically; Home never offers to reopen them.
+                journalBlocked = journalBlocked,
+                cached = if (ready == null) cached else null)
+        }
+    }
+    if (mobileMenu) {
+        MobileMenuShell(page, view?.snapshot?.coins ?: cached?.coins, menuPlay, navigate, menuContent)
+    } else menuContent()
+
 }
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -290,14 +303,14 @@ internal fun AccountScreen(
         BoxWithConstraints(Modifier.fillMaxSize().padding(if (compactOuter || sizing.portrait) GameTokens.Gap else GameTokens.Inset)) {
         val controlsMaxHeight = maxHeight / 2
         val expanded = maxWidth >= GameTokens.ExpandedWidth
-        val wide = maxWidth > maxHeight
+        val wide = !LocalMobileMenuShell.current && maxWidth > maxHeight
         // Approved design C2 (docs/design/account-landscape-actions-v1): short wide windows (phone landscape).
         val threePane = wide && maxHeight < GameTokens.CompactHeight
         // Type tier: compact (Hint) in short wide windows, regular (Title) elsewhere.
         val titleSize = if (threePane) GameTokens.Hint else sizing.heading
         Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(if (sizing.portrait) GameTokens.Small else GameTokens.Gap)) {
             // Approved v3 (9 November): three-pane moves the logo into the hero pane, so there is no header row.
-            if (!threePane) Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(GameTokens.Small), verticalAlignment = Alignment.CenterVertically) {
+            if (!LocalMobileMenuShell.current && !threePane) Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(GameTokens.Small), verticalAlignment = Alignment.CenterVertically) {
                 Box(Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
                     Image(painterResource(R.drawable.wobbrik_logo), "Wobbrik", Modifier.widthIn(max = GameTokens.PanelWidth / 2).fillMaxWidth().height(GameTokens.Target), contentScale = ContentScale.Fit)
                 }
@@ -392,10 +405,10 @@ internal fun AccountScreen(
                         OnlineAction("Yenilə", true, onClick = onRetry)
                     }
                     if (status == null && !sizing.portrait) OnlineAction(if (active) "Cəhdə qayıt" else "Oyna", true, enabled = onPlay != null, onClick = { onPlay?.invoke() })
-                    if (status == null && stacked) Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+                    if (!LocalMobileMenuShell.current && status == null && stacked) Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
                         secondary("Kolleksiya", R.drawable.ui_medal, "collection", Modifier.fillMaxWidth())
                         secondary("Nailiyyətlər", R.drawable.ui_trophy, "achievements", Modifier.fillMaxWidth())
-                    } else if (status == null) Row(horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+                    } else if (!LocalMobileMenuShell.current && status == null) Row(horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
                         secondary("Kolleksiya", R.drawable.ui_medal, "collection", Modifier.weight(1f))
                         secondary("Nailiyyətlər", R.drawable.ui_trophy, "achievements", Modifier.weight(1f))
                     }
@@ -421,9 +434,9 @@ internal fun AccountScreen(
                     info()
                     actions(androidx.compose.ui.platform.LocalDensity.current.fontScale > 1f)
                 }
-                if (status == null) OnlineAction(if (active) "Cəhdə qayıt" else "Oyna", true,
+                if (!LocalMobileMenuShell.current && status == null) OnlineAction(if (active) "Cəhdə qayıt" else "Oyna", true,
                     enabled = onPlay != null, onClick = { onPlay?.invoke() })
-                if (page != "home") OnlineAction("Ana ekran", false, onClick = { onPage("home") })
+                if (!LocalMobileMenuShell.current && page != "home") OnlineAction("Ana ekran", false, onClick = { onPage("home") })
             } else {
                 hero(Modifier.weight(1f).fillMaxWidth())
                 controls(Modifier.fillMaxWidth().heightIn(max = controlsMaxHeight))

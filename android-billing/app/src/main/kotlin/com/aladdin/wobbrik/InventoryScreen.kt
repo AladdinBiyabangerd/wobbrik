@@ -107,7 +107,7 @@ internal fun InventoryScreen(configured: WobbrikApplication.Bootstrap.Configured
                 }, enabled = !loading, modifier = Modifier.size(GameTokens.Target).semantics { contentDescription = "Yenilə" }) {
                     Text("↻", color = GameTokens.Accent, fontSize = GameTokens.Title)
                 }
-                Surface(color = GameTokens.Surface, shape = RoundedCornerShape(GameTokens.CardRadius),
+                if (!LocalMobileMenuShell.current) Surface(color = GameTokens.Surface, shape = RoundedCornerShape(GameTokens.CardRadius),
                     border = BorderStroke(GameTokens.Hairline, GameTokens.Raised)) {
                     Row(Modifier.padding(GameTokens.Small), verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {
@@ -181,9 +181,9 @@ internal fun InventoryScreen(configured: WobbrikApplication.Bootstrap.Configured
                 Text("Məlumat yenilənmədi. Bağlantını yoxla və yenidən cəhd et.", color = GameTokens.Danger)
                 InventoryButton("Yenidən cəhd et") { retry++ }
             }
-            if (sizing.portrait) HomeButton(if (selected == null) "Ana ekran" else "İnventara qayıt",
+            if (!LocalMobileMenuShell.current && sizing.portrait) HomeButton(if (selected == null) "Ana ekran" else "İnventara qayıt",
                 icon = if (selected == null) R.drawable.ui_home else null, onClick = back)
-            else InventoryButton(if (selected == null) "Ana ekran" else "İnventara qayıt", onClick = back)
+            else if (!LocalMobileMenuShell.current) InventoryButton(if (selected == null) "Ana ekran" else "İnventara qayıt", onClick = back)
         }
     }
     deleteCandidate?.let { candidate ->

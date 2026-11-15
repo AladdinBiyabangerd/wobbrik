@@ -26,8 +26,6 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.drawscope.clipPath
@@ -46,12 +44,6 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import appbackend.wobbrik.game.PublicProfile
 
-private val ProfileTypeface = FontFamily(
-    Font(R.font.profile_nunito_regular, FontWeight.Normal),
-    Font(R.font.profile_nunito_bold, FontWeight.Bold),
-    Font(R.font.profile_nunito_black, FontWeight.ExtraBold),
-    Font(R.font.profile_nunito_black, FontWeight.Black))
-
 private data class ProfileBoards(val profile: ImageBitmap, val editor: ImageBitmap, val skin: ImageBitmap, val panel: ImageBitmap)
 private val LocalProfileBoards = staticCompositionLocalOf<ProfileBoards?> { null }
 
@@ -66,7 +58,7 @@ private fun ProfileArtProvider(content: @Composable () -> Unit) {
         val panel = ImageBitmap.imageResource(R.drawable.profile_panel_clean)
         val boards = remember(profile, editor, skin, panel) { ProfileBoards(profile, editor, skin, panel) }
         CompositionLocalProvider(LocalProfileBoards provides boards,
-            LocalTextStyle provides LocalTextStyle.current.copy(fontFamily = ProfileTypeface,
+            LocalTextStyle provides LocalTextStyle.current.copy(fontFamily = GameTypeface,
                 fontWeight = FontWeight.Bold,
                 shadow = Shadow(GameTokens.Background, Offset(0f, GameTokens.Profile.TextShadowOffset), GameTokens.Profile.TextShadowBlur)),
             content = content)
@@ -96,7 +88,7 @@ internal fun ProfileFrame(title: String, onBack: () -> Unit, coins: Long?, conte
                 ProfileSourceArt(GameTokens.Profile.Back, R.drawable.profile_v2_board,
                     Modifier.size(GameTokens.Target).clickable(role = Role.Button, onClick = onBack).semantics { contentDescription = "Geri" })
                 Text(title, Modifier.weight(1f), color = GameTokens.Text, fontSize = if (mobileUiSizing().compact) GameTokens.Title else GameTokens.Score, fontWeight = FontWeight.Bold)
-                if (coins != null && coins.toString().length <= 6 && LocalDensity.current.fontScale <= 1f) {
+                if (!LocalMobileMenuShell.current && coins != null && coins.toString().length <= 6 && LocalDensity.current.fontScale <= 1f) {
                     Box(Modifier.width(GameTokens.Profile.WalletWidth).height(GameTokens.Target).clip(RoundedCornerShape(GameTokens.CardRadius)), contentAlignment = Alignment.CenterEnd) {
                         ProfileSkin(false, Modifier.matchParentSize(), "wallet")
                         ProfileSourceArt(GameTokens.Profile.WalletCoin, R.drawable.profile_v2_board,
@@ -105,7 +97,7 @@ internal fun ProfileFrame(title: String, onBack: () -> Unit, coins: Long?, conte
                     }
                 }
             }
-            if (coins != null && (coins.toString().length > 6 || LocalDensity.current.fontScale > 1f)) Text("$coins sikkə", color = GameTokens.Text)
+            if (!LocalMobileMenuShell.current && coins != null && (coins.toString().length > 6 || LocalDensity.current.fontScale > 1f)) Text("$coins sikkə", color = GameTokens.Text)
             content()
         }
     }
@@ -381,6 +373,10 @@ internal fun ProfileOverview(profile: PublicProfile, level: String, xp: Long, be
 
 @Composable
 internal fun ProfileNavbar(onHome: () -> Unit, onPage: (String) -> Unit) {
+    if (LocalMobileMenuShell.current) {
+        ProfileAction("Parametrlər") { onPage("settings") }
+        return
+    }
     val largeFont = LocalDensity.current.fontScale > 1f
     val items = listOf(Pair("Ana ekran", "home"),
         Pair("Nailiyyətlər", "achievements"),

@@ -30,7 +30,7 @@ class HomeProductionRenderTest {
  @get:Rule val compose=createAndroidComposeRule<ComponentActivity>()
  private val snapshot=GameSnapshot("wobbrik-v1",1,1250,1050,null,
   AccountRecovery("now","first","later",7,0,emptyList(),emptyList(),emptyList(),emptyList(),28))
- private val out=File("/Users/mac/My Workspace/Wobbrik/docs/reviews/mobile-sizing-visual")
+ private val out=File("/Users/mac/My Workspace/Wobbrik/docs/reviews/unified-mobile-visual").apply { mkdirs() }
  private fun capture(name:String) {
   compose.waitForIdle()
   compose.runOnUiThread {
@@ -55,7 +55,7 @@ class HomeProductionRenderTest {
   assertEquals(root.center.x,play.center.x,1f)
   compose.onNodeWithContentDescription("Oyunu başlat").performClick()
   assertEquals(1,plays);assertTrue(routes.isEmpty())
-  for((description,route) in listOf("Şəhərim" to "city","İnventar" to "inventory","Kolleksiya" to "collection","Nailiyyətlər" to "achievements","Hesab" to "account")) {
+  for((description,route) in listOf("Şəhərim" to "city","İnventar" to "inventory","Ana ekran" to "home","Bazar" to "market","Nailiyyətlər" to "achievements","Profil" to "account")) {
    val node=compose.onNodeWithContentDescription(description)
    node.assertIsDisplayed().performClick()
    assertEquals(route,routes.last())
@@ -76,8 +76,9 @@ class HomeProductionRenderTest {
   compose.onNodeWithContentDescription("Oyunu başlat").assertIsNotEnabled().performClick()
   assertEquals(0,plays)
   compose.runOnIdle {allow=true;status="Bağlantı yoxdur"}
-  compose.onNodeWithContentDescription("Oyunu başlat").assertIsNotEnabled().performClick()
-  compose.onNodeWithText("Yenilə").performClick();assertEquals(1,retry);assertEquals(0,plays)
+  // Offline local start is permitted when the host supplies a callback; status is display-only.
+  compose.onNodeWithContentDescription("Oyunu başlat").assertIsEnabled().performClick()
+  compose.onNodeWithText("Yenilə").performClick();assertEquals(1,retry);assertEquals(1,plays)
   capture("home-offline")
  }
  @Test @Config(qualifiers="w320dp-h568dp-xxhdpi") fun longBalanceAndXp() {
