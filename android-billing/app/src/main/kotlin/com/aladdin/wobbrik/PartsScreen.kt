@@ -53,9 +53,11 @@ internal fun PartsScreen(configured: WobbrikApplication.Bootstrap.Configured,
         .safeDrawingPadding().padding(GameTokens.Gap), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
             TextButton(onClick = back, modifier = Modifier.heightIn(min = GameTokens.Target)) { Text("‹ Geri", color = GameTokens.Text) }
-            Image(painterResource(R.drawable.wobbrik_logo), "Wobbrik", Modifier.weight(1f).height(GameTokens.Target))
-            Image(painterResource(R.drawable.ui_coin), "Sikkə", Modifier.size(GameTokens.Inset))
-            Text(ready.snapshot.coins.toString(), color = GameTokens.Text, fontWeight = FontWeight.Bold)
+            if (!LocalMobileMenuShell.current) Image(painterResource(R.drawable.wobbrik_logo), "Wobbrik", Modifier.weight(1f).height(GameTokens.Target))
+            if (!LocalMobileMenuShell.current) {
+                Image(painterResource(R.drawable.ui_coin), "Sikkə", Modifier.size(GameTokens.Inset))
+                Text(ready.snapshot.coins.toString(), color = GameTokens.Text, fontWeight = FontWeight.Bold)
+            }
         }
         val item = selected
         if (item != null) {

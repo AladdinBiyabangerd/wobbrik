@@ -23,6 +23,14 @@ import androidx.compose.ui.text.font.FontWeight
 
 @Composable
 internal fun PurchaseHeader(title: String, coins: Long, onBack: () -> Unit) {
+    if (LocalMobileMenuShell.current) {
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+            HomeButton("‹", modifier = Modifier.width(GameTokens.Target).semantics { contentDescription = "Geri" }, onClick = onBack)
+            Text(title, Modifier.weight(1f), color = GameTokens.Text, fontSize = mobileUiSizing().heading, fontWeight = FontWeight.Bold)
+        }
+        return
+    }
     BoxWithConstraints {
         val separateBalance = coins.toString().length > 6 ||
             androidx.compose.ui.platform.LocalDensity.current.fontScale > 1f

@@ -107,7 +107,7 @@ internal fun InventoryScreen(configured: WobbrikApplication.Bootstrap.Configured
                 }, enabled = !loading, modifier = Modifier.size(GameTokens.Target).semantics { contentDescription = "Yenilə" }) {
                     Text("↻", color = GameTokens.Accent, fontSize = GameTokens.Title)
                 }
-                Surface(color = GameTokens.Surface, shape = RoundedCornerShape(GameTokens.CardRadius),
+                if (!LocalMobileMenuShell.current) Surface(color = GameTokens.Surface, shape = RoundedCornerShape(GameTokens.CardRadius),
                     border = BorderStroke(GameTokens.Hairline, GameTokens.Raised)) {
                     Row(Modifier.padding(GameTokens.Small), verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {
@@ -116,12 +116,12 @@ internal fun InventoryScreen(configured: WobbrikApplication.Bootstrap.Configured
                     }
                 }
             }
-            if (sizing.portrait && largeFont) Text(if (selected == null) "İnventar" else "Bina detalları",
+            if (sizing.portrait && largeFont && (!LocalMobileMenuShell.current || selected != null)) Text(if (selected == null) "İnventar" else "Bina detalları",
                 color = GameTokens.Text, fontSize = sizing.heading, fontWeight = FontWeight.Bold)
             if (selected == null) {
                 if (sizing.portrait) {
                     InventoryToolbar(largeFont, { onParts(null) }, onDecorations, onLand, enabled = canMutate)
-                    Text("Binalar", Modifier.padding(top = GameTokens.Small, bottom = GameTokens.Quarter),
+                    if (!LocalMobileMenuShell.current || !largeFont) Text("Binalar", Modifier.padding(top = GameTokens.Small, bottom = GameTokens.Quarter),
                         color = GameTokens.Text, fontSize = GameTokens.Hint, fontWeight = FontWeight.Bold)
                 } else {
                     InventoryButton("Hissələr · Mağaza", enabled = canMutate) { onParts(null) }
@@ -181,9 +181,9 @@ internal fun InventoryScreen(configured: WobbrikApplication.Bootstrap.Configured
                 Text("Məlumat yenilənmədi. Bağlantını yoxla və yenidən cəhd et.", color = GameTokens.Danger)
                 InventoryButton("Yenidən cəhd et") { retry++ }
             }
-            if (sizing.portrait) HomeButton(if (selected == null) "Ana ekran" else "İnventara qayıt",
+            if (!LocalMobileMenuShell.current && sizing.portrait) HomeButton(if (selected == null) "Ana ekran" else "İnventara qayıt",
                 icon = if (selected == null) R.drawable.ui_home else null, onClick = back)
-            else InventoryButton(if (selected == null) "Ana ekran" else "İnventara qayıt", onClick = back)
+            else if (!LocalMobileMenuShell.current) InventoryButton(if (selected == null) "Ana ekran" else "İnventara qayıt", onClick = back)
         }
     }
     deleteCandidate?.let { candidate ->
@@ -388,12 +388,11 @@ private fun InventoryButton(label: String, enabled: Boolean = true, onClick: () 
 
 @Composable
 private fun InventoryToolbar(largeFont: Boolean, onParts: () -> Unit, onDecorations: () -> Unit, onLand: () -> Unit, enabled: Boolean = true) {
-    if (largeFont) Column(verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-        Row(horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-            InventoryToolbarEntry("Hissələr", null, Modifier.weight(1f), enabled, onParts)
-            InventoryToolbarEntry("Dekor", null, Modifier.weight(1f), enabled, onDecorations)
-        }
-        InventoryToolbarEntry("Ərazi", null, Modifier.fillMaxWidth(), enabled, onLand)
+    if (largeFont) Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+        InventoryToolbarEntry("Hissələr", null, Modifier, enabled, onParts)
+        InventoryToolbarEntry("Dekor", null, Modifier, enabled, onDecorations)
+        InventoryToolbarEntry("Ərazi", null, Modifier, enabled, onLand)
     } else Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
         InventoryToolbarEntry("Hissələr", R.drawable.ui_inventory, Modifier.weight(1f), enabled, onParts)
         InventoryToolbarEntry("Dekor", R.drawable.ui_city, Modifier.weight(1f), enabled, onDecorations)

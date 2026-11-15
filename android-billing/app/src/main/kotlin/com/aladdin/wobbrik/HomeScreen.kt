@@ -32,7 +32,7 @@ import java.math.MathContext
 internal fun HomeScreen(snapshot: GameSnapshot?, active: Boolean, onPlay: (() -> Unit)?, onPage: (String) -> Unit,
                         status: String? = null, onRetry: () -> Unit = {}, journalBlocked: Boolean = false) {
     BoxWithConstraints(Modifier.fillMaxSize()) {
-        if (maxWidth < GameTokens.MediumWidth && maxHeight >= maxWidth) {
+        if (LocalMobileMenuShell.current || (maxWidth < GameTokens.MediumWidth && maxHeight >= maxWidth)) {
             MobileHomeScreen(snapshot, active, onPlay, onPage, status, onRetry, journalBlocked)
         } else {
             LegacyHomeScreen(snapshot, active, onPlay, onPage, status, onRetry, journalBlocked)

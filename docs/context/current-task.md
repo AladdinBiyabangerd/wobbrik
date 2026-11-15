@@ -1,3 +1,87 @@
+# Vahid mobil UI — commit və inteqrasiya təhvili (15 noyabr 2026, cari)
+
+- Completed: istifadəçi Font2 vahidi ilə onun əvvəlki review edilmiş shell/Home prerequisite-ini birlikdə commit, tarixçə saxlanan main merge və push üçün açıq təsdiqlədi. Prerequisite `f727fe8`; font2 source/harness və vahidin review/handoff qeydləri ayrıca növbəti commit-də saxlanır.
+- Current state: funksional source review edilmiş SHA256 izləri ilə eynidir; commit bölünməsi index üzərində edilib, owner işləri stash/reset edilməyib. Son inteqrasiya hash/status-u Git tarixçəsi ilə yoxla.
+- Decisions: baselineProfiles/0,1 `app-release.dm`, account-compact proposal/visual faylları commitdən kənarda qalır. CI ayrıca istənməyib və işə salınmır. Backend müqaviləsi dəyişmir.
+- Checks performed: son lokal review native10/10PASS42s, normal core/engine/appunit+APK/lintPASS3s; contrast4/4min6.48, staged/worktree diffcheck. Source/harness bu yoxlamalardan sonra dəyişməyib. Remote main fetch edildi, lokal main ilə ayrılma yoxdur.
+- Remaining work: tam skin/paritet, sahiblik/şəhər/Plan/performance və əvvəlki runtime məhdudiyyətləri qalır; bu commit onları tamamlanmış saymır.
+- Relevant files: `docs/PLAN.md`§1.1; `docs/reviews/2026-11-15-unified-mobile-ui.md` son lokal review/commit bölməsi; InventoryScreen.kt, FinishCosmeticScreen.kt, MobileShellRouteRenderTest.kt.
+- Exact next step: bu commitdən sonra istifadəçinin təsdiqinə əsasən `main`-ə `--no-ff` merge et, origin/main push et və hash-ləri/owner status-u yoxlayıb bildir. Ayrıca CI işlətmə, yeni feature başlama.
+
+---
+
+# Font2 İnventar/Görünüş — lokal review (15 noyabr 2026, cari)
+
+- Completed: font2 viewport/selection uncommitted diff-i lokal review edildi; yeni konkret bug tapılmadı. Production source/assets/harness dəyişmədi; review qeydi yeniləndi.
+- Current state: `feat/unified-mobile-ui`, HEAD `446cd11`; əvvəlki dirty/owner işlər qorunur. Commit/CI/merge/push/emulator yoxdur.
+- Decisions: bu dar font2 review tam unified UI/§1.1 və skin pariteti qəbulu deyil. Backend müqaviləsi dəyişmir, AppBackend dəyişikliyi/testi tələb olunmadı.
+- Checks performed: təkrar native10/10PASS42s; normal core/engine/appunit+APK/lintPASS3s (qismən UP-TO-DATE); contrast4/4min6.48; diffcheckPASS. Final font2 Inventory/picker/preview görüntüləri oxundu. Synthetic host; real defaults write/restart/server E2E deyil.
+- Remaining work: əvvəlki skin/sahiblik/şəhər/Plan/performance və device/API24/IME/TalkBack/GPU/locale məhdudiyyətləri qalır; yeni tapıntı açılmadı.
+- Relevant files: `docs/PLAN.md`§1.1; `docs/reviews/2026-11-15-unified-mobile-ui.md` son lokal review bölməsi (fayl SHA256 izləri); InventoryScreen.kt, FinishCosmeticScreen.kt, MobileShellRouteRenderTest.kt; lokal `viewport-review-{native,normal}.log`.
+- Exact next step: lokal review nəticəsini təhvil ver; ayrıca göstərişsiz commit/CI/merge/push və yeni böyük vahid başlama.
+
+---
+
+# Vahid mobil UI — font2 viewport və Görünüş axını (15 noyabr 2026, cari)
+
+- Completed: `feat/unified-mobile-ui` üzərində font2 İnventar toolbar bir üfüqi scroll sırasıdır; shell-də təkrar font2 başlıqları çıxarıldı, ilk kart dock-dan əvvəl görünür. Görünüş font2 nested scroll problemi tək LazyColumn ilə düzəldi; preview/kateqoriya/iki sütunlu kartlar bir scroll, Geri/Təsdiq sabitdir.
+- Current state: HEAD `446cd11`, source uncommitted; əvvəlki shell/Home və owner dirty işlər qorunur. Commit/merge/push/CI/emulator yoxdur. Bu kiçik düzəliş hazırdır, tam §1.1/vizual qəbul deyil.
+- Decisions: mövcud təsdiqli dizayn/token/art saxlanır; mobil portret, normal şrift/wide kompozisiyası qorunur. Backend/API/domain/wallet/defaults persistence müqaviləsi dəyişmir; AppBackend dəyişikliyi lazım deyil, backend testləri yoxdur.
+- Checks performed: final native Shell4+Home6=10/10PASS36s; normal core/engine/appunit+APK/lintPASS27s; contrast4/4min6.48; diffcheckPASS. 360×640font1,390×844font1,320×568font2 + recovery/font2 simulyasiya24/48dp inset. Toolbar scroll, son kart→geri seçim native touch, selected state, bərabər ölçülü preview pixel diff, sabit confirm touch→Inventory/map assertion; logo/Play native PNG region assertion-ları. Final renderlər açılıb baxıldı. Synthetic host callback-dir, real defaults write/restart/server E2E deyil.
+- Remaining work: tam clean skin/ikon/hero pariteti, sahiblik/alış bölgüsü, city read/Plan regression və ölçülmüş performans. Font2 məzmun scroll tələb edir; tablet/device/API24/IME/TalkBack/GPU/locale matrisi yoxlanmayıb. Əvvəlki aşağıdakı font2 viewport/selection açıq qeydləri bu vahid üçün tarixçədir.
+- Relevant files: `docs/PLAN.md`§1.1; `docs/reviews/2026-11-15-unified-mobile-ui.md` son font2 bölməsi; `InventoryScreen.kt`, `FinishCosmeticScreen.kt`; `docs/reviews/mobile-sizing-visual/render/MobileShellRouteRenderTest.kt`; lokal `docs/reviews/unified-mobile-visual/viewport-{native,normal}.log`, `production-shell-*.png`.
+- Exact next step: hazır font2 düzəlişi/input nəticəsini təhvil ver; ayrıca göstərişsiz yeni böyük vahid/commit/merge/CI/push/planşet/mərhələ6 başlama.
+
+---
+
+# Vahid mobil UI — real menu shell inteqrasiyası (15 noyabr 2026, cari)
+
+- Completed: `feat/unified-mobile-ui` üzərində ortaq `MobileMenuShell` OnlineGame-in mövcud city/inventory/parts/appearance/purchase/market/achievements/records/profile/settings route-larına qoşuldu. Təkrar logo/balans/destination dock gizlənir, contextual geri/yenilə/edit/settings qalır. Play əvvəlki nullable lifecycle callback-idir. İnventar/Görünüş və Uğurlar/Rekordlar tab girişləri var; Görünüş geri/təsdiq İnventara dönür.
+- Current state: HEAD `446cd11`, source uncommitted. Owner baselineProfiles/design/proposal və əvvəlki Home/typeface işi qorunur. Commit/merge/push/CI/emulator yoxdur. Shell funksional inteqrasiyası var, tam vizual qəbul YOXDUR.
+- Decisions: dizayn/tətbiq təsdiqlidir, yenidən soruşma. Mobil portret; pre-auth/active game/pause dock-suz, tablet/landşaft dəyişmir. Source API/DTO/domain/schema/wallet/journal/Ready fence dəyişmir; AppBackend dəyişikliyi lazım deyil, backend testləri işlədilməyib.
+- Checks performed: son native Shell4+Home6=10/10PASS33s; son normal core/engine/appunit+APK/lintPASS21s; contrast4/4min6.48; diffcheckPASS. 360×640font1,390×844font1,320×568font2; recovery/nullPlay/longbalance+24/48dp simulyasiya inset. Synthetic repository/transport host, real server E2E deyil. Kontaktlar, raw font2 Inventory/Görünüş/Profile/Records və recovery approved home chrome-u ilə müqayisə edildi.
+- Remaining work: Son PixelCopy turundan sonra yenidən çıxarılan360/390/320 kontaktlarda header/dock görünür; ilkin natamam raw capture müşahidəsi üçün ayrıca piksel-region regression hələ yoxdur. Inventory toolbar list viewport-unu sıxır; font2 appearance selection→preview→confirm input yoxlaması açıqdır. Records font2 məzmunu bounded scroll ilə görünür. Bütün bunlar visual PASS deyil. Tam clean skin/ikon/hero pariteti, sahiblik/alış bölgüsü, city read/Plan regression və ölçülmüş performans da açıqdır. Real device/API24/IME/TalkBack/GPU/locale matrisi yoxlanmayıb.
+- Relevant files: `docs/PLAN.md`§1.1; `docs/reviews/2026-11-15-unified-mobile-ui.md` son davam bölməsi; `docs/design/unified-mobile-v3/`; `MobileMenuShell.kt`, `MobileMenuNavbar.kt`, `OnlineGame.kt`, `HomeScreen.kt`, `MobileHomeScreen.kt`, `InventoryScreen.kt`, `FinishCosmeticScreen.kt`, `LeaderboardScreen.kt`, contextual chrome faylları. Host `docs/reviews/mobile-sizing-visual/render/MobileShellRouteRenderTest.kt`; lokal `docs/reviews/unified-mobile-visual/{production-shell-*,shell-contact-*,shell-native.log,shell-normal.log}`.
+- Exact next step: eyni branch-də yalnız font2 Inventory viewport-unu düzəlt, Görünüş seçim axınını və capture ardıcıllığını yoxla; native frame/piksel-region və selection/scroll/confirm input regression-u ilə düzəlt. Sonra review/handoff-u yenilə. Yeni plan/stack/planşet/mərhələ6 açma; CI/emulator/merge/push avtomatik yoxdur.
+
+---
+
+# Vahid mobil UI — ilk Home naviqasiya vahidi (15 noyabr 2026, cari)
+
+- Completed: `feat/unified-mobile-ui` Home-da 7 giriş/real callback, mərkəzi Play, üst profilsiz sağ balans; reusable navbar/header və eyni bundled Nunito ortaq GameTypography faylındadır. Bu yalnız ilk hissədir, tam §1.1 deyil.
+- Current state: HEAD446cd11, source uncommitted. Owner baselineProfiles/design/proposal dirty işləri qorunur. Commit/merge/push/CI/emulator yoxdur.
+- Decisions: dizayn və tətbiq təsdiqlidir, yenidən soruşma. Son home authority qüvvədədir. Native minimum48dp üçün dar dock yanları iki sıraya yığılır, font2 labels a11y adları ilə əvəz olunur; tam vizual paritet deyil. Offline Play host callback icazəsi ilə işləyir; status özlüyündə ikinci authority deyil.
+- Remaining work: bütün menyulara shell; clean relyefli skin/ikon/hero və home nisbətləri/XP; İnventar/Görünüş, Bazar/sahiblik, Uğurlar tabları; city read/Plan səbəb+regression; müqayisəli route performansı. AppBackend API/domain dəyişməyib, bu ilk UI vahidi backend dəyişikliyi tələb etmir.
+- Relevant files: `docs/PLAN.md`§1.1, `docs/design/unified-mobile-v3/`, `docs/reviews/2026-11-15-unified-mobile-ui.md`; `MobileHomeScreen.kt`, `MobileMenuNavbar.kt`, `GameTypography.kt`, `ProfilePresentation.kt`, `OnlineGame.kt`; `docs/reviews/mobile-sizing-visual/render/HomeProductionRenderTest.kt`; lokal `docs/reviews/unified-mobile-visual/production-*.png`.
+- Checks performed: son native6/6PASS26s; normal core/engine/appunit+APK/lintPASS38s; contrast4/4min6.48; native renderlər açılıb approved home ilə müqayisə edildi. Flat chrome/blurred hero/nisbətlər açıqdır; visual parity PASS deyil. Real device/API24/GPU/TalkBack/server E2E yoxlanmayıb.
+- Exact next step: mövcud OnlineGame menu route-larını reusable mobil shell ilə birləşdir; content-in daxili header/footer-lərini ikiqat göstərmə. Əvvəl bu handoff+review+PLAN§1.1 oxu. Yeni stack/plan/planşet/mərhələ6 açma.
+
+---
+
+# Vahid mobil UI — branch və icra planı hazır (15 noyabr 2026, cari)
+
+- Completed: istifadəçinin tətbiq göstərişi ilə `feat/unified-mobile-ui` branch-i `main@446cd11` üzərindən açıldı; `docs/PLAN.md` §1.1-də konkret fix/implementasiya ardıcıllığı və qəbul şərtləri yazıldı. 5lövhə + son təsdiqli home PNG `docs/design/unified-mobile-v3/` daxilində saxlandı.
+- Current state: branch/plan/istinad hazırlığı tamamdır; production source implementasiyası BAŞLAMAYIB. Əvvəlki owner release2.dm və account-compact review/untracked faylları qorunur. Commit/merge/push/CI/emulator yoxdur.
+- Decisions: istifadəçi DİZAYN VƏ İMPLEMENTASİYANI TƏSDİQLƏYİB, yenidən təsdiq istəmə. Son authority `home-approved-final.png`: Ana/Şəhər/İnventar/Oyna/Bazar/Uğurlar/Profil; Oyna navbarın dördüncü slotunda tam ortada, ayrıca yuxarı düymə deyil. Üst profil YOXDUR, balans sağ kənarda. Aşağıdakı6item/üstavatar/pendingapproval qeydləri köhnə tarixçədir. Bütün menyu ekranlarının chrome-u son home-a uyğunlaşır. Kolleksiya vahid İnventar/Görünüş-ə birləşir; sahiblik İnventarda, alışlar Bazarda; Uğurlar Nailiyyətlər/Rekordlar tabları; Profil alt menyudan,settings Profildən. Aktiv oyun/pauza və pre-auth dock-suz qalır.
+- Remaining work: PLAN§1.1-in 4vahidinin hamısı açıqdır: ortaq native skin/header/navbar+realroute; bütün screen inteqrasiyası və city read/Plan click regression; çatışmayan yüksək keyfiyyətli assetlər+ölçülmüş route axıcılığı; fokuslu unit/build/lint/native render/review. Tək navbar və ya animasiya bütün işi tamamlamır. Backend uyğunluğu lazım olan hər axında yoxlanacaq, hazırda müqavilə/source dəyişməyib.
+- Relevant files: `docs/PLAN.md`§1.1; `docs/design/unified-mobile-v3/{README.md,home-approved-final.png,01-main.png,02-market.png,03-account.png,04-game-states.png,05-owned-and-listings.png,prompts.json}`; app `GameTokens.kt`,`MobileUiSizing.kt`,`MobileHomeScreen.kt`,`HomeScreen.kt`,`GameNavigation.kt`,`OnlineGame.kt`; existing host `docs/reviews/mobile-sizing-visual/render/`.
+- Checks performed: branch/dirty status, scoped route/home/token/harness source baxışı; PNG byte-copy/hash və git diffcheck. Build/unit/lint/native render/PERF hələ icra edilməyib; PASS deyil. Özəl backend root cause-u hələ tapılmayıb.
+- Exact next step: yeni chatdə bu handoff + PLAN§1.1 + unified-mobile-v3 istinadlarını oxu, sonra native ortaq chrome/7-slot navbar ilə ilk real inteqrasiya vahidinə başla. Yoxlamaları mövcud host harness ilə et, emulator açma. AppBackend contract dəyişikliyi tələb olarsa onun AGENTS/branch/test qaydalarına əməl et. Plan ayrıca fayla köçürülmür.
+
+---
+
+# Vahid mobil UI — naviqasiya PNG təklifi, 15 noyabr 2026 (cari)
+
+- Completed: production UI dəyişmədən built-in ImageGen ilə 5 PNG lövhə / 27 ekran-vəziyyət hazırlandı; şəkillərə baxıldı. Əvvəlki 5-item/yanlış bölməli təkliflər cari deyil.
+- Current state: yalnız dizayn təklifi, son PNG-lərin açıq tətbiq təsdiqi hələ yoxdur. Mənbə kodu/backend dəyişməyib. Əvvəlki profil işi və owner dirty fayllar qorunur.
+- Decisions: istifadəçi ekranların aid olduğu bölmələri/giriş yollarını düzəltməyi və 6 alt-menu girişini təsdiqlədi: Ana / Şəhər / Oyna / İnventar / Bazar / Uğurlar. Oyna üçüncü slotda, tam mərkəz tələbi bu təklifdə saxlanmır. Şəhər = Görünüş/Plan/placement; İnventar = sahib olunan Binalar/Görünüş/Dekor/Ərazi; Bazar = Binalar/Dekor/Ərazi alışları + Mənim elanlarım/Yeni elan; Uğurlar = Nailiyyətlər/Rekordlar. Profil avatardan, settings profildən. Görünüş kataloq+önizləmə+təsdiq vahid ekrandır; ayrıca Kolleksiya yoxdur. Aktiv oyun/pauza və pre-auth girişdə alt-menu yoxdur. Yeganə plan docs/PLAN.md; bu handoff ikinci plan deyil.
+- Relevant files: /Users/mac/.codex/visualizations/2026/11/15/01a1df44-41e0-7692-b389-1fc21bc824d9/navigation-v2/{01-main.png,02-market.png,03-account.png,04-game-states.png,05-owned-and-listings.png,prompts.json}; GameTokens.kt; docs/design/profile-v2 və game-tap-v2 istinadları.
+- Checks performed: final5PNG vizual oxundu; six-menu item order/section markers/entry buttons baxıldı. Bazar caption-ları arasındakı yanlış sequential oxlar silindi; owned land-in səhv XP capacity mətni çıxarıldı; error state Play skin düzəldildi. Bunlar generativ bitmap-dir, pixel-exact ortaq komponent və real48dp/font2/responsive/runtime/sürət/input sübutu deyil. Qiymət/XP/area/count göstəriciləri illüstrativdir, domain qaydası yaratmır.
+- Remaining work: istifadəçinin bu son PNG-lərə düzəlişi və ya açıq tətbiq təsdiqi; sonra lazımi source/clean assets+ortaq real komponentlər, həqiqi route inteqrasiyası, city read root cause və keçid performansı araşdırması, fokuslu test/native render. Bütün tətbiq problemləri həll edilmiş sayılmır.
+- Exact next step: əvvəl bu5PNG-ni göstər. Konkret tətbiq təsdiqi olmadan app UI implementasiyasına başlama; ayrıca göstərişsiz emulator/CI/merge/push/deploy yoxdur.
+
+---
+
 # Profil v2 — müstəqil lokal review (15 noyabr 2026, cari)
 
 - Completed: hazır profile-v2 source/assets/harness diff-i son clean-skin review və docs/PLAN.md əsasında lokal review edildi; yeni konkret bug tapılmadı, production source dəyişmədi.
