@@ -1,0 +1,3 @@
+core {'tests': 136, 'failures': 0, 'errors': 0, 'skipped': 0}
+engine {'tests': 95, 'failures': 0, 'errors': 0, 'skipped': 0}
+app {'tests': 24, 'failures': 0, 'errors': 0, 'skipped': 0}

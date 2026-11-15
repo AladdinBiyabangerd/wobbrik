@@ -1,3 +1,69 @@
+# Profil v2 — müstəqil lokal review (15 noyabr 2026, cari)
+
+- Completed: hazır profile-v2 source/assets/harness diff-i son clean-skin review və docs/PLAN.md əsasında lokal review edildi; yeni konkret bug tapılmadı, production source dəyişmədi.
+- Current state: `feat/profile-approved-design`, HEAD `3e9af84`; review tamamlandı. İstifadəçinin göstərişi ilə yalnız profil vahidi lokal commit-də saxlanır, owner release .dm/proposal və əvvəlki əlaqəsiz handoff saxlanır.
+- Decisions: yeganə plan `docs/PLAN.md`; backend müqaviləsi dəyişmir, AppBackend dəyişikliyi lazım deyil. Tam ekran piksel pariteti/mərhələ5 qəbulu ayrıca açıqdır; planşet/mərhələ6 başlamır.
+- Checks performed: təkrar native15/15PASS59s; normal255unit/APK/lintPASS3s; kontrast4/4min8.22, asset SHA parity və diffcheckPASS. Mövcud comparison/contact və təkrar raw reference-profile/small-edit/font-profile/font-edit görüntüləri oxundu.
+- Remaining work: real device/API24/HTTP/IME/inset/TalkBack/GPU/locale yoxlanmayıb. CI/emulator/merge/push/deploy yoxdur.
+- Relevant files: `docs/reviews/2026-11-15-profile-v2-implementation.md` son lokal review; `docs/reviews/profile-v2-visual/local-review-*`; əvvəlki cari clean-skin handoff aşağıdadır.
+- Exact next step: lokal review/commit nəticəsini bildir; ayrıca göstərişsiz merge/push/CI və yeni feature başlama.
+
+---
+# Profil v2 — mətnsiz skin/lent/stat/navbar/capture tamamlandı (15 noyabr 2026)
+
+- Completed: istifadəçinin göstərişi ilə built-in ImageGen edit-dən clean chromeV2+panelV3 hazırlandı/qoşuldu; approved PNG dəyişmir. Lent+rail vahid slice, geniş text-free interior, tam alt kontur; köhnə maska/interpolasiya/texture təkrarı çıxarıldı. Stat separator/ölçü və navbar nisbətləri yeniləndi; compact Dəyiş tam48dp görünür. Native hardware PixelCopy, real input scroll, glyph+üst/alt outline piksel assertion-ları işləyir.
+- Current state: `feat/profile-approved-design`, baza `3e9af84`, iş uncommitted; owner release .dm/proposal/başqa working fayllar qorunur. Bu konkret düzəliş vahidi hazırdır; tam mərhələ5/pixel-identical bütün ekran qəbulu deyil.
+- Decisions: son istifadəçi clean skin-i özümün hazırlamağı açıq tapşırıb; asset çatışmazlığı artıq blok deyil. Yeganə plan `docs/PLAN.md`; native Nunito və real server məzmunu saxlanır. Save/cancel/draft/exact retry/session fencing/API dəyişmir; AppBackend dəyişikliyi lazım deyil. Mobil portret; planşet/mərhələ6 başlamır.
+- Remaining work: bu vahiddə açıq konkret skin/maska/stat/navbar/input-capture qüsuru müşahidə olunmadı. Real cihaz/API24/HTTP/IME/inset/TalkBack/GPU/locale yoxlanmayıb; phase5 ümumi qəbul ayrıca qalır. Font2 input capture real scroll vəziyyətidir; portretin bir hissəsi viewport-dan yuxarıdır.
+- Relevant files: `ProfilePresentation.kt`, `GameTokens.kt`; drawable-nodpi `profile_{skin,panel}_clean.png`; `docs/design/profile-v2/{README.md,skin-generation-prompts.md,profile-skin-clean-v2.png,profile-panel-clean-v3.png}`; profil-v2 review-un son bölməsi; `docs/reviews/phase5/final-review.md`; `profile-v2-visual/p3-{profile-comparison.png,contact.png,native-final.log,native-results.txt,normal-final.log,normal-results.txt,contrast.txt}` və input-proof.txt-lər; render harness.
+- Checks performed: final native15/15PASS1m; normal255unit/APK/lintPASS23s; kontrast4/4min8.22, approved/production PNG byte parity və diffcheckPASS.390×844font1,360×640font1,320×568font2 contact və eyni390×761 comparison oxundu. Son lokal source/diff review aparıldı. Emulator/CI/commit/merge/push/deploy yoxdur.
+- Exact next step: bu hazır vahidi təhvil ver. Ayrı göstərişsiz yeni feature/mərhələ/commit/merge/push/CI başlama. Sonrakı istifadəçi review/commit istəsə yeni chatdə bu handoff + son review + docs/PLAN.md əsasında owner fayllarını ayıraraq davam et.
+
+---
+# Profil v2 P1 tekstura/lent/nisbət davamı — 15 noyabr 2026 (cari)
+
+- Completed: source yazısız texture strip; təkrarlanan portret kölgəsi sınağı rədd edildi; mənbənin alt konturundan bütöv üst rail; lent silhouette düzəlişi; normal profil portreti136/badge144/navbar56, compact navbar40; profil horizontal inset8. Editor ölçüləri saxlanır.
+- Current state: `feat/profile-approved-design`, baza `3e9af84`, uncommitted owner diff qorunur. P1 qismən düzəlib; tam paritet/mərhələ5 PASS deyil.
+- Decisions: yeganə plan `docs/PLAN.md`; approved PNG dəyişmir; alternativ art/ümumi istisna yoxdur. Server data/callback/save/cancel/retry/API dəyişmir; backend dəyişikliyi lazım deyil. Mobil portret, planşet/mərhələ6 başlamır.
+- Remaining work: source texture təkrarı orijinal bütöv fon deyil; lent overlap və header/stat/nav nisbətləri açıqdır. Dəqiq örtülü fon üçün clean skin/layer asset-i yoxdur. Son editor route input glyph/border capture fraqmentləri natamamdır; visual PASS deyil. Device/API24/HTTP/IME/inset/TalkBack/GPU/locale yoxlanmayıb.
+- Relevant files: `ProfilePresentation.kt`, `GameTokens.kt`; `docs/design/profile-v2/README.md`; `docs/reviews/2026-11-15-profile-v2-implementation.md` son bölmə; `docs/reviews/profile-v2-visual/p2-{profile-comparison.png,contact.png,native.log,normal.log,contrast.txt}`; `docs/reviews/phase5/final-review.md`.
+- Checks performed: native14/14PASS54s; normal255unit/APK/lintPASS21s; kontrast4/4min8.22; source byte parity/diffcheckPASS.390×844font1,360×640font1,320×568font2 contact və comparison oxundu. Emulator/CI/commit/merge/push/deploy yoxdur.
+- Exact next step: P1-i bitmiş saymadan cari müqayisəni təhvil ver; dəqiq clean skin mənbə çatışmazlığını və qalan lent/stat/navbar/capture fərqlərini açıq saxla. Yeni plan/stack/feature açma.
+
+---
+# Profil v2 P1 davam turu — 15 noyabr 2026 (cari)
+
+- Completed: profilin öz relyefli panel/wallet/identity/navbar source skin-ləri, dairəvi identity crop, real pencil callback48dp; badge/stat/XP/nav ölçü-boşluq düzəlişləri. Frame+idle invalidate-dən sonra capture ilə son9route başlığı tam görünür. Save/cancel/exact retry/server authority saxlanır.
+- Current state: `feat/profile-approved-design`, baza `3e9af84`, iş uncommitted. Owner release .dm/proposal və əvvəlki iş qorunur. Commit/merge/push/CI/deploy/emulator yoxdur.
+- Decisions: təsdiqli PNG-lər dəyişmir, şrift əvvəlki Nunito qərarıdır; ümumi vizual istisna yoxdur. Backend müqaviləsi dəyişmir, DB suite təkrarlanmayıb. Mobil portret; planşet/mərhələ6 başlamır.
+- Remaining work: P1 açıq: panel interior teksturası interpolasiya ilə tam bərpa olunmur; lent maska/overlap konturu və header/portrait/stat/nav nisbətləri istinadla birəbir deyil. Wallet/pencil/identity və route prefix capture əvvəlki açıq statusları bu turla yenilənir. Real cihaz/API24/HTTP/IME/inset/TalkBack/GPU/locale yoxlanmayıb.
+- Relevant files: `docs/PLAN.md`; `docs/design/profile-v2/README.md`+approved PNG-lər; `ProfilePresentation.kt`, `PublicAccountScreen.kt`, `GameTokens.kt`; `docs/reviews/2026-11-15-profile-v2-implementation.md` son bölmə; `docs/reviews/phase5/final-review.md`; `profile-v2-visual/p1-profile-comparison.png`, `p1-continuation-contact.png`, render harness.
+- Checks performed: final native14/14PASS51s; normal136+95+24=255unit/APK/lintPASS32s; explicit text contrast4/4min8.22; diffcheckPASS.390×844font1,360×640font1,320×568font2 profil/editor/picker contact və final390müqayisə oxundu. Tam P1/mərhələ5 PASS deyil.
+- Exact next step: son müqayisə əsasında yalnız qalan source tekstura/lent konturu/kompozisiya nisbətlərini davam etdir; digər scope açma. Header capture artıq son9route-də tamdır. Təkrar böyük repo scan/yeni plan/stack/CI/merge/push yoxdur.
+
+---
+# Profil v2 P1 vizual düzəliş turu — 15 noyabr 2026 (cari)
+
+- Completed: Nunito400/700/900 statik native font+OFL (istifadəçi “özün tap hazırla”), Az cmap; text-free single-source skin/nine-slice, ilkin seams/bitmap təkrarı təmizləndi; tam builder/pilot/memar çərçivə crop-ları; source lent maskası/overlap; badge baked7 düzbucaqlı patch əvəzinə interior gradient+real rəqəm; XP/editor sayğacı/üç-avatar sheet nisbətləri düzəldildi. Save/cancel/retry/server authority saxlanır.
+- Current state: `feat/profile-approved-design`, baza `3e9af84`, bütün iş uncommitted. Owner release .dm/proposal və əvvəlki iş qorunur. Commit/merge/push/CI/deploy/emulator yoxdur.
+- Decisions: Nunito seçimini agent hazırlayır; təsdiqli PNG-lər dəyişmir. Bu, digər vizual fərqlərə ümumi istisna deyil. Backend API/schema/domain dəyişmir; backend dəyişikliyi lazım deyil, DB suite təkrarlanmayıb. Mobil portret; mərhələ6/planşet başlamır.
+- Remaining work: **P1 hələ açıqdır:** source panel relyefi/gradient, lent maskasının konturu, wallet pill, identity pencil/aşağı identity kartı və profil/stat/nav ölçü-boşluqları təsdiqli nümunə ilə birəbir deyil. `p1-profile-comparison.png` konkret fərqləri göstərir. Frame+idle seçilmiş picker-i capture-a çatdırdı, lakin bəzi route header glyph-ləri hələ natamamdır; cold editor başlıqları tamdır. Natamam capture/paritet PASS deyil. Real device/API24/HTTP/IME/inset/TalkBack/GPU/locale yoxlanmayıb.
+- Relevant files: `docs/PLAN.md`, `docs/design/profile-v2/README.md`+approved PNG-lər; `ProfilePresentation.kt`, `PublicAccountScreen.kt`, `GameTokens.kt`, `CommunityArt.kt`; res/font/profile_nunito_*.ttf; assets/licenses/Nunito-OFL.txt; `docs/reviews/2026-11-15-profile-v2-implementation.md` son P1 bölməsi; `docs/reviews/phase5/final-review.md`; `docs/reviews/profile-v2-visual/p1-*` və render harness.
+- Checks performed: final source+frame-flushed harness14/14PASS55s; normal core136+engine95+app24=255unit/APK/lintPASS34s; kontrast4/4min8.22; statik font/Az cmap/source parity/diffcheckPASS.390×844font1,360×640font1,320×568font2 profil/editor/picker, əlavə cold editor PNG-lər və yanaşı müqayisə oxundu. Müqayisə production composable renderidir, generativ yeni nümunə deyil. Tam P1/mərhələ5 qəbul edilmir.
+- Exact next step: yeni chatdə yalnız qalan P1 mask/skin/kompozisiya və host capture vahidini bu konkret müqayisədən davam etdir; yeni dizayn/stack/plan uydurma. Review-lardakı son P1 bölmələri cari authority-dir; aşağıdakı qeydlər tarixçədir. İstifadəçiyə cari native müqayisəni və açıq statusu göstər. Yeni böyük addım/merge/CI/push avtomatik yoxdur.
+
+---
+# Profil v2 funksional inteqrasiya və mərhələ5 review — 15 noyabr 2026
+
+- Completed: istifadəçi profil/redaktə/ayrı avatar grid dizaynlarını təsdiqlədi; real ProfileEditor axınına qoşuldu. Mənbə PNG-lər docs/design/profile-v2-də saxlanır; art/skin source kəsikləri istifadə olunur. Navbar, server səviyyə/XP/rekord, ad15, draft cancel, avatar apply→Save, exact retry/conflict sərhədləri qorunur. Mərhələ5 lokal review aparılıb; tam qəbul verilməyib.
+- Current state: `feat/profile-approved-design`, baza `3e9af84`, working diff uncommitted. Source bitmap-lər provider ilə paylaşılır. Owner iki release baseline .dm və köhnə compact proposal qorunur. Commit/merge/push/CI/deploy yoxdur.
+- Decisions: yeni profil-v2 dizaynı təsdiqlidir, əvvəlki account-states profilini əvəz edir; yenidən dizayn seçim sualı açma. Çox-avatar nümunəsinin əlavə personajları real kataloqa keçirilmir; mövcud3ID qalır. Settings/fitted rekord görünüşü dəyişmir. User bitəndə real ekran şəklini istəyir: native production renderini model-generated nümunə ilə qarışdırma.
+- Remaining work: **P1 — tam vizual paritet açıqdır:** native typo, skin seams/crop və dinamik badge mərkəzi təsdiqli generativ PNG ilə birəbir deyil; bəzi small/font2 native header capture-ları natamamdır. Ümumi vizual istisna təsdiqi yoxdur. Funksional inteqrasiya tam dizayn qəbulu kimi göstərilmir. Real device/API24/HTTP/IME/TalkBack/GPU/locale matris yoxlanmayıb; emulator tələb olunmur/açılmır. Mərhələ6 başlanmır.
+- Relevant files: `docs/PLAN.md`; `docs/design/profile-v2/{README.md,profile-approved.png,edit-avatar-approved.png,avatar-grid-approved.png}`; `PublicAccountScreen.kt`, `ProfilePresentation.kt`, `GameTokens.kt`, `CommunityArt.kt`; review `docs/reviews/2026-11-15-profile-v2-implementation.md`, `docs/reviews/phase5/final-review.md`; `docs/reviews/profile-v2-visual/{regular-profile.png,regular-edit.png,regular-picker.png,small-*.png,font-*.png,render/,native-results.txt,checks.txt}`.
+- Checks performed: son profil native12/12PASS42s; 30sintetikID grid-scroll/fixed apply, real route save/cancel/picker,3portret ölçü. Son feedback callback-only sonrası picker→save1/1PASS16s. Market3/3PASS22s, fitted16/16PASS62s. Final normal core136+engine95+app24=255 unit/APK/lint PASS18s; checks.txt-də saxlanır. Kontrast4/4min8.22, source/drawable byte parity və diffcheckPASS. Regular3 və small/font2 UI renderlərinə baxılıb; natamam capture/paritet məhdudiyyəti review-dadır. Backend müqaviləsi main integration cbd0eeb-də read-only yoxlandı; API/schema dəyişikliyi lazım deyil, DB suite bu tur təkrarlanmadı.
+- Exact next step: yeni chatdə bu handoff+profil review+phase5 final-review+PLAN əsasında yalnız P1 vizual paritet vahidini tamamla; təsdiqli görünüşün composition/font/skin/source crop nisbətlərini düzəlt, real renderləri yanaşı yoxla və istifadəçiyə göstər, sonra mərhələ5 review-u yenilə. Yeni mərhələ və avtomatik commit/merge/CI/push yoxdur.
+
+---
 # Android settings review və lokal commit — 15 noyabr 2026
 
 - Completed: settings diff review edildi; SoundPool callback qeydiyyatı load-dan əvvələ keçirildi; sürətli completion/sound-off/background regression testi əlavə edildi. İstifadəçinin göstərişi ilə settings source/assets/review/harness lokal commit edilir.

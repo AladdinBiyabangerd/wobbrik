@@ -1,0 +1,4 @@
+bounds=Rect.fromLTRB(72.0, 1035.0, 1008.0, 1289.0)
+glyphPixels=4675
+outlineRows=[1035, 1036, 1037, 1226, 1227, 1228]
+PixelCopy=0

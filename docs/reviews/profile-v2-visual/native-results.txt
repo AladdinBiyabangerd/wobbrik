@@ -1,0 +1,13 @@
+com.aladdin.wobbrik.ProfileV2FontProfileRenderTest: tests=1 failures=0 errors=0
+com.aladdin.wobbrik.ProfileV2ColdEditRenderTest: tests=1 failures=0 errors=0
+com.aladdin.wobbrik.ProfileV2SmallProfileRenderTest: tests=1 failures=0 errors=0
+com.aladdin.wobbrik.ProfileV2SmallEditRenderTest: tests=1 failures=0 errors=0
+com.aladdin.wobbrik.ProfileV2RegularPickerRenderTest: tests=1 failures=0 errors=0
+com.aladdin.wobbrik.ProfileV2FontEditRenderTest: tests=1 failures=0 errors=0
+com.aladdin.wobbrik.ProfileV2FontPickerRenderTest: tests=1 failures=0 errors=0
+com.aladdin.wobbrik.ProfileV2ManyAvatarRenderTest: tests=1 failures=0 errors=0
+com.aladdin.wobbrik.ProfileV2RegularEditRenderTest: tests=1 failures=0 errors=0
+com.aladdin.wobbrik.ProfileV2SmallPickerRenderTest: tests=1 failures=0 errors=0
+com.aladdin.wobbrik.ProfileV2ColdProfileRenderTest: tests=1 failures=0 errors=0
+com.aladdin.wobbrik.ProfileV2RegularProfileRenderTest: tests=1 failures=0 errors=0
+Final native PASS42s;12/12.

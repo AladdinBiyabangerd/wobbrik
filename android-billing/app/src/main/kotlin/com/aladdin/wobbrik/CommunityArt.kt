@@ -66,7 +66,8 @@ internal fun CommunityFloorsArt(modifier: Modifier = Modifier) {
  * border-connected pixels keeps enclosed dark eyes/hair/details. Foreground pixels are
  * drawn directly from the unchanged approved bitmap, never regenerated or repainted.
  */
-internal fun sourceForeground(board: ImageBitmap, x: Int, y: Int, width: Int, height: Int): Path {
+internal fun sourceForeground(board: ImageBitmap, x: Int, y: Int, width: Int, height: Int,
+    cornerBackground: Boolean = false): Path {
     val pixels = IntArray(width * height)
     board.asAndroidBitmap().getPixels(pixels, 0, width, x, y, width, height)
     val removed = BooleanArray(pixels.size)
@@ -77,13 +78,19 @@ internal fun sourceForeground(board: ImageBitmap, x: Int, y: Int, width: Int, he
     fun offer(index: Int) {
         if (removed[index]) return
         val row = index / width
-        val left = pixels[row * width]
-        val right = pixels[row * width + width - 1]
+        // Wide profile ribbons touch the side edges in their middle rows. Those
+        // foreground edges cannot be treated as background colour samples.
+        val left = pixels[if (cornerBackground) 0 else row * width]
+        val right = pixels[if (cornerBackground) width - 1 else row * width + width - 1]
+        val lowerLeft = if (cornerBackground) pixels[(height - 1) * width] else left
+        val lowerRight = if (cornerBackground) pixels[pixels.lastIndex] else right
+        fun background(shift: Int) = maxOf(channel(left, shift), channel(right, shift),
+            channel(lowerLeft, shift), channel(lowerRight, shift))
         val pixel = pixels[index]
         // Tolerances describe source compression/gradient noise, not a new UI colour.
-        val navy = channel(pixel, 16) <= maxOf(channel(left, 16), channel(right, 16)) + 8 &&
-            channel(pixel, 8) <= maxOf(channel(left, 8), channel(right, 8)) + 8 &&
-            channel(pixel, 0) <= maxOf(channel(left, 0), channel(right, 0)) + 12
+        val navy = channel(pixel, 16) <= background(16) + 8 &&
+            channel(pixel, 8) <= background(8) + 8 &&
+            channel(pixel, 0) <= background(0) + 12
         if (navy) { removed[index] = true; queue[tail++] = index }
     }
     for (column in 0 until width) { offer(column); offer((height - 1) * width + column) }

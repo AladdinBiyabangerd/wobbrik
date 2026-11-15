@@ -109,8 +109,8 @@ abstract class FittedLeaderboardProductionHost {
     }
    }
    if(scenario=="profile") {
-    compose.waitUntil(15000) {compose.onAllNodesWithText("Profili dəyiş").fetchSemanticsNodes().isNotEmpty()}
-    compose.onNodeWithText("Profili dəyiş").performClick()
+    compose.waitUntil(15000) {compose.onAllNodesWithTag("profile-edit").fetchSemanticsNodes().isNotEmpty()}
+    compose.onNodeWithTag("profile-edit").performClick()
     compose.onNodeWithText("1–15 simvol").assertExists()
     val field=compose.onNode(hasSetTextAction())
     field.performTextReplacement("ə".repeat(23))
@@ -122,7 +122,7 @@ abstract class FittedLeaderboardProductionHost {
     compose.onNodeWithText("Yadda saxla").performClick()
     compose.waitUntil(15000) {publicProfile.revision==2L}
     compose.waitForIdle()
-    compose.onNodeWithText("Profili dəyiş").performClick()
+    compose.onNodeWithTag("profile-edit").performClick()
     capture(name,requests,"New names max15; legacy24 readable/reducible; 16 rejected; PUT15 accepted")
     return
    }

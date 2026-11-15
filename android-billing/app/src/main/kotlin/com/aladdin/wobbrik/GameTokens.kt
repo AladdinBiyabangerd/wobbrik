@@ -125,6 +125,64 @@ internal object GameTokens {
         const val HeroWidth = 400
         const val HeroHeight = 245
     }
+    internal object Profile {
+        val Portrait = Target * 2 + Inset + Small
+        val OverviewPortrait = Target * 3 - Small
+        val CompactPortrait = Target + Inset
+        val PanelInset = Gap
+        val StatIcon = Target + Gap + Quarter
+        val SheetHeightFraction = 0.85f
+        val SmallSheetHeightFraction = 0.55f
+        val SmallGridHeight = Target * 3 + Inset
+        val Back = intArrayOf(24, 44, 115, 101)
+        val WalletCoin = intArrayOf(609, 43, 94, 96)
+        const val TextShadowOffset = 2f
+        const val TextShadowBlur = 1f
+        const val PortraitCornerPercent = 25
+        val NavHome = intArrayOf(36, 1605, 112, 76)
+        val NavAchievements = intArrayOf(280, 1605, 116, 76)
+        val NavRecords = intArrayOf(501, 1605, 112, 76)
+        val NavSettings = intArrayOf(727, 1601, 112, 80)
+        // Source rectangles on unchanged, user-approved profile-v2 boards.
+        val Builder = intArrayOf(56, 324, 311, 316)
+        val Pilot = intArrayOf(1006, 688, 149, 146)
+        val Architect = intArrayOf(1176, 688, 152, 146)
+        val Crown = intArrayOf(90, 978, 244, 150)
+        val Xp = intArrayOf(570, 980, 166, 156)
+        val LevelBadge = intArrayOf(406, 465, 280, 174)
+        val BadgeInterior = floatArrayOf(501f,503f,554f,483f,605f,503f,604f,552f,
+            590f,579f,554f,601f,518f,579f,501f,552f)
+        val BadgeColorSamples = arrayOf(intArrayOf(511,520), intArrayOf(594,559))
+        val PanelSource = intArrayOf(202, 211, 500, 764)
+        val ActionSource = intArrayOf(223, 797, 459, 84)
+        val ActionErase = intArrayOf(27, 12, 427, 70)
+        val PanelErase = intArrayOf(20, 20, 482, 744)
+        const val PanelCorner = 48
+        const val ActionCorner = 32
+        val IdentitySource = intArrayOf(45, 1330, 814, 180)
+        val NavbarSource = intArrayOf(0, 1588, 898, 164)
+        val WalletSource = intArrayOf(701, 49, 176, 85)
+        val Pencil = intArrayOf(745, 372, 94, 86)
+        val IdentityPortrait = intArrayOf(73, 1355, 133, 135)
+        val WalletWidth = Target * 2 + Small
+        val BadgeWidth = Target * 3
+        val BadgeHeight = Target + Inset
+        val NavIcon = Target
+        val CompactNavIcon = Target - Small
+        val NavIconHeight = Target - Gap
+        val OverviewHeader = intArrayOf(8, 151, 882, 173)
+        val OverviewInterior = intArrayOf(8, 324, 882, 1132)
+        val OverviewFooter = intArrayOf(8, 1456, 882, 100)
+        val Rule = intArrayOf(57, 683, 784, 6)
+        val StatRule = intArrayOf(446, 995, 6, 257)
+        val StatRowHeight = Target * 3 - Gap
+        val CrownWidth = Target * 2 + Gap
+        val StatLabel = Body
+        // Optical center of the shield interior relative to its decorative wings.
+        val BadgeTextOffsetX = Quarter / 2
+        val BadgeTextOffsetY = -Quarter
+
+    }
     internal object Market {
         // Portrait sale form: content and actions stay together; font2 can use the available height.
         val SaleDialogHeight = Target * 7 + Gap
