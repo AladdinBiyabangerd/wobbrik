@@ -5,9 +5,10 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -36,6 +37,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import appbackend.wobbrik.game.AuthenticatedRecoveryOwner
+import appbackend.wobbrik.game.CatalogItem
 import appbackend.wobbrik.game.FinishCosmetics
 import com.aladdin.wobbrik.engine.AcceptedEngineHost
 import org.json.JSONObject
@@ -156,52 +158,58 @@ internal fun FinishCosmeticScreen(view: AcceptedEngineHost.Snapshot, ready: Auth
                     }
                 }
             }
-            val picker: @Composable (Modifier) -> Unit = { modifier ->
-                Column(modifier, verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-                    Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {
-                        FinishCosmetics.categories.forEachIndexed { index, key ->
-                            val active = category == key
-                            Button(onClick = { category = key }, modifier = Modifier.heightIn(min = GameTokens.Target),
-                                shape = RoundedCornerShape(GameTokens.ControlRadius),
-                                contentPadding = PaddingValues(GameTokens.Small),
-                                colors = ButtonDefaults.buttonColors(containerColor = if (active) GameTokens.Accent else GameTokens.Raised,
-                                    contentColor = if (active) GameTokens.Background else GameTokens.Text)) {
-                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                    CosmeticCategoryIcon(key, if (active) GameTokens.Background else GameTokens.Text)
-                                    Text(labels[index])
-                                }
+            val categories: @Composable () -> Unit = {
+                Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {
+                    FinishCosmetics.categories.forEachIndexed { index, key ->
+                        val active = category == key
+                        Button(onClick = { category = key }, modifier = Modifier.heightIn(min = GameTokens.Target),
+                            shape = RoundedCornerShape(GameTokens.ControlRadius),
+                            contentPadding = PaddingValues(GameTokens.Small),
+                            colors = ButtonDefaults.buttonColors(containerColor = if (active) GameTokens.Accent else GameTokens.Raised,
+                                contentColor = if (active) GameTokens.Background else GameTokens.Text)) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                CosmeticCategoryIcon(key, if (active) GameTokens.Background else GameTokens.Text)
+                                Text(labels[index])
                             }
                         }
                     }
+                }
+            }
+            val cosmeticItem: @Composable (CatalogItem) -> Unit = { item ->
+                val available = FinishCosmetics.available(item, ready.snapshot)
+                val selected = view.finishParts[category] == item.id
+                Surface(onClick = { onSelect(category, item.id) }, enabled = available && !view.waiting && item.id in art,
+                    modifier = Modifier.fillMaxWidth().semantics { this.selected = selected; contentDescription = item.name },
+                    color = GameTokens.Surface, shape = RoundedCornerShape(GameTokens.ControlRadius),
+                    border = BorderStroke(GameTokens.Hairline, if (selected) GameTokens.Accent else GameTokens.Raised)) {
+                    Column(Modifier.padding(GameTokens.Small), horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {
+                        Box {
+                            Canvas(Modifier.fillMaxWidth().height(if (sizing.portrait && sizing.compact) GameTokens.Target else GameTokens.Target + GameTokens.Inset)) {
+                                if (!available) drawContext.canvas.saveLayer(
+                                    androidx.compose.ui.geometry.Rect(Offset.Zero, size),
+                                    androidx.compose.ui.graphics.Paint().apply { alpha = GameTokens.DimOpacity })
+                                partPreview(atlases, art, view.finishParts + (category to item.id), category)
+                                if (!available) drawContext.canvas.restore()
+                            }
+                            if (selected) Text("✓", color = GameTokens.Background, fontWeight = FontWeight.Bold,
+                                modifier = Modifier.align(Alignment.TopEnd).background(GameTokens.Accent, CircleShape).padding(GameTokens.Quarter))
+                        }
+                        Text(if (!available) "Bağlı" else if (item.method == "free") "Pulsuz" else "Açılıb",
+                            modifier = Modifier.fillMaxWidth().background(if (available) GameTokens.Success else GameTokens.Raised,
+                                RoundedCornerShape(GameTokens.ControlRadius)).padding(GameTokens.Quarter),
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                            color = if (available) GameTokens.Background else GameTokens.Muted, fontWeight = FontWeight.Bold)
+                    }
+                }
+            }
+            val picker: @Composable (Modifier) -> Unit = { modifier ->
+                Column(modifier, verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+                    categories()
                     LazyVerticalGrid(columns = GridCells.Fixed(gridColumns), modifier = Modifier.weight(1f),
                         horizontalArrangement = Arrangement.spacedBy(GameTokens.Small), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
                         items(catalog?.items.orEmpty().filter { it.category == category && it.id in art }, key = { it.id }) { item ->
-                            val available = FinishCosmetics.available(item, ready.snapshot)
-                            val selected = view.finishParts[category] == item.id
-                            Surface(onClick = { onSelect(category, item.id) }, enabled = available && !view.waiting && item.id in art,
-                                modifier = Modifier.fillMaxWidth().semantics { this.selected = selected; contentDescription = item.name },
-                                color = GameTokens.Surface, shape = RoundedCornerShape(GameTokens.ControlRadius),
-                                border = BorderStroke(GameTokens.Hairline, if (selected) GameTokens.Accent else GameTokens.Raised)) {
-                                Column(Modifier.padding(GameTokens.Small), horizontalAlignment = Alignment.CenterHorizontally,
-                                    verticalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {
-                                    Box {
-                                        Canvas(Modifier.fillMaxWidth().height(if (sizing.portrait && sizing.compact) GameTokens.Target else GameTokens.Target + GameTokens.Inset)) {
-                                            if (!available) drawContext.canvas.saveLayer(
-                                                androidx.compose.ui.geometry.Rect(Offset.Zero, size),
-                                                androidx.compose.ui.graphics.Paint().apply { alpha = GameTokens.DimOpacity })
-                                            partPreview(atlases, art, view.finishParts + (category to item.id), category)
-                                            if (!available) drawContext.canvas.restore()
-                                        }
-                                        if (selected) Text("✓", color = GameTokens.Background, fontWeight = FontWeight.Bold,
-                                            modifier = Modifier.align(Alignment.TopEnd).background(GameTokens.Accent, CircleShape).padding(GameTokens.Quarter))
-                                    }
-                                    Text(if (!available) "Bağlı" else if (item.method == "free") "Pulsuz" else "Açılıb",
-                                        modifier = Modifier.fillMaxWidth().background(if (available) GameTokens.Success else GameTokens.Raised,
-                                            RoundedCornerShape(GameTokens.ControlRadius)).padding(GameTokens.Quarter),
-                                        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                                        color = if (available) GameTokens.Background else GameTokens.Muted, fontWeight = FontWeight.Bold)
-                                }
-                            }
+                            cosmeticItem(item)
                         }
                     }
                     Text(when { view.finishStorageError -> "Seçim saxlanmadı. Yenidən təsdiqlə."; catalog == null -> "Kataloq yüklənmədi"; missingArt -> "Bəzi hissələrin qrafikası bu versiyada yoxdur";
@@ -212,14 +220,22 @@ internal fun FinishCosmeticScreen(view: AcceptedEngineHost.Snapshot, ready: Auth
                 preview(Modifier.weight(1f).fillMaxHeight())
                 picker(Modifier.weight(2f).fillMaxHeight())
             } else if (LocalMobileMenuShell.current && androidx.compose.ui.platform.LocalDensity.current.fontScale > 1f) {
-                BoxWithConstraints(Modifier.weight(1f)) {
-                    val contentHeight = maxHeight.coerceAtLeast(GameTokens.CompactHeight)
-                    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
-                        Column(Modifier.fillMaxWidth().height(contentHeight), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-                            preview(Modifier.fillMaxWidth().weight(1f))
-                            picker(Modifier.fillMaxWidth().weight(2f))
+                // One scroll owner keeps the picker touchable in the short font2 viewport.
+                LazyColumn(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+                    item { preview(Modifier.fillMaxWidth().height(GameTokens.Target * 3)) }
+                    item { categories() }
+                    items(catalog?.items.orEmpty().filter { it.category == category && it.id in art }.chunked(gridColumns)) { row ->
+                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+                            row.forEach { item -> Box(Modifier.weight(1f)) { cosmeticItem(item) } }
+                            repeat(gridColumns - row.size) { Spacer(Modifier.weight(1f)) }
                         }
                     }
+                    item { Text(when {
+                        view.finishStorageError -> "Seçim saxlanmadı. Yenidən təsdiqlə."
+                        catalog == null -> "Kataloq yüklənmədi"
+                        missingArt -> "Bəzi hissələrin qrafikası bu versiyada yoxdur"
+                        else -> "Yalnız açıq hissələr seçilə bilər"
+                    }, color = GameTokens.Muted, fontSize = GameTokens.Caption) }
                 }
             } else Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
                 preview(Modifier.fillMaxWidth().weight(1f))
