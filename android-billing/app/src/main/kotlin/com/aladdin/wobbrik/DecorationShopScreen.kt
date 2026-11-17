@@ -17,7 +17,7 @@ import kotlinx.coroutines.CancellationException
 /** Approved decoration purchase panel only; purchasing never invokes placement. */
 @Composable
 internal fun DecorationShopScreen(configured: WobbrikApplication.Bootstrap.Configured,
-    ready: AuthenticatedRecoveryOwner.State.Ready, onBack: () -> Unit) {
+    ready: AuthenticatedRecoveryOwner.State.Ready, onBack: () -> Unit, onListings: () -> Unit = onBack) {
     val purchases = remember(configured) { CityPurchases(configured.recovery) }
     var copies by remember { mutableStateOf<List<DecorationCopy>?>(null) }
     var failed by remember { mutableStateOf(false) }
@@ -43,13 +43,17 @@ internal fun DecorationShopScreen(configured: WobbrikApplication.Bootstrap.Confi
         } catch (cancelled: CancellationException) { throw cancelled }
         catch (_: Exception) { failed = true }
     }
-    DecorationShopContent(ready, copies, failed, { retry++ }, { purchases.buy(ready, it) }, onBack)
+    DecorationShopContent(ready, copies, failed, { retry++ }, { purchases.buy(ready, it) }, onBack, onListings)
 }
 
 @Composable
 internal fun DecorationShopContent(ready: AuthenticatedRecoveryOwner.State.Ready,
     copies: List<DecorationCopy>?, failed: Boolean, onRetry: () -> Unit, onBuy: (String) -> Unit,
-    onBack: () -> Unit) {
+    onBack: () -> Unit, onListings: () -> Unit = onBack) {
+    if(LocalMobileMenuShell.current) {
+        MobileDecorationShop(ready, copies, failed, onRetry, onBuy, onBack, onListings)
+        return
+    }
     val art = rememberDecorationArt()
     var category by remember { mutableStateOf("tree") }
     var selected by remember { mutableStateOf<CatalogItem?>(null) }

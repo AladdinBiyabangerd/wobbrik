@@ -87,12 +87,14 @@ internal fun InventoryScreen(configured: WobbrikApplication.Bootstrap.Configured
         catch (_: Exception) { failed = true }
         finally { loading = false }
     }
+    if(LocalMobileMenuShell.current) CommerceDetailChrome(selected != null)
     val back = { if (selected != null) onSelectBuilding(null) else onHome() }
     BackHandler(onBack = back)
-    Box(Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(GameTokens.Surface, GameTokens.Background)))
-        .safeDrawingPadding().padding(GameTokens.Gap)) {
+    Box(Modifier.fillMaxSize().then(if(LocalMobileMenuShell.current) Modifier else Modifier.background(Brush.verticalGradient(listOf(GameTokens.Surface, GameTokens.Background))))
+        .then(if(LocalMobileMenuShell.current) Modifier else Modifier.safeDrawingPadding()).padding(GameTokens.Gap)) {
         Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+            if(LocalMobileMenuShell.current && selected != null) CommerceTitle("Bina detalı", back)
+            if(!LocalMobileMenuShell.current) Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
                 Surface(onClick = back, shape = if (sizing.portrait) RoundedCornerShape(GameTokens.ControlRadius) else CircleShape, color = GameTokens.Raised,
                     border = if (sizing.portrait) null else BorderStroke(GameTokens.Hairline, GameTokens.Muted), modifier = Modifier.size(GameTokens.Target)) {
                     Box(contentAlignment = Alignment.Center, modifier = Modifier.semantics { contentDescription = "Geri" }) {
@@ -116,12 +118,16 @@ internal fun InventoryScreen(configured: WobbrikApplication.Bootstrap.Configured
                     }
                 }
             }
-            if (sizing.portrait && largeFont && (!LocalMobileMenuShell.current || selected != null)) Text(if (selected == null) "İnventar" else "Bina detalları",
+            if (sizing.portrait && largeFont && !LocalMobileMenuShell.current) Text(if (selected == null) "İnventar" else "Bina detalları",
                 color = GameTokens.Text, fontSize = sizing.heading, fontWeight = FontWeight.Bold)
             if (selected == null) {
                 if (sizing.portrait) {
-                    InventoryToolbar(largeFont, { onParts(null) }, onDecorations, onLand, enabled = canMutate)
-                    if (!LocalMobileMenuShell.current || !largeFont) Text("Binalar", Modifier.padding(top = GameTokens.Small, bottom = GameTokens.Quarter),
+                    if(!LocalMobileMenuShell.current) InventoryToolbar(largeFont, { onParts(null) }, onDecorations, onLand, enabled = canMutate)
+                    if (LocalMobileMenuShell.current) Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                        Text("${buildings.size}${if(next != null) "+" else ""} bina", Modifier.weight(1f), color = GameTokens.Text, fontWeight = FontWeight.Bold)
+                        CommerceAction("↻", Modifier.width(GameTokens.Target), enabled = !loading) { cursor = null; buildings = emptyList(); next = null; retry++ }
+                    }
+                    else Text("Binalar", Modifier.padding(top = GameTokens.Small, bottom = GameTokens.Quarter),
                         color = GameTokens.Text, fontSize = GameTokens.Hint, fontWeight = FontWeight.Bold)
                 } else {
                     InventoryButton("Hissələr · Mağaza", enabled = canMutate) { onParts(null) }
@@ -137,7 +143,8 @@ internal fun InventoryScreen(configured: WobbrikApplication.Bootstrap.Configured
                 LazyVerticalGrid(if (sizing.portrait) GridCells.Fixed(if (largeFont) 1 else 2) else GridCells.Adaptive(GameTokens.PanelWidth / 2 - GameTokens.Gap), Modifier.weight(1f),
                     horizontalArrangement = Arrangement.spacedBy(GameTokens.Small), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
                     items(buildings, key = { it.id }) { building ->
-                        Surface(onClick = { onSelectBuilding(building.id) }, color = GameTokens.Surface,
+                        if(LocalMobileMenuShell.current) MobileOwnedBuildingCard(building, ready.catalog) { onSelectBuilding(building.id) }
+                        else Surface(onClick = { onSelectBuilding(building.id) }, color = GameTokens.Surface,
                             shape = RoundedCornerShape(if (sizing.portrait) GameTokens.ControlRadius else GameTokens.CardRadius), border = BorderStroke(GameTokens.Hairline, GameTokens.Raised)) {
                             if (sizing.portrait && largeFont) Row(Modifier.padding(GameTokens.Small),
                                 verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
@@ -163,11 +170,13 @@ internal fun InventoryScreen(configured: WobbrikApplication.Bootstrap.Configured
                 if (next != null && !loading && !failed) InventoryButton("Daha çox") { cursor = next }
                 if (!loading && !sizing.portrait) TextButton(onClick = { cursor = null; buildings = emptyList(); next = null; retry++ }) { Text("Yenilə", color = GameTokens.Accent) }
             } else if (detail != null) {
-                BuildingDetail(requireNotNull(detail), city, ready.catalog, Modifier.weight(1f))
+                BuildingDetail(requireNotNull(detail), city, ready.catalog, Modifier.weight(1f), canMutate) { deleteCandidate = detail }
                 InventoryButton(if (fromCache) "Yalnız baxış" else "Bina görünüşü", enabled = canMutate) { onParts(detail?.id) }
-                if (onMarket != null) HomeButton("Bazara çıxar", icon = R.drawable.ui_market,
+                if (onMarket != null && LocalMobileMenuShell.current) CommerceAction("Satışa çıxar", icon = MobileIcon.Tag,
                     enabled = canMutate && detail?.traded == false, onClick = onMarket)
-                TextButton(enabled = canMutate, onClick = { deleteCandidate = detail }, modifier = Modifier.fillMaxWidth().heightIn(min = GameTokens.Target)) {
+                else if (onMarket != null) HomeButton("Bazara çıxar", icon = R.drawable.ui_market,
+                    enabled = canMutate && detail?.traded == false, onClick = onMarket)
+                if(!LocalMobileMenuShell.current) TextButton(enabled = canMutate, onClick = { deleteCandidate = detail }, modifier = Modifier.fillMaxWidth().heightIn(min = GameTokens.Target)) {
                     Text("Binanı sil", color = if (canMutate) GameTokens.Danger else GameTokens.Muted)
                 }
             } else Spacer(Modifier.weight(1f))
@@ -235,7 +244,11 @@ internal fun buildingName(building: OwnedBuilding, catalog: RecoveryCatalog?): S
     catalog?.items?.firstOrNull { it.id == building.parts["wall"] }?.name ?: "Bina"
 
 @Composable
-private fun BuildingDetail(building: OwnedBuilding, city: CityMembership?, catalog: RecoveryCatalog?, modifier: Modifier) {
+private fun BuildingDetail(building: OwnedBuilding, city: CityMembership?, catalog: RecoveryCatalog?, modifier: Modifier, canDelete: Boolean, onDelete: () -> Unit) {
+    if(LocalMobileMenuShell.current) {
+        MobileOwnedBuildingDetail(building, city, catalog, modifier, canDelete, onDelete)
+        return
+    }
     val art = rememberCosmeticArt()
     val value = remember(building, catalog) { BuildingValueBreakdown.from(building, catalog) }
     val largeFont = LocalDensity.current.fontScale > 1.3f
@@ -382,7 +395,8 @@ internal fun BuildingPreview(building: OwnedBuilding, modifier: Modifier) {
 
 @Composable
 private fun InventoryButton(label: String, enabled: Boolean = true, onClick: () -> Unit) {
-    HomeButton(label = label, primary = true, compact = true, enabled = enabled, onClick = onClick)
+    if(LocalMobileMenuShell.current) CommerceAction(label, primary = true, enabled = enabled, onClick = onClick)
+    else HomeButton(label = label, primary = true, compact = true, enabled = enabled, onClick = onClick)
 }
 
 

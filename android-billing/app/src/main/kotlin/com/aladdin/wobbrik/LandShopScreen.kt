@@ -14,14 +14,18 @@ import appbackend.wobbrik.game.*
 /** Purchase rights only; map selection and placement remain outside this flow. */
 @Composable
 internal fun LandShopScreen(configured: WobbrikApplication.Bootstrap.Configured,
-    ready: AuthenticatedRecoveryOwner.State.Ready, onBack: () -> Unit) {
+    ready: AuthenticatedRecoveryOwner.State.Ready, onBack: () -> Unit, onListings: () -> Unit = onBack) {
     val purchases = remember(configured) { CityPurchases(configured.recovery) }
-    LandShopContent(ready, { purchases.buy(ready, it) }, onBack)
+    LandShopContent(ready, { purchases.buy(ready, it) }, onBack, onListings)
 }
 
 @Composable
 internal fun LandShopContent(ready: AuthenticatedRecoveryOwner.State.Ready, onBuy: (String) -> Unit,
-    onBack: () -> Unit) {
+    onBack: () -> Unit, onListings: () -> Unit = onBack) {
+    if(LocalMobileMenuShell.current) {
+        MobileLandShop(ready, onBuy, onBack, onListings)
+        return
+    }
     val sizing = mobileUiSizing()
     var selected by remember { mutableStateOf<LandOffer?>(null) }
     val illustration = rememberLandArt()

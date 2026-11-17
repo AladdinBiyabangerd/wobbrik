@@ -186,12 +186,17 @@ private fun AuthenticatedGame(app: WobbrikApplication) {
             key(InventoryReadKey(ready)) { PartsScreen(configured, ready, partsBuilding, onBack = { inventoryBuilding = partsBuilding; page = "inventory" }) }
             return@menuContent
         }
-        if (page == "decorations" && ready != null && configured != null) {
-            key(InventoryReadKey(ready)) { DecorationShopScreen(configured, ready, onBack = { page = "inventory" }) }
+        if (page in setOf("owned-decorations", "owned-land") && view != null && configured != null) {
+            key(InventoryReadKey(ready ?: view.account)) { OwnedCityItemsScreen(configured, view, page == "owned-land",
+                onBack = { page = "inventory" }, onMarket = { page = "decorations" }) }
             return@menuContent
         }
-        if (page == "land" && ready != null && configured != null) {
-            key(InventoryReadKey(ready)) { LandShopScreen(configured, ready, onBack = { page = "inventory" }) }
+        if (page == "decorations" && ready != null && configured != null) {
+            key(InventoryReadKey(ready)) { DecorationShopScreen(configured, ready, onBack = { page = if(mobileMenu) "market" else "inventory" }, onListings = { page = "market-own" }) }
+            return@menuContent
+        }
+        if (page == "land" && !mobileMenu && ready != null && configured != null) {
+            key(InventoryReadKey(ready)) { LandShopScreen(configured, ready, onBack = { page = if(mobileMenu) "market" else "inventory" }, onListings = { page = "market-own" }) }
             return@menuContent
         }
         if (page in setOf("account", "leaderboard") && ready != null && configured?.profiles != null && configured.leaderboard != null) {
@@ -201,14 +206,14 @@ private fun AuthenticatedGame(app: WobbrikApplication) {
             }
             return@menuContent
         }
-        if (page == "market" && ready != null && configured?.market != null) {
-            key(InventoryReadKey(ready)) { MarketScreen(configured, ready, onHome = { page = "home" },
+        if (page in setOf("market", "market-own") && ready != null && configured?.market != null) {
+            key(InventoryReadKey(ready)) { MarketScreen(configured, ready, initialOwn = page == "market-own", onHome = { page = "home" },
                 onInventory = { inventoryBuilding = null; page = "inventory" }, onCity = { page = "city" }, initialBuilding = marketBuilding, onInitialConsumed = { marketBuilding = null }) }
             return@menuContent
         }
         if (page == "inventory" && view != null && configured != null) {
             key(InventoryReadKey(ready ?: view.account)) { InventoryScreen(configured, view, selected = inventoryBuilding, onSelectBuilding = { inventoryBuilding = it }, onHome = { page = "home" },
-                onParts = { partsBuilding = it; page = "parts" }, onDecorations = { inventoryBuilding = null; page = "decorations" }, onLand = { inventoryBuilding = null; page = "land" },
+                onParts = { partsBuilding = it; page = "parts" }, onDecorations = { inventoryBuilding = null; page = if(mobileMenu) "owned-decorations" else "decorations" }, onLand = { inventoryBuilding = null; page = if(mobileMenu) "owned-land" else "land" },
                 onMarket = { marketBuilding = inventoryBuilding; page = "market" }) }
             return@menuContent
         }
