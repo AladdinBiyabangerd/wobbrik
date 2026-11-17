@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.aladdin.wobbrik.RedundantReadMeasurementTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-11-17T12:15:18.974Z" hostname="Macs-MacBook-Pro.local" time="3.397">
+  <properties/>
+  <testcase name="captureDoesNotCoalesceDuplicatePaths" classname="com.aladdin.wobbrik.RedundantReadMeasurementTest" time="2.169"/>
+  <testcase name="accountViewsReadMatrix" classname="com.aladdin.wobbrik.RedundantReadMeasurementTest" time="1.227"/>
+  <system-out><![CDATA[REDUNDANT capture-sequential-same-path elapsedMs=153 requests=3 responseUtf8Bytes=1473 diskReads=0 diskWrites=1 repeatedPaths={market/l-1=2}
+REDUNDANT capture-concurrent-same-path elapsedMs=96 requests=3 responseUtf8Bytes=1473 diskReads=0 diskWrites=1 repeatedPaths={market/l-1=2}
+REDUNDANT cold-market elapsedMs=239 requests=14 responseUtf8Bytes=8776 diskReads=1 diskWrites=1 repeatedPaths={}
+REDUNDANT warm-market-refresh elapsedMs=227 requests=14 responseUtf8Bytes=8776 diskReads=1 diskWrites=1 repeatedPaths={}
+REDUNDANT completed-reuse elapsedMs=3 requests=0 responseUtf8Bytes=0 diskReads=1 diskWrites=0 repeatedPaths={}
+REDUNDANT two-sequential-refreshes elapsedMs=457 requests=28 responseUtf8Bytes=17552 diskReads=2 diskWrites=2 repeatedPaths={market/l-1=2, market/l-10=2, market/l-11=2, market/l-12=2, market/l-2=2, market/l-3=2, market/l-4=2, market/l-5=2, market/l-6=2, market/l-7=2, market/l-8=2, market/l-9=2, market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0=2, sync=2}
+REDUNDANT two-concurrent-refreshes elapsedMs=232 requests=28 responseUtf8Bytes=17552 diskReads=2 diskWrites=2 repeatedPaths={market/l-1=2, market/l-10=2, market/l-11=2, market/l-12=2, market/l-2=2, market/l-3=2, market/l-4=2, market/l-5=2, market/l-6=2, market/l-7=2, market/l-8=2, market/l-9=2, market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0=2, sync=2}
+REDUNDANT read-only-double-replay elapsedMs=3 requests=0 responseUtf8Bytes=0 diskReads=2 diskWrites=0 repeatedPaths={}
+REDUNDANT fresh-action-detail elapsedMs=42 requests=1 responseUtf8Bytes=599 diskReads=0 diskWrites=0 repeatedPaths={}
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

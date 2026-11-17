@@ -40,12 +40,22 @@ internal fun CityScreen(configured: WobbrikApplication.Bootstrap.Configured,
         try {
             val session = requireNotNull(configured.sessions.current())
             check(ready.current(configured, session))
-            val loaded = configured.views?.read(ready, session, "city", onCached = { fromCache = true }, refresh = retry > 0) { CitySceneRepository(it).load(session) } ?: configured.cityScene.load(session)
+            val loaded = configured.views?.read(ready, session, "city",
+                onCached = { fromCache = true }, refresh = retry > 0,
+                onLocal = { local ->
+                    check(ready.current(configured, session))
+                    scene = local
+                },
+                onFresh = {
+                    check(ready.current(configured, session))
+                    fromCache = false
+                }) { CitySceneRepository(it).load(session) } ?: configured.cityScene.load(session)
             check(ready.current(configured, session))
             scene = loaded
         } catch (cancelled: CancellationException) { throw cancelled }
         catch (failure: Exception) {
             android.util.Log.w("WobbrikCity", "City read failed", failure)
+            scene = null
             failed = true
         }
     }

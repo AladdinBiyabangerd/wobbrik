@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.aladdin.wobbrik.ProductionOverlapBaselineTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-11-17T12:20:29.904Z" hostname="Macs-MacBook-Pro.local" time="9.245">
+  <properties/>
+  <testcase name="tabSwitchCancelsPendingListAndReturningStartsNewRead" classname="com.aladdin.wobbrik.ProductionOverlapBaselineTest" time="7.025"/>
+  <testcase name="blockingTransportRouteOverlap" classname="com.aladdin.wobbrik.ProductionOverlapBaselineTest" time="0.781"/>
+  <testcase name="coldRecompositionAndWarmRemount" classname="com.aladdin.wobbrik.ProductionOverlapBaselineTest" time="1.179"/>
+  <testcase name="directAccountViewsOverlapPositiveControl" classname="com.aladdin.wobbrik.ProductionOverlapBaselineTest" time="0.259"/>
+  <system-out><![CDATA[OVERLAP scenario=public-own-public-pending requests=16 bytes=8776 samePathOverlaps=0 cancelled=2 maxMultiplicity=2
+OVERLAP scenario=blocking-public-own-public-pending requests=16 bytes=8776 samePathOverlaps=1 cancelled=2 maxMultiplicity=2
+OVERLAP scenario=cold-plus-5-recompositions requests=14 bytes=8776 samePathOverlaps=0 cancelled=0 maxMultiplicity=1
+OVERLAP scenario=warm-remount-total requests=28 bytes=17552 samePathOverlaps=0 cancelled=0 maxMultiplicity=2
+OVERLAP scenario=direct-two-refresh-positive-control requests=28 bytes=17552 samePathOverlaps=5 cancelled=0 maxMultiplicity=2
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,5 +1,6 @@
 package com.aladdin.wobbrik
 
+import android.content.res.AssetManager
 import android.graphics.BitmapFactory
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -21,11 +22,15 @@ internal data class GameAtlas(val cells: Map<String, CosmeticSprite>, val pitch:
 @Composable
 internal fun rememberGameAtlases(): Map<String, GameAtlas> {
     val context = LocalContext.current
-    return remember(context) {
-        val metadata = context.assets.open("game-v3/atlas.json").bufferedReader().use { JSONObject(it.readText()) }
+    return remember { ApprovedArt.atlases(context.assets) }
+}
+
+internal fun loadGameAtlases(assets: AssetManager): Map<String, GameAtlas> {
+    return run {
+        val metadata = assets.open("game-v3/atlas.json").bufferedReader().use { JSONObject(it.readText()) }
         val cells = metadata.getJSONObject("cells")
         listOf("purple", "teal", "modular", "modular-teal").associateWith { style ->
-            val image = context.assets.open("game-v3/$style.png").use {
+            val image = assets.open("game-v3/$style.png").use {
                 requireNotNull(BitmapFactory.decodeStream(it)).asImageBitmap()
             }
             val sprites = cells.keys().asSequence().associateWith { key ->
@@ -54,9 +59,13 @@ internal fun gameAtlasStyle(parts: Map<String, String>): String =
 @Composable
 internal fun rememberGameWindowArt(): Map<String, CosmeticSprite> {
     val context = LocalContext.current
-    return remember(context) {
-        val metadata = context.assets.open("game-v3/windows.json").bufferedReader().use { JSONObject(it.readText()) }
-        val image = context.assets.open("game-v3/windows.png").use {
+    return remember { ApprovedArt.windows(context.assets) }
+}
+
+internal fun loadGameWindowArt(assets: AssetManager): Map<String, CosmeticSprite> {
+    return run {
+        val metadata = assets.open("game-v3/windows.json").bufferedReader().use { JSONObject(it.readText()) }
+        val image = assets.open("game-v3/windows.png").use {
             requireNotNull(BitmapFactory.decodeStream(it)).asImageBitmap()
         }
         metadata.keys().asSequence().associateWith { id ->

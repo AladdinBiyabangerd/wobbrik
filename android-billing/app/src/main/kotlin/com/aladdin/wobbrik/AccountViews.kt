@@ -6,6 +6,8 @@ import appbackend.wobbrik.billing.AccountChanged
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import appbackend.wobbrik.game.*
 
 /** The screen may hold either an exact online capability or display-only accepted data. */
@@ -39,7 +41,7 @@ class AccountViews(private val backend: GameplayHttpBackend, private val cache: 
         }
         // Publish matching accepted data before network work. It remains display-only until
         // the live read succeeds; replay never creates or extends a mutation capability.
-        if (onLocal != null && !reuse) {
+        if (view.ready != null && onLocal != null && !reuse) {
             val local = withContext(Dispatchers.IO) {
                 try { cache.replay(session, view.account, key, block) }
                 catch (cancelled: CancellationException) { throw cancelled }
@@ -75,6 +77,15 @@ class AccountViews(private val backend: GameplayHttpBackend, private val cache: 
         }
         current()
         if (result.second) onCached() else onFresh()
+        if (view.ready == null) {
+            // The sole replay is already the final display-only result. Publish it without
+            // rereading/parsing the bundle, including nullable results and replay failures.
+            currentCoroutineContext().ensureActive()
+            current()
+            onLocal?.invoke(result.first)
+            currentCoroutineContext().ensureActive()
+            current()
+        }
         return result.first
     }
 }

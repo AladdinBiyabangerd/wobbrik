@@ -1,5 +1,6 @@
 package com.aladdin.wobbrik
 
+import android.content.res.AssetManager
 import android.graphics.BitmapFactory
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
@@ -50,22 +51,26 @@ internal data class CosmeticSprite(val image: ImageBitmap, val origin: IntOffset
 @Composable
 internal fun rememberCosmeticArt(): Map<String, CosmeticSprite> {
     val context = LocalContext.current
-    return remember(context) {
-        val metadata = context.assets.open("finish/catalog-map.json").bufferedReader().use { JSONObject(it.readText()) }
+    return remember { ApprovedArt.cosmetics(context.assets) }
+}
+
+internal fun loadCosmeticArt(assets: AssetManager): Map<String, CosmeticSprite> {
+    return run {
+        val metadata = assets.open("finish/catalog-map.json").bufferedReader().use { JSONObject(it.readText()) }
         val items = metadata.getJSONArray("items")
-        val atlases = mutableMapOf<String, android.graphics.Bitmap>()
+        val atlases = mutableMapOf<String, ImageBitmap>()
         buildMap {
             for (i in 0 until items.length()) {
                 val item = items.getJSONObject(i)
                 val bitmap = atlases.getOrPut(item.getString("atlas")) {
-                    context.assets.open("finish/${item.getString("atlas")}").use { BitmapFactory.decodeStream(it) }
+                    assets.open("finish/${item.getString("atlas")}").use { requireNotNull(BitmapFactory.decodeStream(it)).asImageBitmap() }
                 }
                 val crop = item.getJSONArray("crop")
                 val x0 = crop.getInt(0); val y0 = crop.getInt(1)
                 val width = crop.getInt(2); val height = crop.getInt(3)
                 require(x0 >= 0 && y0 >= 0 && width > 0 && height > 0 &&
                     x0 + width <= bitmap.width && y0 + height <= bitmap.height)
-                put(item.getString("id"), CosmeticSprite(bitmap.asImageBitmap(), IntOffset(x0, y0), IntSize(width, height)))
+                put(item.getString("id"), CosmeticSprite(bitmap, IntOffset(x0, y0), IntSize(width, height)))
             }
         }
     }

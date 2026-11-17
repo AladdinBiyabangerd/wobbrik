@@ -38,11 +38,6 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.window.Dialog
 import appbackend.wobbrik.game.*
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.sync.Semaphore
-import kotlinx.coroutines.sync.withPermit
 
 /** Mounted under an exact Ready key. No account-global cursor, preview cache or local grants. */
 @Composable
@@ -54,8 +49,9 @@ internal fun MarketScreen(configured: WobbrikApplication.Bootstrap.Configured,
     var filter by remember { mutableStateOf(MarketFilter()) }
     var cursor by remember { mutableStateOf<String?>(null) }
     var next by remember { mutableStateOf<String?>(null) }
-    var listings by remember { mutableStateOf(emptyList<MarketListing>()) }
-    var previews by remember { mutableStateOf(emptyMap<String, MarketDetail>()) }
+    var pages by remember { mutableStateOf(emptyMap<String?, MarketPreviewPage>()) }
+    val listings = remember(pages) { pages.values.flatMap { it.page.listings }.distinctBy { it.id } }
+    val previews = remember(pages) { pages.values.flatMap { it.previews.entries }.associate { it.toPair() } }
     var detailId by remember { mutableStateOf<String?>(null) }
     var detail by remember { mutableStateOf<MarketDetail?>(null) }
     var candidate by remember { mutableStateOf<OwnedBuilding?>(null) }
@@ -66,16 +62,17 @@ internal fun MarketScreen(configured: WobbrikApplication.Bootstrap.Configured,
     var initialPending by remember { mutableStateOf(initialBuilding != null) }
     var loading by remember { mutableStateOf(true) }
     var failed by remember { mutableStateOf(false) }
+    var fromCache by remember { mutableStateOf(false) }
     var retry by remember { mutableIntStateOf(0) }
     var filtersOpen by remember { mutableStateOf(false) }
     var confirming by remember { mutableStateOf(false) }
     var withdrawAfterRead by remember { mutableStateOf(false) }
     var localError by remember { mutableStateOf(false) }
-    fun refresh() { withdrawAfterRead = false; cursor = null; next = null; listings = emptyList(); previews = emptyMap(); retry++ }
+    fun refresh() { withdrawAfterRead = false; cursor = null; next = null; pages = emptyMap(); retry++ }
     fun back() { withdrawAfterRead = false; when { candidate != null -> candidate = null; detailId != null -> { detailId = null; detail = null }; picker -> { picker = false; candidate = null }; else -> onHome() } }
     BackHandler { back() }
     LaunchedEffect(ready, own, filter, cursor, detailId, picker, inventoryCursor, retry) {
-        loading = true; failed = false; localError = false
+        loading = true; failed = false; localError = false; fromCache = false
         try {
             val session = requireNotNull(configured.sessions.current())
             fun current() { check(configured.recovery.state.value === ready && configured.sessions.current() == session) }
@@ -92,23 +89,32 @@ internal fun MarketScreen(configured: WobbrikApplication.Bootstrap.Configured,
                     inventoryNext = value.next
                 }
                 else -> {
-                    val value = repository.page(session, own, filter, cursor)
-                    val gate = Semaphore(4)
-                    val art = coroutineScope { value.listings.filter { it.status == "active" }.map { listing -> async {
-                        gate.withPermit {
-                            try { listing.id to repository.detail(session, listing.id) }
-                            catch (cancelled: CancellationException) { throw cancelled }
-                            catch (_: Exception) { null }
-                        }
-                    } }.awaitAll().filterNotNull().toMap() }
-                    current()
-                    listings = if (cursor == null) value.listings else (listings + value.listings).distinctBy { it.id }
-                    previews = if (cursor == null) art else previews + art
-                    next = value.next
+                    val view = AccountView(ReadOnlyAccount(session.uid, ready.snapshot, requireNotNull(ready.catalog)), ready)
+                    fun present(value: MarketPreviewPage) {
+                        current()
+                        // Replace this entire cursor page: a fresh result must not keep
+                        // the cached page's removed/changed listings or preview versions.
+                        pages = if (cursor == null) mapOf(null to value) else pages + (cursor to value)
+                        next = value.page.next
+                    }
+                    val value = configured.views?.read(view, session, repository.previewKey(own, filter, cursor),
+                        // Public listings change independently of this account's revision.
+                        // Always refresh a mounted query; local cards are presentation only.
+                        refresh = true,
+                        onCached = { current(); fromCache = true },
+                        onLocal = { present(it) },
+                        onFresh = { current(); fromCache = false }) { reader ->
+                        MarketRepository(reader).previewPage(session, own, filter, cursor)
+                    } ?: repository.previewPage(session, own, filter, cursor)
+                    present(value)
                 }
             }
         } catch (cancelled: CancellationException) { throw cancelled }
-        catch (_: Exception) { failed = true }
+        catch (_: Exception) {
+            // A terminal rejection/revision mismatch cannot leave a cached list actionable.
+            pages = emptyMap(); next = null; fromCache = false
+            failed = true
+        }
         finally { loading = false }
     }
     if(LocalMobileMenuShell.current) CommerceDetailChrome(detailId != null || picker)
@@ -149,8 +155,10 @@ internal fun MarketScreen(configured: WobbrikApplication.Bootstrap.Configured,
             }
             val nativeGrid = LocalMobileMenuShell.current && !own && LocalDensity.current.fontScale <= 1f
             LazyColumn(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+                if (fromCache && detailId == null && !picker && nativeMenu && own) item { Text("Keş", color = GameTokens.Muted, fontSize = GameTokens.Label) }
                 if(detailId == null && !picker && (!nativeMenu || !own)) item {
                 Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+                    if (fromCache) Text("Keş", Modifier.align(Alignment.CenterVertically), color = GameTokens.Muted, fontSize = GameTokens.Label)
                     MarketAction("Süzgəc", modifier = Modifier.widthIn(min = GameTokens.Target)) { filtersOpen = true }
                     MarketAction("Yenilə", modifier = Modifier.widthIn(min = GameTokens.Target), enabled = !loading) { refresh() }
                     if (filter != MarketFilter()) MarketAction("Hamısı", modifier = Modifier.widthIn(min = GameTokens.Target)) { filter = MarketFilter(); refresh() }
@@ -177,7 +185,7 @@ internal fun MarketScreen(configured: WobbrikApplication.Bootstrap.Configured,
                             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
                                 row.forEach { listing -> Box(Modifier.weight(1f)) {
                                     val preview = previews[listing.id]
-                                    if(preview != null) MarketBuildingCard(preview.building, ready.catalog, "${listing.price} sikkə", "Bax", !loading,
+                                    if(preview != null) MarketBuildingCard(preview.building, ready.catalog, "${listing.price} sikkə", "Bax", !loading || fromCache,
                                         grid = true) { detailId = listing.id }
                                     else MarketUnavailableCard(listing) { detailId = listing.id }
                                 } }
@@ -187,7 +195,7 @@ internal fun MarketScreen(configured: WobbrikApplication.Bootstrap.Configured,
                     } else items(listings, key = { it.id }) { listing ->
                         val preview = previews[listing.id]
                         if (preview != null) MarketBuildingCard(preview.building, ready.catalog, "${listing.price} sikkə",
-                            if(own && nativeMenu) "Elanı geri götür" else "Bax", !loading, listed = own && nativeMenu, purchase = nativeMenu && !own) { detailId = listing.id; withdrawAfterRead = own && nativeMenu }
+                            if(own && nativeMenu) "Elanı geri götür" else "Bax", !loading || fromCache, listed = own && nativeMenu, purchase = nativeMenu && !own) { detailId = listing.id; withdrawAfterRead = own && nativeMenu }
                         else MarketUnavailableCard(listing) { detailId = listing.id }
                     }
                     if (next != null && !loading && !failed) item { MarketAction("Daha çox") { cursor = next } }

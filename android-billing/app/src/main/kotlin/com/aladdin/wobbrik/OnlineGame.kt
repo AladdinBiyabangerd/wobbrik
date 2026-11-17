@@ -138,6 +138,17 @@ private fun AuthenticatedGame(app: WobbrikApplication) {
             configured?.recovery?.onForeground()
         }
     }
+    // One gate per login epoch, never per Ready/revision or menu destination.
+    val initialEpoch = configured?.sessions?.current()
+    // The frame loop above observes recovery. Re-sample for this composition's
+    // epoch/key change so a previous frame's Ready cannot open the new login gate.
+    val initialRecovery = remember(initialEpoch, state, cached, readOnly) {
+        Triple(configured?.recovery?.state?.value, configured?.recovery?.cached?.value?.coins,
+            configured?.recovery?.readOnly?.value != null)
+    }
+    if (InitialAccountSync(initialEpoch, initialRecovery.first, initialRecovery.second,
+            canBrowseCached = initialRecovery.third,
+            onRetry = { configured?.recovery?.onForeground() })) return
     if (page == "game" && localState.playing && localState.scene != null) {
         GameScene(localState, localHost, onDrop = { localHost.drop() }, onPause = { localHost.pause() },
             onResume = { if (localState.choosingFinish) localHost.retryTerminal() else localHost.resume() },

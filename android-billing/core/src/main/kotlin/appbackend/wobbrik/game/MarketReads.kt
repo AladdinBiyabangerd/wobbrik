@@ -2,6 +2,13 @@ package appbackend.wobbrik.game
 
 import appbackend.wobbrik.billing.BillingSession
 import kotlinx.serialization.json.*
+import appbackend.wobbrik.billing.AccountChanged
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 
 /** Inclusive server filters; one immutable value owns a cursor traversal. */
 data class MarketFilter(val minFloors: Long = 0, val maxFloors: Long = 0,
@@ -19,6 +26,8 @@ data class MarketListing(val id: String, val buildingId: String, val revision: L
     val buildingRevision: Long, val price: Long, val fee: Long, val status: String)
 data class MarketPage(val listings: List<MarketListing>, val next: String?)
 data class MarketDetail(val listing: MarketListing, val building: OwnedBuilding)
+/** One query page with optional matching previews; cached only as a complete read bundle. */
+data class MarketPreviewPage(val page: MarketPage, val previews: Map<String, MarketDetail>)
 
 object MarketReads {
     internal fun JsonObject.text(key: String) = getValue(key).jsonPrimitive.also { require(it.isString) }.content
@@ -57,6 +66,32 @@ class MarketRepository(private val backend: GameplayReads) {
         return MarketReads.page(backend.read(session, "market" + (if (own) "/own" else "") + "?limit=20" +
             (cursor?.let { "&cursor=$it" } ?: "") + filter.query()), own)
     }
+    /** Stable query identity: private/public, filters and cursor never share a cached bundle. */
+    fun previewKey(own: Boolean, filter: MarketFilter, cursor: String? = null): String =
+        "market:$own:${filter.minFloors}:${filter.maxFloors}:${filter.minPrice}:${filter.maxPrice}:${filter.partId.orEmpty()}:${cursor.orEmpty()}"
+
+    suspend fun previewPage(session: BillingSession, own: Boolean, filter: MarketFilter, cursor: String? = null): MarketPreviewPage {
+        val page = page(session, own, filter, cursor)
+        val gate = Semaphore(4)
+        val previews = coroutineScope {
+            page.listings.filter { it.status == "active" }.map { listing -> async {
+                gate.withPermit {
+                    try {
+                        val detail = detail(session, listing.id)
+                        // A listing may close/change between page and detail; never pair mismatched versions.
+                        if (detail.listing == listing) listing.id to detail else null
+                    } catch (cancelled: CancellationException) { throw cancelled }
+                    catch (changed: AccountChanged) { throw changed }
+                    catch (failure: GameplayHttpError) {
+                        if (failure.status != 404) throw failure
+                        null // Closed listing: retain the existing unavailable-card presentation.
+                    }
+                }
+            } }.awaitAll().filterNotNull().toMap()
+        }
+        return MarketPreviewPage(page, previews)
+    }
+
     suspend fun detail(session: BillingSession, id: String): MarketDetail {
         InventoryReads.id(id)
         return MarketReads.detail(backend.read(session, "market/$id")).also { require(it.listing.id == id) }

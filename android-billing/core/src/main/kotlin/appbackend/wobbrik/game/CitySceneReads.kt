@@ -2,6 +2,11 @@ package appbackend.wobbrik.game
 
 import appbackend.wobbrik.billing.BillingSession
 import kotlinx.serialization.json.*
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 
 /** Read-only scene coordinates. Absence is legacy membership, never an invented origin. */
 data class CityPosition(val xTicks: Long, val yTicks: Long, val quarterTurns: Int)
@@ -74,10 +79,17 @@ class CitySceneRepository(private val backend: GameplayReads) {
             if (cursor != null) current = page(cursor)
         } while (cursor != null)
         val inventory = InventoryRepository(backend)
-        val buildings = members.map { (id, revision) ->
-            val building = inventory.building(session, id)
-            require(building.revision == revision) { "Building changed; refresh required" }
-            CitySceneBuilding(building, positions[id])
+        // Only independent detail reads overlap. Membership pagination and the final
+        // revision bracket stay ordered; awaitAll preserves the server membership order.
+        val gate = Semaphore(4)
+        val buildings = coroutineScope {
+            members.map { (id, revision) -> async {
+                gate.withPermit {
+                    val building = inventory.building(session, id)
+                    require(building.revision == revision) { "Building changed; refresh required" }
+                    CitySceneBuilding(building, positions[id])
+                }
+            } }.awaitAll()
         }
         val decorations = mutableListOf<CitySceneDecoration>()
         val copies = mutableSetOf<String>()

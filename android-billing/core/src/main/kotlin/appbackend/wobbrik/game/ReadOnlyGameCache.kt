@@ -37,8 +37,11 @@ class ReadOnlyGameCache(private val files: (String) -> JournalFile) {
         val reader = GameplayReads { expected, path ->
             require(expected == session && allowedReadPath(path))
             backend.read(expected, path).also { body ->
-                val previous = bodies.put(path, body)
-                require(previous == null || previous == body) { "View changed during read" }
+                // Scene detail reads may complete on different IO workers.
+                synchronized(bodies) {
+                    val previous = bodies.put(path, body)
+                    require(previous == null || previous == body) { "View changed during read" }
+                }
             }
         }
         val value = block(reader)
