@@ -12,9 +12,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.remember
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
-import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.semantics.ProgressBarRangeInfo
@@ -43,9 +41,10 @@ import java.math.MathContext
 internal fun MobileHomeScreen(snapshot: GameSnapshot?, active: Boolean, onPlay: (() -> Unit)?,
     onPage: (String) -> Unit, status: String?, onRetry: () -> Unit, journalBlocked: Boolean) {
     val largeFont = LocalDensity.current.fontScale > 1f
-    val city = ImageBitmap.imageResource(R.drawable.home_city_cutout_v3)
-    val cityPainter = remember(city) { BitmapPainter(city,
-        IntOffset(GameTokens.MobileHome.HeroLeft, 0), IntSize(GameTokens.MobileHome.HeroWidth, city.height)) }
+    val (art, retryArt) = rememberResourceArt(R.drawable.home_city_cutout_v3)
+    val city = art.images?.single()
+    val cityPainter = remember(city) { city?.let { BitmapPainter(it,
+        IntOffset(GameTokens.MobileHome.HeroLeft, 0), IntSize(GameTokens.MobileHome.HeroWidth, it.height)) } }
     val accepted = snapshot != null && status == null && !journalBlocked
     Column(Modifier.fillMaxSize().background(Brush.radialGradient(listOf(GameTokens.Surface, GameTokens.Background)))
         .safeDrawingPadding().consumeWindowInsets(WindowInsets.safeDrawing)
@@ -66,12 +65,14 @@ internal fun MobileHomeScreen(snapshot: GameSnapshot?, active: Boolean, onPlay: 
                         if (accepted) {
                             if (!largeFont) BoxWithConstraints(Modifier.fillMaxWidth().weight(1f).clipToBounds(), contentAlignment = Alignment.Center) {
                                 val heroWidth = minOf(maxWidth, maxHeight * GameTokens.MobileHome.HeroAspectRatio)
-                                Image(cityPainter, null, Modifier.size(heroWidth, heroWidth / GameTokens.MobileHome.HeroAspectRatio), contentScale = ContentScale.FillBounds)
+                                if (cityPainter != null) Image(cityPainter, null, Modifier.size(heroWidth, heroWidth / GameTokens.MobileHome.HeroAspectRatio).testTag("home-city-hero"), contentScale = ContentScale.FillBounds)
                             }
                             // Large text uses a bounded hero inside the scroll body even on short phones.
-                            else Image(cityPainter, null,
-                                Modifier.fillMaxWidth().height(GameTokens.MobileHome.LargeFontHero)
-                                    .testTag("home-city-hero"), contentScale = ContentScale.Fit)
+                            else Box(Modifier.fillMaxWidth().height(GameTokens.MobileHome.LargeFontHero)) {
+                                if (cityPainter != null) Image(cityPainter, null,
+                                    Modifier.fillMaxSize().testTag("home-city-hero"), contentScale = ContentScale.Fit)
+                            }
+                            if (art.failed) TextButton(onClick = retryArt) { Text("Qrafikanı yenilə", color = GameTokens.Accent) }
                             MobileHomeStats(requireNotNull(snapshot), largeFont)
                             if (!largeFont && available > GameTokens.MobileUi.CompactHeight) Spacer(Modifier.height(GameTokens.MobileHome.StatBottomSpace))
                         } else {

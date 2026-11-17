@@ -1,48 +1,42 @@
-# Cari tapşırıq — bütün app performansı / Android + AppBackend
+# Cari tapşırıq — Home/Profil resources + City/HTTPS / 17 noyabr 2026
 
 ## Completed
 
-- Yeni vahid: idle snapshot reuse + APK atlas IO scheduling. `AcceptedEngineHost.snapshot` unchanged-state copy-ni, `LocalGameHost.snapshot` idle object yaradılmasını çıxarır; canonical frame polling saxlanır. `ApprovedArt.prepare` IO-da işləyir, root hazır olmayan atlas istifadəçilərinə native loading/retry göstərir. Home/profil/achievements/leaderboard/settings bu atlasları gözləmir. Warm-root volatile completion fast path var. Review `docs/reviews/2026-11-17-idle-art-scheduling.md`, evidence `docs/reviews/idle-art/`.
-- Android Bazar bundled previews `2f81349`; paired backend `9f0faf9`:12kart14→2sorğu, köhnə server4paralel detail fallback, köhnə complete cache offline replay, fresh detail-before-command qorunub. Review `docs/reviews/2026-11-17-market-bundled-previews.md`.
-- Cancelled-timeout fallback `c579e22`; əvvəlki dirty işlər `9cac996`-də qorunub. İnventar local-first `083f870`.
-- Əvvəlki vahidlər/evidence: `docs/reviews/2026-11-17-{initial-account-sync,art-reuse,city-read-scheduling,city-local-first,city-same-uid-host,market-local-first,readonly-single-replay,production-overlap,https-overlap}.md`.
+- Home city cutout, köhnə Profil4board və cari native Profil avatar sheet-i composition-owned, Configuration/resource/density-aware Dispatchers.IO loading-ə keçirildi. Process cache yoxdur; retry/stale completion qorunur, avatar grid və overview daxilində1producer paylaşılır. Home navbar/stats açıqdır, hero ölçüsü loading zamanı saxlanır.
+- City Android ardıcıllığı real AppBackend HTTP handler+disposable PostgreSQL ilə yoxlandı:12bina,15request,175SQLstatement,6282JSONbyte; lokal73.565/63.367/61.744ms.21domainSELECT, qalanı middleware+BEGIN/COMMIT. Backend production source dəyişməyib.
+- Real HTTPS fixture təkrarı4/4PASS:cancel→exit522msheaders/755msbody/7998mstimeout;public→own→public567/533ms, eyni-path overlap qalır. Socket cancellation düzəldilməyib.
+- Əvvəlki atlas IO/idle snapshot vahidi `7f24bfc`; Bazar bundled previews Android`2f81349`/backend`9f0faf9`. Əvvəlki sübutlar tarixdə/review-larda saxlanır.
 
 ## Current state
 
-Android `fix/menu-inventory-latency`, yeni vahidin bazası `2f81349`; vahid ayrıca commit-də saxlanır. AppBackend təmiz, `feat/wobbrik`, `9f0faf9`; bu vahiddə dəyişməyib. Əvvəlki DailyPlate işi tarixdə saxlanıb. Main merge, push, deploy, CI yoxdur. Bütün app performansı və redesign tamamlanmayıb.
+Android `fix/menu-inventory-latency`, yeni vahid bazası`7f24bfc`. AppBackend təmiz `feat/wobbrik`/`9f0faf9`. Main merge/push/deploy/CI yoxdur. Bütün app performansı/redesign bitməyib.
 
 ## Decisions
 
-- Yeganə plan `docs/PLAN.md` §1.1/§2–3. İstifadəçi Android və AppBackend performans düzəlişlərinə icazə verib; backend üçün təkrar icazə soruşma. Push/main merge/deploy ayrıca göstəriş tələb edir. CI yalnız ayrıca tələb olduqda main-də lokaldır; emulator açılmır, canlı yoxlama gate deyil.
-- Exact Ready/login epoch, synchronous host revocation, sole journal və server-authoritative wallet/mülkiyyət dəyişmir. İlk sync recovery/reconcile+catalog-dur; art hazırlığı həmin gate-i tutmur. Home dərhal öz resource cutout-u ilə açılır; atlaslar auth entry-də arxa planda hazırlanır. Yalnız game/city/inventory/parts/collection/market/market-own hazır atlasları gözləyir; navbar aktiv, Play müvəqqəti disabled, failure retry var.
-- Art qrupları hesabdan asılı deyil. Hazırlıq10bitmap/~60MiB retention-u auth entry-də daha erkən yaradır; Home-only istifadəçidə də tutulacaq. Activity/UID saxlanmır. Heap/battery/device speedup iddiası yoxdur. Raw art getter-ləri sinxrondur; root-dan kənar standalone consumer öz readiness sərhədinə cavabdehdir.
-- Frame dövrəsi hələ canonical recovery/host lifecycle üçün saxlanır; yalnız idle snapshot allocation azalıb. Identity ilə immutable scene və bütün dəyişən presentation field-lər yoxlanır. Physics/finish/abandon/pause-clock qaydaları dəyişməyib.
-- Bazar public query hər mount-da background refresh edir. Complete cache exact UID/revision/scope/filter/cursor ilədir; final revision sync çıxarılmır. Yeni include=previews representation köhnə complete bundle-in exact query+detail-ləri ilə replay ola bilər. Keş display-only, mutation üçün live detail+Ready lazımdır. Live cursor server-wide frozen snapshot deyil.
+- Yeganə plan `docs/PLAN.md` §1.1/§2–3. Android+AppBackend performans işi icazəlidir; backend üçün təkrar icazə soruşma. Main merge/push/deploy ayrıca göstərişdir. CI yalnız ayrıca tələb ilə main-də lokaldır. Emulator açılmır; canlı yoxlama gate deyil.
+- Exact Ready/login epoch, sole journal, server wallet/mülkiyyət authority-si dəyişmir. İlk sync recovery/reconcile+catalog olaraq qalır.
+- Əvvəlki atlas10bitmap/~60MiBprocessretention saxlanır. Yeni resource loader ikinci process cache yaratmır; remount decode yenə mümkündür, IO-da. Home logo/font və Profil foreground/skin CPUişi bu vahidin scope-u deyil.
 
 ## Checks performed
 
-- Yeni normal engine97/core147/app37unit, assembleDebug/lintDebugPASS26s; `/private/tmp/wobbrik-idle-art-complete.log`.
-- JVM21 actual idle host path10000warmup+3600iteration: before701592allocated byte/2460µs/online3600+local3600distinct snapshot; after48byte/1301µs/1+1identity. Bu, JVM loop sample-dır; display-frame wakeup/device FPS/battery ölçüsü deyil və saniyəlik gecikməni izah etmir.
-- Native cold prior3atlas helper375ms main-thread. Final isolated7/7nativePASS10.761s/Gradle16s; cold preparation285msIO, ready helpers91µs, workerblocked navigation47ms. Small/normal portrait,font1/font2,synthetic insets/Long.MAX balance, failure retry, cancelled-producer stale completion yoxlanıb.7PNG `docs/reviews/idle-art/rendered/` altında saxlanıb və açılıb. Pixel/crop2native+resource1nativePASS(Gradle9s), native7loading/IO ayrıcaPASS; nəticələr son review-da.
-- Contrast Text/Surface13.00,Accent/Surface8.99PASS. Font2Long.MAX shared header clipping qalır; loadedHome fixture minimaldır, XPaccount yoxdur, PNGparity/mərhələqəbulu deyil. Tablet/device/Firebase/TalkBack/locale matrisi yoxlanmayıb.
-- Digər native resource helper ölçüsü (ilk sample): Home30ms/6.29MiB,Profile97ms/25.17MiB,Achievements20ms/6.29MiB,Leaderboard29ms/6.29MiB.İlk sample2remount0newbitmap olsa da final repeat cold63/112/21/28ms; firstremountHome31ms/1newbitmap vəProfile51ms/2newbitmap göstərdi, secondremount0newbitmap. Resource cache variable-dır və repeatUIdecode qalır; bunlar bütün route/server timing deyil. Əlavə resource cache/dizayn uydurulmayıb.
-- Bu vahiddə API/DTO/domain/schema/network query dəyişmir, backend dəyişikliyi/testi lazım olmayıb. Əvvəlki cross-stack vahiddə full backend race+disposablePostgreSQL18/vet/buildPASS(platform23.791s), Android147/37unit+18nativePASS. DBdayandırılıb, deploy yoxdur.
+- Backend focused3raceintegrationPASS2.364s; real disposable PostgreSQL18. DB dayandırılıb. Full backend suite/vet bu production-code-unchanged vahiddə təkrarlanmayıb.
+- HTTPS4nativePASS/Gradle19s. İlk paralel Gradle test-output collision-u uğursuzdur; ardıcıl təkrar PASS.
+- Native10/10PASS11.035stest/Gradle27s:8loadedportretPNG(320/360,font1/2) və2resource/cancellationregression. PNG-lər açılıb; Home/Profil authorityPNG-lərlə müqayisə edilib. Əlavə inset/klaviatura yoxlanmayıb. Son normal core147/appDebug37unit+assembleDebug/lintDebugPASS; log `/private/tmp/wobbrik-resource-checks-shared.log`.
+- Kontrast Text/Surface13.00,Accent/Surface8.99PASS. Native nəticələr/render matrisi son review-da saxlanır; device/Firebase/TalkBack/locale/runtimeproduction ölçüsü yoxdur.
 
 ## Remaining work
 
-- Bütün route üçün deployed/device2+s/10+s baseline və tam ekran composition/layout/network ölçüsü yoxdur. Resource helper qiymətləri bunun əvəzi deyil. Şəhər building detail fanout və başqa City/Purple art helper-ləri hələ yoxlanmalıdır.
-- Real HTTPS cancellation blocking read-i kəsmir: controlled public→own→public16request/1same-path overlap; timeout exit~8s. Tapıntı/evidence `docs/reviews/2026-11-17-https-overlap.md`. Fallback cancellation qorunub, socket cancellation/coalescing implementasiya edilməyib. Scope/session/subscriber cancellation sərhədləri vacibdir.
-- Android və AppBackend City query/request/byte/latency ölçülərini birlikdə yoxla. Bazar bundled endpoint backend-də hazırdır, deploy edilməyib; köhnə serverdə fanout qalır.
-- Home/Profile resource cache dəyişkəndir: final təkrarda remountHome31ms/1bitmap vəProfile51ms/2bitmap UIdecode var. Configuration/density-ə uyğun background resource loading ayrıca vahiddə düzəlməlidir.
-- Durable disk cost, main-thread custom art/map allocations, heap/GPU/device FPS və tam vizual parity qalır. Mövcud font2tab/navbar/scroll və320grid priceclipping borcları review-lardadır.
+- HTTPS cancellation aktiv blocking socketread-i kəsmir; timeout-a qədər8s davam edə bilir. Scoped disconnect tətbiqi ayrıca correctness+realTLSbefore/after yoxlaması ilə edilməlidir; subscriber/session sərhədlərini pozma.
+- City hər bina üçün detail+middlewarefanout saxlayır. Batching düşünülərsə Android+AppBackend additiveDTO/legacyfallback, geometry payload/response limit, revisionbracket/cache/accountisolation birlikdə hazırlanmalıdır. Təhlükəsizlik yoxlamalarını çıxarma.
+- Production/device2+s/10+sbaseline, real payloadbytes/SQLcontention, durableIO, heap/GPU/FPS və tam vizualparity yoxdur. Home fixture XPaccount-suz ola bilər; font2Long.MAXbalanceclipping və əvvəlki navbar/scroll/grid borcları qalır.
 
 ## Relevant files
 
-- `android-billing/app/src/main/kotlin/com/aladdin/wobbrik/{OnlineGame,ApprovedArt,ApprovedArtLoading,GameAtlas,FinishCosmeticScreen,CityScreen,ProfilePresentation,MobileHomeScreen,MobileAchievementsScreen,LeaderboardScreen}.kt`.
-- `android-billing/engine/src/main/kotlin/com/aladdin/wobbrik/engine/{AcceptedEngineHost,LocalGameHost}.kt`; tests `IdleHostPollingTest.kt`, `LocalGameHostTest.kt`.
-- Host `docs/reviews/idle-art/render/{OffMainArtTest,RemainingResourceDecodeTest,ColdArtBaselineTest}.kt`, init script; əvvəlki pixel test `docs/reviews/art-reuse/render/ArtReuseTest.kt`.
-- Backend `/Users/mac/My Workspace/AppBackend`: `AGENTS.md`, `docs/context/current-task.md`, `internal/wobbrik/{city,market}.go`, `docs/wobbrik-game-api.md`. Mövcud persistent branch `feat/wobbrik`.
+- `android-billing/app/src/main/kotlin/com/aladdin/wobbrik/{ResourceArtLoading,MobileHomeScreen,ProfilePresentation,NativeProfileEditor,NativeProfileOverview}.kt`.
+- `docs/reviews/2026-11-17-resource-background-city-https.md`, `docs/reviews/resource-background/` (native/TLS/backendprobe evidence).
+- Android `core/.../game/{CitySceneReads,GameplayHttpBackend,ReadOnlyGameCache}.kt`; AppBackend `internal/{wobbrik/city.go,wobbrik/market.go,platform/auth.go}` və `docs/wobbrik-game-api.md`.
+- Əvvəlki `docs/reviews/2026-11-17-{idle-art-scheduling,https-overlap,market-bundled-previews}.md`.
 
 ## Exact next step
 
-PLAN §1.1, bu handoff, idle-art və HTTPS overlap review-larını oxu. Növbəti dar vahid üçün ölçülmüş Home/Profile remount resource decode-un configuration/density-aware background loading-ni hazırla (MobileHomeScreen/ProfilePresentation; final31/51ms). Müvafiq hazır native renderləri saxla, əlavə60MiB atlas retention-una ikinci kor process cache qatma. Alternativ ayrıca vahiddə production UrlConnectionGameplayTransport cancellation-a scoped socket disconnect tətbiqinin mümkünlüyünü yoxla və real loopbackTLS fixture ilə before/after ölç; UID/session publication, cachewrite və callback regression-larını saxla. Yaxud City fanout-u Android+AppBackend query ölçüsü ilə növbəti unit et. İnfrastruktur/coalescing kor-koranə əlavə edilmir. Eyni source render/test sübutları saxlanır; bütün app bitmiş kimi bildirilməsin.
+Bu handoff+PLAN§1.1+son review-u oxu. Növbəti dar vahid HTTPS scoped socket cancellation-u realTLSfixture ilə before/after yoxlayıb düzəltməkdir; callback/cachewrite/login-isolation/cancellationregression-ları saxla. City batching alternativ növbəti vahiddir; paralel əsas plan/cacheframework uydurma. Yeni böyük dəyişiklik ayrıca chat-də davam etdirilsin.

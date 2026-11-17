@@ -11,11 +11,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.Role
@@ -25,8 +23,17 @@ import androidx.compose.ui.unit.IntSize
 
 /** Approved account head-and-shoulders art; frame and selection remain native. */
 @Composable
-internal fun NativeAccountPortrait(id: String, modifier: Modifier, selected: Boolean = true) {
-    val sheet = ImageBitmap.imageResource(R.drawable.account_portraits_v3)
+internal fun NativeAccountPortrait(id: String, modifier: Modifier, selected: Boolean = true,
+    resource: Pair<ResourceArt, () -> Unit>? = null) {
+    val (art, retry) = resource ?: rememberResourceArt(R.drawable.account_portraits_v3)
+    val sheet = art.images?.single()
+    if (sheet == null) {
+        Box(modifier, contentAlignment = Alignment.Center) {
+            if (art.failed) TextButton(onClick = retry) { Text("Yenilə", color = GameTokens.Accent) }
+            else CircularProgressIndicator(Modifier.size(GameTokens.Target), color = GameTokens.Accent)
+        }
+        return
+    }
     val cell = sheet.height
     val index = when(id) { "pilot" -> 1; "architect" -> 2; else -> 0 }
     val painter = remember(sheet, index) { BitmapPainter(sheet, IntOffset(index * cell, 0), IntSize(cell, cell)) }
@@ -94,6 +101,7 @@ internal fun NativeProfileEditView(name: String, avatar: String, editable: Boole
 internal fun NativeProfileAvatarSheet(avatars: List<String>, selected: String, onClose: () -> Unit, onApply: (String) -> Unit) {
     val feedback = LocalGameFeedback.current
     var pick by remember(selected) { mutableStateOf(selected) }
+    val portraits = rememberResourceArt(R.drawable.account_portraits_v3)
     BoxWithConstraints(Modifier.fillMaxSize().safeDrawingPadding().padding(GameTokens.Small), contentAlignment = Alignment.Center) {
         MenuRelief(Modifier.fillMaxWidth().heightIn(max = maxHeight * GameTokens.Profile.SheetHeightFraction)) {
             Column(Modifier.padding(GameTokens.Small), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
@@ -106,7 +114,7 @@ internal fun NativeProfileAvatarSheet(avatars: List<String>, selected: String, o
                         Column(Modifier.heightIn(min = GameTokens.Target).selectable(pick == id, role = Role.RadioButton, onClick = { pick = id })
                             .testTag("avatar-$id"), horizontalAlignment = Alignment.CenterHorizontally) {
                             Box {
-                                NativeAccountPortrait(id, Modifier.fillMaxWidth().aspectRatio(1f), pick == id)
+                                NativeAccountPortrait(id, Modifier.fillMaxWidth().aspectRatio(1f), pick == id, portraits)
                                 if(pick == id) Text("✓", Modifier.align(Alignment.TopEnd).background(GameTokens.Accent,
                                     RoundedCornerShape(GameTokens.ControlRadius)).padding(GameTokens.Quarter), color = GameTokens.Background,
                                     fontWeight = FontWeight.ExtraBold)

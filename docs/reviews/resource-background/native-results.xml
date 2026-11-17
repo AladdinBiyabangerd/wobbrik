@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.aladdin.wobbrik.ResourceBackgroundTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-11-17T13:11:35.504Z" hostname="Macs-MacBook-Pro.local" time="11.035">
+  <properties/>
+  <testcase name="homeSmallLargeFont" classname="com.aladdin.wobbrik.ResourceBackgroundTest" time="8.233"/>
+  <testcase name="workerRetryAndConfigurationCancellation" classname="com.aladdin.wobbrik.ResourceBackgroundTest" time="0.094"/>
+  <testcase name="profileNormal" classname="com.aladdin.wobbrik.ResourceBackgroundTest" time="0.335"/>
+  <testcase name="homeNormalLargeFont" classname="com.aladdin.wobbrik.ResourceBackgroundTest" time="0.309"/>
+  <testcase name="profileSmallLargeFont" classname="com.aladdin.wobbrik.ResourceBackgroundTest" time="0.21"/>
+  <testcase name="pixelsConfigurationAndRemount" classname="com.aladdin.wobbrik.ResourceBackgroundTest" time="0.599"/>
+  <testcase name="homeNormal" classname="com.aladdin.wobbrik.ResourceBackgroundTest" time="0.462"/>
+  <testcase name="profileSmall" classname="com.aladdin.wobbrik.ResourceBackgroundTest" time="0.248"/>
+  <testcase name="profileNormalLargeFont" classname="com.aladdin.wobbrik.ResourceBackgroundTest" time="0.211"/>
+  <testcase name="homeSmall" classname="com.aladdin.wobbrik.ResourceBackgroundTest" time="0.332"/>
+  <system-out><![CDATA[RESOURCE-BACKGROUND mount=0 ready=true bytes=37752952
+RESOURCE-BACKGROUND mount=1 ready=true bytes=37752952
+RESOURCE-BACKGROUND mount=2 ready=true bytes=37752952
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

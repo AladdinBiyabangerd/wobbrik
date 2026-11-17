@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.aladdin.wobbrik.HttpsOverlapTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-11-17T13:06:53.539Z" hostname="Macs-MacBook-Pro.local" time="16.425">
+  <properties/>
+  <testcase name="cancelWhileWaitingForHeaders" classname="com.aladdin.wobbrik.HttpsOverlapTest" time="5.412"/>
+  <testcase name="realHttpsMarketTabOverlap" classname="com.aladdin.wobbrik.HttpsOverlapTest" time="2.167"/>
+  <testcase name="cancelWhileReadingBody" classname="com.aladdin.wobbrik.HttpsOverlapTest" time="0.796"/>
+  <testcase name="cancelWaitsForActualReadTimeout" classname="com.aladdin.wobbrik.HttpsOverlapTest" time="8.049"/>
+  <system-out><![CDATA[CANCELLED-READ mode=headers terminal=JobCancellationException
+HTTPS mode=headers path=market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews cancelToExitMs=522 totalMs=688 outcome=JobCancellationException
+HTTPS mode=market path=market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews cancelToExitMs=567 totalMs=889 outcome=LeftCompositionCancellationException
+HTTPS mode=market path=market/own?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews cancelToExitMs=533 totalMs=555 outcome=LeftCompositionCancellationException
+HTTPS mode=market path=market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews cancelToExitMs=-1 totalMs=9 outcome=response-200
+HTTPS mode=market path=market/l-2 cancelToExitMs=-1 totalMs=2 outcome=response-200
+HTTPS mode=market path=market/l-1 cancelToExitMs=-1 totalMs=7 outcome=response-200
+HTTPS mode=market path=market/l-3 cancelToExitMs=-1 totalMs=13 outcome=response-200
+HTTPS mode=market path=market/l-5 cancelToExitMs=-1 totalMs=10 outcome=response-200
+HTTPS mode=market path=market/l-6 cancelToExitMs=-1 totalMs=1 outcome=response-200
+HTTPS mode=market path=market/l-4 cancelToExitMs=-1 totalMs=2 outcome=response-200
+HTTPS mode=market path=market/l-7 cancelToExitMs=-1 totalMs=1 outcome=response-200
+HTTPS mode=market path=market/l-8 cancelToExitMs=-1 totalMs=1 outcome=response-200
+HTTPS mode=market path=market/l-9 cancelToExitMs=-1 totalMs=1 outcome=response-200
+HTTPS mode=market path=market/l-10 cancelToExitMs=-1 totalMs=1 outcome=response-200
+HTTPS mode=market path=market/l-11 cancelToExitMs=-1 totalMs=1 outcome=response-200
+HTTPS mode=market path=market/l-12 cancelToExitMs=-1 totalMs=1 outcome=response-200
+HTTPS mode=market path=sync cancelToExitMs=-1 totalMs=0 outcome=response-200
+CANCELLED-READ mode=body terminal=JobCancellationException
+HTTPS mode=body path=market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews cancelToExitMs=755 totalMs=761 outcome=JobCancellationException
+CANCELLED-READ mode=timeout terminal=JobCancellationException
+HTTPS mode=timeout path=market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews cancelToExitMs=7998 totalMs=8009 outcome=SocketTimeoutException
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
