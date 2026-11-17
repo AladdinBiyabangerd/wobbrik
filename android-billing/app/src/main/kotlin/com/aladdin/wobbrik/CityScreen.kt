@@ -3,6 +3,8 @@ package com.aladdin.wobbrik
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Text
@@ -84,93 +86,112 @@ internal fun CityContent(scene: CityScene?, failed: Boolean, onRetry: () -> Unit
         // The reference groups the scene and its action panel into one board. In a
         // tall portrait, cap the scene at its square illustration area and centre
         // the board instead of stretching empty Canvas space between those elements.
-        // Compact windows and enlarged type retain all available scene height.
+        // Enlarged type in the mobile shell uses a bounded scene in scrollable content;
+        // its primary view/back action stays outside the scroll area.
         val tallPortrait = maxHeight > maxWidth * 2 && LocalDensity.current.fontScale <= 1f
         val sceneHeight = if (tallPortrait) maxWidth else maxHeight
+        val scrollScene = LocalMobileMenuShell.current && LocalDensity.current.fontScale > 1f
         Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(GameTokens.Small, Alignment.CenterVertically)) {
-            CityHeader(scene?.membership?.population?.toString(), onHome, cached = cached)
-            BoxWithConstraints(Modifier.weight(1f, fill = !tallPortrait).fillMaxWidth().heightIn(max = sceneHeight)) {
-                val visible = if (focused && chosen != null) listOf(chosen) else buildings
-                val sceneBounds = if (focused && chosen != null) emptyList() else
-                    listOfNotNull(terrainBounds) + decorations.map {
-                        // Sweep envelope for the approved subtle tree motion, with the fixed camera unchanged.
-                        if (it.source.copy.itemId.startsWith("decor_tree_")) it.bounds.copy(left=it.bounds.left-2, right=it.bounds.right+2)
-                        else it.bounds
-                    }
-                val maxArtScale = minOf(cityArtScale(visible, art),
-                    atlases.getValue("modular").floor.size.width / CityBuildingProjection.ArtWidth,
-                    (if (focused) emptyList() else decorations).minOfOrNull { cityDecorationArtScale(it) } ?: Double.POSITIVE_INFINITY)
-                Canvas(Modifier.fillMaxSize().semantics {
-                    val buildingsDescription = if (buildings.isEmpty()) "Şəhər səhnəsi" else
-                        buildings.joinToString("; ") { "Bina ${it.source.building.id}: ${it.floors.size} mərtəbə" }
-                    contentDescription = buildingsDescription + "; ${scene?.parcels?.size ?: 0} torpaq sahəsi; ${decorations.size} yerləşdirilmiş dekor"
-                    customActions = buildings.map { building -> CustomAccessibilityAction("Bina ${building.source.building.id}: bax") {
-                        selected = building.source.building.id; focused = true; true
-                    } }
-                }.pointerInput(visible, sceneBounds, maxArtScale, maxWidth, maxHeight) {
-                    detectTapGestures { point ->
-                        val view = cityViewport(visible, size.width.toDouble(), size.height.toDouble(), maxArtScale, sceneBounds) ?: return@detectTapGestures
-                        selected = visible.asReversed().firstOrNull {
-                            val b = it.bounds
-                            val x = (point.x - view.x) / view.scale
-                            val y = (point.y - view.y) / view.scale
-                            x >= b.left && x <= b.right && y >= b.top && y <= b.bottom
-                        }?.source?.building?.id
-                        if (selected == null) focused = false
-                    }
-                }) {
-                    val view = cityViewport(visible, size.width.toDouble(), size.height.toDouble(), maxArtScale, sceneBounds) ?: return@Canvas
-                    if (!focused) {
-                        cityTerrain(surface, cliff, view, terrainArt)
-                        cityGardenShore(surface, cliff, shore, view, gardenArt)
-                    }
-                    if (!focused) decorations.filter { it.road }.sortedBy { it.source.copy.id }.forEach { cityDecoration(it, view) }
-                    val seconds = if (focused) 0.0 else lifeClock.value
-                    val moving = seconds > 0.0
-                    val actors = if (focused) emptyList() else cityLifeActors(routes, seconds)
-                    // Roads lie below all upright objects. Buildings and upright decorations share painter depth.
-                    val layers = visible.map { Triple(it.foundation.y, it.foundation.x, it.source.building.id) to it } +
-                        (if (focused) emptyList() else decorations.filter { !it.road }.map { Triple(it.anchor.y, it.anchor.x, it.source.copy.id) to it }) +
-                        actors.map { Triple(it.position.y, it.position.x, it.route.id) to it }
-                    layers.sortedWith(compareBy<Pair<Triple<Double, Double, String>, Any>> { it.first.first }
-                        .thenBy { it.first.second }.thenBy { it.first.third }).forEach { layer ->
-                        val projected = layer.second
-                        if (projected is CityDecorationDrawing) {
-                            cityLivingDecoration(projected, view, seconds, moving)
-                            return@forEach
+            val body: @Composable ColumnScope.() -> Unit = {
+                CityHeader(scene?.membership?.population?.toString(), onHome, cached = cached)
+                if (!scrollScene || scene != null) BoxWithConstraints((if (scrollScene) Modifier.height(GameTokens.Target * 3)
+                    else Modifier.weight(1f, fill = !tallPortrait).heightIn(max = sceneHeight)).fillMaxWidth()) {
+                    val visible = if (focused && chosen != null) listOf(chosen) else buildings
+                    val sceneBounds = if (focused && chosen != null) emptyList() else
+                        listOfNotNull(terrainBounds) + decorations.map {
+                            // Sweep envelope for the approved subtle tree motion, with the fixed camera unchanged.
+                            if (it.source.copy.itemId.startsWith("decor_tree_")) it.bounds.copy(left=it.bounds.left-2, right=it.bounds.right+2)
+                            else it.bounds
                         }
-                        if (projected is CityLifeActor) {
-                            cityLifeActor(projected, view, lifeArt, moving)
-                            return@forEach
+                    val maxArtScale = minOf(cityArtScale(visible, art),
+                        atlases.getValue("modular").floor.size.width / CityBuildingProjection.ArtWidth,
+                        (if (focused) emptyList() else decorations).minOfOrNull { cityDecorationArtScale(it) } ?: Double.POSITIVE_INFINITY)
+                    Canvas(Modifier.fillMaxSize().semantics {
+                        val buildingsDescription = if (buildings.isEmpty()) "Şəhər səhnəsi" else
+                            buildings.joinToString("; ") { "Bina ${it.source.building.id}: ${it.floors.size} mərtəbə" }
+                        contentDescription = buildingsDescription + "; ${scene?.parcels?.size ?: 0} torpaq sahəsi; ${decorations.size} yerləşdirilmiş dekor"
+                        customActions = buildings.map { building -> CustomAccessibilityAction("Bina ${building.source.building.id}: bax") {
+                            selected = building.source.building.id; focused = true; true
+                        } }
+                    }.pointerInput(visible, sceneBounds, maxArtScale, maxWidth, maxHeight) {
+                        detectTapGestures { point ->
+                            val view = cityViewport(visible, size.width.toDouble(), size.height.toDouble(), maxArtScale, sceneBounds) ?: return@detectTapGestures
+                            selected = visible.asReversed().firstOrNull {
+                                val b = it.bounds
+                                val x = (point.x - view.x) / view.scale
+                                val y = (point.y - view.y) / view.scale
+                                x >= b.left && x <= b.right && y >= b.top && y <= b.bottom
+                            }?.source?.building?.id
+                            if (selected == null) focused = false
                         }
-                        projected as CityBuildingProjection.Building
-                        val parts = projected.source.building.parts
-                        projected.floors.forEachIndexed { index, point ->
-                            val scale = view.scale.toFloat()
-                            val x = (view.x + (point.x - CityBuildingProjection.ArtWidth / 2) * view.scale).toFloat()
-                            val base = (view.y + (point.y + CityBuildingProjection.FoundationFront) * view.scale).toFloat()
-                            cityBuildingFloor(atlases, art, parts, x, base, scale, index == 0, index == projected.floors.lastIndex,
-                                windowAlpha = if (moving) cityWindowAlpha(projected.source.building.id,index,seconds) else 1f)
-                            cityFacadeGarden(gardenArt,x,base,CityBuildingProjection.ArtWidth.toFloat()*scale,index == 0,parts["window"] == "coins_window_2", cafe = index == 1)
+                    }) {
+                        val view = cityViewport(visible, size.width.toDouble(), size.height.toDouble(), maxArtScale, sceneBounds) ?: return@Canvas
+                        if (!focused) {
+                            cityTerrain(surface, cliff, view, terrainArt)
+                            cityGardenShore(surface, cliff, shore, view, gardenArt)
+                        }
+                        if (!focused) decorations.filter { it.road }.sortedBy { it.source.copy.id }.forEach { cityDecoration(it, view) }
+                        val seconds = if (focused) 0.0 else lifeClock.value
+                        val moving = seconds > 0.0
+                        val actors = if (focused) emptyList() else cityLifeActors(routes, seconds)
+                        // Roads lie below all upright objects. Buildings and upright decorations share painter depth.
+                        val layers = visible.map { Triple(it.foundation.y, it.foundation.x, it.source.building.id) to it } +
+                            (if (focused) emptyList() else decorations.filter { !it.road }.map { Triple(it.anchor.y, it.anchor.x, it.source.copy.id) to it }) +
+                            actors.map { Triple(it.position.y, it.position.x, it.route.id) to it }
+                        layers.sortedWith(compareBy<Pair<Triple<Double, Double, String>, Any>> { it.first.first }
+                            .thenBy { it.first.second }.thenBy { it.first.third }).forEach { layer ->
+                            val projected = layer.second
+                            if (projected is CityDecorationDrawing) {
+                                cityLivingDecoration(projected, view, seconds, moving)
+                                return@forEach
+                            }
+                            if (projected is CityLifeActor) {
+                                cityLifeActor(projected, view, lifeArt, moving)
+                                return@forEach
+                            }
+                            projected as CityBuildingProjection.Building
+                            val parts = projected.source.building.parts
+                            projected.floors.forEachIndexed { index, point ->
+                                val scale = view.scale.toFloat()
+                                val x = (view.x + (point.x - CityBuildingProjection.ArtWidth / 2) * view.scale).toFloat()
+                                val base = (view.y + (point.y + CityBuildingProjection.FoundationFront) * view.scale).toFloat()
+                                cityBuildingFloor(atlases, art, parts, x, base, scale, index == 0, index == projected.floors.lastIndex,
+                                    windowAlpha = if (moving) cityWindowAlpha(projected.source.building.id,index,seconds) else 1f)
+                                cityFacadeGarden(gardenArt,x,base,CityBuildingProjection.ArtWidth.toFloat()*scale,index == 0,parts["window"] == "coins_window_2", cafe = index == 1)
+                            }
                         }
                     }
                 }
-            }
-            when {
-                failed -> { Text("Şəhəri oxumaq mümkün olmadı", color = GameTokens.Danger); HomeButton(label = "Yenilə", onClick = onRetry) }
-                scene == null -> Text("Şəhər yüklənir…", color = GameTokens.Muted)
-                else -> {
-                    if (scene.buildings.isEmpty()) Text("Şəhərdə bina yoxdur", color = GameTokens.Muted)
-                    val unavailableDecor = scene.decorations.size - decorations.size
-                    if (unavailableDecor > 0) Text("$unavailableDecor dekorun qrafikası mövcud deyil", color = GameTokens.Muted)
-                    val unavailable = scene.buildings.size - buildings.size
-                    if (unavailable > 0) Text("$unavailable binanın mövqeyi, həndəsəsi və ya qrafikası mövcud deyil", color = GameTokens.Muted)
+                when {
+                    failed -> {
+                        Text("Şəhəri oxumaq mümkün olmadı", color = GameTokens.Danger)
+                        if (!scrollScene) HomeButton(label = "Yenilə", onClick = onRetry)
+                    }
+                    scene == null -> Text("Şəhər yüklənir…", color = GameTokens.Muted)
+                    else -> {
+                        if (scene.buildings.isEmpty()) Text("Şəhərdə bina yoxdur", color = GameTokens.Muted)
+                        val unavailableDecor = scene.decorations.size - decorations.size
+                        if (unavailableDecor > 0) Text("$unavailableDecor dekorun qrafikası mövcud deyil", color = GameTokens.Muted)
+                        val unavailable = scene.buildings.size - buildings.size
+                        if (unavailable > 0) Text("$unavailable binanın mövqeyi, həndəsəsi və ya qrafikası mövcud deyil", color = GameTokens.Muted)
+                    }
+                }
+                if (scrollScene) {
+                    Text(if (focused) "Bina görünüşü" else "Binaya bax", color = GameTokens.Text, fontSize = GameTokens.Body)
+                    chosen?.source?.building?.let { Text("${it.floors} mərtəbə · ${it.residents} sakin", color = GameTokens.Muted, fontSize = GameTokens.Caption) }
                 }
             }
-            CityViewPanel(chosen?.source?.building, focused, buildings.isNotEmpty()) {
+            if (scrollScene) Column(Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(GameTokens.Small), content = body)
+            else body()
+            val onView = {
                 if (selected == null) selected = buildings.lastOrNull()?.source?.building?.id
                 focused = !focused
             }
+            if (scrollScene && failed) HomeButton("Yenilə", primary = true, compact = true, onClick = onRetry)
+            else if (scrollScene) HomeButton(if (focused) "Geri" else "Bax", primary = true, compact = true,
+                showPlayIcon = !focused, enabled = buildings.isNotEmpty(), onClick = onView)
+            else CityViewPanel(chosen?.source?.building, focused, buildings.isNotEmpty(), onView)
             CityNavigation(onInventory)
         }
     }

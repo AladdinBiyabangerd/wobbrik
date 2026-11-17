@@ -137,12 +137,12 @@ internal fun FinishCosmeticScreen(view: AcceptedEngineHost.Snapshot, ready: Auth
     val missingArt = catalog?.items?.any { it.category in FinishCosmetics.categories && it.id !in art } == true
     val valid = catalog != null && view.finishParts.values.all { it in art } &&
         FinishCosmetics.valid(catalog, ready.snapshot, view.finishParts)
-    BoxWithConstraints(Modifier.fillMaxSize().background(GameTokens.Background).safeDrawingPadding().padding(GameTokens.Gap)) {
+    BoxWithConstraints(Modifier.fillMaxSize().background(if(LocalMobileMenuShell.current) GameTokens.MobileHome.PanelBottom else GameTokens.Background).then(if(LocalMobileMenuShell.current) Modifier else Modifier.safeDrawingPadding()).padding(GameTokens.Gap)) {
         val stackedActions = maxWidth < GameTokens.MediumWidth && androidx.compose.ui.platform.LocalDensity.current.fontScale > 1f
         val wide = maxWidth >= GameTokens.MediumWidth && maxWidth > maxHeight
-        val gridColumns = if (maxWidth >= GameTokens.ExpandedWidth && wide) 3 else 2
+        val gridColumns = if(LocalMobileMenuShell.current && androidx.compose.ui.platform.LocalDensity.current.fontScale > 1f) 1 else if (maxWidth >= GameTokens.ExpandedWidth && wide) 3 else 2
         Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+            if(!LocalMobileMenuShell.current) Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
                 if (!LocalMobileMenuShell.current) Image(painterResource(R.drawable.wobbrik_logo), "Wobbrik", Modifier.width(GameTokens.Target * 2).height(GameTokens.Target), contentScale = ContentScale.Fit)
                 Text("Bina görünüşü", color = GameTokens.Text, fontSize = sizing.heading, fontWeight = FontWeight.Bold)
             }
@@ -195,6 +195,7 @@ internal fun FinishCosmeticScreen(view: AcceptedEngineHost.Snapshot, ready: Auth
                             if (selected) Text("✓", color = GameTokens.Background, fontWeight = FontWeight.Bold,
                                 modifier = Modifier.align(Alignment.TopEnd).background(GameTokens.Accent, CircleShape).padding(GameTokens.Quarter))
                         }
+                        if(LocalMobileMenuShell.current) Text(item.name, color = GameTokens.Text, fontFamily = GameTypeface, fontWeight = FontWeight.Bold)
                         Text(if (!available) "Bağlı" else if (item.method == "free") "Pulsuz" else "Açılıb",
                             modifier = Modifier.fillMaxWidth().background(if (available) GameTokens.Success else GameTokens.Raised,
                                 RoundedCornerShape(GameTokens.ControlRadius)).padding(GameTokens.Quarter),
@@ -242,11 +243,13 @@ internal fun FinishCosmeticScreen(view: AcceptedEngineHost.Snapshot, ready: Auth
                 picker(Modifier.fillMaxWidth().weight(2f))
             }
             val backAction: @Composable (Modifier) -> Unit = { modifier ->
-                Button(onClick = onBack, shape = RoundedCornerShape(GameTokens.ControlRadius), modifier = modifier.heightIn(min = GameTokens.Target),
+                if(LocalMobileMenuShell.current) CommerceAction("Ləğv et", modifier, onClick = onBack)
+                else Button(onClick = onBack, shape = RoundedCornerShape(GameTokens.ControlRadius), modifier = modifier.heightIn(min = GameTokens.Target),
                     colors = ButtonDefaults.buttonColors(containerColor = GameTokens.Raised, contentColor = GameTokens.Text)) { Text("← Geri", softWrap = false) }
             }
             val confirmAction: @Composable (Modifier) -> Unit = { modifier ->
-                Button(onClick = onConfirm, shape = RoundedCornerShape(GameTokens.ControlRadius), enabled = valid && !view.waiting,
+                if(LocalMobileMenuShell.current) CommerceAction(if(view.waiting) "Saxlanılır…" else "✓ Təsdiqlə", modifier, primary = true, enabled = valid && !view.waiting, onClick = onConfirm)
+                else Button(onClick = onConfirm, shape = RoundedCornerShape(GameTokens.ControlRadius), enabled = valid && !view.waiting,
                     modifier = modifier.heightIn(min = GameTokens.Target),
                     colors = ButtonDefaults.buttonColors(containerColor = GameTokens.Accent, contentColor = GameTokens.Background)) {
                     Text(if (view.waiting) "Saxlanılır…" else "✓ Təsdiqlə", fontWeight = FontWeight.Bold, softWrap = false)

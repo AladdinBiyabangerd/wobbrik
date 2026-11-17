@@ -23,7 +23,7 @@ alwaysApply: true
 2. Mövcud skelet üzərində həmin vahidin domain/data/UI inteqrasiyasını hazırla. Müvəqqəti saxta UI və demo adapter yekun oyun deyil.
 3. Uyğun fokuslu yoxlamaları və axının son yoxlamasını apar; CI yalnız aşağıdakı branch/main qaydasına tabedir.
 4. Mövcud təsdiqlənmiş dizaynı birəbir tətbiq et. Şablondakı “yeni nümunə → yeni dizayn dəsti” axını təsdiqlənmiş dizaynları əvəz etmir; yeni/alternativ dizayn əvvəlcədən razılıq tələb edir.
-5. Telefon/planşet, pəncərə/orientasiya, böyük şrift, inset/klaviatura, əlçatanlıq və tələb olunan lokalları yoxla; zəruri scroll-u saxla. Təsdiqlənməmiş dil siyahısını uydurma.
+5. Mobil portret ölçüləri, böyük şrift, inset/klaviatura, əlçatanlıq və tələb olunan lokalları yoxla; zəruri scroll-u saxla. Planşet ayrıca tapşırıqdır. Təsdiqlənməmiş dil siyahısını uydurma.
 6. Vizual vahiddə real build renderlərini dizaynla yanaşı müqayisə et; nəticə və məhdudiyyətləri `docs/reviews/` altında yaz. Tam mərhələ qəbulu üçün ayrıca `docs/reviews/<phase>/acceptance.md` istifadə oluna bilər; mövcud review-ları köçürmə.
 7. Dizayn nümunəsinin OK-u mərhələ qəbulu deyil; mərhələ qəbulu növbəti mərhələyə başlama icazəsi deyil. Növbəti mərhələ ayrıca istifadəçi tapşırığı ilə başlayır.
 

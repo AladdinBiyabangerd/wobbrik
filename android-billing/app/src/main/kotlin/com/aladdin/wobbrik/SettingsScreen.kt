@@ -1,7 +1,6 @@
 package com.aladdin.wobbrik
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -11,8 +10,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.res.imageResource
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
@@ -27,38 +26,36 @@ internal fun SettingsScreen(preferences: DevicePreferences?, busy: Boolean, erro
     onSetting: (FeedbackSetting, Boolean) -> Unit, onLanguage: () -> Unit,
     onSupport: () -> Unit, onPrivacy: () -> Unit, onBack: () -> Unit) {
     BackHandler(onBack = onBack)
-    val board = ImageBitmap.imageResource(R.drawable.account_approved_board)
-    CompositionLocalProvider(LocalCommunityBoard provides board) {
-        Box(Modifier.fillMaxSize().background(GameTokens.Background)) {
-            CommunityBackdrop(Modifier.matchParentSize())
-            Column(Modifier.fillMaxSize().safeDrawingPadding().padding(GameTokens.Gap),
+    Box(Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(
+        GameTokens.MobileHome.PanelTop, GameTokens.MobileHome.PanelBottom)))) {
+        Column(Modifier.fillMaxSize().safeDrawingPadding().padding(GameTokens.Gap),
+            verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Surface(onClick = onBack, modifier = Modifier.size(GameTokens.Target)
+                    .semantics { contentDescription = "Geri" }, color = GameTokens.Surface,
+                    shape = RoundedCornerShape(GameTokens.ControlRadius)) {
+                    Box(contentAlignment = Alignment.Center) { Text("‹", fontSize = GameTokens.Title, color = GameTokens.Text) }
+                }
+                Text("Parametrlər", Modifier.weight(1f).padding(start = GameTokens.Small)
+                    .horizontalScroll(rememberScrollState()), softWrap = false, fontSize = mobileUiSizing().heading,
+                    color = GameTokens.Text, fontWeight = FontWeight.Bold)
+            }
+            Column(Modifier.weight(1f).verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Surface(onClick = onBack, modifier = Modifier.size(GameTokens.Target)
-                        .semantics { contentDescription = "Geri" }, color = GameTokens.Surface,
-                        shape = RoundedCornerShape(GameTokens.ControlRadius)) {
-                        Box(contentAlignment = Alignment.Center) { Text("‹", fontSize = GameTokens.Title, color = GameTokens.Text) }
-                    }
-                    Text("Parametrlər", Modifier.padding(start = GameTokens.Small), fontSize = mobileUiSizing().heading,
-                        color = GameTokens.Text, fontWeight = FontWeight.Bold)
-                }
-                Column(Modifier.weight(1f).verticalScroll(rememberScrollState()),
-                    verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-                    SettingsSection("SƏS VƏ HİSS")
-                    SettingsRow("Musiqi", preferences?.music, enabled = preferences != null && !busy,
-                        toggle = { onSetting(FeedbackSetting.Music, it) })
-                    SettingsRow("Səs effektləri", preferences?.sound, enabled = preferences != null && !busy,
-                        toggle = { onSetting(FeedbackSetting.Sound, it) })
-                    SettingsRow("Titrəmə", preferences?.vibration, enabled = preferences != null && !busy,
-                        toggle = { onSetting(FeedbackSetting.Vibration, it) })
-                    SettingsSection("OYUN")
-                    SettingsRow("Dil", value = "Azərbaycan", onClick = onLanguage)
-                    SettingsSection("DƏSTƏK")
-                    SettingsRow("Dəstək", onClick = onSupport)
-                    SettingsRow("Məxfilik", onClick = onPrivacy)
-                    if (preferences == null && error == null) CircularProgressIndicator(color = GameTokens.Accent)
-                    error?.let { Text(it, color = GameTokens.Danger, fontSize = GameTokens.Body) }
-                }
+                SettingsSection("SƏS VƏ HİSS")
+                SettingsRow("Musiqi", preferences?.music, enabled = preferences != null && !busy,
+                    toggle = { onSetting(FeedbackSetting.Music, it) })
+                SettingsRow("Səs effektləri", preferences?.sound, enabled = preferences != null && !busy,
+                    toggle = { onSetting(FeedbackSetting.Sound, it) })
+                SettingsRow("Titrəmə", preferences?.vibration, enabled = preferences != null && !busy,
+                    toggle = { onSetting(FeedbackSetting.Vibration, it) })
+                SettingsSection("OYUN")
+                SettingsRow("Dil", value = "Azərbaycan", onClick = onLanguage)
+                SettingsSection("DƏSTƏK")
+                SettingsRow("Dəstək", onClick = onSupport)
+                SettingsRow("Məxfilik", onClick = onPrivacy)
+                if (preferences == null && error == null) CircularProgressIndicator(color = GameTokens.Accent)
+                error?.let { Text(it, color = GameTokens.Danger, fontSize = GameTokens.Body) }
             }
         }
     }
@@ -72,6 +69,17 @@ internal fun SettingsScreen(preferences: DevicePreferences?, busy: Boolean, erro
 @Composable private fun SettingsRow(label: String, checked: Boolean? = null, value: String? = null,
     enabled: Boolean = true, toggle: ((Boolean) -> Unit)? = null, onClick: () -> Unit = {}) {
     val shape = RoundedCornerShape(GameTokens.ControlRadius)
+    val largeFont = LocalDensity.current.fontScale > 1f
+    val trailing: @Composable () -> Unit = {
+        if (toggle != null) Box(Modifier.size(GameTokens.Target), contentAlignment = Alignment.Center) {
+            Box(Modifier.size(GameTokens.Target, GameTokens.Inset)
+                .background(if (enabled && checked == true) GameTokens.Accent else GameTokens.Raised, CircleShape),
+                contentAlignment = if (checked == true) Alignment.CenterEnd else Alignment.CenterStart) {
+                Box(Modifier.padding(GameTokens.Quarter).size(GameTokens.Gap)
+                    .background(if (enabled && checked == true) GameTokens.Background else GameTokens.Muted, CircleShape))
+            }
+        } else Text("›", fontSize = GameTokens.Title, color = GameTokens.Muted)
+    }
     val content: @Composable () -> Unit = {
         Row(Modifier.fillMaxWidth().heightIn(min = GameTokens.Target + GameTokens.Gap).padding(GameTokens.Small),
             verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
@@ -81,26 +89,22 @@ internal fun SettingsScreen(preferences: DevicePreferences?, busy: Boolean, erro
             }
             Column(Modifier.weight(1f)) {
                 Text(label, fontSize = GameTokens.Body, color = GameTokens.Text, fontWeight = FontWeight.Bold)
-                if (value != null && LocalDensity.current.fontScale > 1f) Text(value, color = GameTokens.Muted, fontSize = GameTokens.Label)
-            }
-            if (toggle != null) Box(Modifier.size(GameTokens.Target), contentAlignment = Alignment.Center) {
-                Box(Modifier.size(GameTokens.Target, GameTokens.Inset)
-                    .background(if (checked == true) GameTokens.Accent else GameTokens.Raised, CircleShape),
-                    contentAlignment = if (checked == true) Alignment.CenterEnd else Alignment.CenterStart) {
-                    Box(Modifier.padding(GameTokens.Quarter).size(GameTokens.Gap)
-                        .background(if (checked == true) GameTokens.Background else GameTokens.Muted, CircleShape))
+                if (largeFont) {
+                    if (value != null) Text(value, color = GameTokens.Muted, fontSize = GameTokens.Label)
+                    Box(Modifier.align(Alignment.End)) { trailing() }
                 }
-            } else {
-                if (value != null && LocalDensity.current.fontScale <= 1f) Text(value, fontSize = GameTokens.Label, color = GameTokens.Muted)
-                Text("›", fontSize = GameTokens.Title, color = GameTokens.Muted)
+            }
+            if (!largeFont) {
+                if (value != null) Text(value, fontSize = GameTokens.Label, color = GameTokens.Muted)
+                trailing()
             }
         }
     }
-    if (toggle != null) Surface(modifier = Modifier.toggleable(value = checked == true, enabled = enabled,
-        role = Role.Switch, onValueChange = toggle), color = GameTokens.Surface, shape = shape,
-        border = BorderStroke(GameTokens.Hairline, GameTokens.Raised), content = content)
-    else Surface(onClick = onClick, color = GameTokens.Surface, shape = shape,
-        border = BorderStroke(GameTokens.Hairline, GameTokens.Raised), content = content)
+    if (toggle != null) MenuRelief(Modifier.toggleable(value = checked == true, enabled = enabled,
+        role = Role.Switch, onValueChange = toggle), shape = shape) { content() }
+    else Surface(onClick = onClick, enabled = enabled, color = androidx.compose.ui.graphics.Color.Transparent, shape = shape) {
+        MenuRelief(shape = shape) { content() }
+    }
 }
 
 private fun settingsIcon(label:String):androidx.compose.ui.graphics.vector.ImageVector {

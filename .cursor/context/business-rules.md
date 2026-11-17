@@ -9,8 +9,10 @@
 - Kosmetika fiziki üstünlük vermir. Alınan bina hissələri hesabda açmır; alınan bina təkrar satılmır. Detallar məhsul planındadır.
 - Placement typed geometry/provenance və server containment/overlap yoxlamaları hazır olmadan açılmır.
 - Hazır olmayan domain adapteri, demo, fixture, session-only nəticə və placeholder yekun/live oyun kimi göstərilmir.
-- Vizual mənbələr: `docs/design/mobile-v1/`, `docs/design/game-tap-v2/`, `docs/design/tablet-v1/`; şəhər üçün `docs/design/README.md`. Eyni ekranın son təsdiqlənmiş versiyası əsasdır. Sxematik əvəzetmə və icazəsiz redesign olmaz.
+- Vizual mənbə: `docs/design/unified-mobile-v3/README.md`; native Compose layout və navbar/vector ikonları, yalnız mürəkkəb qrafika üçün raster. Mobil portret; planşet ayrıca tapşırıqdır.
 - Mövcud tokeni tap; ui-craft istifadə et; telefon/planşet renderlərini dizaynla yanaşı müqayisə edib bax. Böyük şrift/inset/keyboard/a11y və lazımi scroll qorunur.
 - Real SKU, Console, remote push və deploy ayrıca göstərişədək əhatədən kənardır.
 
 - 13 noyabr cari vəziyyəti: məcburi Google entry və guest/link çıxarılması hər iki main-dədir. Anonymous fallback, wallet merge və data deletion yoxdur. Canlı yoxlama tələb etmə, emulatoru avtomatik açma.
+
+- 15 noyabr lokal test istisnası: ayrıca `mockDebug` (`com.aladdin.wobbrik.mock`, Wobbrik Mock) Google-sız sintetik profil/lokal adapter istifadə edir. Real backend və wallet deyil; adi debug/release Google tələbini saxlayır. Mock source release-ə daxil edilmir.

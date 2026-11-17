@@ -3,7 +3,7 @@ package appbackend.wobbrik.game
 import appbackend.wobbrik.billing.BillingSession
 import kotlinx.serialization.json.*
 
-data class DecorationCopy(val id: String, val itemId: String)
+data class DecorationCopy(val id: String, val itemId: String, val position: CityPosition? = null)
 data class DecorationPage(val copies: List<DecorationCopy>, val next: String?)
 
 /** Copy identities come only from the authenticated server; position is outside this flow. */
@@ -15,7 +15,8 @@ object DecorationReads {
         }.content.also(InventoryReads::id)
         val copies = root.getValue("copies").jsonArray.map {
             val copy = it.jsonObject
-            DecorationCopy(copy.id("id"), copy.id("item_id"))
+            DecorationCopy(copy.id("id"), copy.id("item_id"),
+                copy["position"]?.takeUnless { it == JsonNull }?.let(CitySceneReads::position))
         }
         require(copies.size <= 20 && copies.map { it.id }.distinct().size == copies.size)
         val next = root["next_cursor"]?.let { root.id("next_cursor") }
@@ -24,7 +25,7 @@ object DecorationReads {
     }
 }
 
-class DecorationRepository(private val backend: GameplayHttpBackend) {
+class DecorationRepository(private val backend: GameplayReads) {
     suspend fun page(session: BillingSession, cursor: String? = null): DecorationPage {
         cursor?.let(InventoryReads::id)
         return DecorationReads.page(backend.read(session, "decorations?limit=20" +

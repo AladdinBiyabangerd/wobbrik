@@ -1,0 +1,13 @@
+# Mənim elanlarım — native kompozisiya
+
+Branch feat/community-tabs-native-consistency; HEAD6c96e9c və owner working diff. Bu vahidin source bazası /private/tmp/market-own-before.kt. Commit/stage/merge/push/deploy/CI yoxdur.
+
+PLAN§1.1 və unified-mobile-v3/05-owned-and-listings sağ ekran əsasında MarketScreen.kt mobil aktiv elan kartları ayrıca feature-local composable alır. Bina solda, ad/mərtəbə sağda; normal fontda coin qiymət və Satışdadır eyni sətirdə, altında full-width native refresh ikonlu Elanı geri götür. Native ControlRadius16dp, mövcud PanelTop/Bottom+radial Rim+Hairline materialı təkrar istifadə olunur. Font2 mətn/qiymət/status/action şaqulidir, art96dp və lazy scroll saxlanır. Yeni token/asset/dependency yoxdur.
+
+Mobil öz elanlarında PNG-də olmayan filter/refresh sətri çıxarıldı; tabın mövcud təkrar seçilməsi refresh edir, error retry qalır. Own tab seçiləndə alış filter-i sıfırlanır ki, gizli filter öz elanlarını gizlətməsin. Alış/legacy filter UI saxlanır. Real server price/status/preview, list/withdraw confirmation və mutation/revision/account sərhədləri dəyişmir. Sold/withdrawn/unavailable kartı öz mövcud statusunu saxlayır; aktiv deyilsə Satışdadır uydurulmur. API/DTO/schema/wallet/domain qaydası dəyişmir; AppBackend dəyişikliyi lazım deyil. Profil/Ərazi/shared token/chrome/Yeni elan forması dəyişdirilmədi.
+
+Kontrast ui-craft3/3PASS: Muted/PanelTop8.59, Text/PanelTop13.58, Background/Accent11.45. Material əvvəlki alış səthidir; ən açıq kompozit işıq üzrə əvvəlki min6.56 sübutu market-building-relief review-dadır.
+
+Native host normal/small font1/font2/inset+uzun ad-balans renderləri /private/tmp/wobbrik-own-listings-renders altında alınır. Font2 capture-lar geri götürmə action-a scroll vəziyyətidir; ilk scroll/eyni anda tam kart görünməsi sübutu deyil. Real kataloq artwork saxlanır; tam piksel eyniliyi və app redesign/mərhələ qəbulu iddia edilmir. Device/account/TalkBack/IME/real inset/API24/GPU/performance/locale/tablet yoxlanmadı; emulator açılmadı. Yoxlama nəticələri aşağıda yekunlaşdırılır.
+
+Son native commerce5+shell4=9/9 PASS1m37s, failure/error/skipped0. Own status/minimum48dp action/filter absence, withdraw confirmation+cancel, Yeni elan və alış route/input regressiyaları keçdi. İlk production9/9 run1m47s idi. Normal debug/mockDebug APK+lintDebug PASS1m22s. Beş own PNG açılıb05-owned ilə müqayisə edildi və market-own-listings/ altında saxlanıb. Scoped diff/callsite və git diff --check PASS; index boşdur. Gradle wrapper sandbox lock cəhdi test nəticəsi deyil; icazəli rerun keçib. Mövcud nullable String/native ripple warning-ləri saxlanır.

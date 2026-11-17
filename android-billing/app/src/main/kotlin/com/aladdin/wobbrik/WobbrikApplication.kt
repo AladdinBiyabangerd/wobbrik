@@ -70,6 +70,10 @@ class WobbrikApplication : Application(), DefaultLifecycleObserver {
 
     fun retryAccount() {
         if (bootstrap !is Bootstrap.Configured) return
+        if (BuildVariantBackend.localUid != null) {
+            (bootstrap as Bootstrap.Configured).recovery.onForeground()
+            return
+        }
         val user = googleUser()
         mutableAccount.value = user?.let { AccountState.Session(it.uid) } ?: AccountState.SignedOut
         if (user != null) (bootstrap as Bootstrap.Configured).recovery.onForeground()
@@ -94,18 +98,24 @@ class WobbrikApplication : Application(), DefaultLifecycleObserver {
 
     override fun onCreate() {
         super<Application>.onCreate()
-        if (FirebaseApp.getApps(this).isEmpty()) {
+        val localTransport = BuildVariantBackend.transport(this)
+        check(localTransport == null || BuildConfig.DEBUG)
+        if (localTransport == null && FirebaseApp.getApps(this).isEmpty()) {
             bootstrap = Bootstrap.MissingFirebase
             return
         }
-        if (BuildConfig.BACKEND_ORIGIN.isBlank()) {
+        if (localTransport == null && BuildConfig.BACKEND_ORIGIN.isBlank()) {
             bootstrap = Bootstrap.MissingBackendOrigin
             return
         }
         // Invalid configured origins fail explicitly; never fall back to a guessed endpoint.
-        val transport = UrlConnectionGameplayTransport(BuildConfig.BACKEND_ORIGIN)
-        val auth = FirebaseAuth.getInstance()
+        val transport = localTransport ?: UrlConnectionGameplayTransport(BuildConfig.BACKEND_ORIGIN)
+        val auth = if (localTransport == null) FirebaseAuth.getInstance() else null
         val sessions = AccountSessions { uid ->
+            if (localTransport != null) {
+                check(uid == BuildVariantBackend.localUid)
+                return@AccountSessions "local-mock-only"
+            }
             val user = googleUser() ?: throw AccountChanged()
             if (user.uid != uid) throw AccountChanged()
             val token = try { user.getIdToken(false).await().token }
@@ -133,14 +143,19 @@ class WobbrikApplication : Application(), DefaultLifecycleObserver {
             appbackend.wobbrik.game.DecorationRepository(backend), appbackend.wobbrik.game.CitySceneRepository(backend), AccountViews(backend, readCache, sessions), appbackend.wobbrik.game.MarketRepository(backend), backend, appbackend.wobbrik.game.LeaderboardRepository(backend))
         retryScheduler = appbackend.wobbrik.game.RecoveryRetryScheduler(owner, recoveryScope)
         connectivity = RecoveryConnectivity(this) { retryScheduler?.connected(it) }
-        authListener = FirebaseAuth.AuthStateListener {
+        if (localTransport != null) {
+            val uid = requireNotNull(BuildVariantBackend.localUid)
+            owner.onAuthChanged(uid)
+            localHost.bind(sessions.current())
+            mutableAccount.value = AccountState.Session(uid)
+        } else authListener = FirebaseAuth.AuthStateListener {
             // Do not deduplicate by UID: a re-login must establish a new recovery epoch.
             val user = googleUser()
             owner.onAuthChanged(user?.uid)
             localHost.bind(sessions.current())
             mutableAccount.value = user?.let { AccountState.Session(it.uid) }
                 ?: AccountState.SignedOut
-        }.also(auth::addAuthStateListener)
+        }.also { requireNotNull(auth).addAuthStateListener(it) }
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)
         retryAccount()
     }

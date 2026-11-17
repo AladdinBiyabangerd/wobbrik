@@ -19,7 +19,7 @@ internal fun CityPurchasePanel(enabled: Boolean, onBuy: () -> Unit, onCancel: ()
     content: @Composable ColumnScope.() -> Unit) {
     Surface(shape = RoundedCornerShape(GameTokens.CardRadius), color = Color.Transparent,
         border = BorderStroke(GameTokens.Hairline, GameTokens.Raised)) {
-        Column(Modifier.background(Brush.verticalGradient(listOf(GameTokens.Surface, GameTokens.Background))).padding(GameTokens.Small), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+        Column(Modifier.background(Brush.verticalGradient(if(LocalMobileMenuShell.current) listOf(GameTokens.MobileHome.PanelTop, GameTokens.MobileHome.PanelBottom) else listOf(GameTokens.Surface, GameTokens.Background))).padding(GameTokens.Small), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
             Column(Modifier.heightIn(max = GameTokens.Target * 3).verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(GameTokens.Small), content = content)
             if (LocalDensity.current.fontScale > 1f) {

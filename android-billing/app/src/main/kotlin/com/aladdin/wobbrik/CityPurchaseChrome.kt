@@ -78,8 +78,14 @@ private fun PurchaseBalance(coins: Long) {
 
 @Composable
 internal fun PurchaseCard(selected: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier,
+    shape: androidx.compose.ui.graphics.Shape = RoundedCornerShape(GameTokens.CardRadius),
     content: @Composable () -> Unit) {
-    val shape = RoundedCornerShape(GameTokens.CardRadius)
+    if(LocalMobileMenuShell.current) {
+        Surface(onClick = onClick, modifier = modifier, color = Color.Transparent, shape = shape) {
+            MenuRelief(Modifier.fillMaxWidth(), shape, if(selected) MenuSkin.Selected else MenuSkin.Commerce) { content() }
+        }
+        return
+    }
     Surface(onClick = onClick, modifier = modifier.then(if (selected) Modifier.shadow(GameTokens.PanelElevation,
         shape, ambientColor = GameTokens.Accent, spotColor = GameTokens.Accent) else Modifier),
         shape = shape, color = Color.Transparent,
@@ -106,6 +112,10 @@ internal fun PurchasePrice(price: Long?, modifier: Modifier = Modifier) {
 @Composable
 internal fun PurchaseAction(modifier: Modifier = Modifier.fillMaxWidth(), primary: Boolean = false,
     enabled: Boolean = true, onClick: () -> Unit) {
+    if(LocalMobileMenuShell.current) {
+        CommerceAction(if(primary) "Al" else "Ləğv et", modifier, primary, enabled, if(primary) MobileIcon.Cart else null, onClick = onClick)
+        return
+    }
     val sizing = mobileUiSizing()
     val shape = RoundedCornerShape(GameTokens.CardRadius)
     val background = if (primary && enabled) GameTokens.Accent else GameTokens.Surface

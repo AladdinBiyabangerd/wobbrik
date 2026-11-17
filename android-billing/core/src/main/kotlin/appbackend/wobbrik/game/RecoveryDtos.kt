@@ -7,10 +7,12 @@ import java.util.TimeZone
 import kotlinx.serialization.json.*
 
 data class PartProgress(val itemId: String, val completed: Long, val required: Long, val unlocked: Boolean)
+data class AchievementProgress(val id: String, val category: String, val threshold: Long, val current: Long)
 data class AccountRecovery(val serverTime: String, val firstOnlineAt: String, val graceUntil: String,
     val level: Long, val rescues: Long, val achievements: List<String>, val unlocks: List<String>,
     val land: List<String>, val partProgress: List<PartProgress>,
-    val bestFloors: Long? = null, val xpInterval: XpInterval? = null)
+    val bestFloors: Long? = null, val xpInterval: XpInterval? = null,
+    val achievementProgress: List<AchievementProgress>? = null)
 data class XpInterval(val start: BigInteger, val next: BigInteger)
 sealed interface AttemptResult {
     data class Started(val attemptId: String) : AttemptResult
@@ -92,7 +94,13 @@ object RecoveryDtos {
         require(progress.map { it.itemId }.distinct().size == progress.size)
         val account = AccountRecovery(r.time("server_time"), r.time("first_online_at"), r.time("grace_until"),
             r.n("level"), r.n("rescues"), r.ids("achievements"), r.ids("unlocks"), r.ids("land"), progress,
-            r["best_floors"]?.let { r.n("best_floors") }, r.xpInterval(r.n("xp"), r.n("level")))
+            r["best_floors"]?.let { r.n("best_floors") }, r.xpInterval(r.n("xp"), r.n("level")),
+            r["achievement_progress"]?.jsonArray?.map { element ->
+                val p = element.jsonObject
+                AchievementProgress(p.s("id"), p.s("category"), p.n("threshold"), p.n("current")).also {
+                    require(it.threshold > 0 && it.current <= it.threshold)
+                }
+            }?.also { require(it.map { p -> p.id }.distinct().size == it.size) })
         return GameSnapshot(r.s("rules_version"), r.n("revision"), r.n("coins"), r.n("xp"), attempt, account).also { it.wire = body }
     }
     fun receipt(body: String): OperationReceipt {

@@ -9,4 +9,4 @@
 - Room hesab üzrə server snapshot oxu keşidir; exact retry outbox davamlı fayl journal-ı (`DurableJournalFile`) qalır (9 noyabr qərarı B); DataStore cihaz seçimləri üçündür. Hazır olub-olmadığını aktiv branch-də yoxla; iki aktiv journal və ya ikinci wallet yaratma.
 - UI/naviqasiya state/domain/data sərhədlərini çağırır; debug fixture canlı backend sübutu deyil. 13 noyabr son qərarı: offline nəticələr sonradan serverə göndərilməlidir; terminal intent növbəsi/recovery replay, sessiyaya bağlı lokal Play və accepted snapshot+kataloq/revision-scoped read-only baxış keşi branch-də var. Cache/yerli nəticə authority və Ready deyil; wire command üçün sole journal saxlanır.
 - Lifecycle və onlayn inteqrasiya: `docs/PLAN.md` §3; mərhələlər §1, server §2, şəhər §7.
-- Telefon/planşet, portret/landşaft və dəyişən pəncərə ölçüsü dəstəklənir. Locale siyahısını təxmin etmə; tapşırıqda plan/resurs və təsdiqlənmiş tələbləri yoxla.
+- Cari UI işi mobil portret və dəyişən portret pəncərə ölçüləridir; planşet ayrıca tapşırıqdır. Locale siyahısını təxmin etmə; tapşırıqda plan/resurs və təsdiqlənmiş tələbləri yoxla.

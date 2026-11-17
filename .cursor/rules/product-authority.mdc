@@ -20,3 +20,5 @@ alwaysApply: true
 - 13 noyabr cari vəziyyəti: məcburi Google entry və guest/link çıxarılması hər iki main-dədir. Anonymous fallback, wallet merge və data deletion yoxdur. Canlı yoxlama tələb etmə, emulatoru avtomatik açma.
 
 - 13 noyabr son internet qərarı: lokal oyun və keşlə mümkün baxışlar şəbəkə yoxluğuna görə bloklanmamalıdır; oflayn nəticələr sonradan serverə göndərilməlidir. Qəbuladək wallet/XP/nailiyyət/bina/leaderboard təsdiqlənmir. Bu, köhnə yalnız məşq qaydasını əvəz edir; 14 noyabr terminal intent növbəsi/recovery replay var; yeni sessiyaya bağlı lokal Play və accepted snapshot+kataloq/revision-scoped read-only inventar/detail/şəhər baxış keşi branch-də inteqrasiya edilib; əvvəldən oxunmamış/köhnə baxış offline uydurulmur, mutation bağlıdır.
+
+- 15 noyabr lokal test istisnası: ayrıca `mockDebug` (`com.aladdin.wobbrik.mock`, Wobbrik Mock) Google-sız sintetik profil/lokal adapter istifadə edir. Real backend və wallet deyil; adi debug/release Google tələbini saxlayır. Mock source release-ə daxil edilmir.

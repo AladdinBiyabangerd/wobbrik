@@ -91,13 +91,22 @@ class MobileShellRouteRenderTest {
    val parts=FinishCosmetics.categories.joinToString(",") {"\"$it\":\"base_${id}_$it\""}
    return """{"id":"b-$id","revision":1,"floors":10,"residents":40,"base_value":20,"max_price":24,"parts":{$parts},"traded":false,"accepted_geometry":{"geometry":{"version":"city-geometry-v1","centers_x_ticks":[${(0..9).joinToString(","){(it*2500).toString()}}]},"attempt_id":"attempt","sequence":1,"operation_id":"op","rules_version":"wobbrik-v1","engine_version":"wobbrik-structural-v1"}}"""
   }
-  val reads=GameplayHttpBackend(sessions,GameplayTransport {path,_,_->GameplayResponse(200,when {
+  var cityReads=0
+  var failCity=true
+  val reads=GameplayHttpBackend(sessions,GameplayTransport {path,_,body->
+   assertNull("Scene navigation must remain read-only",body)
+   if (path.startsWith("city?")) {
+    cityReads++
+    if (failCity) return@GameplayTransport GameplayResponse(503,"""{"error":"unavailable"}""")
+   }
+   GameplayResponse(200,when {
    path.startsWith("inventory?")->"""{"buildings":[${(1..4).joinToString(","){json(it)}}]}"""
    path.startsWith("buildings/")->json(path.substringAfter("b-").toInt())
    path == "profile"->"""{"revision":1,"display_name":"İnşaatçı","avatar_id":"builder"}"""
    path.startsWith("market?")->"""{"listings":[]}"""
    path.startsWith("leaderboard?")->"""{"scope":"weekly","week_start":"2026-11-09","snapshot_at":"2026-11-15T00:00:00Z","expires_at":"2026-11-16T00:00:00Z","entries":[]}"""
-   path.startsWith("city?")->"""{"rules_version":"wobbrik-v1","revision":1,"population":"0","buildings":[]}"""
+   path.startsWith("city?")->"""{"rules_version":"wobbrik-v1","geometry_version":"city-geometry-v1","placement_enabled":true,"revision":1,"population":"40","parcels":[{"kind":"land","id":"base","position":{"x_ticks":"0","y_ticks":"0","quarter_turns":0}}],"buildings":[{"building_id":"b-1","building_revision":1,"residents":40,"position":{"x_ticks":"0","y_ticks":"0","quarter_turns":0}}]}"""
+   path.startsWith("decorations?")->"""{"copies":[]}"""
    else->error(path)
   })})
   var submissions=0
@@ -126,7 +135,7 @@ class MobileShellRouteRenderTest {
       key(page) {when(page) {
        "inventory"->InventoryScreen(configured,ready,selected,{selected=it},{page="home"},{page="parts"},{page="decorations"},{page="land"})
        "parts"->PartsScreen(configured,ready,null,{page="inventory"})
-       "city"->CityScreen(configured,ready,{page="home"},{page="inventory"})
+       "city"->CityScreen(configured,AccountView(ReadOnlyAccount("alice",snapshot,catalog),ready),{page="home"},{page="inventory"},lifeTimeSeconds=0.0)
        "decorations"->DecorationShopScreen(configured,ready,{page="inventory"})
        "land"->LandShopScreen(configured,ready,{page="inventory"})
        "market"->MarketScreen(configured,ready,{page="home"},{page="inventory"},{page="city"})
@@ -154,14 +163,38 @@ class MobileShellRouteRenderTest {
    val playBounds=compose.onNodeWithContentDescription("Oyunu başlat").fetchSemanticsNode().boundsInRoot
    assertTrue("First card must fit above dock",cardBounds.bottom < playBounds.top)
    if (font>1f) {
-    compose.onNodeWithText("Ərazi").performScrollTo().assertIsDisplayed()
-    compose.onNodeWithText("Hissələr").performScrollTo()
+    compose.onAllNodesWithText("Ərazi").assertCountEquals(0)
+    compose.onNodeWithText("Dekor").performScrollTo().assertIsDisplayed()
+    compose.onNodeWithText("Binalar").performScrollTo()
    }
-   compose.onNodeWithText("Hissələr").performTouchInput { click() }
+   // The fixture intentionally fails city reads until the city retry segment.
+   // Detail needs that read; the dedicated commerce host covers its actual input route.
+   // Continue the existing production parts regression without changing failCity early.
+   compose.runOnIdle { page="parts" }
    compose.onNodeWithText("Əhəngdaşı divar").assertIsDisplayed()
    dock();capture("shell-parts-$name")
    compose.onNodeWithContentDescription("Şəhərim").performClick()
-   dock();capture("shell-city-$name")
+   if (font>1f) compose.onNodeWithText("Şəhəri oxumaq mümkün olmadı").performScrollTo()
+   compose.onNodeWithText("Şəhəri oxumaq mümkün olmadı").assertIsDisplayed()
+   compose.onNodeWithText("Plan").assert(hasAnyAncestor(isNotEnabled()))
+   dock();capture("shell-city-error-$name")
+   compose.runOnIdle { failCity=false }
+   compose.onNodeWithText("Yenilə").assertIsDisplayed().performTouchInput { click() }
+   if (font>1f) compose.onNodeWithText("Əhali: 40").performScrollTo()
+   compose.onNodeWithText("Əhali: 40").assertIsDisplayed()
+   compose.onNodeWithText("Şəhəri oxumaq mümkün olmadı").assertDoesNotExist()
+   compose.onNodeWithText("Plan").assert(hasAnyAncestor(isNotEnabled()))
+   if (font>1f) compose.onNodeWithContentDescription("Bina b-1: 10 mərtəbə; 1 torpaq sahəsi; 0 yerləşdirilmiş dekor").performScrollTo()
+   compose.onNodeWithContentDescription("Bina b-1: 10 mərtəbə; 1 torpaq sahəsi; 0 yerləşdirilmiş dekor").assertIsDisplayed()
+   compose.onNodeWithText("Plan").assert(hasAnyAncestor(isNotEnabled()))
+   assertEquals("One failed read, then revision-bracketed retry",3,cityReads)
+   capture("shell-city-$name")
+   compose.onNode(hasText("Bax",substring=true) and hasClickAction()).performTouchInput { click() }
+   if (font>1f) compose.onNodeWithText("Bina görünüşü").performScrollTo()
+   compose.onNodeWithText("Bina görünüşü").assertIsDisplayed()
+   compose.onNodeWithText("Geri").performTouchInput { click() }
+   if (font>1f) compose.onNodeWithText("Binaya bax").performScrollTo()
+   compose.onNodeWithText("Binaya bax").assertIsDisplayed()
    compose.onNodeWithContentDescription("İnventar").performClick()
    if (font>1f) compose.onNodeWithText("Görünüş").performScrollTo()
    compose.onNodeWithText("Görünüş").assertIsDisplayed()
@@ -187,16 +220,23 @@ class MobileShellRouteRenderTest {
    before.recycle();after.recycle()
    compose.onNodeWithText("✓ Təsdiqlə").assertIsDisplayed().performTouchInput { click() }
    compose.runOnIdle { assertEquals("inventory",page);assertEquals(finishParts,confirmedParts) }
-   compose.onNodeWithText("Hissələr").assertIsDisplayed()
+   compose.onNodeWithText("Binalar").assertIsDisplayed()
    compose.runOnIdle {page="decorations"}
    dock();capture("shell-decorations-$name")
-   compose.runOnIdle {page="land"}
-   dock();capture("shell-land-$name")
    compose.onNodeWithContentDescription("Nailiyyətlər").performClick()
    if (font>1f) compose.onNodeWithText("Rekordlar").performScrollTo()
    compose.onNodeWithText("Rekordlar").assertIsDisplayed()
    dock();capture("shell-achievements-$name")
    compose.onNodeWithText("Rekordlar").performClick()
+   val recordsTab = compose.onNode(hasText("Rekordlar") and hasClickAction())
+   if (font>1f) recordsTab.performScrollTo()
+   recordsTab.assertIsDisplayed().assertIsSelected().assertHeightIsAtLeast(48.dp)
+   recordsTab.performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.GetTextLayoutResult) { action ->
+     val layouts=mutableListOf<androidx.compose.ui.text.TextLayoutResult>()
+     action(layouts)
+     val layout=layouts.single()
+     assertTrue("records tab glyphs overflow",layout.getLineRight(0)<=layout.size.width+1f)
+    }
    if (font>1f) compose.onNodeWithText("Hələ qəbul edilmiş nəticə yoxdur.").performScrollTo().assertIsDisplayed()
    dock();capture("shell-records-$name")
    compose.onNodeWithContentDescription("Bazar").performClick()
@@ -206,7 +246,15 @@ class MobileShellRouteRenderTest {
    dock();capture("shell-settings-$name")
    compose.onNodeWithContentDescription("Profil").performClick()
    dock();capture("shell-profile-$name")
-   assertEquals(11,plays)
+   if(font<=1f && name=="390-font1") compose.onNodeWithTag("profile-edit").performScrollTo()
+   compose.onNodeWithTag("profile-edit").performClick()
+   compose.onNodeWithTag("profile-avatar").performScrollTo().performClick()
+   compose.onNodeWithTag("avatar-pilot").performClick()
+   compose.onNodeWithTag("avatar-apply").performClick()
+   compose.onNodeWithContentDescription("Pilot avatarı").performScrollTo().assertIsDisplayed()
+   compose.onNodeWithTag("profile-cancel").performClick()
+   compose.onAllNodesWithContentDescription("İnşaatçı avatarı").onFirst().performScrollTo().assertIsDisplayed()
+   assertEquals(10,plays)
    assertEquals(0,submissions)
   } finally {scope.cancel()}
  }
