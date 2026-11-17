@@ -22,7 +22,7 @@ Koddan əvvəl bu faylı və `docs/context/current-task.md`-ni oxu. Paralel əsa
 2. Mövcud skelet üzərində həmin vahidin domain/data/UI inteqrasiyasını hazırla. Müvəqqəti saxta UI və demo adapter yekun oyun deyil.
 3. Uyğun fokuslu yoxlamaları və axının son yoxlamasını apar; CI yalnız aşağıdakı branch/main qaydasına tabedir.
 4. Mövcud təsdiqlənmiş dizaynı birəbir tətbiq et. Şablondakı “yeni nümunə → yeni dizayn dəsti” axını təsdiqlənmiş dizaynları əvəz etmir; yeni/alternativ dizayn əvvəlcədən razılıq tələb edir.
-5. Telefon/planşet, pəncərə/orientasiya, böyük şrift, inset/klaviatura, əlçatanlıq və tələb olunan lokalları yoxla; zəruri scroll-u saxla. Təsdiqlənməmiş dil siyahısını uydurma.
+5. Mobil portret ölçüləri, böyük şrift, inset/klaviatura, əlçatanlıq və tələb olunan lokalları yoxla; zəruri scroll-u saxla. Planşet ayrıca tapşırıqdır. Təsdiqlənməmiş dil siyahısını uydurma.
 6. Vizual vahiddə real build renderlərini dizaynla yanaşı müqayisə et; nəticə və məhdudiyyətləri `docs/reviews/` altında yaz. Tam mərhələ qəbulu üçün ayrıca `docs/reviews/<phase>/acceptance.md` istifadə oluna bilər; mövcud review-ları köçürmə.
 7. Dizayn nümunəsinin OK-u mərhələ qəbulu deyil; mərhələ qəbulu növbəti mərhələyə başlama icazəsi deyil. Növbəti mərhələ ayrıca istifadəçi tapşırığı ilə başlayır.
 
@@ -62,33 +62,18 @@ Koddan əvvəl bu faylı və `docs/context/current-task.md`-ni oxu. Paralel əsa
 
 ## Visual work
 
-- **13 noyabr 2026 — mobil əvvəl:** mobil oyun və ekranlar tam bitmədən planşet dizaynına keçilmir. Hər mobil vahid üçün ayrıca planşet dizaynı/nümunəsi hazırlanmaz; planşet dizaynı və ona aid ayrıca implementasiya/render işi mobil tamamlandıqdan sonra istifadəçinin ayrıca tapşırığı ilə başlayır. Mövcud təsdiqlənmiş planşet görünüşləri qorunur. Bu ardıcıllıq əvvəlki hər vizual vahiddə telefon+planşet işi tələbindən üstündür; mobil yalnız portret rejimindədir. Mobil üçün landşaft dizaynı/implementasiyası tələb edilmir; əvvəlki telefon landşaftı yoxlama tələblərini bu qərar əvəz edir. Müxtəlif portret ölçüləri, böyük şrift, inset və əlçatanlıq uyğunlaşdırması qüvvədə qalır. Mobil portret kilidi app manifestində `MainActivity` üçün `screenOrientation="portrait"` ilə tətbiq edilir.
+- Bütün oyun və menyu düymələrində vahid native basılma animasiyası olmalıdır: basılı saxlananda yüngül sıxılma, buraxıldıqda və ya toxunma ləğv edildikdə yumşaq şəkildə ilkin vəziyyətə qayıtma. Bu, navbar/Play, geri, ikon və dialoq əməliyyat düymələrinə də aiddir; disabled düymə basılma reaksiyası vermir. Klik semantikası, əlçatanlıq və toxunma sahəsi qorunur. Bu tələb qaydaya yazılıb, hazırda implementasiya edilməyib; tətbiqi ayrıca tapşırıqla edilir.
 
-- UI hazırlayanda implementasiyaya başlamazdan əvvəl tətbiq ediləcək dizaynı/vizual nümunəni istifadəçiyə göstər və açıq təsdiqini al; təsdiq gələnədək UI implementasiyasına başlama. Mövcud təsdiqlənmiş dizayn varsa, həmin dizaynı təqdim et, yeni alternativ uydurma. Ümumi işə başlama icazəsini bu konkret UI təsdiqinin əvəzi sayma.
-- Təsdiqlənmiş hazır dizaynlar implementasiya üçün məcburi vizual əsasdır və birəbir həyata keçirilməlidir: kompozisiya, rənglər, tipoqrafiya, boşluqlar, ölçü nisbətləri, formalar, ikonlar, illüstrasiyalar və oyun qrafikası qorunmalıdır. Əsas istinadlar `docs/design/mobile-v1/` və `docs/design/game-tap-v2/` altındakı cari təsdiqlənmiş dizaynlardır; eyni ekran üçün son təsdiqlənmiş versiya əsas götürülür.
-- Hazır qrafikanı özbaşına sxematik fiqurlar, placeholder və ya sadələşdirilmiş alternativlərlə əvəz etmək, ekranı yenidən dizayn etmək olmaz. Lazımi asset çatışmırsa və ya texniki məhdudiyyət birəbir uyğunluğa mane olursa, bunu açıq bildir və alternativi tətbiq etməzdən əvvəl istifadəçinin razılığını al; belə nəticəni tamamlanmış dizayn kimi təqdim etmə.
-- Yalnız pəncərə ölçüsü, orientasiya və şrift miqyası üçün zəruri responsiv/adaptiv uyğunlaşdırmalara icazə verilir; dizaynın vizual dili və elementlərin iyerarxiyası saxlanmalıdır. Bu zərurətdən kənar hər vizual dəyişiklik istifadəçi ilə əvvəlcədən razılaşdırılmalıdır.
-- Vizual yoxlamada telefon və planşet renderlərini müvafiq təsdiqlənmiş dizaynlarla yanaşı müqayisə et; fərqləri və razılaşdırılmış istisnaları review qeydində göstər. Sadəcə build-in keçməsi və ya screenshot-un mövcudluğu dizayna uyğunluğun sübutu deyil.
-- Bütün ekran və oyun interfeysləri responsiv/adaptiv olmalıdır: həm telefonda, həm də planşetdə rahat və düzgün işləməlidir.
-- Layout cihaz adına deyil, mövcud pəncərə ölçüsünə uyğunlaşmalıdır; portret, landşaft və ölçüsü dəyişən pəncərələr nəzərə alınmalıdır. Məzmun kəsilməməli, idarəetmələr üst-üstə düşməməli və əlçatmaz qalmamalıdır.
-- **Responsivlik qaydası (Aladdin, 9 noyabr 2026):** layout pəncərənin həm eni, həm də hündürlüyü üzrə ölçü sinfinə uyğunlaşır (`GameTokens`: `MediumWidth`, `CompactHeight` və s.); telefon landşaftı qısa hündürlük kimi ayrıca nəzərə alınır və eni geniş olduğu üçün avtomatik planşet layoutuna düşmür.
-  - Mətn, komponent (düymə, kart, ikon, rail elementi), boşluq və illüstrasiya ölçüləri bütün ekranlarda məcburi eyni olmamalıdır: kiçik/qısa ekranda kiçilə, böyük ekranda böyüyə bilər. Ölçülər token pillələri ilə (məs. compact/regular/expanded) seçilir, təsadüfi rəqəm yazılmır; vizual dil, rənglər, iyerarxiya və təsdiqlənmiş kompozisiyanın nisbətləri qorunur.
-  - Əsas əməliyyatlar (Oyna, Ana ekran, naviqasiya elementləri və s.) heç bir ölçüdə kəsilməməli, ekrandan kənara düşməməli və yalnız scroll ilə əlçatan qalmamalıdır; yer çatmayanda əvvəlcə ölçü/boşluq kiçildilir, sonra ikinci dərəcəli məzmun yığcamlaşdırılır, scroll ən son ehtiyatdır.
-  - Düymə, tab və menyu yazılarında söz qırılmamalıdır (sözün ortasından sətirə keçid olmaz); lazım gələrsə komponent genişləndirilir, alt-alta düzülür və ya mətn ölçüsü pillə ilə kiçildilir.
-  - İstifadəçinin artıq təsdiqlədiyi ölçü/orientasiya üçün layout başqa ölçünü düzəldərkən dəyişdirilmir; düzəliş yalnız problemli ölçü sinfinə tətbiq olunur və təsdiqlənmiş halların dəyişmədiyi renderlə yoxlanır.
-  - Vizual iş tamamlanmış sayılmazdan əvvəl ən azı bu hallarda render edilib baxılır: kiçik telefon (≈640×360dp landşaft / 360×640dp portret), normal telefon portret və landşaft, planşet portret və landşaft, şrift miqyası 1.0 və 2.0 (ən azı telefon landşaftında). Yoxlanmamış hal review qeydində açıq yazılır.
-- Telefon dizaynını sadəcə böyütmək planşet üçün kifayət etmirsə, planşetə uyğun ayrıca kompozisiya/dizayn hazırla (məsələn, iki panel və ya uyğun naviqasiya); mövcud dizayn tokenlərini saxla.
-- Vizual işi tamamlanmış saymazdan əvvəl telefon və planşet ölçülərində render edib görüntülərə bax; yoxlanmış ölçüləri və yoxlanmamış halları qeyd et.
-
-When a task touches how something looks, use the `ui-craft` skill — it carries
-the token, contrast and screenshot workflow. Two things hold regardless of it:
-
-- **Find the token file before writing a value.** Inventing a colour, spacing or
-  radius next to a palette that already names one is the most common way an
-  interface drifts, and it never looks broken enough to get caught in review.
-- **Don't report a visual change as working without having rendered it and
-  looked at the image.** If rendering wasn't possible, say that plainly instead
-  of implying the result was checked.
+- Cari tapşırıq: app-in ekranlarını son təsdiqli PNG-lərə uyğun Kotlin + Jetpack Compose ilə yenidən qur. Bu implementasiya təsdiqlənib; eyni dizaynı yenidən təsdiqə çıxarma. Yeni alternativ dizayn istifadəçinin ayrıca razılığını tələb edir.
+- Vizual authority: `docs/design/unified-mobile-v3/README.md`; Home üçün `home-approved-frameless.png`, digər ekranlar üçün həmin qovluqdakı `01-main.png`–`05-owned-and-listings.png`. Home-un 7-slot header/navbar qərarı bütün menyu ekranlarına tətbiq olunur. Köhnə nümunə/proposal/review cari icra göstərişi deyil.
+- PNG vizual istinaddır. Ekranın layout-u, panel, kart, düymə, tab, navbar, mətn, balans, XP və state-ləri adi native Compose komponentləri ilə qurulur. Gradient, kontur və kölgə kodla çəkilir; ekran və sadə UI səthləri raster skin ilə yığılmır.
+- Navbar düymələri və onların içindəki ikonlar da native komponent/vector (`ImageVector`, vector drawable və ya uyğun Canvas) ilə hazırlanır; PNG-dən kəsilmiş raster ikon istifadə edilmir. İkonun təsdiqli silueti, rəngi və nisbəti saxlanır; təsadüfi standart ikonla əvəz edilmir.
+- Raster asset yalnız mürəkkəb illüstrasiya və oyun qrafikası kimi hissələr üçündür. Lazım olan qrafikanı ayrıca asset kimi istifadə et; mətn və idarəetməni asset-ə bişirmə. Sadə UI-ni bütöv şəkillə əvəz etmə.
+- Təsdiqli kompozisiya, rəng, tipoqrafiya, boşluq, forma və iyerarxiya saxlanır. Native implementasiya dizaynı sadələşdirmək və ya yenisini uydurmaq icazəsi deyil. Çatışmayan asset/texniki maneəni bildir; razılaşdırılmamış alternativ tətbiq etmə.
+- Mobil əvvəl və yalnız portret. Planşet işi ayrıca istifadəçi tapşırığıdır; mövcud təsdiqli planşet görünüşünü pozma. `MainActivity` portret kilidini saxla. Cari mobil işdə landşaft/planşet implementasiyası və renderi tələb edilmir.
+- `ui-craft` istifadə et. Rəng/ölçü yazmazdan əvvəl `GameTokens` və mövcud ölçü pillələrini tap. Layout eni, hündürlüyü və fontScale-a uyğunlaşır; kiçik portretdə komponent/boşluq pillələri yığcamlaşır. Əsas əməliyyat görünən və əlçatan qalır; sözlər ortadan qırılmır, idarəetmələr üst-üstə düşmür; zəruri scroll saxlanır.
+- Hər vizual vahiddə kiçik və normal mobil portret, fontScale 1.0/2.0 və uyğun inset/uzun mətn halları üçün mümkün native renderləri al, açıb bax və təsdiqli PNG ilə yanaşı müqayisə et. Kontrastı ölç. Build/test PASS vizual uyğunluq sübutu deyil. Yoxlanmamış hallar açıq yazılır; emulator avtomatik açılmır və canlı yoxlama gate deyil.
+- Nəticə və fərqləri `docs/reviews/` altında qeyd et. Yalnız tamamlanan vahidi tamamlanmış kimi bildir; bütün ekranlar bitmədən app redesign-ını bitmiş sayma.
 
 # Context growth
 
@@ -128,3 +113,6 @@ Optimize for minimum necessary context. One chat = one logical task.
 - Yeganə plan `docs/PLAN.md`-dir. Köhnə planlar silinib; tarix git/backup və review-lardadır. Handoff ikinci plan deyil.
 - Canlı yoxlama heç vaxt tələb edilmir, emulator avtomatik açılmır. Yoxlanmamış runtime/render PASS sayılmır və canlı yoxlama merge/tamamlanma gate-i deyil.
 - CI yalnız istifadəçi ayrıca istəyəndə, yalnız main-də lokaldır. Fokuslu build/lint/unit və disposable lokal PostgreSQL testləri icazəli adi yoxlamalardır. Avtomatik CI işə salınmır.
+
+
+15 noyabr 2026 — son istifadəçi qərarı: mobil Bazar daxilində Ərazi tabı və ərazi alış girişi çıxarılır. Son əlavə göstərişlə mobil İnventarın Ərazi tabı da çıxarılır. Saxlanmış server hüquqları dəyişmir; ərazi üçün menyu girişi və yeni alternativ yer yoxdur. Ərazi alışının yeni yeri istifadəçi tərəfindən sonra göstəriləcək; yeni yer uydurulmur. Bu qərar əvvəlki Bazar/Ərazi PNG girişini əvəz edir.
