@@ -16,6 +16,7 @@ class LocalGameHost(private val results: PendingGameResults, private val default
     private var foreground = false
     private var previous: Long? = null
     private var storageError = false
+    private var lastSnapshot: AcceptedEngineHost.Snapshot? = null
     @Synchronized fun bind(session: BillingSession?) {
         if (this.session == session) return
         pause()
@@ -37,10 +38,18 @@ class LocalGameHost(private val results: PendingGameResults, private val default
         previous = null; storageError = false
         return true
     }
-    @Synchronized fun snapshot(): AcceptedEngineHost.Snapshot = AcceptedEngineHost.Snapshot(
-        foreground = foreground, scene = attempt?.engine?.state, cameraX = attempt?.engine?.cameraX ?: 0.0,
-        playing = attempt != null, finishParts = attempt?.parts.orEmpty(), finishStorageError = storageError,
-        choosingFinish = attempt?.engine?.state?.phase == Phase.FINISHED)
+    @Synchronized fun snapshot(): AcceptedEngineHost.Snapshot {
+        val scene = attempt?.engine?.state
+        val cameraX = attempt?.engine?.cameraX ?: 0.0
+        val parts = attempt?.parts.orEmpty()
+        val previous = lastSnapshot
+        if (previous != null && previous.foreground == foreground && previous.scene === scene &&
+            previous.cameraX == cameraX && previous.playing == (attempt != null) &&
+            previous.finishParts === parts && previous.finishStorageError == storageError) return previous
+        return AcceptedEngineHost.Snapshot(foreground = foreground, scene = scene, cameraX = cameraX,
+            playing = attempt != null, finishParts = parts, finishStorageError = storageError,
+            choosingFinish = scene?.phase == Phase.FINISHED).also { lastSnapshot = it }
+    }
     @Synchronized fun foreground(value: Boolean) { pause(); foreground = value }
     @Synchronized fun pause() { attempt?.engine?.pause(); previous = null }
     @Synchronized fun resume(): Boolean {

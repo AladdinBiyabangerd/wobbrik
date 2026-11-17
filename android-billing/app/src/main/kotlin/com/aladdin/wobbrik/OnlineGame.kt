@@ -53,6 +53,10 @@ internal fun OnlineGame(app: WobbrikApplication) {
 @Composable
 private fun AuthenticatedGame(app: WobbrikApplication) {
     val configured = app.bootstrap as? WobbrikApplication.Bootstrap.Configured
+    var artRetry by remember { mutableIntStateOf(0) }
+    // Overlap immutable APK decode with recovery; optional art never holds the account sync gate.
+    val artPreparation = if (ApprovedArt.prepared) ArtPreparation.Ready
+        else rememberArtPreparation(artRetry) { ApprovedArt.prepare(app.assets) }
     // Ready is a capability: structural equality must not retain an old auth epoch.
     // Read the canonical object every frame; StateFlow/Compose conflation may skip
     // a short Recovering transition between two equal server snapshots.
@@ -149,6 +153,12 @@ private fun AuthenticatedGame(app: WobbrikApplication) {
     if (InitialAccountSync(initialEpoch, initialRecovery.first, initialRecovery.second,
             canBrowseCached = initialRecovery.third,
             onRetry = { configured?.recovery?.onForeground() })) return
+    if (needsBundledArt(page) && artPreparation != ArtPreparation.Ready) {
+        MobileMenuShell(page, ready?.snapshot?.coins ?: cached?.coins, null, { page = it }) {
+            ApprovedArtStatus(artPreparation) { artRetry++ }
+        }
+        return
+    }
     if (page == "game" && localState.playing && localState.scene != null) {
         GameScene(localState, localHost, onDrop = { localHost.drop() }, onPause = { localHost.pause() },
             onResume = { if (localState.choosingFinish) localHost.retryTerminal() else localHost.resume() },

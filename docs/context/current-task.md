@@ -2,78 +2,47 @@
 
 ## Completed
 
-- Cross-stack Bazar bundled previews: server mövcud SQL join-dan `include=previews` ilə matching kartları qaytarır, Android12detail fanout-u çıxarır. Köhnə server bounded fallback, köhnə complete cache offline replay, fresh detail-before-command saxlanır. Backend `feat/wobbrik` commit `9f0faf9`; Android ayrıca `perf: consume bundled market previews without detail fanout` commit-indədir. Review `docs/reviews/2026-11-17-market-bundled-previews.md`.
-
-- AccountViews cancelled-timeout fallback düzəldi: IOException catch girişində ensureActive; ləğv edilmiş iş replay/cache-miss yoluna keçmir. Cache olan/olmayan blocking timeout regressiyası PASS. Review `docs/reviews/2026-11-17-cancelled-timeout-fallback.md`.
-
-- Inventory local-first/optional city vahidi `083f870`-dədir.
-- İlkin sync gate, proses üzrə art reuse, şəhər4paralel detail scheduling və CityScreen onLocal əvvəlki working diff-dədir. Sübutlar: `docs/reviews/2026-11-17-{initial-account-sync,art-reuse,city-read-scheduling,city-local-first}.md`.
-- Same-UID City host timeout dar araşdırması tamamlandı: state write-dan sonra `waitForIdle()` olmaması reproduksiya edildi, test düzəldi; production CityScreen/AccountViews dəyişmədi. Retained11/11PASS. Review `docs/reviews/2026-11-17-city-same-uid-host.md`.
-- Bazar local-first dar vahidi tamamlandı: page+Ndetail aggregation repository-yə çıxarıldı, matching complete bundle AccountViews onLocal ilə dərhal göstərilir. Query scope/filter/cursor, UID/revision və exact Ready/session yoxlamaları saxlanır. Cached kartdan əməliyyat üçün yeni live detail tələb olunur. Cursor səhifəsi cached→fresh keçidində bütöv əvəz edilir. Review `docs/reviews/2026-11-17-market-local-first.md`.
-
-- Redundant-read ölçmə vahidi tamamlandı (production dəyişməyib): normal Market14distinct request/8776byte; concurrent identical refresh28/17552; generic read-only onLocal2disk replay; capture eyni path-i coalesce etmir. Review `docs/reviews/2026-11-17-redundant-reads.md`, opt-in harness/results `docs/reviews/redundant-reads/`.
-
-- Read-only single-replay fix tamamlandı: AccountViews ready==null onLocal yalnız bir replay edir; callback/session/cancellation yoxlamaları və8yeni regression var. Review `docs/reviews/2026-11-17-readonly-single-replay.md`.
-
-- AccountViews/MarketScreen production-path host overlap baseline tamamlandı: cold+5recomposition0overlap; warm remount əlavə14request/0overlap; public→own→public cooperative0, blocking-I/O model1same-path overlap (16request/8776completed body byte/2cancellation). Direct2refresh positive control28request/17552byte. Real server/device overlap tezliyi deyil. Review `docs/reviews/2026-11-17-production-overlap.md`;4hostPASS. Production/əvvəlki dirty fayllar dəyişməyib.
-
-- Real HTTPS overlap/cancellation ölçü vahidi tamamlandı: production UrlConnectionGameplayTransport + loopback TLSv1.3. Market public→own→public16request/11384server-written body byte/1same-path overlap; cancellation→transport exit public563ms/own534ms; header515ms/body756ms/timeout7996ms.4hostPASS. Review `docs/reviews/2026-11-17-https-overlap.md`, harness/evidence `docs/reviews/https-overlap/`. Production/əvvəlki dirty işlər dəyişməyib.
+- Yeni vahid: idle snapshot reuse + APK atlas IO scheduling. `AcceptedEngineHost.snapshot` unchanged-state copy-ni, `LocalGameHost.snapshot` idle object yaradılmasını çıxarır; canonical frame polling saxlanır. `ApprovedArt.prepare` IO-da işləyir, root hazır olmayan atlas istifadəçilərinə native loading/retry göstərir. Home/profil/achievements/leaderboard/settings bu atlasları gözləmir. Warm-root volatile completion fast path var. Review `docs/reviews/2026-11-17-idle-art-scheduling.md`, evidence `docs/reviews/idle-art/`.
+- Android Bazar bundled previews `2f81349`; paired backend `9f0faf9`:12kart14→2sorğu, köhnə server4paralel detail fallback, köhnə complete cache offline replay, fresh detail-before-command qorunub. Review `docs/reviews/2026-11-17-market-bundled-previews.md`.
+- Cancelled-timeout fallback `c579e22`; əvvəlki dirty işlər `9cac996`-də qorunub. İnventar local-first `083f870`.
+- Əvvəlki vahidlər/evidence: `docs/reviews/2026-11-17-{initial-account-sync,art-reuse,city-read-scheduling,city-local-first,city-same-uid-host,market-local-first,readonly-single-replay,production-overlap,https-overlap}.md`.
 
 ## Current state
 
-Android branch `fix/menu-inventory-latency`, bu vahidin bazası `c579e22`; əvvəlki dirty işlər `9cac996`-də saxlanıb. Bazar bundled-preview vahidi ayrıca commit-dədir. AppBackend təmiz checkout `feat/dailyplate`-dan required persistent `feat/wobbrik`-ə keçirildi, local main `7584346`-ə ff edildi; Bazar dəyişməsi `9f0faf9`-dədir. DailyPlate işi saxlanıb. Heç bir merge/push/deploy/CI edilməyib. Bütün app performansı və redesign tamamlanmayıb.
+Android `fix/menu-inventory-latency`, yeni vahidin bazası `2f81349`; vahid ayrıca commit-də saxlanır. AppBackend təmiz, `feat/wobbrik`, `9f0faf9`; bu vahiddə dəyişməyib. Əvvəlki DailyPlate işi tarixdə saxlanıb. Main merge, push, deploy, CI yoxdur. Bütün app performansı və redesign tamamlanmayıb.
 
 ## Decisions
 
-İstifadəçi bütün app performansı üçün Android və AppBackend-də lazım olan düzəlişlərə açıq icazə verib; backend üçün təkrar icazə soruşma. Push/main merge/deploy ayrıca qalır. Yeganə plan `docs/PLAN.md` §1.1/§2–3. İlk vacib sync mövcud owner recovery/journal reconcile+catalog-dur; optional warmup gate deyil.8000ms gate çıxışı network cancellation deyil. Gate login epoch üzrədir. Cache display-only-dir, wallet/mutation authority AppBackend-dir.
-
-Bazar public list viewer revision dəyişmədən dəyişə bilər: hər mounted query background refresh edir, completed-read reuse refresh-i udmur. Complete cache yalnız exact account revision-da replay olunur; capture sonunda mövcud sync saxlanır.404detail live unavailable card ola bilər, lakin həmin response body saxlanmadığından belə bundle sonradan tam replay olunmursa cache miss-dir; negative-response cache əlavə edilməyib. Yeni endpoint/domain/schema yoxdur. Emulator avtomatik açılmır; CI yalnız ayrıca tapşırıqla main-dədir.
-
-## Remaining work
-
-- Production2+s/10+s route baseline hələ yoxdur. Yeni backend ilə Bazar cold page+Ndetail fanout-u2sorğuya endi; köhnə serverdə4paralel detail fallback qalır. Backend deploy edilməyib.
-- Capture redundant path/coalescing sintetik ölçüldü; production overlap tezliyi və durable disk baseline qalır. Revision sync kor-koranə çıxarılmır. Public market live-cursor müqaviləsidir, server-wide frozen snapshot deyil; Keş nişanı cari cursor oxusuna aiddir.
-- Art cold decode main-thread-dədir; reuse təkrar decode-u azaldır, təxminən60MiB sabit proses retention qalır. Digər art helper/frame polling/map allocation açıqdır.
-- Vizual parity/mərhələ5qəbulu qalır:320grid qiymət clipping, font2 tab/navbar/scroll borcları var. Bəzi native redraw PNG-lərində dəyişməyən shell qatları çəkilmir; bunlar full shell parity sübutu deyil. Real Firebase/server/device/TalkBack/locale matrisi yoxlanmayıb.
-
-## Relevant files
-
-- Son vahid: `MarketReads.kt`, `ReadOnlyGameCache.kt`, `MarketPreviewReadsTest.kt`; host `docs/reviews/market-local-first/render/MarketLocalFirstTest.kt`.
-- Backend `internal/wobbrik/market.go`, `internal/platform/wobbrik_{http.go,market_previews_test.go}`, `docs/wobbrik-game-api.md`, `docs/reviews/2026-11-17-wobbrik-market-previews.md`.
-
-- `docs/PLAN.md` §1.1/§2–3; son review `docs/reviews/2026-11-17-market-local-first.md`.
-- `android-billing/app/src/main/kotlin/com/aladdin/wobbrik/{MarketScreen,AccountViews,InventoryScreen,OnlineGame,CityScreen}.kt`.
-- Core `MarketReads.kt`, `ReadOnlyGameCache.kt`, `AuthenticatedRecoveryOwner.kt`; tests `MarketPreviewReadsTest.kt`, `MenuReadLatencyTest.kt`.
-- Host `docs/reviews/market-local-first/render/{MarketLocalFirstTest.kt,render.init.gradle}`; əvvəlki City harness `docs/reviews/city-local-first/render/`.
-- Əvvəlki `InitialAccountSync.kt`, `ApprovedArt.kt`, `GameAtlas.kt`, `FinishCosmeticScreen.kt`, core `CitySceneReads.kt` working diff-dədir.
-- AppBackend `docs/wobbrik-game-api.md`, `internal/wobbrik/market.go` müqavilə/source kimi yoxlanıb, dəyişməyib.
+- Yeganə plan `docs/PLAN.md` §1.1/§2–3. İstifadəçi Android və AppBackend performans düzəlişlərinə icazə verib; backend üçün təkrar icazə soruşma. Push/main merge/deploy ayrıca göstəriş tələb edir. CI yalnız ayrıca tələb olduqda main-də lokaldır; emulator açılmır, canlı yoxlama gate deyil.
+- Exact Ready/login epoch, synchronous host revocation, sole journal və server-authoritative wallet/mülkiyyət dəyişmir. İlk sync recovery/reconcile+catalog-dur; art hazırlığı həmin gate-i tutmur. Home dərhal öz resource cutout-u ilə açılır; atlaslar auth entry-də arxa planda hazırlanır. Yalnız game/city/inventory/parts/collection/market/market-own hazır atlasları gözləyir; navbar aktiv, Play müvəqqəti disabled, failure retry var.
+- Art qrupları hesabdan asılı deyil. Hazırlıq10bitmap/~60MiB retention-u auth entry-də daha erkən yaradır; Home-only istifadəçidə də tutulacaq. Activity/UID saxlanmır. Heap/battery/device speedup iddiası yoxdur. Raw art getter-ləri sinxrondur; root-dan kənar standalone consumer öz readiness sərhədinə cavabdehdir.
+- Frame dövrəsi hələ canonical recovery/host lifecycle üçün saxlanır; yalnız idle snapshot allocation azalıb. Identity ilə immutable scene və bütün dəyişən presentation field-lər yoxlanır. Physics/finish/abandon/pause-clock qaydaları dəyişməyib.
+- Bazar public query hər mount-da background refresh edir. Complete cache exact UID/revision/scope/filter/cursor ilədir; final revision sync çıxarılmır. Yeni include=previews representation köhnə complete bundle-in exact query+detail-ləri ilə replay ola bilər. Keş display-only, mutation üçün live detail+Ready lazımdır. Live cursor server-wide frozen snapshot deyil.
 
 ## Checks performed
 
-Cross-stack unit: core147/app37unit, assembleDebug/lintDebugPASS25s; `/private/tmp/wobbrik-market-bundle-final.log`. Fixture12kart40ms/request14→2sorğu,5174→5199body byte,222→92ms; real cihaz/production latency deyil. Backend full race+disposablePostgreSQL18PASS(platform23.791s), vet/buildPASS; `/private/tmp/wobbrik-perf-backend-final.log`. DB dayandırılıb. Final native Compose host18/18PASS,0failure/error/skip,26.839s test/Gradle29s. Public+own bundled cold2request/0detail, cached-before-network and live detail-before-purchase, legacy fallback/cursor/revision/login regression checked. Evidence `docs/reviews/market-bundled-previews/host-results.xml`; log `/private/tmp/wobbrik-market-bundle-host-verified.log`. Initial own-tab predicate failed twice (refresh then public-only action); final source uses the actual enabled own/public card action and full suite rerun PASS. No production fix was needed for those harness failures.
+- Yeni normal engine97/core147/app37unit, assembleDebug/lintDebugPASS26s; `/private/tmp/wobbrik-idle-art-complete.log`.
+- JVM21 actual idle host path10000warmup+3600iteration: before701592allocated byte/2460µs/online3600+local3600distinct snapshot; after48byte/1301µs/1+1identity. Bu, JVM loop sample-dır; display-frame wakeup/device FPS/battery ölçüsü deyil və saniyəlik gecikməni izah etmir.
+- Native cold prior3atlas helper375ms main-thread. Final isolated7/7nativePASS10.761s/Gradle16s; cold preparation285msIO, ready helpers91µs, workerblocked navigation47ms. Small/normal portrait,font1/font2,synthetic insets/Long.MAX balance, failure retry, cancelled-producer stale completion yoxlanıb.7PNG `docs/reviews/idle-art/rendered/` altında saxlanıb və açılıb. Pixel/crop2native+resource1nativePASS(Gradle9s), native7loading/IO ayrıcaPASS; nəticələr son review-da.
+- Contrast Text/Surface13.00,Accent/Surface8.99PASS. Font2Long.MAX shared header clipping qalır; loadedHome fixture minimaldır, XPaccount yoxdur, PNGparity/mərhələqəbulu deyil. Tablet/device/Firebase/TalkBack/locale matrisi yoxlanmayıb.
+- Digər native resource helper ölçüsü (ilk sample): Home30ms/6.29MiB,Profile97ms/25.17MiB,Achievements20ms/6.29MiB,Leaderboard29ms/6.29MiB.İlk sample2remount0newbitmap olsa da final repeat cold63/112/21/28ms; firstremountHome31ms/1newbitmap vəProfile51ms/2newbitmap göstərdi, secondremount0newbitmap. Resource cache variable-dır və repeatUIdecode qalır; bunlar bütün route/server timing deyil. Əlavə resource cache/dizayn uydurulmayıb.
+- Bu vahiddə API/DTO/domain/schema/network query dəyişmir, backend dəyişikliyi/testi lazım olmayıb. Əvvəlki cross-stack vahiddə full backend race+disposablePostgreSQL18/vet/buildPASS(platform23.791s), Android147/37unit+18nativePASS. DBdayandırılıb, deploy yoxdur.
 
-Cancelled-timeout fix: AccountViews14/14unit, assembleDebug/lintDebugPASS32s; `/private/tmp/wobbrik-cancel-checks.log`. Əvvəlki dirty faylların hash-lərində yalnız nəzərdə tutulan AccountViews dəyişdi (review/handoff yenilənməsindən əvvəl). Real HTTPS harness təkrar işlədilməyib. CI yoxdur.
+## Remaining work
 
-Real HTTPS final4/4hostPASS,16.889s test/Gradle20s; `docs/reviews/https-overlap/results.xml`, `server-events.jsonl`, `/private/tmp/wobbrik-https/test-final.log`. Cancelled view cache boşdur, publication/command yoxdur. TLS fixture dayandırıldı; hash müqayisəsində review/handoff-dan əvvəl bütün əvvəlki dirty fayllar eyni idi. Diffcheck/PythonAST/shSyntaxPASS. CI/build/lint/backend test yoxdur.
+- Bütün route üçün deployed/device2+s/10+s baseline və tam ekran composition/layout/network ölçüsü yoxdur. Resource helper qiymətləri bunun əvəzi deyil. Şəhər building detail fanout və başqa City/Purple art helper-ləri hələ yoxlanmalıdır.
+- Real HTTPS cancellation blocking read-i kəsmir: controlled public→own→public16request/1same-path overlap; timeout exit~8s. Tapıntı/evidence `docs/reviews/2026-11-17-https-overlap.md`. Fallback cancellation qorunub, socket cancellation/coalescing implementasiya edilməyib. Scope/session/subscriber cancellation sərhədləri vacibdir.
+- Android və AppBackend City query/request/byte/latency ölçülərini birlikdə yoxla. Bazar bundled endpoint backend-də hazırdır, deploy edilməyib; köhnə serverdə fanout qalır.
+- Home/Profile resource cache dəyişkəndir: final təkrarda remountHome31ms/1bitmap vəProfile51ms/2bitmap UIdecode var. Configuration/density-ə uyğun background resource loading ayrıca vahiddə düzəlməlidir.
+- Durable disk cost, main-thread custom art/map allocations, heap/GPU/device FPS və tam vizual parity qalır. Mövcud font2tab/navbar/scroll və320grid priceclipping borcları review-lardadır.
 
+## Relevant files
 
-Overlap baseline final:4/4hostPASS,9.245s test/Gradle12s; `docs/reviews/production-overlap/results.xml`, `/private/tmp/wobbrik-overlap.log`. Initial stale-enabled-node wait failure harness-də final network completion ilə düzəldildi; production dəyişməyib. Başlanğıcdakı bütün dirty/untracked faylların hash-ləri review/handoff yeniləməsindən əvvəl eyni idi. DiffcheckPASS; CI/build/lint/backend test yoxdur.
-
-
-Read-only fix final: focused AccountViews13/13unitPASS (8new+5existing), assembleDebug/lintDebugPASS26s; log `/private/tmp/wobbrik-readonly-replay-checks.log`, XML `docs/reviews/readonly-replay/`. Cache read2→1,0network; UID/revision/query/corruption/session epoch/callback/cancellation yoxlanıb. Production yalnız AccountViews dəyişib; əvvəlki dirty işlər saxlanıb, CI yoxdur.
-
-
-Redundant-read final focused offline host2test/9scenarioPASS, Gradle6s. Exact request/byte/cache-read assertions, `docs/reviews/redundant-reads/results.xml`; normal cold239ms/warm227ms, overlap232ms, sequential457ms, reuse3ms; sintetik40ms/request, production ölçüsü deyil. Production dəyişməyib; backend müqaviləsi read-only yoxlanıb, backend test/CI yoxdur.
-
-
-Bazar final15/15native hostPASS31s (test26.680s): cached public/own blocked network0response byte;320/360font1,320/390font2, synthetic inset/Long.MAX balance;503fallback,403clear/retry, query/cursor mismatch, stale cache/capture revision change, Alice→Bob/sameUID inflight cancellation, cached Bax→freshdetail/no command; cursor600→700və fresh empty-page removal. Log `/private/tmp/wobbrik-market-local-host-final.log`, XML `/private/tmp/wobbrik-market-local-host-final.xml`.9PNG `/private/tmp/wobbrik-market-local-first/` açılıb02-market ilə müqayisə edilib; yuxarıdakı borclar/host redraw məhdudiyyəti qalır. Contrast13.00/8.22/8.99PASS.
-
-Paired12listing40ms/request fixture: before-first-publication183ms,13request/8501UTF8byte; afterlocal2ms,0request/byte; afterfresh248ms,14request/8776byte (əlavə sync1request/275byte). Əvvəlki sample174→3ms,fresh232ms. Full host route1634→1429ms sample art/layout daxil edir və isolated device speedup deyil; əsas sübut blocked-networkdə local kartların görünməsidir. Baseline `/private/tmp/wobbrik-market-before.xml`. Cold fanout qalır.
-
-Final normal core144/app28unit,assembleDebug,lintDebugPASS33s; `/private/tmp/wobbrik-market-local-checks-final.log`.3yeni core test bounded4/order/version mismatch/404 və403/503/epoch propagation/query identity-ni yoxlayır. DiffcheckPASS. Backend API/domain/schema dəyişməsi lazım deyil, backend test işlədilməyib. CI yoxdur. Aralıq host predicate/exception identity assertion xətaları review-da qeyd olunub; PASS sayılmır.
-
-Əvvəlki vahidlərin tam sübutları öz review-larındadır: initial-sync8host/28app; art reuse2host+5commerce; city local-first10host+sameUID11host və normal core141/app28PASS. Art ölçüsü5mount əvvəl260/229/225/256/242ms,50bitmap/314531040byte; sonra262/0/0/0/0ms,10bitmap/62906208byte. City scheduling synthetic714→264ms,15request/3630byte; capture734→316ms,16/3903; replay0request. Bunlar production latency/heap deyil.
+- `android-billing/app/src/main/kotlin/com/aladdin/wobbrik/{OnlineGame,ApprovedArt,ApprovedArtLoading,GameAtlas,FinishCosmeticScreen,CityScreen,ProfilePresentation,MobileHomeScreen,MobileAchievementsScreen,LeaderboardScreen}.kt`.
+- `android-billing/engine/src/main/kotlin/com/aladdin/wobbrik/engine/{AcceptedEngineHost,LocalGameHost}.kt`; tests `IdleHostPollingTest.kt`, `LocalGameHostTest.kt`.
+- Host `docs/reviews/idle-art/render/{OffMainArtTest,RemainingResourceDecodeTest,ColdArtBaselineTest}.kt`, init script; əvvəlki pixel test `docs/reviews/art-reuse/render/ArtReuseTest.kt`.
+- Backend `/Users/mac/My Workspace/AppBackend`: `AGENTS.md`, `docs/context/current-task.md`, `internal/wobbrik/{city,market}.go`, `docs/wobbrik-game-api.md`. Mövcud persistent branch `feat/wobbrik`.
 
 ## Exact next step
 
-Bütün app performans tapşırığı davam edir. PLAN §1.1, bu handoff və son `docs/reviews/2026-11-17-market-bundled-previews.md` oxu. Növbəti dar vahid: Home/City/Inventory/Market/Achievements/Profile/game üçün cold/warm art decode və idle-menu frame snapshot allocation ölç; `OnlineGame` hər frame exact Ready və iki host snapshot-u poll edir, `ApprovedArt` cold decode sinxrondur, `ProfilePresentation` source board-ları provider-də açır. Bunlar bu vahiddə ölçülmüş root cause deyil. Uyğun backend request/query latency-ni də eyni ölçüyə bağla; City building fanout və HTTPS transport cancellation açıqdır. Exact Ready/login epoch, journal, revision sync və approved UI qorunsun. AppBackend yeni iş `feat/wobbrik`-də; icazə əvvəlcədən var, deploy/push/merge/CI yoxdur. Bütün app bitmiş kimi bildirmə.
+PLAN §1.1, bu handoff, idle-art və HTTPS overlap review-larını oxu. Növbəti dar vahid üçün ölçülmüş Home/Profile remount resource decode-un configuration/density-aware background loading-ni hazırla (MobileHomeScreen/ProfilePresentation; final31/51ms). Müvafiq hazır native renderləri saxla, əlavə60MiB atlas retention-una ikinci kor process cache qatma. Alternativ ayrıca vahiddə production UrlConnectionGameplayTransport cancellation-a scoped socket disconnect tətbiqinin mümkünlüyünü yoxla və real loopbackTLS fixture ilə before/after ölç; UID/session publication, cachewrite və callback regression-larını saxla. Yaxud City fanout-u Android+AppBackend query ölçüsü ilə növbəti unit et. İnfrastruktur/coalescing kor-koranə əlavə edilmir. Eyni source render/test sübutları saxlanır; bütün app bitmiş kimi bildirilməsin.

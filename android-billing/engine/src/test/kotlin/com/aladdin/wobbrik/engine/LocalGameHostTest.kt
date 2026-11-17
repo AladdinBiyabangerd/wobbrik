@@ -74,4 +74,25 @@ class LocalGameHostTest {
         assertTrue(runCatching { f.host.start(f.session, f.account) }.isFailure)
         assertEquals("corrupt", f.bytes[key]!!.toString(Charsets.UTF_8))
     }
+    @Test fun reusedSnapshotsTrackEveryInputLifecycleAndSceneChange() {
+        val f = Fixture()
+        val idle = f.host.snapshot()
+        assertSame(idle, f.host.snapshot())
+        f.start()
+        val running = f.host.snapshot()
+        assertNotSame(idle, running); assertTrue(running.inputEnabled)
+        assertSame(running, f.host.snapshot())
+        f.frames(2)
+        val advanced = f.host.snapshot()
+        assertNotSame(running, advanced)
+        f.host.pause()
+        val paused = f.host.snapshot()
+        assertFalse(paused.inputEnabled); assertSame(paused, f.host.snapshot())
+        f.host.foreground(false)
+        assertFalse(f.host.snapshot().foreground)
+        f.host.bind(BillingSession("alice", "next"))
+        assertNull(f.host.snapshot().scene); assertFalse(f.host.snapshot().playing)
+        assertTrue(running.inputEnabled)
+    }
+
 }

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.aladdin.wobbrik.RemainingResourceDecodeTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-11-17T13:01:34.801Z" hostname="Macs-MacBook-Pro.local" time="0.395">
+  <properties/>
+  <testcase name="remainingScreenResourceColdAndRemountCost" classname="com.aladdin.wobbrik.RemainingResourceDecodeTest" time="0.395"/>
+  <system-out><![CDATA[RESOURCE-DECODE group=home mount=0 mainThread=true elapsedMs=63 newBitmaps=1 newRGBABytes=6291832
+RESOURCE-DECODE group=profile mount=0 mainThread=true elapsedMs=112 newBitmaps=4 newRGBABytes=25171008
+RESOURCE-DECODE group=achievements mount=0 mainThread=true elapsedMs=21 newBitmaps=1 newRGBABytes=6289868
+RESOURCE-DECODE group=leaderboard mount=0 mainThread=true elapsedMs=28 newBitmaps=1 newRGBABytes=6294152
+RESOURCE-DECODE group=home mount=1 mainThread=true elapsedMs=31 newBitmaps=1 newRGBABytes=6291832
+RESOURCE-DECODE group=profile mount=1 mainThread=true elapsedMs=51 newBitmaps=2 newRGBABytes=12584640
+RESOURCE-DECODE group=achievements mount=1 mainThread=true elapsedMs=0 newBitmaps=0 newRGBABytes=0
+RESOURCE-DECODE group=leaderboard mount=1 mainThread=true elapsedMs=0 newBitmaps=0 newRGBABytes=0
+RESOURCE-DECODE group=home mount=2 mainThread=true elapsedMs=0 newBitmaps=0 newRGBABytes=0
+RESOURCE-DECODE group=profile mount=2 mainThread=true elapsedMs=0 newBitmaps=0 newRGBABytes=0
+RESOURCE-DECODE group=achievements mount=2 mainThread=true elapsedMs=0 newBitmaps=0 newRGBABytes=0
+RESOURCE-DECODE group=leaderboard mount=2 mainThread=true elapsedMs=0 newBitmaps=0 newRGBABytes=0
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.aladdin.wobbrik.ArtReuseTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-11-17T13:01:28.857Z" hostname="Macs-MacBook-Pro.local" time="5.912">
+  <properties/>
+  <testcase name="bundledPixelsAndCropsUnchanged" classname="com.aladdin.wobbrik.ArtReuseTest" time="5.566"/>
+  <testcase name="repeatedArtBaseline" classname="com.aladdin.wobbrik.ArtReuseTest" time="0.346"/>
+  <system-out><![CDATA[ART_BASELINE host compose ms=[0, 0, 0, 0, 0] uniqueBitmaps=10 allocatedRGBABytes=62906208
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

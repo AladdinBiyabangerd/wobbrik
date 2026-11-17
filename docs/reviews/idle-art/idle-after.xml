@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.aladdin.wobbrik.engine.IdleHostPollingTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-11-17T12:53:49.144Z" hostname="Macs-MacBook-Pro.local" time="0.017">
+  <properties/>
+  <testcase name="idleMenuPollingAllocationSample" classname="com.aladdin.wobbrik.engine.IdleHostPollingTest" time="0.017"/>
+  <system-out><![CDATA[IDLE-POLL frames=3600 onlineUnique=1 localUnique=1 allocatedBytes=48 elapsedUs=1301
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

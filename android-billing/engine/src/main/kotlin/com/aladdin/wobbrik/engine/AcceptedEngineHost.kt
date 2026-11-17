@@ -34,7 +34,11 @@ class AcceptedEngineHost(private val drafts: FinishDraftStore? = null, private v
 
     @Synchronized fun bind(commands: AcceptedAttemptCommands) { this.commands = commands }
     private var current = Snapshot()
-    @Synchronized fun snapshot(): Snapshot = current.copy(cameraX = engine?.cameraX ?: 0.0)
+    @Synchronized fun snapshot(): Snapshot {
+        val cameraX = engine?.cameraX ?: 0.0
+        if (current.cameraX != cameraX) current = current.copy(cameraX = cameraX)
+        return current
+    }
 
     /** Synchronous with recovery transitions, including same-UID auth epochs. */
     @Synchronized fun onRecoveryChanged(state: AuthenticatedRecoveryOwner.State) {
