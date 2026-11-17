@@ -22,8 +22,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -281,7 +279,7 @@ private fun BuildingDetail(building: OwnedBuilding, city: CityMembership?, catal
         MobileOwnedBuildingDetail(building, city, catalog, modifier, canDelete, onDelete)
         return
     }
-    val art = rememberCosmeticArt()
+    val art = if (LocalBuildingArt.current.status == ArtPreparation.Ready) rememberCosmeticArt() else emptyMap()
     val value = remember(building, catalog) { BuildingValueBreakdown.from(building, catalog) }
     val largeFont = LocalDensity.current.fontScale > 1.3f
     var tab by rememberSaveable(building.id) { mutableIntStateOf(0) }
@@ -405,12 +403,27 @@ private fun DetailRow(label: String, value: String) {
 /** Server metadata stays real; approved art is a decorative owned-building presentation. */
 @Composable
 internal fun BuildingPreview(building: OwnedBuilding, modifier: Modifier) {
+    val preparation = LocalBuildingArt.current
+    if (preparation.status != ArtPreparation.Ready) {
+        Box(modifier) { ApprovedArtStatus(preparation.status, preparation.retry) }
+        return
+    }
     val art = rememberCosmeticArt() + rememberGameWindowArt()
     val atlases = rememberGameAtlases()
     val purple = rememberPurpleBuildingArt()
-    val gardenImage = ImageBitmap.imageResource(R.drawable.inventory_garden)
-    val garden = remember(gardenImage) { CosmeticSprite(gardenImage, androidx.compose.ui.unit.IntOffset.Zero,
-        androidx.compose.ui.unit.IntSize(gardenImage.width, gardenImage.height)) }
+    val purpleTemplate = usesPurpleTemplate(building.parts)
+    // Purple already carries its approved garden in the atlas. Other templates load
+    // their decorative island on IO without withholding the building's metadata.
+    val garden = if (purpleTemplate) null else {
+        val (resource, retry) = rememberResourceArt(R.drawable.inventory_garden)
+        val image = resource.images?.singleOrNull()
+        if (image == null) {
+            Box(modifier) { ApprovedArtStatus(if (resource.failed) ArtPreparation.Failed else ArtPreparation.Loading, retry) }
+            return
+        }
+        remember(image) { CosmeticSprite(image, androidx.compose.ui.unit.IntOffset.Zero,
+            androidx.compose.ui.unit.IntSize(image.width, image.height)) }
+    }
     val centers = building.geometry?.geometry?.centers
     val missing = building.parts.values.any { it !in art }
     if (centers == null || missing) {
@@ -420,8 +433,8 @@ internal fun BuildingPreview(building: OwnedBuilding, modifier: Modifier) {
         return
     }
     Canvas(modifier.semantics { contentDescription = "${building.floors} mərtəbəli bina" }) {
-        if (usesPurpleTemplate(building.parts)) purpleBuilding(purple, art, atlases, building.parts, centers)
-        else buildingPreview(atlases, art, building.parts, centers, garden)
+        if (purpleTemplate) purpleBuilding(purple, art, atlases, building.parts, centers)
+        else buildingPreview(atlases, art, building.parts, centers, requireNotNull(garden))
     }
 }
 

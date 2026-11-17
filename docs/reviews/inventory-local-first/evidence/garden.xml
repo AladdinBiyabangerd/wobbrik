@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.aladdin.wobbrik.InventoryGardenDecodeTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-11-17T13:51:46.141Z" hostname="Macs-MacBook-Pro.local" time="5.31">
+  <properties/>
+  <testcase name="gardenResourceCost" classname="com.aladdin.wobbrik.InventoryGardenDecodeTest" time="5.31"/>
+  <system-out><![CDATA[GARDEN main=true wallMs=67 rgbaBytes=6291456
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

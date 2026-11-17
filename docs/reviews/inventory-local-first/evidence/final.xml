@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.aladdin.wobbrik.InventoryLocalFirstTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-11-17T13:52:27.733Z" hostname="Macs-MacBook-Pro.local" time="9.68">
+  <properties/>
+  <testcase name="cachedRouteWithArtAndNetworkBlocked" classname="com.aladdin.wobbrik.InventoryLocalFirstTest" time="6.784"/>
+  <testcase name="cachedDetailDoesNotGrantCommandsWhileArtLoads" classname="com.aladdin.wobbrik.InventoryLocalFirstTest" time="0.339"/>
+  <testcase name="cachedAccountBypassesInitialGateButNewLoginDoesNot" classname="com.aladdin.wobbrik.InventoryLocalFirstTest" time="0.09"/>
+  <testcase name="normalFont2" classname="com.aladdin.wobbrik.InventoryLocalFirstTest" time="0.706"/>
+  <testcase name="otherTemplateUsesSameAsyncPreview" classname="com.aladdin.wobbrik.InventoryLocalFirstTest" time="0.684"/>
+  <testcase name="smallFont1" classname="com.aladdin.wobbrik.InventoryLocalFirstTest" time="0.588"/>
+  <testcase name="smallFont2" classname="com.aladdin.wobbrik.InventoryLocalFirstTest" time="0.488"/>
+  <system-out><![CDATA[LOCAL-FIRST warmRouteCachedMs=375 art=Loading blockedNetwork=true additionalRequests=2
+LOCAL-FIRST remount=0 hostMs=70 addedHTTP=0
+LOCAL-FIRST remount=1 hostMs=37 addedHTTP=0
+LOCAL-FIRST warmRouteCachedMs=45 art=Loading blockedNetwork=true additionalRequests=2
+LOCAL-FIRST remount=0 hostMs=22 addedHTTP=0
+LOCAL-FIRST remount=1 hostMs=18 addedHTTP=0
+LOCAL-FIRST warmRouteCachedMs=47 art=Loading blockedNetwork=true additionalRequests=2
+LOCAL-FIRST remount=0 hostMs=28 addedHTTP=0
+LOCAL-FIRST remount=1 hostMs=43 addedHTTP=0
+LOCAL-FIRST warmRouteCachedMs=57 art=Loading blockedNetwork=true additionalRequests=2
+LOCAL-FIRST remount=0 hostMs=22 addedHTTP=0
+LOCAL-FIRST remount=1 hostMs=17 addedHTTP=0
+LOCAL-FIRST warmRouteCachedMs=36 art=Loading blockedNetwork=true additionalRequests=2
+LOCAL-FIRST remount=0 hostMs=14 addedHTTP=0
+LOCAL-FIRST remount=1 hostMs=13 addedHTTP=0
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -18,6 +18,11 @@ import kotlinx.coroutines.withContext
 
 internal enum class ArtPreparation { Loading, Ready, Failed }
 
+/** Inventory metadata does not depend on decorative APK art. Other destinations retain
+ * their existing route gate; this scope only defers the inventory illustration. */
+internal data class BuildingArtState(val status: ArtPreparation, val retry: () -> Unit)
+internal val LocalBuildingArt = staticCompositionLocalOf { BuildingArtState(ArtPreparation.Ready, {}) }
+
 /** Bundled art is account-independent. A cancelled composition cannot publish completion. */
 @Composable
 internal fun rememberArtPreparation(key: Any, load: () -> Unit): ArtPreparation {
@@ -51,4 +56,4 @@ internal fun ApprovedArtStatus(status: ArtPreparation, onRetry: () -> Unit) {
 }
 
 internal fun needsBundledArt(page: String): Boolean =
-    page in setOf("game", "city", "inventory", "parts", "collection", "market", "market-own")
+    page in setOf("game", "city", "parts", "collection", "market", "market-own")

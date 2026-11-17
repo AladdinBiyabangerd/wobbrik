@@ -233,9 +233,13 @@ private fun AuthenticatedGame(app: WobbrikApplication) {
             return@menuContent
         }
         if (page == "inventory" && view != null && configured != null) {
-            key(InventoryReadKey(ready ?: view.account)) { InventoryScreen(configured, view, selected = inventoryBuilding, onSelectBuilding = { inventoryBuilding = it }, onHome = { page = "home" },
+            key(InventoryReadKey(ready ?: view.account)) {
+                CompositionLocalProvider(LocalBuildingArt provides BuildingArtState(artPreparation) { artRetry++ }) {
+                    InventoryScreen(configured, view, selected = inventoryBuilding, onSelectBuilding = { inventoryBuilding = it }, onHome = { page = "home" },
                 onParts = { partsBuilding = it; page = "parts" }, onDecorations = { inventoryBuilding = null; page = if(mobileMenu) "owned-decorations" else "decorations" }, onLand = { inventoryBuilding = null; page = if(mobileMenu) "owned-land" else "land" },
-                onMarket = { marketBuilding = inventoryBuilding; page = "market" }) }
+                onMarket = { marketBuilding = inventoryBuilding; page = "market" })
+                }
+            }
             return@menuContent
         }
         if (page == "collection" && ready != null) {

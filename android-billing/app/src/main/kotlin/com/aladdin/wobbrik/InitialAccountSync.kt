@@ -35,8 +35,10 @@ internal fun InitialAccountSync(epoch: BillingSession?, state: AuthenticatedReco
     }
     val ready = state is AuthenticatedRecoveryOwner.State.Ready
     // Latch success: later mutations/recoveries must not replace an already opened menu.
-    SideEffect { if (ready) entered = true }
-    if (epoch == null || ready || entered) return false
+    SideEffect { if (ready || canBrowseCached) entered = true }
+    // A validated accepted account already supplies the menu's display-only state.
+    // Recovery continues in its owner; neither a timer nor a click is needed to browse.
+    if (epoch == null || ready || canBrowseCached || entered) return false
     val failed = state is AuthenticatedRecoveryOwner.State.Error
     val canContinue = canBrowseCached || elapsed || failed
     BackHandler(canContinue) { entered = true }
