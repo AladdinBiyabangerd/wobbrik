@@ -1,5 +1,6 @@
 package com.aladdin.wobbrik
 
+import android.content.res.AssetManager
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.graphics.Paint
@@ -24,21 +25,25 @@ import org.json.JSONObject
 @Composable
 internal fun rememberPurpleBuildingArt(): Map<String, CosmeticSprite> {
     val context = LocalContext.current
-    return remember(context) {
-        val metadata = context.assets.open("building-purple/atlas.json").bufferedReader().use { JSONObject(it.readText()) }
-        val image = context.assets.open("building-purple/atlas.png").use { requireNotNull(BitmapFactory.decodeStream(it)).asImageBitmap() }
+    return remember { ApprovedArt.purple(context.assets) }
+}
+
+internal fun loadPurpleBuildingArt(assets: AssetManager): Map<String, CosmeticSprite> {
+    return run {
+        val metadata = assets.open("building-purple/atlas.json").bufferedReader().use { JSONObject(it.readText()) }
+        val image = assets.open("building-purple/atlas.png").use { requireNotNull(BitmapFactory.decodeStream(it)).asImageBitmap() }
         val cells = metadata.getJSONObject("cells")
         val primary = cells.keys().asSequence().associateWith { key ->
             val c = cells.getJSONArray(key)
             CosmeticSprite(image, IntOffset(c.getInt(0), c.getInt(1)), IntSize(c.getInt(2), c.getInt(3)))
         }
-        val foundation = context.assets.open("building-purple/" + metadata.getString("foundation_image"))
+        val foundation = assets.open("building-purple/" + metadata.getString("foundation_image"))
             .use { requireNotNull(BitmapFactory.decodeStream(it)).asImageBitmap() }
         val foundationCells = metadata.getJSONObject("foundation_cells")
-        val foreground = context.assets.open("building-purple/" + metadata.getString("foreground_image"))
+        val foreground = assets.open("building-purple/" + metadata.getString("foreground_image"))
             .use { requireNotNull(BitmapFactory.decodeStream(it)).asImageBitmap() }
         val foregroundCells = metadata.getJSONObject("foreground_cells")
-        val groundFloor = context.assets.open("building-purple/" + metadata.getString("ground_floor_image"))
+        val groundFloor = assets.open("building-purple/" + metadata.getString("ground_floor_image"))
             .use { requireNotNull(BitmapFactory.decodeStream(it)).asImageBitmap() }
         val groundFloorCells = metadata.getJSONObject("ground_floor_cells")
         primary + foundationCells.keys().asSequence().associateWith { key ->
