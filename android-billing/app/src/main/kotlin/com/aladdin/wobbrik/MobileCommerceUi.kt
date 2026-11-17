@@ -21,7 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 /** Native commerce controls use the established menu palette and dimension scale. */
 @Composable
 internal fun CommerceAction(label: String, modifier: Modifier = Modifier.fillMaxWidth(), primary: Boolean = false,
-    enabled: Boolean = true, icon: MobileIcon? = null, compact: Boolean = false, onClick: () -> Unit) {
+    enabled: Boolean = true, icon: MobileIcon? = null, compact: Boolean = false, destructive: Boolean = false, onClick: () -> Unit) {
     val feedback = LocalGameFeedback.current
     val shape = RoundedCornerShape(GameTokens.ControlRadius)
     Surface(onClick = { feedback(); onClick() }, enabled = enabled, modifier = modifier.heightIn(min = GameTokens.Target),
@@ -33,7 +33,7 @@ internal fun CommerceAction(label: String, modifier: Modifier = Modifier.fillMax
                 listOf(GameTokens.MobileHome.PlayTop, GameTokens.Accent, GameTokens.MobileHome.PlayBottom))) else Modifier)
                 .padding(GameTokens.Small), verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(GameTokens.Quarter, Alignment.CenterHorizontally)) {
-                val color = if (!enabled) GameTokens.Muted else if (primary) GameTokens.Background else GameTokens.Text
+                val color = if (!enabled) GameTokens.Muted else if (primary) GameTokens.Background else if (destructive) GameTokens.Danger else GameTokens.Text
                 icon?.let { MobileMenuIcon(it, Modifier.size(if(compact) GameTokens.Gap else GameTokens.Inset), color) }
                 Text(label, Modifier.then(if (bounded) Modifier.weight(1f, fill = false) else Modifier).widthIn(max = GameTokens.MobileHome.NavbarLabelWidth * LocalDensity.current.fontScale).horizontalScroll(rememberScrollState()), color = color, fontFamily = GameTypeface,
                     fontSize = if(compact) GameTokens.Caption else GameTokens.Body, fontWeight = FontWeight.Bold, softWrap = false)

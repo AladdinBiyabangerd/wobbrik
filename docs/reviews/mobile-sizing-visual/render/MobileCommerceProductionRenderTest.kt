@@ -66,7 +66,7 @@ abstract class MobileCommerceProductionHost {
    AccountRecovery("now","first","later",7,0,emptyList(),emptyList(),listOf("land_1"),emptyList(),28))
   fun building(id:Int):String {
    val parts=FinishCosmetics.categories.joinToString(",") {"\"$it\":\"base_${id}_$it\""}
-   return """{"id":"b-$id","revision":1,"floors":10,"residents":40,"base_value":20,"max_price":24,"parts":{$parts},"traded":false,"accepted_geometry":{"geometry":{"version":"city-geometry-v1","centers_x_ticks":[${(0..9).joinToString(","){(it*2500).toString()}}]},"attempt_id":"attempt","sequence":1,"operation_id":"op","rules_version":"wobbrik-v1","engine_version":"wobbrik-structural-v1"}}"""
+   return """{"id":"b-$id","revision":1,"floors":10,"residents":40,"base_value":20,"max_price":${if(id == 4) Long.MAX_VALUE else 24},"parts":{$parts},"traded":${id == 3},"accepted_geometry":{"geometry":{"version":"city-geometry-v1","centers_x_ticks":[${(0..9).joinToString(","){(it*2500).toString()}}]},"attempt_id":"attempt","sequence":1,"operation_id":"op","rules_version":"wobbrik-v1","engine_version":"wobbrik-structural-v1"}}"""
   }
   fun listing(id:Int)="""{"id":"l-$id","building_id":"b-$id","revision":1,"building_revision":1,"price":24,"fee":2,"status":"active"}"""
   var failDecor=false
@@ -147,7 +147,19 @@ abstract class MobileCommerceProductionHost {
    compose.onNodeWithText("Şəhər statusu").performScrollTo().assertIsDisplayed().assertHasNoClickAction()
    compose.onNodeWithText("✓ Şəhərdə yerləşdirilib").performScrollTo().assertIsDisplayed().assertHasNoClickAction()
    capture("detail-city-status-$name")
-   compose.onNodeWithText("Binanı sil").performScrollTo().assertIsDisplayed()
+   compose.onNodeWithText("Maksimum satış").performScrollTo().assertIsDisplayed().assertHasNoClickAction()
+   // The coin row owns horizontal scroll; reveal that row through the outer detail scroll first.
+   compose.onNodeWithText("24").onParent().performScrollTo()
+   compose.onNodeWithText("24").assertIsDisplayed().assertHasNoClickAction()
+   capture("detail-sale-price-$name")
+   compose.onNodeWithText("Binanı sil").performScrollTo().assertIsDisplayed().assertIsEnabled().assertHeightIsAtLeast(GameTokens.Target)
+   capture("detail-delete-action-$name")
+   compose.onNodeWithText("Binanı sil").performClick()
+   waitText("Bina silinsin?")
+   compose.runOnIdle { assertEquals(0, submissions) }
+   capture("detail-delete-confirm-$name", true)
+   compose.onNodeWithText("Ləğv et").assertIsDisplayed().performClick()
+   compose.onAllNodesWithText("Bina silinsin?").assertCountEquals(0)
    compose.onNodeWithText("Bina görünüşü").assertIsDisplayed()
    compose.onNodeWithText("Bina görünüşü").performClick()
    compose.runOnIdle {assertEquals("parts",page)}
@@ -158,6 +170,16 @@ abstract class MobileCommerceProductionHost {
     compose.onNodeWithText(status).performScrollTo().assertIsDisplayed().assertHasNoClickAction()
     compose.onAllNodesWithText("✓ Şəhərdə yerləşdirilib").assertCountEquals(0)
    }
+   compose.onNodeWithText("Alınmış bina yenidən satılmır").performScrollTo().assertIsDisplayed()
+   compose.onNodeWithText("Satışa çıxar").assertIsNotEnabled()
+   compose.onNodeWithText("Binanı sil").performScrollTo().assertIsEnabled()
+   capture("detail-traded-$name")
+   go("inventory");waitText("10 mərtəbə  ›")
+   compose.runOnIdle { selected = "b-4" }
+   waitText("✓ Sənindir")
+   compose.onAllNodesWithText(Long.MAX_VALUE.toString()).onLast().onParent().performScrollTo()
+   compose.onAllNodesWithText(Long.MAX_VALUE.toString()).onLast().assertIsDisplayed().assertHasNoClickAction()
+   capture("detail-sale-long-price-$name")
    go("owned-decorations");waitText("✓ Şəhərdə")
    capture("owned-decor-$name")
    compose.onNode(hasScrollToIndexAction()).performScrollToNode(hasText("Saxlanılır"))

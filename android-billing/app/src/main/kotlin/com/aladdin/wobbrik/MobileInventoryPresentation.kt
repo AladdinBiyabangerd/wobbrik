@@ -115,14 +115,30 @@ internal fun MobileOwnedBuildingDetail(building: OwnedBuilding, city: CityMember
                 }
             }
         }
-        MenuRelief(Modifier.fillMaxWidth()) {
+        MenuRelief(Modifier.fillMaxWidth(), shape = RoundedCornerShape(GameTokens.ControlRadius), kind = MenuSkin.Commerce) {
             Column(Modifier.padding(GameTokens.Small), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-                Text("Maksimum satış", color = GameTokens.Muted, fontFamily = GameTypeface)
-                CommercePrice(building.maxPrice)
-                if(building.traded) Text("Alınmış bina yenidən satılmır", color = GameTokens.Muted, fontFamily = GameTypeface)
-                CommerceAction("Binanı sil", enabled = canDelete, onClick = onDelete)
+                val priceLabel: @Composable () -> Unit = {
+                    Row(verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+                        MobileMenuIcon(MobileIcon.Tag, Modifier.size(GameTokens.Inset), GameTokens.Muted)
+                        Text("Maksimum satış", color = GameTokens.Text, fontFamily = GameTypeface,
+                            fontSize = GameTokens.Label, fontWeight = FontWeight.Bold)
+                    }
+                }
+                if (largeFont) {
+                    priceLabel()
+                    CommercePrice(building.maxPrice)
+                } else Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+                    Box(Modifier.weight(1f)) { priceLabel() }
+                    CommercePrice(building.maxPrice, Modifier.weight(1f))
+                }
+                if(building.traded) Text("Alınmış bina yenidən satılmır", color = GameTokens.Muted,
+                    fontFamily = GameTypeface, fontSize = GameTokens.Label)
             }
         }
+        CommerceAction("Binanı sil", enabled = canDelete, destructive = true, onClick = onDelete)
+
     }
 }
 
