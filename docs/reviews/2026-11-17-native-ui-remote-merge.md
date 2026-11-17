@@ -6,3 +6,5 @@
 - Existing native ownership font-scale render reopened and inspected; known viewport clipping/scroll limitation remains. Existing 52-render run and contrast evidence are historical checks for unchanged production source; no new full visual parity claim.
 - `git diff --check` passed. Full CI, emulator, deployment and real account runtime were not run. Two unverified generated `.dm` files remain uncommitted in the primary checkout and are excluded from merge.
 - AppBackend contracts already included in remote main `36ec1de`; no backend implementation change required for this merge. Remaining visual/runtime limitations in the logical-commit review remain open.
+
+Result: branch pushed; history-preserving remote main merge `0315674`; primary local main fast-forwarded to identical SHA. GitHub connector PR creation returned 403; standard authenticated Git push succeeded. Backend obsolete merged Wobbrik refs cleaned and persistent per-app rule merged/pushed as cb684a7. No blocking issue remains for this integration; prior product limitations remain.
