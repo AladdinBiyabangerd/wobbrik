@@ -71,10 +71,11 @@ abstract class MobileCommerceProductionHost {
   fun listing(id:Int)="""{"id":"l-$id","building_id":"b-$id","revision":1,"building_revision":1,"price":24,"fee":2,"status":"active"}"""
   var failDecor=false
   var failCity=false
+  var cityFailureStatus=503
   var submissions=0
   val reads=GameplayHttpBackend(sessions,GameplayTransport {path,_,body->
    assertNull(body)
-   if(failCity && path.startsWith("city?")) return@GameplayTransport GameplayResponse(503,"""{"error":"unavailable"}""")
+   if(failCity && path.startsWith("city?")) return@GameplayTransport GameplayResponse(cityFailureStatus,"""{"error":"unavailable"}""")
    if(failDecor && path.startsWith("decorations?")) return@GameplayTransport GameplayResponse(503,"""{"error":"unavailable"}""")
    GameplayResponse(200,when {
     path.startsWith("inventory?")->"""{"buildings":[${(1..4).joinToString(","){building(it)}}]}"""
@@ -268,6 +269,26 @@ abstract class MobileCommerceProductionHost {
    compose.onAllNodesWithText("✓ Şəhərdə").assertCountEquals(0)
    compose.onAllNodesWithText("Məlumat yenilənmədi.", substring=true).assertCountEquals(0)
    capture("inventory-city-unavailable-$name")
+   compose.onAllNodesWithText("10 mərtəbə  ›")[0].performScrollTo().performClick()
+   waitText("✓ Sənindir")
+   compose.onNodeWithText("Şəhərə aidlik yüklənməyib").performScrollTo().assertIsDisplayed().assertHasNoClickAction()
+   compose.onAllNodesWithText("✓ Şəhərdə yerləşdirilib").assertCountEquals(0)
+   compose.onAllNodesWithText("Məlumat yenilənmədi.", substring=true).assertCountEquals(0)
+   compose.onNodeWithText("Bina görünüşü").assertIsDisplayed().assertIsEnabled()
+   compose.onNodeWithText("Satışa çıxar").assertIsDisplayed().assertIsEnabled()
+   capture("detail-city-unavailable-$name")
+   compose.onNodeWithText("Binanı sil").performScrollTo().assertIsDisplayed().assertIsEnabled()
+   compose.runOnIdle {assertEquals(0,submissions)}
+   // An unavailable city must not trap the user on the detail route.
+   compose.onNodeWithContentDescription("Geri").performClick()
+   waitText("10 mərtəbə  ›")
+   compose.runOnIdle {cityFailureStatus=403}
+   compose.onAllNodesWithText("10 mərtəbə  ›")[0].performScrollTo().performClick()
+   waitText("Məlumat yenilənmədi. Bağlantını yoxla və yenidən cəhd et.")
+   compose.onAllNodesWithText("✓ Sənindir").assertCountEquals(0)
+   compose.onAllNodesWithText("Binanı sil").assertCountEquals(0)
+   compose.onAllNodesWithText("Satışa çıxar").assertCountEquals(0)
+   compose.onNodeWithContentDescription("Geri").performClick()
    compose.runOnIdle {failDecor=true}
    go("decorations")
    compose.onNode(hasScrollToIndexAction()).performScrollToNode(hasText("Dekor inventarı yüklənmədi"))

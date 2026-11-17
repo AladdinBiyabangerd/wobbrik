@@ -85,10 +85,22 @@ internal fun InventoryScreen(configured: WobbrikApplication.Bootstrap.Configured
                 next = page.next
             } else {
                 detail = null; city = null
+                suspend fun readDetail(repository: InventoryRepository): Pair<OwnedBuilding, CityMembership?> {
+                    val building = repository.building(session, requireNotNull(selected))
+                    // Membership is optional presentation data, not authority for building mutations.
+                    val membership = if (!mobileShell) repository.city(session) else try { repository.city(session) }
+                    catch (cancelled: CancellationException) { throw cancelled }
+                    catch (changed: appbackend.wobbrik.billing.AccountChanged) { throw changed }
+                    catch (failure: GameplayHttpError) {
+                        if (failure.status !in 500..599 && failure.status !in setOf(408, 429)) throw failure
+                        null
+                    }
+                    catch (_: Exception) { null }
+                    return building to membership
+                }
                 val (building, membership) = configured.views?.read(ready, session, "detail-$selected", onCached = { fromCache = true }, refresh = retry > 0) { reader ->
-                    val repository = appbackend.wobbrik.game.InventoryRepository(reader)
-                    repository.building(session, requireNotNull(selected)) to repository.city(session)
-                } ?: (configured.inventory.building(session, requireNotNull(selected)) to configured.inventory.city(session))
+                    readDetail(InventoryRepository(reader))
+                } ?: readDetail(configured.inventory)
                 check(ready.current(configured, session))
                 detail = building; city = membership
             }
