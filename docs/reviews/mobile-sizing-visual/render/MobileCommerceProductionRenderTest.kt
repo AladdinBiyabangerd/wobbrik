@@ -144,10 +144,20 @@ abstract class MobileCommerceProductionHost {
    compose.onNodeWithText("40").performScrollTo().assertIsDisplayed()
    compose.onAllNodesWithText("Səviyyə", substring = true).assertCountEquals(0)
    capture("detail-information-residents-$name")
+   compose.onNodeWithText("Şəhər statusu").performScrollTo().assertIsDisplayed().assertHasNoClickAction()
+   compose.onNodeWithText("✓ Şəhərdə yerləşdirilib").performScrollTo().assertIsDisplayed().assertHasNoClickAction()
+   capture("detail-city-status-$name")
    compose.onNodeWithText("Binanı sil").performScrollTo().assertIsDisplayed()
    compose.onNodeWithText("Bina görünüşü").assertIsDisplayed()
    compose.onNodeWithText("Bina görünüşü").performClick()
    compose.runOnIdle {assertEquals("parts",page)}
+   for ((index, status) in listOf(1 to "Şəhər məlumatı dəyişib. Yenilə.", 2 to "İnventardadır")) {
+    go("inventory");waitText("10 mərtəbə  ›")
+    compose.runOnIdle { selected = "b-${index + 1}" }
+    waitText("✓ Sənindir")
+    compose.onNodeWithText(status).performScrollTo().assertIsDisplayed().assertHasNoClickAction()
+    compose.onAllNodesWithText("✓ Şəhərdə yerləşdirilib").assertCountEquals(0)
+   }
    go("owned-decorations");waitText("✓ Şəhərdə")
    capture("owned-decor-$name")
    compose.onNode(hasScrollToIndexAction()).performScrollToNode(hasText("Saxlanılır"))

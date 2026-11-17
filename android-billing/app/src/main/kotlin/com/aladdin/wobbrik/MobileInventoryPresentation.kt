@@ -96,12 +96,25 @@ internal fun MobileOwnedBuildingDetail(building: OwnedBuilding, city: CityMember
                 }
             }
         }
-        Text(when {
-            city == null -> "Şəhərə aidlik yüklənməyib"
-            city.buildings[building.id] == building.revision -> "✓ Şəhərdə yerləşdirilib"
-            building.id in city.buildings -> "Şəhər məlumatı dəyişib. Yenilə."
-            else -> "İnventardadır"
-        }, color = GameTokens.Accent, fontFamily = GameTypeface)
+        val placed = city?.buildings?.get(building.id) == building.revision
+        MenuRelief(Modifier.fillMaxWidth(), shape = RoundedCornerShape(GameTokens.ControlRadius), kind = MenuSkin.Track) {
+            Row(Modifier.padding(GameTokens.Small), verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+                MobileMenuIcon(MobileIcon.City, Modifier.size(GameTokens.Inset),
+                    if (placed) GameTokens.Success else GameTokens.Muted)
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {
+                    Text("Şəhər statusu", color = GameTokens.Muted, fontFamily = GameTypeface,
+                        fontSize = GameTokens.Label)
+                    Text(when {
+                        city == null -> "Şəhərə aidlik yüklənməyib"
+                        placed -> "✓ Şəhərdə yerləşdirilib"
+                        building.id in city.buildings -> "Şəhər məlumatı dəyişib. Yenilə."
+                        else -> "İnventardadır"
+                    }, color = if (placed) GameTokens.Success else GameTokens.Text,
+                        fontFamily = GameTypeface, fontSize = GameTokens.Body, fontWeight = FontWeight.Bold)
+                }
+            }
+        }
         MenuRelief(Modifier.fillMaxWidth()) {
             Column(Modifier.padding(GameTokens.Small), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
                 Text("Maksimum satış", color = GameTokens.Muted, fontFamily = GameTypeface)
