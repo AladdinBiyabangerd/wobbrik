@@ -69,6 +69,9 @@ class AccountViews(private val backend: GameplayHttpBackend, private val cache: 
                         }
                     } to false
                 } catch (failure: java.io.IOException) {
+                    // Blocking I/O can time out after its caller has already been cancelled.
+                    // Preserve cancellation instead of starting an offline replay (or cache miss).
+                    currentCoroutineContext().ensureActive()
                     // Authentication/server rejections must never be disguised as offline data.
                     if (failure is GameplayHttpError && failure.status !in 500..599 && failure.status !in setOf(408, 429)) throw failure
                     cache.replay(session, view.account, key, block) to true

@@ -2,6 +2,8 @@
 
 ## Completed
 
+- AccountViews cancelled-timeout fallback düzəldi: IOException catch girişində ensureActive; ləğv edilmiş iş replay/cache-miss yoluna keçmir. Cache olan/olmayan blocking timeout regressiyası PASS. Review `docs/reviews/2026-11-17-cancelled-timeout-fallback.md`.
+
 - Inventory local-first/optional city vahidi `083f870`-dədir.
 - İlkin sync gate, proses üzrə art reuse, şəhər4paralel detail scheduling və CityScreen onLocal əvvəlki working diff-dədir. Sübutlar: `docs/reviews/2026-11-17-{initial-account-sync,art-reuse,city-read-scheduling,city-local-first}.md`.
 - Same-UID City host timeout dar araşdırması tamamlandı: state write-dan sonra `waitForIdle()` olmaması reproduksiya edildi, test düzəldi; production CityScreen/AccountViews dəyişmədi. Retained11/11PASS. Review `docs/reviews/2026-11-17-city-same-uid-host.md`.
@@ -17,7 +19,7 @@
 
 ## Current state
 
-Branch `fix/menu-inventory-latency`, HEAD `083f870`. Bütün son vahidlər working diff-dədir; commit/merge/push edilməyib. Owner PLAN dəyişməsi, baselineProfiles/{0,1}/app-release.dm və untracked parity audit saxlanıb, toxunma. Bütün menyu performans/redesign işi tamamlanmayıb. CI yoxdur.
+Branch `fix/menu-inventory-latency`, HEAD `083f870`. Əvvəlki working diff istifadəçi göstərişi ilə `9cac996` commit-ində saxlanıb. Cancelled-timeout fallback düzəlişi ayrıca commit edilir; merge/push edilməyib. Owner PLAN dəyişməsi, baselineProfiles/{0,1}/app-release.dm və untracked parity audit saxlanıb, toxunma. Bütün menyu performans/redesign işi tamamlanmayıb. CI yoxdur.
 
 ## Decisions
 
@@ -43,6 +45,8 @@ Bazar public list viewer revision dəyişmədən dəyişə bilər: hər mounted 
 
 ## Checks performed
 
+Cancelled-timeout fix: AccountViews14/14unit, assembleDebug/lintDebugPASS32s; `/private/tmp/wobbrik-cancel-checks.log`. Əvvəlki dirty faylların hash-lərində yalnız nəzərdə tutulan AccountViews dəyişdi (review/handoff yenilənməsindən əvvəl). Real HTTPS harness təkrar işlədilməyib. CI yoxdur.
+
 Real HTTPS final4/4hostPASS,16.889s test/Gradle20s; `docs/reviews/https-overlap/results.xml`, `server-events.jsonl`, `/private/tmp/wobbrik-https/test-final.log`. Cancelled view cache boşdur, publication/command yoxdur. TLS fixture dayandırıldı; hash müqayisəsində review/handoff-dan əvvəl bütün əvvəlki dirty fayllar eyni idi. Diffcheck/PythonAST/shSyntaxPASS. CI/build/lint/backend test yoxdur.
 
 
@@ -65,4 +69,4 @@ Final normal core144/app28unit,assembleDebug,lintDebugPASS33s; `/private/tmp/wob
 
 ## Exact next step
 
-Real HTTPS baseline tamamlandı, optimizasiya edilmədi. Yeni chatdə PLAN §1.1, bu handoff və `docs/reviews/2026-11-17-https-overlap.md` oxu. Konkret tapıntı: cancellation blocking HTTPS oxusunu kəsmir, controlled rapid tab return real same-path overlap yaradır; cancelled timeout AccountViews IOException fallback-də cache replay edib cache miss IllegalArgumentException çıxara bilir. Növbəti ayrıca vahid cancellation-before-fallback düzəlişi və ya ölçüyə əsasən scoped transport cancellation ola bilər; inflight coalescing ayrıca qərar/test tələb edir. Device/deployed frequency və durable disk baseline qalır. Bütün dirty işləri saxla; merge/push/CI icazəsi yoxdur.
+Cancelled-timeout fallback vahidi bitdi. Növbəti ayrıca tapşırıqda PLAN §1.1 və HTTPS overlap review əsasında transport cancellation və ya cold Market page+N detail fanout ölçüsü araşdırıla bilər. Scoped transport cancellation/coalescing implementasiya edilməyib; device/deployed frequency və durable disk baseline açıqdır. Backend toplu detail müqaviləsi ehtiyacı ayrıca ölçülüb qiymətləndirilməlidir. Merge/push və CI ayrıca göstəriş olmadan edilmir.

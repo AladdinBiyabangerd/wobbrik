@@ -157,4 +157,48 @@ class AccountViewsTest {
         assertFalse(local)
     }
 
+    @Test fun cancelledTimeoutNeverStartsFallbackWithOrWithoutCache() = runBlocking {
+        for (seeded in listOf(false, true)) {
+            val f = Fixture()
+            if (seeded) f.seed()
+            var diskReads = 0
+            var writes = 0
+            val cache = ReadOnlyGameCache { key -> object : JournalFile {
+                override fun read(): ByteArray? { diskReads++; return f.rows[key] }
+                override fun replace(bytes: ByteArray) { writes++; f.rows[key] = bytes.clone() }
+            } }
+            val entered = CompletableDeferred<Unit>()
+            val release = java.util.concurrent.CountDownLatch(1)
+            val backend = GameplayHttpBackend(f.sessions, GameplayTransport { _, _, _ ->
+                entered.complete(Unit)
+                check(release.await(5, java.util.concurrent.TimeUnit.SECONDS))
+                throw java.net.SocketTimeoutException("blocked read timed out")
+            })
+            val views = AccountViews(backend, cache, f.sessions)
+            var terminal: Throwable? = null
+            var callbacks = 0
+            var returned = false
+            val job = launch {
+                try {
+                    views.read(f.view, f.session, "inventory-", refresh = true,
+                        onCached = { callbacks++ }, onFresh = { callbacks++ }) {
+                        InventoryRepository(it).page(f.session)
+                    }
+                    returned = true
+                } catch (failure: Throwable) { terminal = failure }
+            }
+            try {
+                withTimeout(5000) { entered.await() }
+                job.cancel()
+            } finally { release.countDown() }
+            withTimeout(5000) { job.join() }
+            assertTrue("seeded=$seeded terminal=$terminal", terminal is CancellationException)
+            assertTrue(job.isCancelled)
+            assertFalse(returned)
+            assertEquals(0, callbacks)
+            assertEquals(0, diskReads)
+            assertEquals(0, writes)
+        }
+    }
+
 }
