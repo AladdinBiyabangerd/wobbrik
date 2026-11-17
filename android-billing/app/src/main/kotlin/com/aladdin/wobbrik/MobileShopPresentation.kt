@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.grid.*
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.*
@@ -43,7 +44,15 @@ internal fun MobileDecorationShop(ready: AuthenticatedRecoveryOwner.State.Ready,
                         Text(item.name, Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
                             color = GameTokens.Text, fontFamily = GameTypeface, fontSize = GameTokens.Body,
                             fontWeight = FontWeight.Bold, softWrap = false)
-                        copies?.let { Text("Nüsxə: ${it.count { copy -> copy.itemId == item.id }}", color = GameTokens.Muted, fontSize = GameTokens.Caption) }
+                        copies?.let { owned ->
+                            val count = owned.count { it.itemId == item.id }
+                            if(count > 0) Surface(color = GameTokens.Success, shape = RoundedCornerShape(GameTokens.Target)) {
+                                Text("✓ Sahibsən", Modifier.padding(horizontal = GameTokens.Small, vertical = GameTokens.Quarter),
+                                    color = GameTokens.Background, fontFamily = GameTypeface, fontSize = GameTokens.Caption,
+                                    fontWeight = FontWeight.Bold)
+                            }
+                            Text("Nüsxə: $count", color = GameTokens.Muted, fontFamily = GameTypeface, fontSize = GameTokens.Caption)
+                        }
                         if (large) {
                             item.price?.let { CommercePrice(it, Modifier.fillMaxWidth()) }
                             CommerceAction("Al", primary = true, icon = MobileIcon.Cart) { selected = item }

@@ -158,9 +158,19 @@ abstract class MobileCommerceProductionHost {
    compose.runOnIdle {failDecor=false}
    compose.onNodeWithText("Yenidən cəhd et").performScrollTo().performClick();waitText("✓ Şəhərdə")
    compose.onAllNodesWithText("Ərazi").assertCountEquals(0)
-   go("decorations");waitText("Ağac");capture("decor-shop-$name")
+   go("decorations");waitText("Nüsxə: 1");capture("decor-shop-$name")
+   compose.onAllNodesWithText("✓ Sahibsən")[0].performScrollTo().assertIsDisplayed()
+   compose.onAllNodesWithText("Nüsxə: 1")[0].performScrollTo().assertIsDisplayed()
+   if(font > 1f) compose.onNode(hasScrollToIndexAction()).performSemanticsAction(
+       androidx.compose.ui.semantics.SemanticsActions.ScrollBy) { scroll ->
+       scroll(0f, with(compose.density) { (GameTokens.Target * 2).toPx() })
+   }
+   capture("decor-ownership-$name")
    compose.onNode(hasScrollToIndexAction()).performScrollToNode(hasText("Skamya"))
-   compose.onNodeWithText("Skamya").performClick();compose.waitForIdle();capture("decor-selected-$name",font>1f)
+   compose.onNodeWithText("Skamya").performClick();compose.waitForIdle()
+   // Owning a copy must not disable buying another one.
+   compose.onAllNodesWithText("Al").onLast().assertIsEnabled()
+   capture("decor-selected-$name",font>1f)
    compose.onNodeWithText("Ləğv et").assertIsDisplayed().performClick()
    compose.onNodeWithText("Mənim elanlarım").performClick();marketLoaded("Elanı geri götür")
    compose.onNodeWithText("+ Yeni elan").assertIsDisplayed().assertHeightIsAtLeast(GameTokens.Target)
@@ -226,6 +236,12 @@ abstract class MobileCommerceProductionHost {
    compose.onAllNodesWithText("✓ Şəhərdə").assertCountEquals(0)
    compose.onAllNodesWithText("Məlumat yenilənmədi.", substring=true).assertCountEquals(0)
    capture("inventory-city-unavailable-$name")
+   compose.runOnIdle {failDecor=true}
+   go("decorations")
+   compose.onNode(hasScrollToIndexAction()).performScrollToNode(hasText("Dekor inventarı yüklənmədi"))
+   waitText("Dekor inventarı yüklənmədi")
+   compose.onAllNodesWithText("✓ Sahibsən").assertCountEquals(0)
+   compose.onNodeWithText("Yenidən cəhd et").performScrollTo().assertIsDisplayed()
   } finally {scope.cancel()}
  }
 }
