@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.aladdin.wobbrik.MarketLocalFirstTest" tests="18" skipped="0" failures="0" errors="0" timestamp="2026-11-17T12:44:05.235Z" hostname="Macs-MacBook-Pro.local" time="26.839">
+  <properties/>
+  <testcase name="routeTiming" classname="com.aladdin.wobbrik.MarketLocalFirstTest" time="6.71"/>
+  <testcase name="freshCursorPageReplacesCachedPriceAndRemovedListing" classname="com.aladdin.wobbrik.MarketLocalFirstTest" time="3.835"/>
+  <testcase name="staleRevisionAndQueryMismatchDoNotPublishLocalCards" classname="com.aladdin.wobbrik.MarketLocalFirstTest" time="1.639"/>
+  <testcase name="embeddedCacheStillRequiresLiveDetailForPurchase" classname="com.aladdin.wobbrik.MarketLocalFirstTest" time="0.693"/>
+  <testcase name="embeddedColdOwnUsesOnlyPageAndSync" classname="com.aladdin.wobbrik.MarketLocalFirstTest" time="0.375"/>
+  <testcase name="smallCached" classname="com.aladdin.wobbrik.MarketLocalFirstTest" time="0.966"/>
+  <testcase name="publicationTimingAndTraffic" classname="com.aladdin.wobbrik.MarketLocalFirstTest" time="0.713"/>
+  <testcase name="embeddedColdPublicUsesOnlyPageAndSync" classname="com.aladdin.wobbrik.MarketLocalFirstTest" time="0.569"/>
+  <testcase name="sameUidReloginCancelsInflightRead" classname="com.aladdin.wobbrik.MarketLocalFirstTest" time="1.311"/>
+  <testcase name="cachedCardsBeforeNetwork" classname="com.aladdin.wobbrik.MarketLocalFirstTest" time="1.206"/>
+  <testcase name="revisionChangeDuringCaptureClearsLocalCards" classname="com.aladdin.wobbrik.MarketLocalFirstTest" time="0.73"/>
+  <testcase name="ownCacheUsesSeparateQuery" classname="com.aladdin.wobbrik.MarketLocalFirstTest" time="1.001"/>
+  <testcase name="normalFont2InsetCached" classname="com.aladdin.wobbrik.MarketLocalFirstTest" time="1.095"/>
+  <testcase name="smallFont2Cached" classname="com.aladdin.wobbrik.MarketLocalFirstTest" time="0.852"/>
+  <testcase name="accountSwitchDoesNotPublishOldAccountCache" classname="com.aladdin.wobbrik.MarketLocalFirstTest" time="1.35"/>
+  <testcase name="longBalanceCached" classname="com.aladdin.wobbrik.MarketLocalFirstTest" time="1.014"/>
+  <testcase name="cachedBuyRequiresFreshDetailAndDoesNotGrantCommand" classname="com.aladdin.wobbrik.MarketLocalFirstTest" time="0.857"/>
+  <testcase name="cachedTransientErrorAndDeniedRetry" classname="com.aladdin.wobbrik.MarketLocalFirstTest" time="1.922"/>
+  <system-out><![CDATA[MARKET first-card-host-ms=1526 requests=14 responseUtf8Bytes=8776 details=12
+MARKET settled-host-ms=1530 requests=14 responseUtf8Bytes=8776 details=12
+MARKET before-first-publication-ms=199 requests=13 responseUtf8Bytes=8501
+MARKET after-local-publication-ms=3 requests=0 responseUtf8Bytes=0
+MARKET after-fresh-publication-ms=234 requests=14 responseUtf8Bytes=8776
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

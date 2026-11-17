@@ -39,6 +39,7 @@ class MarketLocalFirstTest {
   val snapshotBody="""{"rules_version":"wobbrik-v1","revision":1,"coins":1250,"xp":0,"attempt":null,"server_time":"2026-11-05T00:00:00Z","first_online_at":"2026-11-05T00:00:00Z","grace_until":"2026-11-05T20:00:00Z","level":1,"rescues":0,"achievements":[],"unlocks":[],"land":[],"part_progress":[]}"""
   var snapshot=RecoveryDtos.snapshot(snapshotBody)
   val catalog=RecoveryCatalog("wobbrik-v1","wobbrik-structural-v1",FinishCosmetics.categories.map {c->CatalogItem("base_1_$c","Bənövşəyi ev",c,"free",0,null,null)},emptyList())
+  @Volatile var embedded=false
   @Volatile var pagination=false
   @Volatile var secondPrice=600
   @Volatile var secondPresent=true
@@ -65,7 +66,11 @@ class MarketLocalFirstTest {
     path.startsWith("market/l-")->path.substringAfter("market/l-").toInt().let {"""{"listing":${listing(it)},"building":${building(it)}}"""}
     else->error(path)
    }
-   bytes.addAndGet(body.toByteArray(Charsets.UTF_8).size);GameplayResponse(status,body)
+   val response = if (embedded && status == 200 && (path.startsWith("market?") || path.startsWith("market/own?"))) {
+    val ids = if (path.contains("cursor=")) { if (secondPresent) listOf(13) else emptyList() } else (1..12).toList()
+    body.dropLast(1) + ",\"previews\":[" + ids.joinToString(",") {"""{"listing":${listing(it)},"building":${building(it)}}"""} + "]}"
+   } else body
+   bytes.addAndGet(response.toByteArray(Charsets.UTF_8).size);GameplayResponse(status,response)
   })
   val owner=AuthenticatedRecoveryOwner(sessions,object:AttemptBackend {
    override suspend fun sync(session:BillingSession)=snapshot
@@ -235,6 +240,25 @@ class MarketLocalFirstTest {
    compose.runOnUiThread {compose.activity.onBackPressedDispatcher.onBackPressed()}
    compose.waitUntil(15000) {!text("700") && !text("Al · 700")}
    settled();assertFalse(text("700"));assertFalse(text("600"))
+  } finally {f.close()}
+ }
+
+ private fun embeddedCold(own:Boolean) {
+  val f=Fixture();try {
+   f.embedded=true;mount(f,own=own);waitText("350")
+   compose.waitUntil(15000) {compose.onAllNodes(hasText(if(own) "Elanı geri götür" else "Bax") and isEnabled()).fetchSemanticsNodes().isNotEmpty()}
+   assertEquals(2,f.calls.get());assertEquals(0,f.detailCalls.get());assertEquals(0,f.commands.get())
+  } finally {f.close()}
+ }
+ @Test fun embeddedColdPublicUsesOnlyPageAndSync()=embeddedCold(false)
+ @Test fun embeddedColdOwnUsesOnlyPageAndSync()=embeddedCold(true)
+ @Test fun embeddedCacheStillRequiresLiveDetailForPurchase() {
+  val f=Fixture();try {
+   f.embedded=true;f.seed();f.gate=CompletableDeferred();mount(f);waitText("Keş")
+   compose.onAllNodesWithText("Bax")[0].performScrollTo().performClick()
+   compose.waitForIdle();assertFalse(text("Al · 350"));assertEquals(0,f.commands.get())
+   f.gate!!.complete(Unit);waitText("Al · 350")
+   assertEquals(1,f.detailCalls.get());assertEquals(0,f.commands.get())
   } finally {f.close()}
  }
 

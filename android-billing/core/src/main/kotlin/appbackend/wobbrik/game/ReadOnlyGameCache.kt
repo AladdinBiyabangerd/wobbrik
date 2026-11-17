@@ -66,7 +66,12 @@ class ReadOnlyGameCache(private val files: (String) -> JournalFile) {
         val bodies = data.getValue("bodies").jsonObject
         return block(GameplayReads { expected, path ->
             require(expected == session && allowedReadPath(path))
-            bodies.getValue(path).jsonPrimitive.content
+            // The additive market representation did not exist in older complete bundles.
+            // Replay the identical legacy query, then let the repository use its captured
+            // detail bodies. Never alias filters, scope, cursor or account revisions.
+            val body = bodies[path] ?: if (path.endsWith("&include=previews") && MarketReads.allowedPath(path))
+                bodies[path.removeSuffix("&include=previews")] else null
+            requireNotNull(body) { "View path not cached" }.jsonPrimitive.content
         })
     }
     private fun read(uid: String, view: String): JsonObject? {

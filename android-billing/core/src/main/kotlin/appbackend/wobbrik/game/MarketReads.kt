@@ -48,8 +48,18 @@ object MarketReads {
         require(next == null || next == listings.lastOrNull()?.id)
         return MarketPage(listings, next)
     }
-    fun detail(body: String): MarketDetail {
+    /** Absent on older servers. A present array is authoritative, including an empty one. */
+    fun previews(body: String, page: MarketPage): Map<String, MarketDetail>? {
         val r = Json.parseToJsonElement(body).jsonObject
+        val raw = r["previews"] ?: return null
+        val details = raw.jsonArray.map { detail(it.jsonObject) }
+        require(details.size <= page.listings.size && details.map { it.listing.id }.distinct().size == details.size)
+        val listings = page.listings.associateBy { it.id }
+        require(details.all { listings[it.listing.id] == it.listing })
+        return details.associateBy { it.listing.id }
+    }
+    fun detail(body: String): MarketDetail = detail(Json.parseToJsonElement(body).jsonObject)
+    private fun detail(r: JsonObject): MarketDetail {
         val listing = listing(r.getValue("listing").jsonObject)
         val building = InventoryReads.building(r.getValue("building").jsonObject)
         require(listing.status == "active" && building.id == listing.buildingId && building.revision == listing.buildingRevision)
@@ -57,21 +67,27 @@ object MarketReads {
     }
     internal fun allowedPath(path: String): Boolean =
         Regex("market/[A-Za-z0-9_-]{1,128}").matches(path) ||
-            Regex("market(?:/own)?\\?limit=20(?:&cursor=[A-Za-z0-9_-]{1,128})?&min_floors=[0-9]{1,19}&max_floors=[0-9]{1,19}&min_price=[0-9]{1,19}&max_price=[0-9]{1,19}(?:&part_id=[A-Za-z0-9_-]{1,128})?").matches(path)
+            Regex("market(?:/own)?\\?limit=20(?:&cursor=[A-Za-z0-9_-]{1,128})?&min_floors=[0-9]{1,19}&max_floors=[0-9]{1,19}&min_price=[0-9]{1,19}&max_price=[0-9]{1,19}(?:&part_id=[A-Za-z0-9_-]{1,128})?(?:&include=previews)?").matches(path)
 }
 
 class MarketRepository(private val backend: GameplayReads) {
     suspend fun page(session: BillingSession, own: Boolean, filter: MarketFilter, cursor: String? = null): MarketPage {
+        return MarketReads.page(backend.read(session, pagePath(own, filter, cursor)), own)
+    }
+    private fun pagePath(own: Boolean, filter: MarketFilter, cursor: String?): String {
         cursor?.let(InventoryReads::id)
-        return MarketReads.page(backend.read(session, "market" + (if (own) "/own" else "") + "?limit=20" +
-            (cursor?.let { "&cursor=$it" } ?: "") + filter.query()), own)
+        return "market" + (if (own) "/own" else "") + "?limit=20" +
+            (cursor?.let { "&cursor=$it" } ?: "") + filter.query()
     }
     /** Stable query identity: private/public, filters and cursor never share a cached bundle. */
     fun previewKey(own: Boolean, filter: MarketFilter, cursor: String? = null): String =
         "market:$own:${filter.minFloors}:${filter.maxFloors}:${filter.minPrice}:${filter.maxPrice}:${filter.partId.orEmpty()}:${cursor.orEmpty()}"
 
     suspend fun previewPage(session: BillingSession, own: Boolean, filter: MarketFilter, cursor: String? = null): MarketPreviewPage {
-        val page = page(session, own, filter, cursor)
+        val body = backend.read(session, pagePath(own, filter, cursor) + "&include=previews")
+        val page = MarketReads.page(body, own)
+        MarketReads.previews(body, page)?.let { return MarketPreviewPage(page, it) }
+        // Older servers ignore the additive query option and keep the bounded detail path.
         val gate = Semaphore(4)
         val previews = coroutineScope {
             page.listings.filter { it.status == "active" }.map { listing -> async {
