@@ -43,6 +43,24 @@ internal object GameTokens {
         val PrimaryTarget = Target + Small
     }
     internal object MobileHome {
+        // Transparent margins are excluded by BitmapPainter; no new bitmap allocation.
+        const val HeroLeft = 90
+        const val HeroWidth = 1100
+        // Native surface palette sampled from the approved Home reference.
+        val PanelTop = Color(0xFF062855)
+        val PanelBottom = Color(0xFF031A3A)
+        val Rim = Color(0xFF126EB1)
+        val RimLight = Color(0xFF67CFFF)
+        val Gold = Color(0xFFFFB800)
+        val GoldLight = Color(0xFFFFFF76)
+        val HomeTitle = 30.sp
+        val CompactNavLabel = 10.sp
+        const val HeroAspectRatio = 1100f / 1226f
+        val HeaderTop = Inset
+        val StatBottomSpace = Target
+        val NavIcon = Inset + Quarter
+        val PlayTop = Color(0xFF52F9FF)
+        val PlayBottom = Color(0xFF00BCCB)
         val HeroMax = Target * 7
         val LargeFontHero = Target * 2
         val NavbarLabelWidth = PanelWidth - Gap * 2
@@ -51,7 +69,18 @@ internal object GameTokens {
         val NavbarHeight = Target + Inset + Small
         val LargeFontNavbarHeight = Target * 2 + Gap
     }
+    internal object Achievements {
+        // Transparent illustration sheet derived from the approved 01-main artwork.
+        val Trophy = intArrayOf(48, 112, 690, 440)
+        val GoldMedal = intArrayOf(790, 136, 304, 390)
+        val BlueMedal = intArrayOf(184, 720, 316, 406)
+        val PurpleMedal = intArrayOf(780, 720, 316, 406)
+        val HeroHeight = Target + Inset + Small
+        val ProgressHeight = Small + Quarter
+    }
     internal object Leaderboard {
+        // Three equal sprite cells: builder, pilot, architect; no baked labels or UI.
+        const val PortraitCell = 724
         // Pixel source bounds on the unchanged approved play-progress-v2 board.
         const val ArtX = 1340
         const val ArtY = 205
