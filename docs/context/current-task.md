@@ -1,6 +1,10 @@
-# Cari tapşırıq — City detail batching / 17 noyabr 2026
+# Cari tapşırıq — HTTPS cancellation tamamlanması / 17 noyabr 2026
 
 ## Completed
+
+- City paired commit review: Android85307bf/AppBackend23102b4; konkret bug tapılmadı, City/cache19testPASS. Review: `docs/reviews/2026-11-17-city-commits-review.md`.
+- İstifadəçinin açıq tapşırığı ilə AppBackend Market+City remote main-ə merge/push edildi:838c0c7. Persistent feat/wobbrik həmin main ilə sinxron, təmizdir. Deploy/CI yoxdur.
+- HTTPS request-owned cancellation ayrıca fix/https-scoped-cancellation branch-ində review edildi; production diff qorundu. Opt-in TLS test keşlənməsi düzəldildi; fresh5/5TLS PASS7.45s, normal core152/app37+assembleDebug/lintDebugPASS28s.
 
 - City Android+AppBackend batching tətbiq edildi: additive include=details, owner-filtered mövcud SQL join, snapshot/creator-sız compact DTO. Tam City JSON60KiB budget; sığmayan detail üçün əvvəlki4paralel fallback. Pagination və son plain City revision bracket saxlanır. Strict köhnə server və pre-batch cache dəstəklənir; clock-only legacy cache rejection düzəldildi.
 - Ölçü12bina:15→3HTTP,175→43SQL. Həndəsə1000center/bina:33022→32698JSONbyte; lokal race67–75→45–47ms. Android production repository40ms/request fixture:batch3read145ms,legacy15read267ms,strict16read305ms. Bunlar host fixture ölçüləridir, device/production deyil.
@@ -8,7 +12,7 @@
 
 ## Current state
 
-Android `fix/city-detail-batching`, baza8fd0bc6; City ayrıca scoped commit. AppBackend `feat/wobbrik`, City batching scoped commit (dəqiq hash git log-dadır). Merge/main/push/deploy/CI yoxdur. App-wide performans/redesign bitməyib.
+Android `fix/https-scoped-cancellation`, baza85307bf; HTTPS ayrıca scoped commit hazırlanır (dəqiq hash git log-da). Android main merge/push yoxdur. AppBackend feat/wobbrik və remote main838c0c7. Deploy/CI yoxdur. App-wide performans/redesign bitməyib.
 
 ## Decisions
 
@@ -32,8 +36,8 @@ Android `fix/city-detail-batching`, baza8fd0bc6; City ayrıca scoped commit. App
 
 - Android `android-billing/core/.../game/{CitySceneReads,GameplayHttpBackend,ReadOnlyGameCache}.kt`, `CitySceneReadsTest.kt`.
 - AppBackend `internal/wobbrik/city.go`, `internal/platform/{wobbrik_http.go,wobbrik_city_details_test.go,wobbrik_city_batch_probe_test.go}`, `docs/wobbrik-game-api.md`.
-- HTTPS ayrı dirty vahid: `docs/reviews/2026-11-17-https-scoped-cancellation.md`, `docs/reviews/https-overlap/`; Home/Profil əvvəlki review `2026-11-17-resource-background-city-https.md`.
+- HTTPS ayrı vahid: `docs/reviews/2026-11-17-https-scoped-cancellation.md`, `docs/reviews/https-overlap/`; Home/Profil əvvəlki review `2026-11-17-resource-background-city-https.md`.
 
 ## Exact next step
 
-City vahidi lokal review/check-dən keçib; istifadəçiyə paired commit-ləri təqdim et. HTTPS dirty işini ayrıca saxla. Main merge/CI/push/deploy etmə. Yeni istifadəçi tapşırığı varsa yeni chatdə bu handoff və PLAN §1.1 əsasında yalnız həmin vahidi başla; production/device performansını yoxlanmış kimi göstərmə.
+HTTPS vahidi review/test-dən keçib; Android main merge/push üçün ayrıca istifadəçi göstərişi gözlə. CI avtomatik işləmir. Yeni chatdə bu handoff və PLAN §1.1 ilə qalan menyu/İnventar gecikmələrini ölç; artıq tamamlanan Market/City batching və HTTPS cancellation işini təkrarlama. Production/device performansını yoxlanmış kimi göstərmə. Backend dəyişərsə mövcud feat/wobbrik branch-ində işlə.

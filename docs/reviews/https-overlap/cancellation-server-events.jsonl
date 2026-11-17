@@ -1,0 +1,385 @@
+{"t_ns": 81417703769250, "mode": "headers", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 81418276693791, "mode": "headers", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0", "event": "response_written", "bytes": 1304}
+{"t_ns": 81423262880666, "mode": "market", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 81424082904583, "mode": "market", "n": 2, "path": "market/own?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 81424149279500, "mode": "market", "n": 3, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0", "event": "received", "overlap": true, "tls": "TLSv1.3"}
+{"t_ns": 81424167533166, "mode": "market", "n": 3, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0", "event": "response_written", "bytes": 1304}
+{"t_ns": 81424200753875, "mode": "market", "n": 4, "path": "market/l-2", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 81424206122541, "mode": "market", "n": 4, "path": "market/l-2", "event": "response_written", "bytes": 623}
+{"t_ns": 81424221869500, "mode": "market", "n": 5, "path": "market/l-1", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 81424222968083, "mode": "market", "n": 5, "path": "market/l-1", "event": "response_written", "bytes": 623}
+{"t_ns": 81424226914791, "mode": "market", "n": 6, "path": "market/l-3", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 81424227748500, "mode": "market", "n": 6, "path": "market/l-3", "event": "response_written", "bytes": 623}
+{"t_ns": 81424235120041, "mode": "market", "n": 7, "path": "market/l-6", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 81424236394458, "mode": "market", "n": 7, "path": "market/l-6", "event": "response_written", "bytes": 623}
+{"t_ns": 81424660727333, "mode": "market", "n": 2, "path": "market/own?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0", "event": "response_written", "bytes": 1304}
+{"t_ns": 81424661146875, "mode": "market", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0", "event": "response_written", "bytes": 1304}
+{"t_ns": 81440319670791, "mode": "body", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 81440320271083, "mode": "body", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0", "event": "body_prefix"}
+{"t_ns": 81441090841125, "mode": "body", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0", "event": "response_written", "bytes": 1304}
+{"t_ns": 81441215671791, "mode": "timeout", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 81449252302291, "mode": "timeout", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0", "event": "response_written", "bytes": 1304}
+{"t_ns": 81494285148416, "mode": "headers", "n": 2, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 81494287671291, "mode": "headers", "n": 2, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0", "event": "response_written", "bytes": 1304}
+{"t_ns": 81494338112583, "mode": "headers", "n": 3, "path": "market/l-2", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 81494338629208, "mode": "headers", "n": 3, "path": "market/l-2", "event": "response_written", "bytes": 623}
+{"t_ns": 81494354049958, "mode": "headers", "n": 4, "path": "market/l-3", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 81494358764208, "mode": "headers", "n": 4, "path": "market/l-3", "event": "response_written", "bytes": 623}
+{"t_ns": 81494359451291, "mode": "headers", "n": 5, "path": "market/l-1", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 81494359915750, "mode": "headers", "n": 5, "path": "market/l-1", "event": "response_written", "bytes": 623}
+{"t_ns": 81497092550416, "mode": "market", "n": 8, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 81497095059291, "mode": "market", "n": 8, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0", "event": "response_written", "bytes": 1304}
+{"t_ns": 81497098639208, "mode": "market", "n": 9, "path": "market/l-12", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 81497099850041, "mode": "market", "n": 9, "path": "market/l-12", "event": "response_written", "bytes": 626}
+{"t_ns": 81497106834458, "mode": "market", "n": 10, "path": "market/l-1", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 81497110468208, "mode": "market", "n": 10, "path": "market/l-1", "event": "response_written", "bytes": 623}
+{"t_ns": 81497130737208, "mode": "market", "n": 11, "path": "market/l-2", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 81497131284541, "mode": "market", "n": 11, "path": "market/l-2", "event": "response_written", "bytes": 623}
+{"t_ns": 81497133461708, "mode": "market", "n": 12, "path": "market/l-8", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 81497135294250, "mode": "market", "n": 12, "path": "market/l-8", "event": "response_written", "bytes": 623}
+{"t_ns": 81497152377375, "mode": "market", "n": 13, "path": "market/l-9", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 81497153221125, "mode": "market", "n": 13, "path": "market/l-9", "event": "response_written", "bytes": 623}
+{"t_ns": 81512846487666, "mode": "body", "n": 2, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 81512847329500, "mode": "body", "n": 2, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0", "event": "response_written", "bytes": 1304}
+{"t_ns": 81512849562750, "mode": "body", "n": 3, "path": "market/l-1", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 81512849949375, "mode": "body", "n": 3, "path": "market/l-1", "event": "response_written", "bytes": 623}
+{"t_ns": 81512857463708, "mode": "body", "n": 4, "path": "market/l-12", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 81512858858166, "mode": "body", "n": 4, "path": "market/l-12", "event": "response_written", "bytes": 626}
+{"t_ns": 81512866736625, "mode": "body", "n": 5, "path": "market/l-3", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 81512867992125, "mode": "body", "n": 5, "path": "market/l-3", "event": "response_written", "bytes": 623}
+{"t_ns": 81512871705125, "mode": "body", "n": 6, "path": "market/l-2", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 81512872138500, "mode": "body", "n": 6, "path": "market/l-2", "event": "response_written", "bytes": 623}
+{"t_ns": 81512915803833, "mode": "timeout", "n": 2, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 81512916160500, "mode": "timeout", "n": 2, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0", "event": "response_written", "bytes": 1304}
+{"t_ns": 81512918241041, "mode": "timeout", "n": 3, "path": "market/l-12", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 81512918609750, "mode": "timeout", "n": 3, "path": "market/l-12", "event": "response_written", "bytes": 626}
+{"t_ns": 81512923628125, "mode": "timeout", "n": 4, "path": "market/l-1", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 81512924034000, "mode": "timeout", "n": 4, "path": "market/l-1", "event": "response_written", "bytes": 623}
+{"t_ns": 81512925441333, "mode": "timeout", "n": 5, "path": "market/l-2", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 81512925844583, "mode": "timeout", "n": 5, "path": "market/l-2", "event": "response_written", "bytes": 623}
+{"t_ns": 81512928389750, "mode": "timeout", "n": 6, "path": "market/l-3", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 81512928740583, "mode": "timeout", "n": 6, "path": "market/l-3", "event": "response_written", "bytes": 623}
+{"t_ns": 81540742387625, "mode": "headers", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 81541257124291, "mode": "headers", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0", "event": "response_written", "bytes": 1304}
+{"t_ns": 81542354680416, "mode": "market", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 81542819186750, "mode": "market", "n": 2, "path": "market/own?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 81542851116166, "mode": "market", "n": 3, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0", "event": "received", "overlap": true, "tls": "TLSv1.3"}
+{"t_ns": 81542851461750, "mode": "market", "n": 3, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0", "event": "response_written", "bytes": 1304}
+{"t_ns": 81542863388958, "mode": "market", "n": 4, "path": "market/l-2", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 81542864363583, "mode": "market", "n": 4, "path": "market/l-2", "event": "response_written", "bytes": 599}
+{"t_ns": 81542868223958, "mode": "market", "n": 5, "path": "market/l-3", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 81542869003625, "mode": "market", "n": 5, "path": "market/l-3", "event": "response_written", "bytes": 599}
+{"t_ns": 81542872329583, "mode": "market", "n": 6, "path": "market/l-4", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 81542873174541, "mode": "market", "n": 7, "path": "market/l-5", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 81542873575791, "mode": "market", "n": 8, "path": "market/l-1", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 81542874553083, "mode": "market", "n": 6, "path": "market/l-4", "event": "response_written", "bytes": 599}
+{"t_ns": 81542875187416, "mode": "market", "n": 7, "path": "market/l-5", "event": "response_written", "bytes": 599}
+{"t_ns": 81542875274125, "mode": "market", "n": 8, "path": "market/l-1", "event": "response_written", "bytes": 599}
+{"t_ns": 81542875861333, "mode": "market", "n": 9, "path": "market/l-7", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 81542876852750, "mode": "market", "n": 9, "path": "market/l-7", "event": "response_written", "bytes": 599}
+{"t_ns": 81542877417791, "mode": "market", "n": 10, "path": "market/l-9", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 81542877716708, "mode": "market", "n": 11, "path": "market/l-8", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 81542878004458, "mode": "market", "n": 10, "path": "market/l-9", "event": "response_written", "bytes": 599}
+{"t_ns": 81542878160708, "mode": "market", "n": 11, "path": "market/l-8", "event": "response_written", "bytes": 599}
+{"t_ns": 81542880877583, "mode": "market", "n": 12, "path": "market/l-6", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 81542881450250, "mode": "market", "n": 13, "path": "market/l-10", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 81542881875458, "mode": "market", "n": 14, "path": "market/l-12", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 81542882307708, "mode": "market", "n": 15, "path": "market/l-11", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 81542882612333, "mode": "market", "n": 15, "path": "market/l-11", "event": "response_written", "bytes": 602}
+{"t_ns": 81542882710541, "mode": "market", "n": 12, "path": "market/l-6", "event": "response_written", "bytes": 599}
+{"t_ns": 81542883233833, "mode": "market", "n": 13, "path": "market/l-10", "event": "response_written", "bytes": 602}
+{"t_ns": 81542883336291, "mode": "market", "n": 14, "path": "market/l-12", "event": "response_written", "bytes": 602}
+{"t_ns": 81542885347875, "mode": "market", "n": 16, "path": "sync", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 81542885672041, "mode": "market", "n": 16, "path": "sync", "event": "response_written", "bytes": 275}
+{"t_ns": 81543365340000, "mode": "market", "n": 2, "path": "market/own?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0", "event": "response_written", "bytes": 1304}
+{"t_ns": 81543369649791, "mode": "market", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0", "event": "response_written", "bytes": 1304}
+{"t_ns": 81544180193583, "mode": "body", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 81544180445916, "mode": "body", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0", "event": "body_prefix"}
+{"t_ns": 81544940271833, "mode": "body", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0", "event": "response_written", "bytes": 1304}
+{"t_ns": 81545030940458, "mode": "timeout", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 81553164709916, "mode": "timeout", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0", "event": "response_written", "bytes": 1304}
+{"t_ns": 81584960038125, "mode": "headers", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 81585474995875, "mode": "headers", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0", "event": "response_written", "bytes": 1304}
+{"t_ns": 81586859884416, "mode": "market", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 81587265518875, "mode": "market", "n": 2, "path": "market/own?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 81587294780041, "mode": "market", "n": 3, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0", "event": "received", "overlap": true, "tls": "TLSv1.3"}
+{"t_ns": 81587295325875, "mode": "market", "n": 3, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0", "event": "response_written", "bytes": 1304}
+{"t_ns": 81587301380875, "mode": "market", "n": 4, "path": "market/l-2", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 81587302041750, "mode": "market", "n": 4, "path": "market/l-2", "event": "response_written", "bytes": 599}
+{"t_ns": 81587311692833, "mode": "market", "n": 5, "path": "market/l-1", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 81587312093000, "mode": "market", "n": 5, "path": "market/l-1", "event": "response_written", "bytes": 599}
+{"t_ns": 81587314307208, "mode": "market", "n": 6, "path": "market/l-6", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 81587314645208, "mode": "market", "n": 7, "path": "market/l-10", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 81587315175583, "mode": "market", "n": 6, "path": "market/l-6", "event": "response_written", "bytes": 599}
+{"t_ns": 81587315823541, "mode": "market", "n": 7, "path": "market/l-10", "event": "response_written", "bytes": 602}
+{"t_ns": 81587316760291, "mode": "market", "n": 8, "path": "market/l-4", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 81587317424625, "mode": "market", "n": 9, "path": "market/l-9", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 81587317774416, "mode": "market", "n": 10, "path": "market/l-5", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 81587318317416, "mode": "market", "n": 8, "path": "market/l-4", "event": "response_written", "bytes": 599}
+{"t_ns": 81587318629541, "mode": "market", "n": 9, "path": "market/l-9", "event": "response_written", "bytes": 599}
+{"t_ns": 81587319063416, "mode": "market", "n": 11, "path": "market/l-11", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 81587319405666, "mode": "market", "n": 11, "path": "market/l-11", "event": "response_written", "bytes": 602}
+{"t_ns": 81587319984208, "mode": "market", "n": 10, "path": "market/l-5", "event": "response_written", "bytes": 599}
+{"t_ns": 81587320215458, "mode": "market", "n": 12, "path": "market/l-12", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 81587320554875, "mode": "market", "n": 12, "path": "market/l-12", "event": "response_written", "bytes": 602}
+{"t_ns": 81587320635916, "mode": "market", "n": 13, "path": "market/l-8", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 81587320875791, "mode": "market", "n": 13, "path": "market/l-8", "event": "response_written", "bytes": 599}
+{"t_ns": 81587321839250, "mode": "market", "n": 14, "path": "market/l-7", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 81587322449416, "mode": "market", "n": 15, "path": "market/l-3", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 81587322765083, "mode": "market", "n": 14, "path": "market/l-7", "event": "response_written", "bytes": 599}
+{"t_ns": 81587322922083, "mode": "market", "n": 15, "path": "market/l-3", "event": "response_written", "bytes": 599}
+{"t_ns": 81587325421958, "mode": "market", "n": 16, "path": "sync", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 81587325775708, "mode": "market", "n": 16, "path": "sync", "event": "response_written", "bytes": 275}
+{"t_ns": 81587813590000, "mode": "market", "n": 2, "path": "market/own?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0", "event": "response_written", "bytes": 1304}
+{"t_ns": 81587813924666, "mode": "market", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0", "event": "response_written", "bytes": 1304}
+{"t_ns": 81588570113041, "mode": "body", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 81588570333166, "mode": "body", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0", "event": "body_prefix"}
+{"t_ns": 81589331915791, "mode": "body", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0", "event": "response_written", "bytes": 1304}
+{"t_ns": 81589367345500, "mode": "timeout", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 81597379501875, "mode": "timeout", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0", "event": "response_written", "bytes": 1304}
+{"t_ns": 83967788925666, "mode": "headers", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 83968298888916, "mode": "headers", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "response_written", "bytes": 1304}
+{"t_ns": 83969079984208, "mode": "market", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 83969401354125, "mode": "market", "n": 2, "path": "market/own?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 83969432515416, "mode": "market", "n": 3, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "received", "overlap": true, "tls": "TLSv1.3"}
+{"t_ns": 83969432897833, "mode": "market", "n": 3, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "response_written", "bytes": 1304}
+{"t_ns": 83969438273583, "mode": "market", "n": 4, "path": "market/l-1", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 83969438681083, "mode": "market", "n": 4, "path": "market/l-1", "event": "response_written", "bytes": 599}
+{"t_ns": 83969442460083, "mode": "market", "n": 5, "path": "market/l-5", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 83969443408750, "mode": "market", "n": 5, "path": "market/l-5", "event": "response_written", "bytes": 599}
+{"t_ns": 83969443579208, "mode": "market", "n": 6, "path": "market/l-3", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 83969443901250, "mode": "market", "n": 7, "path": "market/l-6", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 83969444217958, "mode": "market", "n": 6, "path": "market/l-3", "event": "response_written", "bytes": 599}
+{"t_ns": 83969444322083, "mode": "market", "n": 7, "path": "market/l-6", "event": "response_written", "bytes": 599}
+{"t_ns": 83969445483125, "mode": "market", "n": 8, "path": "market/l-9", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 83969445635750, "mode": "market", "n": 9, "path": "market/l-7", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 83969445866166, "mode": "market", "n": 10, "path": "market/l-2", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 83969446361791, "mode": "market", "n": 8, "path": "market/l-9", "event": "response_written", "bytes": 599}
+{"t_ns": 83969446919000, "mode": "market", "n": 10, "path": "market/l-2", "event": "response_written", "bytes": 599}
+{"t_ns": 83969447315375, "mode": "market", "n": 9, "path": "market/l-7", "event": "response_written", "bytes": 599}
+{"t_ns": 83969447713916, "mode": "market", "n": 11, "path": "market/l-10", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 83969448157083, "mode": "market", "n": 12, "path": "market/l-12", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 83969448561666, "mode": "market", "n": 13, "path": "market/l-8", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 83969448811541, "mode": "market", "n": 11, "path": "market/l-10", "event": "response_written", "bytes": 602}
+{"t_ns": 83969449051833, "mode": "market", "n": 14, "path": "market/l-4", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 83969449428375, "mode": "market", "n": 13, "path": "market/l-8", "event": "response_written", "bytes": 599}
+{"t_ns": 83969449746708, "mode": "market", "n": 12, "path": "market/l-12", "event": "response_written", "bytes": 602}
+{"t_ns": 83969449858416, "mode": "market", "n": 15, "path": "market/l-11", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 83969450011250, "mode": "market", "n": 14, "path": "market/l-4", "event": "response_written", "bytes": 599}
+{"t_ns": 83969450209958, "mode": "market", "n": 15, "path": "market/l-11", "event": "response_written", "bytes": 602}
+{"t_ns": 83969452465958, "mode": "market", "n": 16, "path": "sync", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 83969452778708, "mode": "market", "n": 16, "path": "sync", "event": "response_written", "bytes": 275}
+{"t_ns": 83969952256166, "mode": "market", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "response_written", "bytes": 1304}
+{"t_ns": 83969952550791, "mode": "market", "n": 2, "path": "market/own?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "response_written", "bytes": 1304}
+{"t_ns": 83970697082083, "mode": "body", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 83970697342916, "mode": "body", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "body_prefix"}
+{"t_ns": 83971456445791, "mode": "body", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "response_written", "bytes": 1304}
+{"t_ns": 83971496768041, "mode": "timeout", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 83979505761166, "mode": "timeout", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "response_written", "bytes": 1304}
+{"t_ns": 84028911187750, "mode": "headers", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 84029429860666, "mode": "headers", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "response_written", "bytes": 1304}
+{"t_ns": 84030245210458, "mode": "market", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 84030574284916, "mode": "market", "n": 2, "path": "market/own?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 84030607373875, "mode": "market", "n": 3, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "received", "overlap": true, "tls": "TLSv1.3"}
+{"t_ns": 84030607736250, "mode": "market", "n": 3, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "response_written", "bytes": 1304}
+{"t_ns": 84030613374500, "mode": "market", "n": 4, "path": "market/l-2", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 84030613997875, "mode": "market", "n": 4, "path": "market/l-2", "event": "response_written", "bytes": 599}
+{"t_ns": 84030618697625, "mode": "market", "n": 5, "path": "market/l-6", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 84030619176541, "mode": "market", "n": 5, "path": "market/l-6", "event": "response_written", "bytes": 599}
+{"t_ns": 84030619928791, "mode": "market", "n": 6, "path": "market/l-1", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 84030620731708, "mode": "market", "n": 6, "path": "market/l-1", "event": "response_written", "bytes": 599}
+{"t_ns": 84030620972166, "mode": "market", "n": 7, "path": "market/l-4", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 84030622321125, "mode": "market", "n": 8, "path": "market/l-5", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 84030622521041, "mode": "market", "n": 7, "path": "market/l-4", "event": "response_written", "bytes": 599}
+{"t_ns": 84030622651583, "mode": "market", "n": 9, "path": "market/l-7", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 84030622821000, "mode": "market", "n": 8, "path": "market/l-5", "event": "response_written", "bytes": 599}
+{"t_ns": 84030623122791, "mode": "market", "n": 10, "path": "market/l-8", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 84030623356708, "mode": "market", "n": 9, "path": "market/l-7", "event": "response_written", "bytes": 599}
+{"t_ns": 84030623751791, "mode": "market", "n": 10, "path": "market/l-8", "event": "response_written", "bytes": 599}
+{"t_ns": 84030623983541, "mode": "market", "n": 11, "path": "market/l-10", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 84030624088125, "mode": "market", "n": 12, "path": "market/l-9", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 84030624588375, "mode": "market", "n": 13, "path": "market/l-11", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 84030624992500, "mode": "market", "n": 12, "path": "market/l-9", "event": "response_written", "bytes": 599}
+{"t_ns": 84030625249166, "mode": "market", "n": 11, "path": "market/l-10", "event": "response_written", "bytes": 602}
+{"t_ns": 84030625703125, "mode": "market", "n": 13, "path": "market/l-11", "event": "response_written", "bytes": 602}
+{"t_ns": 84030625954916, "mode": "market", "n": 14, "path": "market/l-12", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 84030626086500, "mode": "market", "n": 15, "path": "market/l-3", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 84030626336000, "mode": "market", "n": 14, "path": "market/l-12", "event": "response_written", "bytes": 602}
+{"t_ns": 84030626480000, "mode": "market", "n": 15, "path": "market/l-3", "event": "response_written", "bytes": 599}
+{"t_ns": 84030628673916, "mode": "market", "n": 16, "path": "sync", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 84030628903458, "mode": "market", "n": 16, "path": "sync", "event": "response_written", "bytes": 275}
+{"t_ns": 84031123976416, "mode": "market", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "response_written", "bytes": 1304}
+{"t_ns": 84031124166125, "mode": "market", "n": 2, "path": "market/own?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "response_written", "bytes": 1304}
+{"t_ns": 84031870712791, "mode": "body", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 84031870927833, "mode": "body", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "body_prefix"}
+{"t_ns": 84032626046583, "mode": "body", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "response_written", "bytes": 1304}
+{"t_ns": 84032673988458, "mode": "timeout", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 84040681533208, "mode": "timeout", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "response_written", "bytes": 1304}
+{"t_ns": 84518245742541, "mode": "headers", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 84518266857208, "mode": "headers", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "response_written", "bytes": 1304}
+{"t_ns": 84519219751125, "mode": "market", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 84519536066541, "mode": "market", "n": 2, "path": "market/own?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 84519576738791, "mode": "market", "n": 3, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "received", "overlap": true, "tls": "TLSv1.3"}
+{"t_ns": 84519577113250, "mode": "market", "n": 3, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "response_written", "bytes": 1304}
+{"t_ns": 84519579402458, "mode": "market", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "response_written", "bytes": 1304}
+{"t_ns": 84519580614208, "mode": "market", "n": 2, "path": "market/own?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "response_written", "bytes": 1304}
+{"t_ns": 84519590097916, "mode": "market", "n": 4, "path": "market/l-4", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 84519590555916, "mode": "market", "n": 4, "path": "market/l-4", "event": "response_written", "bytes": 599}
+{"t_ns": 84519591811250, "mode": "market", "n": 5, "path": "market/l-2", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 84519592136708, "mode": "market", "n": 5, "path": "market/l-2", "event": "response_written", "bytes": 599}
+{"t_ns": 84519594762791, "mode": "market", "n": 6, "path": "market/l-3", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 84519595126083, "mode": "market", "n": 6, "path": "market/l-3", "event": "response_written", "bytes": 599}
+{"t_ns": 84519597460125, "mode": "market", "n": 7, "path": "market/l-1", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 84519597802083, "mode": "market", "n": 7, "path": "market/l-1", "event": "response_written", "bytes": 599}
+{"t_ns": 84519599172541, "mode": "market", "n": 8, "path": "market/l-6", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 84519599503708, "mode": "market", "n": 8, "path": "market/l-6", "event": "response_written", "bytes": 599}
+{"t_ns": 84519600736083, "mode": "market", "n": 9, "path": "market/l-5", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 84519601058000, "mode": "market", "n": 9, "path": "market/l-5", "event": "response_written", "bytes": 599}
+{"t_ns": 84519603346208, "mode": "market", "n": 10, "path": "market/l-7", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 84519603654458, "mode": "market", "n": 10, "path": "market/l-7", "event": "response_written", "bytes": 599}
+{"t_ns": 84519604884416, "mode": "market", "n": 11, "path": "market/l-8", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 84519605155000, "mode": "market", "n": 11, "path": "market/l-8", "event": "response_written", "bytes": 599}
+{"t_ns": 84519607374000, "mode": "market", "n": 12, "path": "market/l-10", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 84519607667625, "mode": "market", "n": 12, "path": "market/l-10", "event": "response_written", "bytes": 602}
+{"t_ns": 84519608719333, "mode": "market", "n": 13, "path": "market/l-9", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 84519608963833, "mode": "market", "n": 13, "path": "market/l-9", "event": "response_written", "bytes": 599}
+{"t_ns": 84519610558750, "mode": "market", "n": 14, "path": "market/l-11", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 84519610935583, "mode": "market", "n": 14, "path": "market/l-11", "event": "response_written", "bytes": 602}
+{"t_ns": 84519613209708, "mode": "market", "n": 15, "path": "market/l-12", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 84519613562125, "mode": "market", "n": 15, "path": "market/l-12", "event": "response_written", "bytes": 602}
+{"t_ns": 84519619057000, "mode": "market", "n": 16, "path": "sync", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 84519619359833, "mode": "market", "n": 16, "path": "sync", "event": "response_written", "bytes": 275}
+{"t_ns": 84520345121375, "mode": "body", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 84520345373666, "mode": "body", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "body_prefix"}
+{"t_ns": 84520352063250, "mode": "body", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "response_written", "bytes": 1304}
+{"t_ns": 84520380098208, "mode": "timeout", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 84520385840250, "mode": "timeout", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "response_written", "bytes": 1304}
+{"t_ns": 84548872233166, "mode": "headers", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 84548891781000, "mode": "headers", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "response_written", "bytes": 1304}
+{"t_ns": 84549136031458, "mode": "market", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 84549148317208, "mode": "market", "n": 2, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "received", "overlap": true, "tls": "TLSv1.3"}
+{"t_ns": 84549154667708, "mode": "market", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "response_written", "bytes": 1304}
+{"t_ns": 84549155052291, "mode": "market", "n": 2, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "response_written", "bytes": 1304}
+{"t_ns": 84549719710416, "mode": "market", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 84550068919958, "mode": "market", "n": 2, "path": "market/own?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 84550089662041, "mode": "market", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "response_written", "bytes": 1304}
+{"t_ns": 84550091958083, "mode": "market", "n": 3, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 84550092315250, "mode": "market", "n": 3, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "response_written", "bytes": 1304}
+{"t_ns": 84550093388958, "mode": "market", "n": 2, "path": "market/own?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "response_written", "bytes": 1304}
+{"t_ns": 84550101370291, "mode": "market", "n": 4, "path": "market/l-4", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 84550101891125, "mode": "market", "n": 4, "path": "market/l-4", "event": "response_written", "bytes": 599}
+{"t_ns": 84550103908083, "mode": "market", "n": 5, "path": "market/l-2", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 84550104200250, "mode": "market", "n": 5, "path": "market/l-2", "event": "response_written", "bytes": 599}
+{"t_ns": 84550105509416, "mode": "market", "n": 6, "path": "market/l-3", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 84550105824000, "mode": "market", "n": 6, "path": "market/l-3", "event": "response_written", "bytes": 599}
+{"t_ns": 84550108327208, "mode": "market", "n": 7, "path": "market/l-1", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 84550108624083, "mode": "market", "n": 7, "path": "market/l-1", "event": "response_written", "bytes": 599}
+{"t_ns": 84550110368458, "mode": "market", "n": 8, "path": "market/l-6", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 84550110791041, "mode": "market", "n": 8, "path": "market/l-6", "event": "response_written", "bytes": 599}
+{"t_ns": 84550112637250, "mode": "market", "n": 9, "path": "market/l-7", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 84550112953166, "mode": "market", "n": 9, "path": "market/l-7", "event": "response_written", "bytes": 599}
+{"t_ns": 84550115199416, "mode": "market", "n": 10, "path": "market/l-11", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 84550115669500, "mode": "market", "n": 10, "path": "market/l-11", "event": "response_written", "bytes": 602}
+{"t_ns": 84550116966875, "mode": "market", "n": 11, "path": "market/l-12", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 84550117332458, "mode": "market", "n": 11, "path": "market/l-12", "event": "response_written", "bytes": 602}
+{"t_ns": 84550119712166, "mode": "market", "n": 12, "path": "market/l-5", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 84550120178375, "mode": "market", "n": 12, "path": "market/l-5", "event": "response_written", "bytes": 599}
+{"t_ns": 84550121316208, "mode": "market", "n": 13, "path": "market/l-8", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 84550121640666, "mode": "market", "n": 13, "path": "market/l-8", "event": "response_written", "bytes": 599}
+{"t_ns": 84550122503458, "mode": "market", "n": 14, "path": "market/l-9", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 84550122792583, "mode": "market", "n": 14, "path": "market/l-9", "event": "response_written", "bytes": 599}
+{"t_ns": 84550124865875, "mode": "market", "n": 15, "path": "market/l-10", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 84550125169208, "mode": "market", "n": 15, "path": "market/l-10", "event": "response_written", "bytes": 602}
+{"t_ns": 84550130021583, "mode": "market", "n": 16, "path": "sync", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 84550130362458, "mode": "market", "n": 16, "path": "sync", "event": "response_written", "bytes": 275}
+{"t_ns": 84550889252291, "mode": "body", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 84550889463666, "mode": "body", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "body_prefix"}
+{"t_ns": 84550896186333, "mode": "body", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "response_written", "bytes": 1304}
+{"t_ns": 84550922720833, "mode": "timeout", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 84550928639416, "mode": "timeout", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "response_written", "bytes": 1304}
+{"t_ns": 85051639111125, "mode": "headers", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 85051658508333, "mode": "headers", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "response_written", "bytes": 1304}
+{"t_ns": 85051944397750, "mode": "market", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 85051956969083, "mode": "market", "n": 2, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "received", "overlap": true, "tls": "TLSv1.3"}
+{"t_ns": 85051962811166, "mode": "market", "n": 2, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "response_written", "bytes": 1304}
+{"t_ns": 85051963021625, "mode": "market", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "response_written", "bytes": 1304}
+{"t_ns": 85052579356916, "mode": "market", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 85052915552416, "mode": "market", "n": 2, "path": "market/own?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 85052939876083, "mode": "market", "n": 2, "path": "market/own?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "response_written", "bytes": 1304}
+{"t_ns": 85052940432583, "mode": "market", "n": 3, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "received", "overlap": true, "tls": "TLSv1.3"}
+{"t_ns": 85052940683375, "mode": "market", "n": 3, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "response_written", "bytes": 1304}
+{"t_ns": 85052940937250, "mode": "market", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "response_written", "bytes": 1304}
+{"t_ns": 85052952921000, "mode": "market", "n": 4, "path": "market/l-2", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 85052953533208, "mode": "market", "n": 4, "path": "market/l-2", "event": "response_written", "bytes": 599}
+{"t_ns": 85052955850625, "mode": "market", "n": 5, "path": "market/l-4", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 85052957037541, "mode": "market", "n": 5, "path": "market/l-4", "event": "response_written", "bytes": 599}
+{"t_ns": 85052959575666, "mode": "market", "n": 6, "path": "market/l-1", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 85052960149708, "mode": "market", "n": 6, "path": "market/l-1", "event": "response_written", "bytes": 599}
+{"t_ns": 85052962425541, "mode": "market", "n": 7, "path": "market/l-3", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 85052962791916, "mode": "market", "n": 7, "path": "market/l-3", "event": "response_written", "bytes": 599}
+{"t_ns": 85052964088083, "mode": "market", "n": 8, "path": "market/l-5", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 85052964586041, "mode": "market", "n": 8, "path": "market/l-5", "event": "response_written", "bytes": 599}
+{"t_ns": 85052967243083, "mode": "market", "n": 9, "path": "market/l-8", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 85052967616375, "mode": "market", "n": 9, "path": "market/l-8", "event": "response_written", "bytes": 599}
+{"t_ns": 85052968886250, "mode": "market", "n": 10, "path": "market/l-9", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 85052969313583, "mode": "market", "n": 10, "path": "market/l-9", "event": "response_written", "bytes": 599}
+{"t_ns": 85052970185458, "mode": "market", "n": 11, "path": "market/l-10", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 85052970565375, "mode": "market", "n": 11, "path": "market/l-10", "event": "response_written", "bytes": 602}
+{"t_ns": 85052972411458, "mode": "market", "n": 12, "path": "market/l-11", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 85052972997250, "mode": "market", "n": 12, "path": "market/l-11", "event": "response_written", "bytes": 602}
+{"t_ns": 85052974584000, "mode": "market", "n": 13, "path": "market/l-12", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 85052974923958, "mode": "market", "n": 13, "path": "market/l-12", "event": "response_written", "bytes": 602}
+{"t_ns": 85052976048083, "mode": "market", "n": 14, "path": "market/l-7", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 85052976390958, "mode": "market", "n": 14, "path": "market/l-7", "event": "response_written", "bytes": 599}
+{"t_ns": 85052979112125, "mode": "market", "n": 15, "path": "market/l-6", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 85052979465333, "mode": "market", "n": 15, "path": "market/l-6", "event": "response_written", "bytes": 599}
+{"t_ns": 85052984829166, "mode": "market", "n": 16, "path": "sync", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 85052985379333, "mode": "market", "n": 16, "path": "sync", "event": "response_written", "bytes": 275}
+{"t_ns": 85053766978208, "mode": "body", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 85053767376500, "mode": "body", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "body_prefix"}
+{"t_ns": 85053780864500, "mode": "body", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "response_written", "bytes": 1304}
+{"t_ns": 85053849657708, "mode": "timeout", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 85053857551541, "mode": "timeout", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "response_written", "bytes": 1304}
+{"t_ns": 85444468736625, "mode": "headers", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 85444489323333, "mode": "headers", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "response_written", "bytes": 1304}
+{"t_ns": 85444770185000, "mode": "market", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 85444781385416, "mode": "market", "n": 2, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "received", "overlap": true, "tls": "TLSv1.3"}
+{"t_ns": 85444787699750, "mode": "market", "n": 2, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "response_written", "bytes": 1304}
+{"t_ns": 85444789113291, "mode": "market", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "response_written", "bytes": 1304}
+{"t_ns": 85445442869875, "mode": "market", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 85445827298833, "mode": "market", "n": 2, "path": "market/own?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 85445854695958, "mode": "market", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "response_written", "bytes": 1304}
+{"t_ns": 85445856174125, "mode": "market", "n": 3, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 85445856622916, "mode": "market", "n": 3, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "response_written", "bytes": 1304}
+{"t_ns": 85445857840541, "mode": "market", "n": 2, "path": "market/own?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "response_written", "bytes": 1304}
+{"t_ns": 85445867100458, "mode": "market", "n": 4, "path": "market/l-2", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 85445867526666, "mode": "market", "n": 4, "path": "market/l-2", "event": "response_written", "bytes": 599}
+{"t_ns": 85445870928000, "mode": "market", "n": 5, "path": "market/l-3", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 85445871383291, "mode": "market", "n": 5, "path": "market/l-3", "event": "response_written", "bytes": 599}
+{"t_ns": 85445873961041, "mode": "market", "n": 6, "path": "market/l-4", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 85445874510500, "mode": "market", "n": 6, "path": "market/l-4", "event": "response_written", "bytes": 599}
+{"t_ns": 85445875661458, "mode": "market", "n": 7, "path": "market/l-1", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 85445876040458, "mode": "market", "n": 7, "path": "market/l-1", "event": "response_written", "bytes": 599}
+{"t_ns": 85445878850750, "mode": "market", "n": 8, "path": "market/l-5", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 85445879256041, "mode": "market", "n": 8, "path": "market/l-5", "event": "response_written", "bytes": 599}
+{"t_ns": 85445881255458, "mode": "market", "n": 9, "path": "market/l-6", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 85445881832541, "mode": "market", "n": 9, "path": "market/l-6", "event": "response_written", "bytes": 599}
+{"t_ns": 85445883119125, "mode": "market", "n": 10, "path": "market/l-7", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 85445883502583, "mode": "market", "n": 10, "path": "market/l-7", "event": "response_written", "bytes": 599}
+{"t_ns": 85445887541791, "mode": "market", "n": 11, "path": "market/l-11", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 85445887986375, "mode": "market", "n": 11, "path": "market/l-11", "event": "response_written", "bytes": 602}
+{"t_ns": 85445889552958, "mode": "market", "n": 12, "path": "market/l-10", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 85445889923666, "mode": "market", "n": 12, "path": "market/l-10", "event": "response_written", "bytes": 602}
+{"t_ns": 85445891170666, "mode": "market", "n": 13, "path": "market/l-12", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 85445891683291, "mode": "market", "n": 13, "path": "market/l-12", "event": "response_written", "bytes": 602}
+{"t_ns": 85445893907041, "mode": "market", "n": 14, "path": "market/l-8", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 85445894410375, "mode": "market", "n": 14, "path": "market/l-8", "event": "response_written", "bytes": 599}
+{"t_ns": 85445895660583, "mode": "market", "n": 15, "path": "market/l-9", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 85445896105333, "mode": "market", "n": 15, "path": "market/l-9", "event": "response_written", "bytes": 599}
+{"t_ns": 85445901073083, "mode": "market", "n": 16, "path": "sync", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 85445901376625, "mode": "market", "n": 16, "path": "sync", "event": "response_written", "bytes": 275}
+{"t_ns": 85446732223750, "mode": "body", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 85446732439708, "mode": "body", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "body_prefix"}
+{"t_ns": 85446739069916, "mode": "body", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "response_written", "bytes": 1304}
+{"t_ns": 85446766820875, "mode": "timeout", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "received", "overlap": false, "tls": "TLSv1.3"}
+{"t_ns": 85446773375916, "mode": "timeout", "n": 1, "path": "market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews", "event": "response_written", "bytes": 1304}

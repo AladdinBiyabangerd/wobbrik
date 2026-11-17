@@ -7,6 +7,8 @@ gradle.beforeProject { app ->
     app.dependencies.add('testImplementation', 'androidx.compose.ui:ui-test-junit4:1.7.6')
     app.dependencies.add('debugImplementation', 'androidx.compose.ui:ui-test-manifest:1.7.6')
     app.tasks.withType(Test).configureEach {
+        // The loopback origin/certificate and server gates change on each run.
+        outputs.upToDateWhen { false }
         systemProperty 'robolectric.offline', 'true'
         if (System.getProperty('wobbrik.render.output')) systemProperty 'wobbrik.render.output', System.getProperty('wobbrik.render.output')
         systemProperty 'robolectric.dependency.dir', '/private/tmp/wobbrik-android-jars'

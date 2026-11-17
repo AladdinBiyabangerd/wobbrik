@@ -111,19 +111,40 @@ class HttpsOverlapTest {
    waitFor{root.resolve("$mode-received-1").exists()}
    job.cancel();waitFor{f.traces.first().cancel>0}
    if(mode!="timeout") {
-    delay(holdMs);assertFalse(job.isCompleted);assertEquals(0L,f.traces.first().end)
+    withTimeout(1500){job.join()}
     root.resolve("$mode-release").writeText("release")
    }
    withTimeout(12000){job.join()}
    val t=f.traces.single();assertTrue(job.isCancelled);assertFalse(published)
-   assertTrue((t.end-t.cancel)/1_000_000 >= if(mode=="timeout")7000 else holdMs)
+   assertTrue("Cancellation must interrupt TLS read", (t.end-t.cancel)/1_000_000 < 1500)
+   assertTrue(t.outcome.contains("Cancellation"))
    assertTrue(f.rows.isEmpty())
    report(mode,f)
   } finally {cleanup(mode,f)}
  }
  @Test fun cancelWhileWaitingForHeaders()=cancelRead("headers",500)
  @Test fun cancelWhileReadingBody()=cancelRead("body",750)
- @Test fun cancelWaitsForActualReadTimeout()=cancelRead("timeout",0)
+ @Test fun cancelWithoutResponseRelease()=cancelRead("timeout",0)
+ @Test fun cancellationDoesNotCloseConcurrentSamePathSocket()=runBlocking {
+  setup("market");val f=Fixture()
+  try {
+   // Use the exact same URL on separate request-owned sockets.
+   val url="market?limit=20&min_floors=0&max_floors=0&min_price=0&max_price=0&include=previews"
+   val first=launch(Dispatchers.Default){f.reads.read(f.sessions.current()!!,url)}
+   waitFor{root.resolve("market-received-1").exists()}
+   val second=async(Dispatchers.Default){f.reads.read(f.sessions.current()!!,url)}
+   waitFor{root.resolve("market-received-2").exists()}
+   first.cancel()
+   withTimeout(1500){first.join()}
+   assertFalse(second.isCompleted)
+   root.resolve("market-release").writeText("release")
+   assertTrue(withTimeout(3000){second.await()}.contains("listings"))
+   assertEquals(2,f.traces.size)
+   assertTrue(f.traces[0].outcome.contains("Cancellation"))
+   assertEquals("response-200",f.traces[1].outcome)
+   report("same-path-isolation",f)
+  } finally {cleanup("market",f)}
+ }
  @Test fun realHttpsMarketTabOverlap() {
   setup("market");val f=Fixture()
   try {
@@ -135,15 +156,13 @@ class HttpsOverlapTest {
    compose.waitUntil(15000){root.resolve("market-received-2").exists() && f.traces[0].cancel>0}
    compose.onNodeWithText("Alış",useUnmergedTree=true).performClick();compose.waitForIdle()
    compose.waitUntil(15000){f.traces.size>=3 && f.traces[1].cancel>0}
-   // The new public page really reaches the HTTPS server while old public is blocked.
-   compose.waitUntil(15000){root.resolve("server.jsonl").readLines().drop(serverLogStart).any{it.contains("\"mode\": \"market\"") && it.contains("\"overlap\": true")}}
-   Thread.sleep(500)
-   assertEquals(0L,f.traces[0].end);assertEquals(0L,f.traces[1].end)
+   // Cancelled sockets must exit while the replacement request remains usable.
+   compose.waitUntil(15000){f.traces.take(2).all{it.end>0}}
    root.resolve("market-release").writeText("release")
    compose.waitUntil(15000){f.traces.size==16 && f.traces.all{it.end>0}}
    compose.waitUntil(15000){compose.onAllNodesWithText("350").fetchSemanticsNodes().isNotEmpty()}
    assertEquals(2,f.traces.count{it.cancel>0});assertEquals(16,f.traces.size)
-   assertTrue(f.traces.take(2).all{(it.end-it.cancel)/1_000_000>=500})
+   assertTrue(f.traces.take(2).all{(it.end-it.cancel)/1_000_000<1500})
    report("market",f)
   } finally {cleanup("market",f)}
  }
