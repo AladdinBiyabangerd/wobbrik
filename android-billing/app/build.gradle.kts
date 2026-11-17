@@ -27,11 +27,20 @@ android {
         require(googleWebClientId.none { it == '"' || it == '\\' || it.isISOControl() })
         buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"$googleWebClientId\"")
     }
+    buildTypes {
+        create("mockDebug") {
+            initWith(getByName("debug"))
+            applicationIdSuffix = ".mock"
+            versionNameSuffix = "-mock"
+            matchingFallbacks += "debug"
+        }
+    }
     buildFeatures { compose = true; buildConfig = true }
     compileOptions { sourceCompatibility = JavaVersion.VERSION_21; targetCompatibility = JavaVersion.VERSION_21 }
 }
 kotlin { jvmToolchain(21) }
 dependencies {
+    "mockDebugImplementation"("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0")
     testImplementation("junit:junit:4.13.2")
     // Device settings; same DataStore pin as the Arrowz reference.
     implementation("androidx.datastore:datastore-preferences:1.1.1")
@@ -52,4 +61,9 @@ dependencies {
     implementation("androidx.credentials:credentials:1.3.0")
     implementation("androidx.credentials:credentials-play-services-auth:1.3.0")
     implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
+}
+
+// The isolated mock app has no Firebase client and must not inherit production resources.
+tasks.configureEach {
+    if (name == "processMockDebugGoogleServices") enabled = false
 }

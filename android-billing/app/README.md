@@ -1,22 +1,13 @@
-# Compose practice host
+# Android app variants
 
-`./gradlew :app:installDebug` builds the offline game (`com.aladdin.wobbrik`).
-Minimum API 24; target/compile API 36. `./scripts/local-ci.sh` at repository root
-includes app assembly and Android lint alongside engine/billing checks.
+Run Gradle from `android-billing/` (JDK 21, existing project pins).
 
-The Canvas reads engine snapshots in its draw phase. A monotonic frame loop
-feeds the engine's bounded fixed-step accumulator. HUD state changes only on
-floor/phase changes. Scene taps call `drop`; pause, overlays and lifecycle stop
-input and simulation. Resume resets the frame baseline. A ViewModel retains the
-attempt during activity recreation; process death starts a fresh practice.
+- `debug`: `:app:installDebug`, package `com.aladdin.wobbrik`. Real Firebase Google sign-in and configured AppBackend are required.
+- `release`: `:app:assembleRelease`. Google sign-in remains required; mock implementation is not compiled into this APK. Signing/distribution is a separate operation.
+- `mockDebug`: `:app:installMockDebug`, package `com.aladdin.wobbrik.mock`, launcher name **Wobbrik Mock**. Starts with a synthetic local profile without Firebase/Google/backend configuration. In Android Studio select **app → mockDebug** in **Build Variants**, then Run on the emulator.
 
-The camera follows the tower top and culls floors below the viewport. The active
-HUD has only pause and noninteractive counters; pause has resume/restart/menu.
-The small menu is a practice entry point, not the future full product menu.
-The palette is ported from mobile-v1, and composition/input follows game-tap-v2.
-Canvas buildings are schematic artwork, not extracted concept PNG assets.
+Mock installs beside the real app and has separate Android storage. It uses the existing production navigation, local game engine, command journal and result reconciler with a mock transport. Profile edits, attempts, receipts and completed buildings are stored locally; balance is synthetic and rewards are not real economy calculations. Inventory contains completed buildings with at least ten floors; city starts empty. Purchases and market mutations are unsupported. This is a local test adapter, not the accepted server domain or a release alternative.
 
-No account, rewards, XP, wallet, owned building, checkpoint API or online claim
-is created. Best score is session/saved-instance practice state, not a durable
-account record. Process restore, audio/haptics, final illustration assets,
-TalkBack device validation and real-device performance measurements remain.
+The mock manifest removes Firebase auto-initialization and the INTERNET permission. Neither mock credentials nor results are sent to AppBackend. Relaunch preserves mock data; clearing **Wobbrik Mock** app storage resets only that profile.
+
+Focused checks: `:app:testMockDebugUnitTest :app:assembleMockDebug :app:lintMockDebug`. CI is separate and runs only when explicitly requested, locally on main, according to repository instructions.
