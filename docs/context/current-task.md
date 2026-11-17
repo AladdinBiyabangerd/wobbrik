@@ -10,7 +10,7 @@ Wobbrik branch feat/community-tabs-native-consistency; son production commit79d2
 
 ## Decisions
 
-Yeganə plan docs/PLAN.md§1.1; vizual authority unified-mobile-v3/README.md (Home frameless, başqa ekranlar01–05). Son istifadəçi kod+asılılıqları yoxlamaq, məntiqi commit-lərə ayırmaq və commit etmək üçün açıq icazə verdi; köhnə no-commit qərarı bununla əvəz olundu. Merge/push/deploy/CI icazəsi yoxdur. Bu tur Profilə yeni düzəliş edilmədi, əvvəlki işi ayrıca commit olundu. Mobil Bazar/İnventarda Ərazi girişi qaytarılmır; saxlanmış server hüquqları/dormant legacy kodu dəyişmir. Press animasiyası ayrıca tapşırıqdır. Yeni alternativ dizayn/səviyyə rəqəmi/placement hüququ uydurulmur.
+Yeganə plan docs/PLAN.md§1.1; vizual authority unified-mobile-v3/README.md (Home frameless, başqa ekranlar01–05). Son istifadəçi kod+asılılıqları yoxlamaq, məntiqi commit-lərə ayırmaq və commit etmək üçün açıq icazə verdi; köhnə no-commit qərarı bununla əvəz olundu. 17 noyabr son göstəriş: bu branch üçün push, remote main merge və lokal main yenilənməsi icazəlidir; deploy/CI tələb edilməyib. Bu tur Profilə yeni düzəliş edilmədi, əvvəlki işi ayrıca commit olundu. Mobil Bazar/İnventarda Ərazi girişi qaytarılmır; saxlanmış server hüquqları/dormant legacy kodu dəyişmir. Press animasiyası ayrıca tapşırıqdır. Yeni alternativ dizayn/səviyyə rəqəmi/placement hüququ uydurulmur.
 
 ## Checks performed
 
@@ -30,3 +30,7 @@ Tam app/PNG pariteti və mərhələ qəbulu açıqdır. İnventar Bina məlumat�
 ## Exact next step
 
 Yeni feature-a keçmədən istifadəçinin növbəti dar vizual tapşırığını götür. Son müəyyən edilmiş namizəd: PLAN§1.1/02-market üst orta əsasında yalnız Bina məlumatı panelinin təsdiqli sətirlərini mövcud real field-lərlə tutuşdur; serverdə olmayan səviyyəni uydurma. Hazır üst xülasə/Yeni elan/Mənim elanlarım kompozisiyasını təkrarlama. Profilə toxunma, Ərazini qaytarma. Merge/push/CI-ni ayrıca tapşırıq olmadan etmə.
+
+## Remote integration — 17 November 2026
+
+User authorized reviewed native UI branch push and history-preserving remote main merge, followed by local main update. Review: docs/reviews/2026-11-17-native-ui-remote-merge.md. Production source unchanged since 2f1a623; focused premerge checks PASS. Two dirty generated .dm files remain outside commits. AppBackend Wobbrik branches are already merged; remove only merged obsolete refs/worktrees while preserving unrelated dirty recipe work. Exact next step after integration: await the next scoped user task; outstanding visual parity limitations above remain.
