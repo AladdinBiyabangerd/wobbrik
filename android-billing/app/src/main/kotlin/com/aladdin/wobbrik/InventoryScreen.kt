@@ -71,18 +71,16 @@ internal fun InventoryScreen(configured: WobbrikApplication.Bootstrap.Configured
             val session = requireNotNull(configured.sessions.current())
             check(ready.current(configured, session))
             if (selected == null) {
-                val page = configured.views?.read(ready, session, "inventory-${cursor.orEmpty()}", onCached = { fromCache = true }, refresh = retry > 0) { appbackend.wobbrik.game.InventoryRepository(it).page(session, cursor) } ?: configured.inventory.page(session, cursor)
-                // Membership decorates mobile cards; an unavailable city must not hide owned buildings.
-                val membership = if (mobileShell) try {
-                    configured.views?.read(ready, session, "inventory-city", onCached = { fromCache = true }, refresh = retry > 0) {
-                        appbackend.wobbrik.game.InventoryRepository(it).city(session)
-                    } ?: configured.inventory.city(session)
-                } catch (cancelled: CancellationException) { throw cancelled }
-                catch (_: Exception) { null } else null
-                check(ready.current(configured, session))
-                city = membership
-                buildings = if (cursor == null) page.buildings else (buildings + page.buildings).distinctBy { it.id }
-                next = page.next
+                fun present(page: InventoryPage) {
+                    check(ready.current(configured, session))
+                    buildings = if (cursor == null) page.buildings else (buildings + page.buildings).distinctBy { it.id }
+                    next = page.next
+                }
+                val page = configured.views?.read(ready, session, "inventory-${cursor.orEmpty()}",
+                    onCached = { fromCache = true }, refresh = retry > 0, onLocal = { present(it) }, onFresh = { fromCache = false }) {
+                    InventoryRepository(it).page(session, cursor)
+                } ?: configured.inventory.page(session, cursor)
+                present(page)
             } else {
                 detail = null; city = null
                 suspend fun readDetail(repository: InventoryRepository): Pair<OwnedBuilding, CityMembership?> {
@@ -107,6 +105,19 @@ internal fun InventoryScreen(configured: WobbrikApplication.Bootstrap.Configured
         } catch (cancelled: CancellationException) { throw cancelled }
         catch (_: Exception) { failed = true }
         finally { loading = false }
+    }
+    // Optional card decoration must neither gate first content nor refetch per inventory page.
+    LaunchedEffect(ready, selected, retry, mobileShell) {
+        if (!mobileShell || selected != null) return@LaunchedEffect
+        val session = configured.sessions.current() ?: return@LaunchedEffect
+        try {
+            val membership = configured.views?.read(ready, session, "inventory-city",
+                refresh = retry > 0, onLocal = {
+                    if (ready.current(configured, session)) city = it
+                }) { InventoryRepository(it).city(session) } ?: configured.inventory.city(session)
+            if (ready.current(configured, session)) city = membership
+        } catch (cancelled: CancellationException) { throw cancelled }
+        catch (_: Exception) { /* Optional presentation data never hides inventory. */ }
     }
     if(LocalMobileMenuShell.current) CommerceDetailChrome(selected != null)
     val back = { if (selected != null) onSelectBuilding(null) else onHome() }

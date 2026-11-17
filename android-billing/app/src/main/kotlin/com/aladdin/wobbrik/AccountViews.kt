@@ -27,7 +27,7 @@ class AccountViews(private val backend: GameplayHttpBackend, private val cache: 
     private val completed = mutableSetOf<String>()
 
     suspend fun <T> read(view: AccountView, session: BillingSession, key: String, onCached: () -> Unit = {},
-        refresh: Boolean = false, block: suspend (GameplayReads) -> T): T {
+        refresh: Boolean = false, onLocal: ((T) -> Unit)? = null, onFresh: () -> Unit = {}, block: suspend (GameplayReads) -> T): T {
         fun current() { if (sessions.current() != session || session.uid != view.accountKey) throw AccountChanged() }
         current()
         val capability = view.ready ?: view.account
@@ -36,6 +36,17 @@ class AccountViews(private val backend: GameplayHttpBackend, private val cache: 
                 epoch = capability; login = session; completed.clear()
             }
             !refresh && key in completed
+        }
+        // Publish matching accepted data before network work. It remains display-only until
+        // the live read succeeds; replay never creates or extends a mutation capability.
+        if (onLocal != null && !reuse) {
+            val local = withContext(Dispatchers.IO) {
+                try { cache.replay(session, view.account, key, block) }
+                catch (cancelled: CancellationException) { throw cancelled }
+                catch (_: Exception) { null }
+            }
+            current()
+            if (local != null) { onCached(); onLocal(local) }
         }
         // Parsing, hashing, file reads and fsync must not run on the Compose/UI dispatcher.
         val result = withContext(Dispatchers.IO) {
@@ -63,7 +74,7 @@ class AccountViews(private val backend: GameplayHttpBackend, private val cache: 
             }
         }
         current()
-        if (result.second) onCached()
+        if (result.second) onCached() else onFresh()
         return result.first
     }
 }
