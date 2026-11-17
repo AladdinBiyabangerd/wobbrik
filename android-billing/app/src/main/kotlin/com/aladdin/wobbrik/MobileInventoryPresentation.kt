@@ -1,6 +1,5 @@
 package com.aladdin.wobbrik
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -12,8 +11,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import appbackend.wobbrik.game.*
@@ -177,6 +180,30 @@ private fun OwnedCitySeal(modifier: Modifier = Modifier) {
 /** Native light behind the real geometry; confined to the owned-detail hero. */
 @Composable
 private fun OwnedBuildingDetailArtwork(building: OwnedBuilding, modifier: Modifier) {
-    BuildingPreview(building, modifier.background(Brush.radialGradient(
-        listOf(GameTokens.Raised, Color.Transparent))))
+    BuildingPreview(building, modifier.drawWithCache {
+        // Illustration coordinates, independent of density and font scale. The rays fade
+        // before the art bounds; clipping keeps them out of the neighbouring labels.
+        val radius = size.minDimension / 2f
+        val center = Offset(size.width / 2f, size.height / 2f)
+        val light = Brush.radialGradient(listOf(GameTokens.Raised, Color.Transparent), center, radius)
+        val rays = Path().apply {
+            repeat(12) { ray ->
+                val angle = ray * Math.PI / 6
+                fun edge(a: Double) = Offset(center.x + (kotlin.math.cos(a) * radius).toFloat(),
+                    center.y + (kotlin.math.sin(a) * radius).toFloat())
+                val start = edge(angle)
+                val end = edge(angle + Math.PI / 24)
+                moveTo(center.x, center.y)
+                lineTo(start.x, start.y)
+                lineTo(end.x, end.y)
+                close()
+            }
+        }
+        onDrawBehind {
+            clipRect {
+                drawPath(rays, light)
+                drawRect(light)
+            }
+        }
+    })
 }
