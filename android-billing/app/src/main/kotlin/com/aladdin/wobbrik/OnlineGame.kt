@@ -296,6 +296,10 @@ internal fun AccountScreen(
         HomeScreen(snapshot, active, if (journalBlocked) null else onPlay, onPage, status, onRetry, journalBlocked)
         return
     }
+    if (page == "achievements" && sizing.portrait && status == null && snapshot != null) {
+        MobileAchievementsScreen(snapshot, onHome = { onPage("home") })
+        return
+    }
     BoxWithConstraints(Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(GameTokens.Surface, GameTokens.Background)))
         .safeDrawingPadding()) {
         // Responsive rule: short wide windows use the compact spacing/type tier.
