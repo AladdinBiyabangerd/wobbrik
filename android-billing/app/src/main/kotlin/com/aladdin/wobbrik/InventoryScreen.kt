@@ -54,7 +54,6 @@ internal fun InventoryScreen(configured: WobbrikApplication.Bootstrap.Configured
     val canMutate = ready.ready != null && !fromCache
     val sizing = mobileUiSizing()
     val largeFont = LocalDensity.current.fontScale > 1f
-    val mobileShell = LocalMobileMenuShell.current
     var retry by remember { mutableIntStateOf(0) }
     var deleteCandidate by remember(ready, selected) { mutableStateOf<OwnedBuilding?>(null) }
     val deletion = remember(configured) { BuildingDeletion(configured.recovery) }
@@ -82,33 +81,27 @@ internal fun InventoryScreen(configured: WobbrikApplication.Bootstrap.Configured
                 } ?: configured.inventory.page(session, cursor)
                 present(page)
             } else {
-                detail = null; city = null
-                suspend fun readDetail(repository: InventoryRepository): Pair<OwnedBuilding, CityMembership?> {
-                    val building = repository.building(session, requireNotNull(selected))
-                    // Membership is optional presentation data, not authority for building mutations.
-                    val membership = if (!mobileShell) repository.city(session) else try { repository.city(session) }
-                    catch (cancelled: CancellationException) { throw cancelled }
-                    catch (changed: appbackend.wobbrik.billing.AccountChanged) { throw changed }
-                    catch (failure: GameplayHttpError) {
-                        if (failure.status !in 500..599 && failure.status !in setOf(408, 429)) throw failure
-                        null
-                    }
-                    catch (_: Exception) { null }
-                    return building to membership
+                detail = null
+                fun present(building: OwnedBuilding) {
+                    check(ready.current(configured, session))
+                    detail = building
                 }
-                val (building, membership) = configured.views?.read(ready, session, "detail-$selected", onCached = { fromCache = true }, refresh = retry > 0) { reader ->
-                    readDetail(InventoryRepository(reader))
-                } ?: readDetail(configured.inventory)
-                check(ready.current(configured, session))
-                detail = building; city = membership
+                // Detail has its own accepted bundle: optional membership must not gate it.
+                // Legacy detail bundles already contain this exact building path.
+                val building = configured.views?.read(ready, session, "detail-$selected",
+                    onCached = { fromCache = true }, refresh = retry > 0,
+                    onLocal = { present(it) }, onFresh = { fromCache = false }) { reader ->
+                    InventoryRepository(reader).building(session, requireNotNull(selected))
+                } ?: configured.inventory.building(session, requireNotNull(selected))
+                present(building)
             }
         } catch (cancelled: CancellationException) { throw cancelled }
         catch (_: Exception) { failed = true }
         finally { loading = false }
     }
-    // Optional card decoration must neither gate first content nor refetch per inventory page.
-    LaunchedEffect(ready, selected, retry, mobileShell) {
-        if (!mobileShell || selected != null) return@LaunchedEffect
+    // Shared presentation data survives list/detail navigation and pagination.
+    // It never grants mutation capability and cannot delay either building read.
+    LaunchedEffect(ready, retry) {
         val session = configured.sessions.current() ?: return@LaunchedEffect
         try {
             val membership = configured.views?.read(ready, session, "inventory-city",

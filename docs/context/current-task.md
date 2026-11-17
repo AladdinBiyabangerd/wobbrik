@@ -1,43 +1,39 @@
-# Cari tapşırıq — HTTPS cancellation tamamlanması / 17 noyabr 2026
+# Cari tapşırıq — İnventar detalı gecikməsi / 17 noyabr 2026
 
 ## Completed
 
-- City paired commit review: Android85307bf/AppBackend23102b4; konkret bug tapılmadı, City/cache19testPASS. Review: `docs/reviews/2026-11-17-city-commits-review.md`.
-- İstifadəçinin açıq tapşırığı ilə AppBackend Market+City remote main-ə merge/push edildi:838c0c7. Persistent feat/wobbrik həmin main ilə sinxron, təmizdir. Deploy/CI yoxdur.
-- HTTPS request-owned cancellation ayrıca fix/https-scoped-cancellation branch-ində review edildi; production diff qorundu. Opt-in TLS test keşlənməsi düzəldildi; fresh5/5TLS PASS7.45s, normal core152/app37+assembleDebug/lintDebugPASS28s.
-
-- City Android+AppBackend batching tətbiq edildi: additive include=details, owner-filtered mövcud SQL join, snapshot/creator-sız compact DTO. Tam City JSON60KiB budget; sığmayan detail üçün əvvəlki4paralel fallback. Pagination və son plain City revision bracket saxlanır. Strict köhnə server və pre-batch cache dəstəklənir; clock-only legacy cache rejection düzəldildi.
-- Ölçü12bina:15→3HTTP,175→43SQL. Həndəsə1000center/bina:33022→32698JSONbyte; lokal race67–75→45–47ms. Android production repository40ms/request fixture:batch3read145ms,legacy15read267ms,strict16read305ms. Bunlar host fixture ölçüləridir, device/production deyil.
-- Əvvəlki HTTPS request-owned socket cancellation working diff-i və fixture/review/evidence qorunur; City commit-inə daxil edilmir. Əvvəlki Home/Profil IO resource loader və atlas işləri dəyişməyib.
+- Əvvəlki City batching Android85307bf/AppBackend23102b4; backend remote main838c0c7. HTTPS socket-owned cancellation Android02fbf5a. Əvvəlki review/evidence saxlanır, bu chatdə həmin işlər təkrarlanmayıb.
+- İnventar detalının building→bütün city səhifələri asılılığı ayrıldı. Optional membership `inventory-city` effekti Ready/retry üzrədir; seçim/pagination onu yenidən başlatmır. Detail mövcud `detail-<id>` bundle-dan local display-only məlumatı əvvəl göstərir; fresh cavab yalnız mövcud capability ilə əməliyyatları açır.
+- Production native host fixture: city gate1200ms, building40ms. İlk detail1408→197ms; city2→1read. Total6→6HTTP,1623→1898responsebyte (city capture son sync indi tamamlanır). Bunlar tək host nümunələridir, device/production deyil.
 
 ## Current state
 
-Android `fix/https-scoped-cancellation`, baza85307bf; HTTPS ayrıca scoped commit hazırlanır (dəqiq hash git log-da). Android main merge/push yoxdur. AppBackend feat/wobbrik və remote main838c0c7. Deploy/CI yoxdur. App-wide performans/redesign bitməyib.
+Android `fix/inventory-detail-latency`, baza02fbf5a; kiçik production diff yalnız InventoryScreen.kt, review/evidence aşağıdadır. Main merge/push/deploy/CI yoxdur. AppBackend dəyişməyib. App-wide performans/redesign bitməyib.
 
 ## Decisions
 
-- Yeganə plan `docs/PLAN.md` §1.1/§2–3. Android+AppBackend işi icazəlidir; backend persistent feat/wobbrik-dədir. Main merge/push/deploy ayrıca göstəriş; CI yalnız ayrıca tələb ilə main-də lokal. Emulator açılmır, canlı yoxlama gate deyil.
-- Auth/app/UID/deletion/blocked/rate-limit, account share lock, accepted geometry/provenance, revision/dedup/exact Ready/login epoch/sole journal/server wallet authority saxlanır. Schema/rules/mutation dəyişməyib. İlk sync recovery/reconcile+catalog olaraq qalır.
-- Legacy individual detail64KiB və cache140000byte limitləri artırılmayıb. Cache persistence optional-dır; böyük bundle diskə sığmasa live read uğuru saxlanır. Strict old server include üçün bir əlavə probe/load çəkir.
+- Yeganə plan `docs/PLAN.md` §1.1/§2–3. Backend lazım olsa mövcud feat/wobbrik-də; main merge/push/deploy ayrıca göstəriş. CI yalnız ayrıca tələb ilə main-də lokal. Emulator avtomatik açılmır, canlı yoxlama gate deyil.
+- Exact Ready/login epoch/account/revision, accepted geometry, server wallet/ownership authority və sole journal sərhədləri saxlanır. Membership yalnız təqdimatdır. Yeni cache açarı ilə köhnə offline bundle-lar itirilməyib.
 
 ## Checks performed
 
-- Android normal core149/app37unit+assembleDebug/lintDebug PASS58s; son genişlənmiş core152PASS14s. Pagination, partial fallback/geometry, ID/revision mismatch, racing bracket, cache new/strict/legacy replay, account/revision/epoch isolation və401/403/429/500no-retry yoxlanıb.
-- Real TLS5/5PASS7.1stest/12sGradle: cancellation, sameURLsocket isolation, market overlap; mövcud HTTPS source qorunur. DiffcheckPASS; ilkin working patch-in reverse-check-i handoff yenilənməzdən əvvəl PASS.
-- Backend final production source full race/disposable PostgreSQL18PASS(platform26.371s), vet/buildPASS. Aggregate geometry test əlavə ediləndən sonra City4focusedPASS3.322s; bütün measured request-lər real middleware-dən keçir. Fixture rate history timing-dən əvvəl təmizlənir. DB dayandırılır.
-- Review və evidence: `docs/reviews/2026-11-17-city-detail-batching.md`, `docs/reviews/city-batching/`. Əvvəlki uğursuz fixture/sandbox cəhdləri PASS sayılmır. UI dəyişmədiyindən yeni visual parity/render iddiası yoxdur.
+- Son production diff: core152/app37unit+assembleDebug/lintDebugPASS29s; diffcheckPASS.
+- Native host7/7PASS18s: blocked city ilk məzmunu saxlamır, legacy cached detail şəbəkədən əvvəl görünür/silmə disabled; fresh bina cavabı sonrası enabled; list↔detail təkrarı əlavə HTTP yaratmır; scroll düyməyə çatır.
+- Native beş matrix PNG açılıb:320×568font1/2,360×640font1,390×844font2synthetic inset və Long.MAX balans. `02-market.png` ilə müqayisə edildi; vizual layout dəyişməyib, tam parity deyil. Kontrast Text13.00/Muted8.22/Accent8.99PASS.
+- Backend Inventory/City owner-filtered read müqaviləsinə baxıldı; scheduling düzəlişi API/domain/schema dəyişikliyi tələb etmir. Bu vahiddə backend testləri işlədilməyib.
 
 ## Remaining work
 
-- Production/device latency, real workload/SQLcontention/payload distribution, authenticated Android→GoE2E, HTTPS libcore/DNS/connect/handshake/upload cancellation və pooling ölçülməyib. Tam app performansı/mərhələ qəbulu deyil.
-- Əvvəlki atlas~60MiBretention, Home logo/font və Profil foreground/skin CPUişi, font2Long.MAXheaderclipping/navbar/scroll/grid və tam visual parity borcları qalır. Əvvəlki native10matrix və kontrast nəticələri resource review-dadır; bu vahiddə təkrarlanmayıb.
+- Root İnventarın bildirilən10+s və menyuların2+s gecikməsi device-də ölçülməyib. BuildingPreview sinxron art/atlas decode, atlas~60MiB retention, Profile foreground/skin CPU, real payload və production/device gecikməsi açıqdır.
+- Font2/Long.MAX header clipping, kiçik portret dock, scroll və tam visual parity borcları qalır. Real OS inset/IME/locale/TalkBack/GPU yoxlanmayıb; fixture padding real inset deyil.
+- Android main merge/push yoxdur; yeni vahid üçün ayrıca istifadəçi göstərişi ilə davam et. HTTPS/libcore/DNS/connect/handshake/upload cancellation və authenticated Android→GoE2E ölçülməyib.
 
 ## Relevant files
 
-- Android `android-billing/core/.../game/{CitySceneReads,GameplayHttpBackend,ReadOnlyGameCache}.kt`, `CitySceneReadsTest.kt`.
-- AppBackend `internal/wobbrik/city.go`, `internal/platform/{wobbrik_http.go,wobbrik_city_details_test.go,wobbrik_city_batch_probe_test.go}`, `docs/wobbrik-game-api.md`.
-- HTTPS ayrı vahid: `docs/reviews/2026-11-17-https-scoped-cancellation.md`, `docs/reviews/https-overlap/`; Home/Profil əvvəlki review `2026-11-17-resource-background-city-https.md`.
+- `android-billing/app/src/main/kotlin/com/aladdin/wobbrik/{InventoryScreen,MobileInventoryPresentation,ResourceArtLoading,AccountViews}.kt`; art çağırışları üçün InventoryScreen.kt BuildingPreview və mövcud rememberGameAtlases/rememberCosmeticArt.
+- `docs/reviews/2026-11-17-inventory-detail-latency.md`, `docs/reviews/inventory-detail-latency/{render,evidence}/`.
+- Əvvəlki review: `2026-11-17-resource-background-city-https.md`, `2026-11-17-city-detail-batching.md`, `2026-11-17-https-scoped-cancellation.md`.
 
 ## Exact next step
 
-HTTPS vahidi review/test-dən keçib; Android main merge/push üçün ayrıca istifadəçi göstərişi gözlə. CI avtomatik işləmir. Yeni chatdə bu handoff və PLAN §1.1 ilə qalan menyu/İnventar gecikmələrini ölç; artıq tamamlanan Market/City batching və HTTPS cancellation işini təkrarlama. Production/device performansını yoxlanmış kimi göstərmə. Backend dəyişərsə mövcud feat/wobbrik branch-ində işlə.
+Bu handoff və PLAN §1.1-i oxu; root İnventarın qalan gecikməsi üçün BuildingPreview/atlas/resource decode CPU/byte/allocation və ilk kart gecikməsini production native host fixture-də ölç. Mövcud GameTokens/ui-craft və PNG authority-ni saxla; yalnız ölçülmüş işi optimallaşdır. Tamamlanan detail scheduling/Market/City batching/HTTPS işini təkrarlama. Cihazda ölçülməyən performansı PASS göstərmə. CI/merge/push/deploy avtomatik yoxdur.

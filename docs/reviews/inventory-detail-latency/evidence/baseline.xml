@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.aladdin.wobbrik.InventoryDetailLatencyTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-11-17T13:34:08.106Z" hostname="Macs-MacBook-Pro.local" time="8.849">
+  <properties/>
+  <testcase name="routeTiming" classname="com.aladdin.wobbrik.InventoryDetailLatencyTest" time="8.849"/>
+  <system-out><![CDATA[INVENTORY detail-host-ms=1408 requests=6 responseUtf8Bytes=1623 cityRequests=2
+INVENTORY settled requests=6 responseUtf8Bytes=1623 cityRequests=2
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.aladdin.wobbrik.InventoryDetailLatencyTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-11-17T13:36:27.846Z" hostname="Macs-MacBook-Pro.local" time="12.218">
+  <properties/>
+  <testcase name="routeTiming" classname="com.aladdin.wobbrik.InventoryDetailLatencyTest" time="7.747"/>
+  <testcase name="longBalance" classname="com.aladdin.wobbrik.InventoryDetailLatencyTest" time="0.975"/>
+  <testcase name="detailDoesNotWaitForCity" classname="com.aladdin.wobbrik.InventoryDetailLatencyTest" time="0.815"/>
+  <testcase name="normalFont2" classname="com.aladdin.wobbrik.InventoryDetailLatencyTest" time="0.809"/>
+  <testcase name="smallFont1" classname="com.aladdin.wobbrik.InventoryDetailLatencyTest" time="0.759"/>
+  <testcase name="smallFont2" classname="com.aladdin.wobbrik.InventoryDetailLatencyTest" time="0.722"/>
+  <testcase name="legacyDetailCacheShowsBeforeNetworkAndCannotDelete" classname="com.aladdin.wobbrik.InventoryDetailLatencyTest" time="0.391"/>
+  <system-out><![CDATA[INVENTORY detail-host-ms=197 requests=5 responseUtf8Bytes=1504 cityRequests=1
+INVENTORY settled requests=6 responseUtf8Bytes=1898 cityRequests=1
+INVENTORY detail-visible-with-city-blocked requests=5 responseUtf8Bytes=1504
+INVENTORY detail-visible-with-city-blocked requests=5 responseUtf8Bytes=1504
+INVENTORY detail-visible-with-city-blocked requests=5 responseUtf8Bytes=1504
+INVENTORY detail-visible-with-city-blocked requests=5 responseUtf8Bytes=1504
+INVENTORY detail-visible-with-city-blocked requests=5 responseUtf8Bytes=1504
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
