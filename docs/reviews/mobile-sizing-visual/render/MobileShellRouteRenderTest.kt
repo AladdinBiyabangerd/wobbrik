@@ -174,20 +174,25 @@ class MobileShellRouteRenderTest {
    compose.onNodeWithText("Əhəngdaşı divar").assertIsDisplayed()
    dock();capture("shell-parts-$name")
    compose.onNodeWithContentDescription("Şəhərim").performClick()
-   if (font>1f) compose.onNodeWithText("Şəhəri oxumaq mümkün olmadı").performScrollTo()
-   compose.onNodeWithText("Şəhəri oxumaq mümkün olmadı").assertIsDisplayed()
+   if (font>1f) compose.onNodeWithText("Şəhər yüklənmədi").performScrollTo()
+   compose.onNodeWithText("Şəhər yüklənmədi").assertIsDisplayed()
    compose.onNodeWithText("Plan").assert(hasAnyAncestor(isNotEnabled()))
+   compose.onNodeWithText("Bax").assertDoesNotExist()
+   compose.onNodeWithText("Binaya bax").assertDoesNotExist()
+   compose.onNodeWithText("Yenilə").assertIsDisplayed()
+   val retryBounds=compose.onNodeWithText("Yenilə").fetchSemanticsNode().boundsInRoot
+   assertTrue("Retry target at least 48dp",retryBounds.height / compose.activity.resources.displayMetrics.density >= 48f)
    dock();capture("shell-city-error-$name")
    compose.runOnIdle { failCity=false }
    compose.onNodeWithText("Yenilə").assertIsDisplayed().performTouchInput { click() }
    if (font>1f) compose.onNodeWithText("Əhali: 40").performScrollTo()
    compose.onNodeWithText("Əhali: 40").assertIsDisplayed()
-   compose.onNodeWithText("Şəhəri oxumaq mümkün olmadı").assertDoesNotExist()
+   compose.onNodeWithText("Şəhər yüklənmədi").assertDoesNotExist()
    compose.onNodeWithText("Plan").assert(hasAnyAncestor(isNotEnabled()))
    if (font>1f) compose.onNodeWithContentDescription("Bina b-1: 10 mərtəbə; 1 torpaq sahəsi; 0 yerləşdirilmiş dekor").performScrollTo()
    compose.onNodeWithContentDescription("Bina b-1: 10 mərtəbə; 1 torpaq sahəsi; 0 yerləşdirilmiş dekor").assertIsDisplayed()
    compose.onNodeWithText("Plan").assert(hasAnyAncestor(isNotEnabled()))
-   assertEquals("One failed read, then revision-bracketed retry",3,cityReads)
+   assertEquals("Inventory membership read, one failed read, then revision-bracketed retry",4,cityReads)
    capture("shell-city-$name")
    compose.onNode(hasText("Bax",substring=true) and hasClickAction()).performTouchInput { click() }
    if (font>1f) compose.onNodeWithText("Bina görünüşü").performScrollTo()
@@ -277,6 +282,37 @@ class MobileShellRouteRenderTest {
   assertEquals(1,retry)
   capture("shell-recovery-insets")
  }
+ private fun cityError(font: Float, name: String, insets: Boolean = false) {
+  var retries=0
+  var page by mutableStateOf("city")
+  compose.setContent {
+   val d=LocalDensity.current
+   CompositionLocalProvider(LocalDensity provides Density(d.density,font)) {
+    MaterialTheme {
+     Box(if(insets) Modifier.fillMaxSize().padding(top=24.dp,bottom=48.dp) else Modifier.fillMaxSize()) {
+      MobileMenuShell(page,if(insets) Long.MAX_VALUE else 246L,{}, {page=it}) {
+       if(page=="city") CityContent(null,true,{retries++},{page="home"},{page="inventory"},lifeTimeSeconds=0.0)
+      }
+     }
+    }
+   }
+  }
+  compose.onNodeWithText("Yenilə").assertIsDisplayed().performTouchInput { click() }
+  assertEquals(1,retries)
+  compose.onNodeWithText("Bax").assertDoesNotExist()
+  compose.onNodeWithText("Binaya bax").assertDoesNotExist()
+  compose.onNodeWithText("Plan").assert(hasAnyAncestor(isNotEnabled()))
+  capture("city-error-$name")
+  if (font>1f) compose.onNodeWithText("Şəhər yüklənmədi").performScrollTo()
+  compose.onNodeWithText("Şəhər yüklənmədi").assertIsDisplayed()
+  compose.onNodeWithText("Yenilə").assertIsDisplayed()
+  capture("city-error-title-$name")
+  compose.onNodeWithContentDescription("Geri").assertIsDisplayed().performClick()
+  compose.runOnIdle { assertEquals("home",page) }
+ }
+ @Test @Config(qualifiers="w320dp-h568dp-xxhdpi") fun cityErrorSmall()=cityError(1f,"320-font1")
+ @Test @Config(qualifiers="w390dp-h844dp-xxhdpi") fun cityErrorLargeType()=cityError(2f,"390-font2")
+ @Test fun cityErrorInsets()=cityError(2f,"360-font2-insets-long-balance",true)
  @Test fun compact()=flow(1f,"360-font1")
  @Test @Config(qualifiers="w390dp-h844dp-xxhdpi") fun regular()=flow(1f,"390-font1")
  @Test @Config(qualifiers="w320dp-h568dp-xxhdpi") fun largeFont()=flow(2f,"320-font2")

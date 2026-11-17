@@ -56,6 +56,10 @@ internal fun CityScreen(configured: WobbrikApplication.Bootstrap.Configured,
 @Composable
 internal fun CityContent(scene: CityScene?, failed: Boolean, onRetry: () -> Unit,
     onHome: () -> Unit, onInventory: () -> Unit, lifeTimeSeconds: Double? = null, cached: Boolean = false) {
+    if (failed && LocalMobileMenuShell.current) {
+        CityErrorContent(onRetry, onHome, onInventory)
+        return
+    }
     var selected by remember(scene) { mutableStateOf<String?>(null) }
     var focused by remember(scene) { mutableStateOf(false) }
     BackHandler(focused) { focused = false }
@@ -165,7 +169,7 @@ internal fun CityContent(scene: CityScene?, failed: Boolean, onRetry: () -> Unit
                 when {
                     failed -> {
                         Text("Şəhəri oxumaq mümkün olmadı", color = GameTokens.Danger)
-                        if (!scrollScene) HomeButton(label = "Yenilə", onClick = onRetry)
+                        HomeButton(label = "Yenilə", onClick = onRetry)
                     }
                     scene == null -> Text("Şəhər yüklənir…", color = GameTokens.Muted)
                     else -> {
@@ -188,8 +192,7 @@ internal fun CityContent(scene: CityScene?, failed: Boolean, onRetry: () -> Unit
                 if (selected == null) selected = buildings.lastOrNull()?.source?.building?.id
                 focused = !focused
             }
-            if (scrollScene && failed) HomeButton("Yenilə", primary = true, compact = true, onClick = onRetry)
-            else if (scrollScene) HomeButton(if (focused) "Geri" else "Bax", primary = true, compact = true,
+            if (scrollScene) HomeButton(if (focused) "Geri" else "Bax", primary = true, compact = true,
                 showPlayIcon = !focused, enabled = buildings.isNotEmpty(), onClick = onView)
             else CityViewPanel(chosen?.source?.building, focused, buildings.isNotEmpty(), onView)
             CityNavigation(onInventory)
