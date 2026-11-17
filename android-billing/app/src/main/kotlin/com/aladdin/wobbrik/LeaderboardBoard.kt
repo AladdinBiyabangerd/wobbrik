@@ -27,6 +27,7 @@ import appbackend.wobbrik.game.*
 @Composable
 internal fun LeaderboardBoard(page: LeaderboardPage?, modifier: Modifier = Modifier, onFit: (Int) -> Unit) {
     val large = LocalDensity.current.fontScale > 1f
+    val repeatPodiumRows = LocalMobileMenuShell.current
     var shown by remember { mutableIntStateOf(0) }
     SubcomposeLayout(modifier.testTag("records-board").semantics { contentDescription = "Göstərilən oyunçular: $shown" }) { constraints ->
         val entries = page?.entries.orEmpty().take(LeaderboardWindowPolicy.MaxRows)
@@ -52,12 +53,12 @@ internal fun LeaderboardBoard(page: LeaderboardPage?, modifier: Modifier = Modif
             else -> null
         }
         val head = candidate?.takeIf { it.height + dots.height + gap <= constraints.maxHeight }
-        val base = if (head != null) 3 else 0
+        val base = if (head != null && !repeatPodiumRows) 3 else 0
         val limit = constraints.maxHeight - dots.height - gap
         var y = head?.let { it.height + gap } ?: 0
         val placed = ArrayList<Pair<LeaderboardEntry, Placeable>>()
         var blocked = false
-        for (entry in entries.drop(if (canShowPodium && head != null) 3 else 0)) {
+        for (entry in entries.drop(if (canShowPodium && head != null && !repeatPodiumRows) 3 else 0)) {
             if (base + placed.size >= LeaderboardWindowPolicy.MaxRows) break
             var row = subcompose("player-${entry.rank}") { LeaderboardRow(entry, modifier = Modifier.testTag("records-player-${entry.rank}")) }.first().measure(loose)
             // Only the first oversized row may use the existing compact token step.
@@ -68,7 +69,9 @@ internal fun LeaderboardBoard(page: LeaderboardPage?, modifier: Modifier = Modif
             placed += entry to row
             y += row.height + gap
         }
-        val visible = (if (canShowPodium && head != null) 3 else 0) + placed.size
+        // The mobile reference repeats podium players in the list; count unique ranks for reads.
+        val visible = if (canShowPodium && head != null && repeatPodiumRows) maxOf(3, placed.size)
+            else (if (canShowPodium && head != null) 3 else 0) + placed.size
         if (shown != visible) shown = visible
         val mayNeedRows = page == null || (page.next != null && !blocked)
         val extra = if (mayNeedRows && sample.height > 0) ((limit - y + gap).coerceAtLeast(0) / (sample.height + gap)) else 0
@@ -87,6 +90,10 @@ internal fun LeaderboardBoard(page: LeaderboardPage?, modifier: Modifier = Modif
 
 @Composable
 private fun LeaderboardPodiumWithNames(entries: List<LeaderboardEntry>) {
+    if (LocalMobileMenuShell.current) {
+        MobileRecordsPodium(entries)
+        return
+    }
     Column(verticalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {
         LeaderboardPodium(entries)
         Row(Modifier.fillMaxWidth()) {
@@ -108,6 +115,10 @@ internal fun LeaderboardRow(entry: LeaderboardEntry, compact: Boolean = false, m
 @Composable
 private fun LeaderboardRowContent(rank: Long, floors: Long, isSelf: Boolean, displayName: String,
     avatarId: String, compact: Boolean = false, modifier: Modifier = Modifier) {
+    if (LocalMobileMenuShell.current) {
+        MobileRecordsRow(rank, floors, isSelf, displayName, avatarId, compact, modifier)
+        return
+    }
     Surface(modifier = modifier, color = GameTokens.Surface, shape = RoundedCornerShape(GameTokens.ControlRadius),
         border = BorderStroke(GameTokens.Hairline, if (isSelf) GameTokens.Accent else GameTokens.Raised)) {
         if (compact) {

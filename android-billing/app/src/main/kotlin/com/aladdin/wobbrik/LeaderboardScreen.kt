@@ -77,6 +77,8 @@ internal fun LeaderboardScreen(configured: WobbrikApplication.Bootstrap.Configur
     BackHandler(onBack = onBack)
     val largeFont = LocalDensity.current.fontScale > 1f
     CommunityFrame("Rekordlar", onBack, onRefresh = ::refresh, refreshEnabled = !loading, refreshing = loading) {
+        if (LocalMobileMenuShell.current) MobileRecordsControls(scope, { scope = it }, ::refresh, !loading, loading)
+        else {
         val tabs: @Composable (Modifier) -> Unit = { modifier ->
             HomeButton("Həftəlik", modifier = modifier, primary = scope == LeaderboardScope.WEEKLY,
                 leading = { CommunityCalendarArt(scope == LeaderboardScope.WEEKLY, Modifier.size(GameTokens.Inset)) }) { scope = LeaderboardScope.WEEKLY }
@@ -86,6 +88,7 @@ internal fun LeaderboardScreen(configured: WobbrikApplication.Bootstrap.Configur
         if (largeFont) Column(verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) { tabs(Modifier.fillMaxWidth()) }
         else Surface(color = GameTokens.Raised, shape = RoundedCornerShape(GameTokens.CardRadius)) {
             Row { tabs(Modifier.weight(1f).heightIn(min = GameTokens.MobileUi.PrimaryTarget)) }
+        }
         }
         if (scope == LeaderboardScope.WEEKLY) {
             val week = page?.weekStart
@@ -118,6 +121,10 @@ internal fun LeaderboardScreen(configured: WobbrikApplication.Bootstrap.Configur
 internal fun CommunityFrame(title: String, onBack: () -> Unit, coins: Long? = null,
     onRefresh: (() -> Unit)? = null, refreshEnabled: Boolean = true, refreshing: Boolean = false,
     content: @Composable ColumnScope.() -> Unit) {
+    if (LocalMobileMenuShell.current) {
+        MobileRecordsFrame(content)
+        return
+    }
     val board = ImageBitmap.imageResource(R.drawable.leaderboard_approved_board)
     CompositionLocalProvider(LocalCommunityBoard provides board) {
         BoxWithConstraints(Modifier.fillMaxSize().background(GameTokens.Background)) {
