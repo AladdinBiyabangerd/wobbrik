@@ -78,6 +78,13 @@ private fun profileBoard(resource: Int): ImageBitmap {
 
 @Composable
 internal fun ProfileFrame(title: String, onBack: () -> Unit, coins: Long?, content: @Composable ColumnScope.() -> Unit) {
+    if (LocalMobileMenuShell.current && coins != null) {
+        Column(Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(GameTokens.MobileHome.PanelTop, GameTokens.MobileHome.PanelBottom)))
+            .safeDrawingPadding().padding(GameTokens.Gap), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+            content()
+        }
+        return
+    }
     ProfileArtProvider {
         Column(Modifier.fillMaxSize().background(GameTokens.Background).safeDrawingPadding().imePadding()
             .padding(horizontal = if (coins != null) GameTokens.Quarter else GameTokens.Gap)
@@ -107,6 +114,10 @@ internal fun ProfileFrame(title: String, onBack: () -> Unit, coins: Long?, conte
 internal fun ProfileEditView(name: String, avatar: String, editable: Boolean, canCancel: Boolean,
     canSave: Boolean, saveLabel: String, onName: (String) -> Unit, onAvatar: () -> Unit,
     onCancel: () -> Unit, onSave: () -> Unit, status: @Composable () -> Unit = {}) {
+    if (LocalMobileMenuShell.current) {
+        NativeProfileEditView(name, avatar, editable, canCancel, canSave, saveLabel, onName, onAvatar, onCancel, onSave, status)
+        return
+    }
     ProfileFrame("Profili dəyiş", { if (canCancel) onCancel() }, null) {
         ProfilePanel(Modifier.fillMaxWidth().weight(1f, fill = false)) {
             Column(Modifier.weight(1f, fill = false).fillMaxWidth().verticalScroll(rememberScrollState()),
@@ -247,6 +258,10 @@ private fun ProfileRule(vertical: Boolean = false, modifier: Modifier = Modifier
 @Composable
 internal fun ProfileAction(label: String, enabled: Boolean = true, modifier: Modifier = Modifier, onClick: () -> Unit) {
     val feedback = LocalGameFeedback.current
+    if (LocalMobileMenuShell.current) {
+        NativeProfileAction(label, enabled, modifier) { feedback(); onClick() }
+        return
+    }
     Box(modifier.fillMaxWidth().heightIn(min = if (mobileUiSizing().compact) GameTokens.Target else GameTokens.MobileUi.PrimaryTarget)
         .clip(RoundedCornerShape(GameTokens.ControlRadius))
         .clickable(enabled = enabled, role = Role.Button, onClick = { feedback(); onClick() }), contentAlignment = Alignment.Center) {
@@ -307,6 +322,10 @@ private fun ProfileLevelBadge(level: String) {
 @Composable
 internal fun ProfileOverview(profile: PublicProfile, level: String, xp: Long, best: String,
     progress: @Composable () -> Unit, showEdit: Boolean = true, enabled: Boolean, onEdit: () -> Unit) {
+    if (LocalMobileMenuShell.current) {
+        NativeProfileOverview(profile, level, xp, best, progress, showEdit, enabled, onEdit)
+        return
+    }
     val compact = mobileUiSizing().compact && LocalDensity.current.fontScale <= 1f
     Box(Modifier.fillMaxWidth()) {
     ProfilePanel(Modifier.fillMaxWidth().testTag("profile-panel"), kind = "overview") {
@@ -374,7 +393,10 @@ internal fun ProfileOverview(profile: PublicProfile, level: String, xp: Long, be
 @Composable
 internal fun ProfileNavbar(onHome: () -> Unit, onPage: (String) -> Unit) {
     if (LocalMobileMenuShell.current) {
-        ProfileAction("Parametrlər") { onPage("settings") }
+        Row(horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+            NativeProfileShortcut("Parametrlər", records = false, Modifier.weight(1f)) { onPage("settings") }
+            NativeProfileShortcut("Rekordlar", records = true, Modifier.weight(1f)) { onPage("leaderboard") }
+        }
         return
     }
     val largeFont = LocalDensity.current.fontScale > 1f
@@ -413,6 +435,15 @@ internal fun ProfileNavbar(onHome: () -> Unit, onPage: (String) -> Unit) {
 /** Only the viewport scrolls. Header and apply action are outside the lazy grid. */
 @Composable
 internal fun ProfileAvatarPicker(avatars: List<String>, selected: String, onClose: () -> Unit, onApply: (String) -> Unit) {
+    if (LocalMobileMenuShell.current) {
+        val density = LocalDensity.current
+        Dialog(onDismissRequest = onClose, properties = DialogProperties(usePlatformDefaultWidth = false)) {
+            CompositionLocalProvider(LocalDensity provides density) {
+                NativeProfileAvatarSheet(avatars, selected, onClose, onApply)
+            }
+        }
+        return
+    }
     var pick by remember(selected) { mutableStateOf(selected) }
     val parentDensity = LocalDensity.current
     Dialog(onDismissRequest = onClose, properties = DialogProperties(usePlatformDefaultWidth = false)) {

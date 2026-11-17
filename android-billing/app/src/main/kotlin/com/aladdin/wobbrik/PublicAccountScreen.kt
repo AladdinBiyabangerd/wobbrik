@@ -53,6 +53,8 @@ internal fun PublicAccountScreen(configured: WobbrikApplication.Bootstrap.Config
     }
     val back: () -> Unit = { if (editing) closeEditor() else onHome() }
     BackHandler(onBack = back)
+    val pinnedEdit = LocalDensity.current.fontScale > 1f || mobileUiSizing().compact
+    val inlineShortcuts = LocalMobileMenuShell.current && !pinnedEdit
     val status: @Composable () -> Unit = {
         if (busy) CircularProgressIndicator(color = GameTokens.Accent)
         message?.let { Text(it, color = GameTokens.Muted) }
@@ -96,16 +98,16 @@ internal fun PublicAccountScreen(configured: WobbrikApplication.Bootstrap.Config
                             val earned = java.math.BigInteger.valueOf(ready.snapshot.xp).subtract(interval.start)
                             val required = interval.next.subtract(interval.start)
                             AccountXpProgress(earned, required, ready.snapshot.account?.level?.toString())
-                            Text("Növbəti səviyyəyə ${interval.next.subtract(java.math.BigInteger.valueOf(ready.snapshot.xp))} XP", Modifier.fillMaxWidth(), color = GameTokens.Muted, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
                         }
-                    }, showEdit = LocalDensity.current.fontScale <= 1f, enabled = !busy,
+                    }, showEdit = !pinnedEdit, enabled = !busy,
                     onEdit = { editing = true; message = null })
             }
             status()
+            if (inlineShortcuts) ProfileNavbar(onHome, onPage)
         }
-        if (LocalDensity.current.fontScale > 1f && profile != null) ProfileAction("Dəyiş", enabled = !busy,
+        if (pinnedEdit && profile != null) ProfileAction("Dəyiş", enabled = !busy,
             modifier = Modifier.testTag("profile-edit")) { editing = true; message = null }
-        ProfileNavbar(onHome, onPage)
+        if (!inlineShortcuts) ProfileNavbar(onHome, onPage)
     }
     if (pickingAvatar) ProfileAvatarPicker(PublicProfiles.avatars.toList(), avatar,
         onClose = { pickingAvatar = false }, onApply = { avatar = it; pickingAvatar = false })
@@ -129,11 +131,11 @@ internal fun AccountXpProgress(earned: java.math.BigInteger, required: java.math
         Text(label, color = GameTokens.Muted, fontWeight = FontWeight.ExtraBold)
     } else Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
         if (level != null) Text("Səviyyə $level", Modifier.weight(1f), color = GameTokens.Text,
-            fontSize = if (mobileUiSizing().compact) GameTokens.Body else GameTokens.Title, fontWeight = FontWeight.ExtraBold)
+            fontSize = if (LocalMobileMenuShell.current || mobileUiSizing().compact) GameTokens.Body else GameTokens.Title, fontWeight = FontWeight.ExtraBold)
         Text(label, color = GameTokens.Muted,
             fontSize = if (mobileUiSizing().compact) GameTokens.Body else GameTokens.Hint, fontWeight = FontWeight.ExtraBold)
     }
-    Surface(Modifier.fillMaxWidth().height(if (LocalDensity.current.fontScale > 1f) GameTokens.Target else GameTokens.Inset)
+    Surface(Modifier.fillMaxWidth().height(if (LocalDensity.current.fontScale > 1f) GameTokens.Target else if (LocalMobileMenuShell.current) GameTokens.Small + GameTokens.Quarter else GameTokens.Inset)
         .progressSemantics(fraction), shape = RoundedCornerShape(GameTokens.CardRadius), color = GameTokens.Background,
         border = BorderStroke(GameTokens.Hairline, GameTokens.Raised)) {
         Box {
