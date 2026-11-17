@@ -70,16 +70,18 @@ abstract class MobileCommerceProductionHost {
   }
   fun listing(id:Int)="""{"id":"l-$id","building_id":"b-$id","revision":1,"building_revision":1,"price":24,"fee":2,"status":"active"}"""
   var failDecor=false
+  var failCity=false
   var submissions=0
   val reads=GameplayHttpBackend(sessions,GameplayTransport {path,_,body->
    assertNull(body)
+   if(failCity && path.startsWith("city?")) return@GameplayTransport GameplayResponse(503,"""{"error":"unavailable"}""")
    if(failDecor && path.startsWith("decorations?")) return@GameplayTransport GameplayResponse(503,"""{"error":"unavailable"}""")
    GameplayResponse(200,when {
     path.startsWith("inventory?")->"""{"buildings":[${(1..4).joinToString(","){building(it)}}]}"""
     path.startsWith("buildings/")->building(path.substringAfter("b-").toInt())
     path.startsWith("market?") || path.startsWith("market/own?")->"""{"listings":[${(1..4).joinToString(","){listing(it)}}]}"""
     path.startsWith("market/l-")->path.substringAfter("l-").toInt().let {"""{"listing":${listing(it)},"building":${building(it)}}"""}
-    path.startsWith("city?")->"""{"rules_version":"wobbrik-v1","revision":1,"population":"40","buildings":[{"building_id":"b-1","building_revision":1,"residents":40}]}"""
+    path.startsWith("city?")->"""{"rules_version":"wobbrik-v1","revision":1,"population":"40","buildings":[{"building_id":"b-1","building_revision":1,"residents":40},{"building_id":"b-2","building_revision":2,"residents":40}]}"""
     path.startsWith("decorations?")->"""{"copies":[{"id":"copy-a","item_id":"decor_bench_1","position":{"x_ticks":"0","y_ticks":"0","quarter_turns":0}},{"id":"copy-b","item_id":"decor_tree_1"}]}"""
     else->error(path)
    })
@@ -124,6 +126,8 @@ abstract class MobileCommerceProductionHost {
    waitText("10 mərtəbə  ›")
    compose.onNodeWithContentDescription("Oyunu başlat").assertIsDisplayed()
    compose.onAllNodesWithContentDescription("Geri").assertCountEquals(0)
+   compose.onAllNodesWithText("✓ Şəhərdə").assertCountEquals(1)
+   compose.onNodeWithText("✓ Şəhərdə").assertIsDisplayed()
    capture("inventory-$name")
    compose.onAllNodesWithText("10 mərtəbə  ›")[0].performScrollTo().performClick()
    waitText("✓ Sənindir")
@@ -217,7 +221,11 @@ abstract class MobileCommerceProductionHost {
    compose.onAllNodesWithText(snapshot.coins.toString()).onLast().assertIsDisplayed()
    capture("buy-confirm-balance-$name",true)
    compose.onNodeWithText("Ləğv et").assertIsDisplayed().performClick()
-   compose.runOnIdle {assertEquals(0,submissions)}
+   compose.runOnIdle {assertEquals(0,submissions);failCity=true}
+   go("inventory");waitText("10 mərtəbə  ›")
+   compose.onAllNodesWithText("✓ Şəhərdə").assertCountEquals(0)
+   compose.onAllNodesWithText("Məlumat yenilənmədi.", substring=true).assertCountEquals(0)
+   capture("inventory-city-unavailable-$name")
   } finally {scope.cancel()}
  }
 }

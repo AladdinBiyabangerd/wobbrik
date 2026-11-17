@@ -54,6 +54,7 @@ internal fun InventoryScreen(configured: WobbrikApplication.Bootstrap.Configured
     val canMutate = ready.ready != null && !fromCache
     val sizing = mobileUiSizing()
     val largeFont = LocalDensity.current.fontScale > 1f
+    val mobileShell = LocalMobileMenuShell.current
     var retry by remember { mutableIntStateOf(0) }
     var deleteCandidate by remember(ready, selected) { mutableStateOf<OwnedBuilding?>(null) }
     val deletion = remember(configured) { BuildingDeletion(configured.recovery) }
@@ -71,7 +72,15 @@ internal fun InventoryScreen(configured: WobbrikApplication.Bootstrap.Configured
             check(ready.current(configured, session))
             if (selected == null) {
                 val page = configured.views?.read(ready, session, "inventory-${cursor.orEmpty()}", onCached = { fromCache = true }, refresh = retry > 0) { appbackend.wobbrik.game.InventoryRepository(it).page(session, cursor) } ?: configured.inventory.page(session, cursor)
+                // Membership decorates mobile cards; an unavailable city must not hide owned buildings.
+                val membership = if (mobileShell) try {
+                    configured.views?.read(ready, session, "inventory-city", onCached = { fromCache = true }, refresh = retry > 0) {
+                        appbackend.wobbrik.game.InventoryRepository(it).city(session)
+                    } ?: configured.inventory.city(session)
+                } catch (cancelled: CancellationException) { throw cancelled }
+                catch (_: Exception) { null } else null
                 check(ready.current(configured, session))
+                city = membership
                 buildings = if (cursor == null) page.buildings else (buildings + page.buildings).distinctBy { it.id }
                 next = page.next
             } else {
@@ -143,7 +152,7 @@ internal fun InventoryScreen(configured: WobbrikApplication.Bootstrap.Configured
                 LazyVerticalGrid(if (sizing.portrait) GridCells.Fixed(if (largeFont) 1 else 2) else GridCells.Adaptive(GameTokens.PanelWidth / 2 - GameTokens.Gap), Modifier.weight(1f),
                     horizontalArrangement = Arrangement.spacedBy(GameTokens.Small), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
                     items(buildings, key = { it.id }) { building ->
-                        if(LocalMobileMenuShell.current) MobileOwnedBuildingCard(building, ready.catalog) { onSelectBuilding(building.id) }
+                        if(LocalMobileMenuShell.current) MobileOwnedBuildingCard(building, ready.catalog, city) { onSelectBuilding(building.id) }
                         else Surface(onClick = { onSelectBuilding(building.id) }, color = GameTokens.Surface,
                             shape = RoundedCornerShape(if (sizing.portrait) GameTokens.ControlRadius else GameTokens.CardRadius), border = BorderStroke(GameTokens.Hairline, GameTokens.Raised)) {
                             if (sizing.portrait && largeFont) Row(Modifier.padding(GameTokens.Small),

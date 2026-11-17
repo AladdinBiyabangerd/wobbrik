@@ -18,14 +18,22 @@ import androidx.compose.ui.text.font.FontWeight
 import appbackend.wobbrik.game.*
 
 @Composable
-internal fun MobileOwnedBuildingCard(building: OwnedBuilding, catalog: RecoveryCatalog?, onClick: () -> Unit) {
+internal fun MobileOwnedBuildingCard(building: OwnedBuilding, catalog: RecoveryCatalog?, city: CityMembership?, onClick: () -> Unit) {
     Surface(onClick = onClick, color = Color.Transparent, shape = RoundedCornerShape(GameTokens.ControlRadius)) {
         MenuRelief(Modifier.fillMaxWidth().border(GameTokens.Hairline,
             Brush.verticalGradient(listOf(GameTokens.MobileHome.RimLight, GameTokens.MobileHome.Rim)),
             RoundedCornerShape(GameTokens.ControlRadius)), shape = RoundedCornerShape(GameTokens.ControlRadius), kind = MenuSkin.Commerce) {
             Column(Modifier.padding(GameTokens.Small), verticalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {
-                BuildingPreview(building, Modifier.fillMaxWidth().height(if(LocalDensity.current.fontScale > 1f)
-                    GameTokens.Target else mobileUiSizing().cardArt))
+                val largeFont = LocalDensity.current.fontScale > 1f
+                val inCity = city?.buildings?.get(building.id) == building.revision
+                Box(Modifier.fillMaxWidth()) {
+                    BuildingPreview(building, Modifier.fillMaxWidth()
+                        .then(if(!largeFont) Modifier.padding(top = GameTokens.Inset + GameTokens.Small) else Modifier)
+                        .height(if(largeFont) GameTokens.Target else mobileUiSizing().cardArt))
+                    if(inCity && !largeFont) OwnedCitySeal(Modifier.align(Alignment.TopEnd))
+                }
+                // Large type gets its own natural-height row, keeping the art and label unobscured.
+                if(inCity && largeFont) OwnedCitySeal()
                 Text(buildingName(building, catalog), Modifier.horizontalScroll(rememberScrollState()), color = GameTokens.Text,
                     fontFamily = GameTypeface, fontSize = GameTokens.Body, fontWeight = FontWeight.Bold, softWrap = false)
                 Text("${building.floors} mərtəbə  ›", Modifier.horizontalScroll(rememberScrollState()), color = GameTokens.Muted,
@@ -123,5 +131,15 @@ private fun BuildingInformationRow(icon: MobileIcon, label: String, value: Strin
                 fontFamily = GameTypeface, fontSize = GameTokens.Label, softWrap = false,
                 textAlign = androidx.compose.ui.text.style.TextAlign.End)
         }
+    }
+}
+
+/** Read-only membership seal: only an exact accepted city revision earns it. */
+@Composable
+private fun OwnedCitySeal(modifier: Modifier = Modifier) {
+    Surface(modifier = modifier, color = GameTokens.Success, shape = RoundedCornerShape(GameTokens.Target)) {
+        Text("✓ Şəhərdə", Modifier.padding(horizontal = GameTokens.Small, vertical = GameTokens.Quarter),
+            color = GameTokens.Background, fontFamily = GameTypeface, fontSize = GameTokens.Caption,
+            fontWeight = FontWeight.Bold)
     }
 }
