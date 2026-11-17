@@ -1,0 +1,34 @@
+# City detail batching — 17 November 2026
+
+Android branch `fix/city-detail-batching`, base `8fd0bc6`; paired AppBackend `feat/wobbrik`, base `9f0faf9`. PLAN §1.1 performance unit. Reviewed the incremental City diff; inherited scoped HTTPS cancellation and its fixture/review remain separate, uncommitted work. A reverse-apply check of the initial full working patch passed before the handoff update, proving those edits were preserved. No main merge, push, deployment, CI or emulator.
+
+## Change and contract
+
+Android requests `city?limit=20[&cursor=…]&include=details` for membership pages, consumes optional per-member `detail` using the existing OwnedBuilding/accepted geometry parser and requires matching ID/content revision. The final bracket requests plain City and compares membership/revision/population/parcels/positions, ignoring optional detail representation. Independent missing details retain the existing four-request concurrency bound. Pagination remains ordered and rejects duplicates/mixed revisions.
+
+AppBackend adds only `include=details`, maximum page limit20, to existing authenticated City GET. Its existing owner/deleted-filtered membership SQL selects the compact detail columns in the same statement; no extra domain SELECT per building. Snapshot and creator UID are omitted because scene rendering does not consume them. Accepted geometry and provenance are unchanged. Existing account share lock, auth/app/UID derivation, deletion fence, blocked-account and rate-limit checks remain. No migration, rules-version, wallet, mutation, revision or dedup change.
+
+The server budgets the complete serialized JSON envelope to60KiB (Android City transport remains64KiB). It counts the base envelope and each optional detail once; a detail that will not fit is omitted while membership/cursor remain intact and later smaller details can still fit. Both an aggregate over-budget page and an individually oversized synthetic geometry are tested. A single legacy building detail still exceeding its existing64KiB endpoint cap remains an existing unsupported read; this change does not raise that cap or claim all arbitrary-size geometries are readable. Huge fixture geometries are deliberate direct-DB stress inputs, not new accepted gameplay policy.
+
+Strict old servers return400 invalid_request for include; Android retries the same plain query once and disables include for that load. Other auth/transient/rate errors and cancellation propagate. Old servers that ignore include use normal missing-detail fallback. Complete legacy cache bundles alias only the exact validated City query without include; cursor/account/revision scope stays exact. Repeated legacy first/final raw bodies can differ in server_time: capture compares parsed City pages, retaining all consistency-bearing fields, rather than rejecting an observational clock change. Cache remains optional and bounded140000bytes; an oversized complete bundle may fail persistence without revoking a successful live read. Capture's additional final sync and session/publication guards remain.
+
+## Measurements
+
+Retained evidence: `city-batching/backend-focused.log`, `backend-race.log`, `android-city-results.xml`, `https-results.xml`. Probe source lives in AppBackend `internal/platform/wobbrik_city_batch_probe_test.go`.
+
+Real local AppBackend auth/middleware/HTTP handlers plus disposable PostgreSQL18,12buildings, mirrored production Android request ordering, four-at-a-time legacy details, three samples per mode. Each sample resets only the disposable fixture's rate history before timing; every measured request executes the real limiter/security path. Counts include BEGIN/COMMIT; no SQL parameters/tokens are logged. httptest/fake identity, without TLS/Firebase/device/network RTT. Capture sync is excluded equally.
+
+- Legacy geometry absent:15→3HTTP,175→43SQL statements,6282→5958JSON bytes;79.861/69.338/76.646ms→33.607/31.498/30.507ms.
+- Geometry1000centers/building:15→3HTTP,175→43SQL,33022→32698bytes;75.196/73.673/67.319ms→44.681/46.643/45.157ms. Existing accepted-attempt fixture is updated directly with coherent floor/resident/value columns for this payload probe, not a full1000floor gameplay replay.
+- Domain statements21→9; request-level transactions/security/rate work accounts for most removed statements. HTTP−80%, SQL−75.4%. Payload savings are small; no compression/production speedup claim.
+- Production Android CitySceneRepository with controlled40ms delay/request, same12building fixture: batch3requests/5407successfulJSONbytes/145ms; include-ignoring legacy15/5287/267ms; strict legacy16/5287/305ms. Fixture omits private snapshot/creator fields, so additive nesting increases bytes here. These are one host sample/mode, not measured network RTT or device latency. Strict fallback has one compatibility-probe cost per load.
+
+## Validation and local review
+
+Final core152/152PASS including12-building equivalence, three/fifteen/sixteen read counts, pagination/partial fallback, geometry preservation, ID/revision mismatch, racing final bracket, malformed paths, cache new/strict/pre-batch replay, account/revision isolation and no legacy retry for401/403/429/500. Existing account-epoch/cancellation tests remain. Normal `:core:test :app:testDebugUnitTest :app:assembleDebug :app:lintDebug` PASS58s (core149 at that run, app37); final expanded core152PASS14s. Five opt-in real TLS scoped cancellation/overlap regressions PASS7.1s test/12s Gradle; HTTPS implementation unchanged apart from the City allowlist entry. No concurrent Gradle invocations.
+
+Backend final production-source full `go test -race ./... -count=1` with disposable PostgreSQL PASS, platform26.371s; `go vet ./...` and server build PASS. After the aggregate-budget test addition, focused City batch probe/embedded detail/read-return/HTTP boundary4/4PASS, platform3.322s. No skipped integration tests. SQL count assertions enforce175/43 for the paired fixture. Diff checks PASS. Disposable DB stopped after checks.
+
+Review found and fixed repeated whole-page budget serialization (now linear), clock-only legacy cache rejection, fixture bigint parameter inference, random-ID ordering assumption and fixture rate exhaustion. Earlier failed attempts are not PASS. Focused fallback/geometry tests cover the final fixes. Initial sandbox Gradle/PG starts and one wrong-working-directory command failed before checks; authorized runs succeeded.
+
+No UI/asset/layout values changed, so no new native visual parity claim or render. Existing design gaps remain. No production/device/libcore latency, production SQL contention/payload distribution, cross-language authenticated Android→running Go E2E or deployment check. Local host fixtures establish bounded fanout and compatibility; app-wide performance and phase acceptance remain open.

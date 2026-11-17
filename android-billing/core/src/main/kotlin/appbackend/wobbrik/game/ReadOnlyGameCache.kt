@@ -40,7 +40,13 @@ class ReadOnlyGameCache(private val files: (String) -> JournalFile) {
                 // Scene detail reads may complete on different IO workers.
                 synchronized(bodies) {
                     val previous = bodies.put(path, body)
-                    require(previous == null || previous == body) { "View changed during read" }
+                    // City server_time is observational; the repository brackets the actual
+                    // membership, geometry and revision. Legacy first/final bodies may
+                    // differ only by that clock and still be the same captured view.
+                    require(previous == null || previous == body ||
+                        (path.startsWith("city?") && CitySceneReads.page(previous) == CitySceneReads.page(body))) {
+                        "View changed during read"
+                    }
                 }
             }
         }
@@ -70,7 +76,9 @@ class ReadOnlyGameCache(private val files: (String) -> JournalFile) {
             // Replay the identical legacy query, then let the repository use its captured
             // detail bodies. Never alias filters, scope, cursor or account revisions.
             val body = bodies[path] ?: if (path.endsWith("&include=previews") && MarketReads.allowedPath(path))
-                bodies[path.removeSuffix("&include=previews")] else null
+                bodies[path.removeSuffix("&include=previews")]
+            else if (path.endsWith("&include=details") && allowedReadPath(path))
+                bodies[path.removeSuffix("&include=details")] else null
             requireNotNull(body) { "View path not cached" }.jsonPrimitive.content
         })
     }

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="appbackend.wobbrik.game.CitySceneReadsTest" tests="15" skipped="0" failures="0" errors="0" timestamp="2026-11-17T13:25:19.958Z" hostname="Macs-MacBook-Pro.local" time="0.782">
+  <properties/>
+  <testcase name="mixedCityPagesAreRejected" classname="appbackend.wobbrik.game.CitySceneReadsTest" time="0.008"/>
+  <testcase name="decorationReadPathsAreBoundedIncludingPagination" classname="appbackend.wobbrik.game.CitySceneReadsTest" time="0.005"/>
+  <testcase name="changedBuildingDiscardsScene" classname="appbackend.wobbrik.game.CitySceneReadsTest" time="0.008"/>
+  <testcase name="malformedCoordinatesAndUnknownVersionsFailClosed" classname="appbackend.wobbrik.game.CitySceneReadsTest" time="0.001"/>
+  <testcase name="writeDuringDecorationReadDiscardsScene" classname="appbackend.wobbrik.game.CitySceneReadsTest" time="0.002"/>
+  <testcase name="transientAndAuthorizationFailuresNeverTriggerLegacyRetry" classname="appbackend.wobbrik.game.CitySceneReadsTest" time="0.001"/>
+  <testcase name="invalidEmbeddedDetailFailsClosedAndMissingDetailFallsBack" classname="appbackend.wobbrik.game.CitySceneReadsTest" time="0.002"/>
+  <testcase name="loadsPlacedCopiesAndMatchingBuildingWithoutMutation" classname="appbackend.wobbrik.game.CitySceneReadsTest" time="0.004"/>
+  <testcase name="missingServerGeometryContractIsRejectedRatherThanInventingAnIsland" classname="appbackend.wobbrik.game.CitySceneReadsTest" time="0.001"/>
+  <testcase name="twelveBuildingsBatchToThreeReadsWithSameSceneAsLegacy" classname="appbackend.wobbrik.game.CitySceneReadsTest" time="0.725"/>
+  <testcase name="emptyCityAndEmptyDecorationInventoryAreValid" classname="appbackend.wobbrik.game.CitySceneReadsTest" time="0.001"/>
+  <testcase name="cityCaptureReplaysNewStrictLegacyAndPreBatchBundlesWithoutNetwork" classname="appbackend.wobbrik.game.CitySceneReadsTest" time="0.018"/>
+  <testcase name="paginatedBatchAndPartialFallbackKeepGeometryAndRevisionBracket" classname="appbackend.wobbrik.game.CitySceneReadsTest" time="0.005"/>
+  <testcase name="exactPositionAndLegacyAbsenceArePreserved" classname="appbackend.wobbrik.game.CitySceneReadsTest" time="0.0"/>
+  <testcase name="newLoginOfSameUidRejectsLateResponse" classname="appbackend.wobbrik.game.CitySceneReadsTest" time="0.001"/>
+  <system-out><![CDATA[CITY-ANDROID mode=batch requests=3 successJSONBytes=5407 elapsedMs=145
+CITY-ANDROID mode=legacy requests=15 successJSONBytes=5287 elapsedMs=267
+CITY-ANDROID mode=strict requests=16 successJSONBytes=5287 elapsedMs=305
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

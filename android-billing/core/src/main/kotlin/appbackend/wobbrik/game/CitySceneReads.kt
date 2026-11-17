@@ -17,7 +17,7 @@ data class CityScene(val membership: CityMembership, val parcels: List<CityParce
     val buildings: List<CitySceneBuilding>, val decorations: List<CitySceneDecoration>)
 
 internal data class CityScenePage(val membership: CityMembership, val parcels: List<CityParcel>,
-    val positions: Map<String, CityPosition?>)
+    val positions: Map<String, CityPosition?>, val details: Map<String, OwnedBuilding> = emptyMap())
 
 internal object CitySceneReads {
     fun position(value: JsonElement): CityPosition {
@@ -52,7 +52,18 @@ internal object CitySceneReads {
             val b = item.jsonObject
             b.getValue("building_id").jsonPrimitive.content to b["position"]?.takeUnless { it == JsonNull }?.let(::position)
         }
-        return CityScenePage(membership, parcels.sortedBy { it.id }, positions)
+        val details = root.getValue("buildings").jsonArray.mapNotNull { item ->
+            val b = item.jsonObject
+            b["detail"]?.let { raw ->
+                val detail = InventoryReads.building(raw.jsonObject)
+                val id = b.getValue("building_id").jsonPrimitive.content
+                require(detail.id == id && detail.revision == membership.buildings.getValue(id)) {
+                    "Building changed; refresh required"
+                }
+                detail.id to detail
+            }
+        }.toMap()
+        return CityScenePage(membership, parcels.sortedBy { it.id }, positions, details)
     }
 }
 
@@ -60,13 +71,26 @@ internal object CitySceneReads {
  * No placement mutation, wallet, cache or second authority is introduced here. */
 class CitySceneRepository(private val backend: GameplayReads) {
     suspend fun load(session: BillingSession): CityScene {
-        suspend fun page(cursor: String? = null): CityScenePage {
+        var supportsDetails = true
+        suspend fun page(cursor: String? = null, details: Boolean = true): CityScenePage {
             cursor?.let(InventoryReads::id)
-            return CitySceneReads.page(backend.read(session, "city?limit=20" + (cursor?.let { "&cursor=$it" } ?: "")))
+            val path = "city?limit=20" + (cursor?.let { "&cursor=$it" } ?: "")
+            val body = if (details && supportsDetails) {
+                try { backend.read(session, "$path&include=details") }
+                catch (failure: GameplayHttpError) {
+                    // Older City handlers strictly reject unknown query parameters.
+                    // Never retry auth, network, rate-limit or malformed-body failures.
+                    if (failure.status != 400 || failure.code != "invalid_request") throw failure
+                    supportsDetails = false
+                    backend.read(session, path)
+                }
+            } else backend.read(session, path)
+            return CitySceneReads.page(body)
         }
         val first = page()
         val members = linkedMapOf<String, Long>()
         val positions = mutableMapOf<String, CityPosition?>()
+        val details = mutableMapOf<String, OwnedBuilding>()
         var current = first
         var cursor: String? = null
         do {
@@ -75,6 +99,7 @@ class CitySceneRepository(private val backend: GameplayReads) {
             require(current.membership.buildings.keys.none { it in members })
             require(cursor == null || current.membership.buildings.keys.all { it > cursor!! })
             members.putAll(current.membership.buildings); positions.putAll(current.positions)
+            details.putAll(current.details)
             cursor = current.membership.next
             if (cursor != null) current = page(cursor)
         } while (cursor != null)
@@ -85,7 +110,7 @@ class CitySceneRepository(private val backend: GameplayReads) {
         val buildings = coroutineScope {
             members.map { (id, revision) -> async {
                 gate.withPermit {
-                    val building = inventory.building(session, id)
+                    val building = details[id] ?: inventory.building(session, id)
                     require(building.revision == revision) { "Building changed; refresh required" }
                     CitySceneBuilding(building, positions[id])
                 }
@@ -106,8 +131,8 @@ class CitySceneRepository(private val backend: GameplayReads) {
             }
             cursor = parsed.next
         } while (cursor != null)
-        val last = page()
-        require(last == first) { "City changed; refresh required" }
+        val last = page(details = false)
+        require(last.copy(details = emptyMap()) == first.copy(details = emptyMap())) { "City changed; refresh required" }
         return CityScene(first.membership.copy(buildings = members.toMap(), next = null), first.parcels, buildings, decorations)
     }
 }
