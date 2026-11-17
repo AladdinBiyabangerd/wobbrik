@@ -1,5 +1,6 @@
 package com.aladdin.wobbrik
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -63,11 +64,11 @@ internal fun MobileOwnedBuildingDetail(building: OwnedBuilding, city: CityMember
                 }
             }
             if(largeFont) Column(Modifier.padding(GameTokens.Small), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-                BuildingPreview(building, Modifier.fillMaxWidth().height(GameTokens.Target * 2))
+                OwnedBuildingDetailArtwork(building, Modifier.fillMaxWidth().height(GameTokens.Target * 2))
                 labels()
             } else Row(Modifier.padding(GameTokens.Small), verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-                BuildingPreview(building, Modifier.weight(1f).height(mobileUiSizing().detailArt))
+                OwnedBuildingDetailArtwork(building, Modifier.weight(1f).height(mobileUiSizing().detailArt))
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(GameTokens.Small), content = labels)
             }
         }
@@ -171,4 +172,11 @@ private fun OwnedCitySeal(modifier: Modifier = Modifier) {
             color = GameTokens.Background, fontFamily = GameTypeface, fontSize = GameTokens.Caption,
             fontWeight = FontWeight.Bold)
     }
+}
+
+/** Native light behind the real geometry; confined to the owned-detail hero. */
+@Composable
+private fun OwnedBuildingDetailArtwork(building: OwnedBuilding, modifier: Modifier) {
+    BuildingPreview(building, modifier.background(Brush.radialGradient(
+        listOf(GameTokens.Raised, Color.Transparent))))
 }
