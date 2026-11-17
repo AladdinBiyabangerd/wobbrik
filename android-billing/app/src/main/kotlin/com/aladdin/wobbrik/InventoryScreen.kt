@@ -114,7 +114,14 @@ internal fun InventoryScreen(configured: WobbrikApplication.Bootstrap.Configured
     Box(Modifier.fillMaxSize().then(if(LocalMobileMenuShell.current) Modifier else Modifier.background(Brush.verticalGradient(listOf(GameTokens.Surface, GameTokens.Background))))
         .then(if(LocalMobileMenuShell.current) Modifier else Modifier.safeDrawingPadding()).padding(GameTokens.Gap)) {
         Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-            if(LocalMobileMenuShell.current && selected != null) CommerceTitle("Bina detalı", back)
+            if(LocalMobileMenuShell.current && selected != null) CommerceTitle("Bina detalı", back) {
+                Row(verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {
+                    MobileMenuIcon(MobileIcon.Inventory, Modifier.size(GameTokens.Inset), GameTokens.Muted)
+                    Text("İnventar · Binalar", color = GameTokens.Muted, fontFamily = GameTypeface,
+                        fontSize = GameTokens.Label, modifier = Modifier.weight(1f))
+                }
+            }
             if(!LocalMobileMenuShell.current) Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
                 Surface(onClick = back, shape = if (sizing.portrait) RoundedCornerShape(GameTokens.ControlRadius) else CircleShape, color = GameTokens.Raised,
                     border = if (sizing.portrait) null else BorderStroke(GameTokens.Hairline, GameTokens.Muted), modifier = Modifier.size(GameTokens.Target)) {

@@ -132,6 +132,8 @@ abstract class MobileCommerceProductionHost {
    capture("inventory-$name")
    compose.onAllNodesWithText("10 mərtəbə  ›")[0].performScrollTo().performClick()
    waitText("✓ Sənindir")
+   compose.onNodeWithText("İnventar · Binalar").assertIsDisplayed().assertHasNoClickAction()
+   compose.onNodeWithContentDescription("Geri").assertIsDisplayed().assertHeightIsAtLeast(GameTokens.Target)
    compose.onNodeWithText("Bina görünüşü").assertIsDisplayed().assertHeightIsAtLeast(GameTokens.Target)
    capture("detail-$name")
    compose.onNodeWithText("✓ Sənindir").performScrollTo().assertIsDisplayed().assertHasNoClickAction()
