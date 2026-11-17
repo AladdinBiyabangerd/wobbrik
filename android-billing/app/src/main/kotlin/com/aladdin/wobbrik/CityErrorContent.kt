@@ -1,14 +1,12 @@
 package com.aladdin.wobbrik
 
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -16,11 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.semantics.disabled
-import androidx.compose.ui.semantics.selected
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 
@@ -33,31 +27,12 @@ internal fun CityErrorContent(onRetry: () -> Unit, onHome: () -> Unit, onInvento
             verticalArrangement = Arrangement.spacedBy(GameTokens.Gap)) {
             CommerceTitle("Şəhərim", onHome)
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                CityErrorMode("Plan", MobileIcon.Layers, false, Modifier.weight(1f))
-                CityErrorMode("Görünüş", MobileIcon.City, true, Modifier.weight(1f))
+                CityMode("Plan", MobileIcon.Layers, false, Modifier.weight(1f))
+                CityMode("Görünüş", MobileIcon.City, true, Modifier.weight(1f))
             }
         }
         CityErrorCard(onRetry, Modifier.weight(1f, fill = false).heightIn(max = GameTokens.Target * 8))
         CityNavigation(onInventory)
-    }
-}
-
-@Composable
-private fun CityErrorMode(label: String, icon: MobileIcon, active: Boolean, modifier: Modifier) {
-    val shape = RoundedCornerShape(GameTokens.CardRadius)
-    Surface(modifier = modifier.semantics { if (active) selected = true else disabled() },
-        color = Color.Transparent, shape = shape) {
-        MenuRelief(shape = shape, kind = if (active) MenuSkin.Selected else MenuSkin.Panel) {
-            Row(Modifier.fillMaxWidth().heightIn(min = GameTokens.Target)
-                .then(if (active) Modifier.background(Brush.verticalGradient(listOf(GameTokens.MobileHome.PlayTop,
-                    GameTokens.Accent, GameTokens.MobileHome.PlayBottom))) else Modifier).padding(GameTokens.Small),
-                verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(GameTokens.Quarter, Alignment.CenterHorizontally)) {
-                if (LocalDensity.current.fontScale <= 1f)
-                    MobileMenuIcon(icon, Modifier.size(GameTokens.Inset), if (active) GameTokens.Background else GameTokens.Muted)
-                Text(label, Modifier.weight(1f, fill = false).horizontalScroll(rememberScrollState()), softWrap = false, color = if (active) GameTokens.Background else GameTokens.Muted,
-                    fontFamily = GameTypeface, fontSize = GameTokens.Body, fontWeight = FontWeight.Bold)
-            }
-        }
     }
 }
 

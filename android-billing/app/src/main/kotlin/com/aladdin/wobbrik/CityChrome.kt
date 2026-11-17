@@ -1,5 +1,8 @@
 package com.aladdin.wobbrik
 
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -27,6 +30,18 @@ import appbackend.wobbrik.game.OwnedBuilding
 
 @Composable
 internal fun CityHeader(population: String?, onHome: () -> Unit, cached: Boolean = false) {
+    if (LocalMobileMenuShell.current) {
+        Column(verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+            CommerceTitle("Şəhərim", onHome)
+            Row(Modifier.fillMaxWidth()) {
+                CityMode("Plan", MobileIcon.Layers, false, Modifier.weight(1f))
+                CityMode("Görünüş", MobileIcon.City, true, Modifier.weight(1f))
+            }
+            if (population != null) Text("Əhali: $population" + if (cached) " · Keş" else "",
+                color = GameTokens.Muted, fontFamily = GameTypeface, fontSize = GameTokens.Caption)
+        }
+        return
+    }
     val largeFont = LocalDensity.current.fontScale > 1f
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
@@ -86,6 +101,22 @@ internal fun CityHeader(population: String?, onHome: () -> Unit, cached: Boolean
 @Composable
 internal fun CityViewPanel(building: OwnedBuilding?, focused: Boolean, enabled: Boolean, onView: () -> Unit) {
     val largeFont = LocalDensity.current.fontScale > 1f
+    if (LocalMobileMenuShell.current) {
+        MenuRelief(Modifier.fillMaxWidth(), kind = MenuSkin.Commerce) {
+            Row(Modifier.fillMaxWidth().padding(GameTokens.Small), verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+                if (!largeFont) {
+                    if (building != null) BuildingPreview(building, Modifier.size(GameTokens.Target + GameTokens.Gap))
+                    else CityCameraArt()
+                }
+                Column(Modifier.weight(1f)) { CityViewSummary(building, focused) }
+                HomeButton(if (focused) "Geri" else "Bax", primary = true, compact = true,
+                    showPlayIcon = !focused, enabled = enabled,
+                    modifier = Modifier.widthIn(min = GameTokens.Target * 2), onClick = onView)
+            }
+        }
+        return
+    }
     CityFrame(Modifier.fillMaxWidth()) {
         if (largeFont) {
             Column(Modifier.padding(GameTokens.Small), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
@@ -178,5 +209,58 @@ private fun CityFrame(modifier: Modifier, content: @Composable () -> Unit) {
     Surface(modifier, shape = RoundedCornerShape(GameTokens.CardRadius), color = androidx.compose.ui.graphics.Color.Transparent,
         border = BorderStroke(GameTokens.Hairline, GameTokens.Raised)) {
         Box(Modifier.background(Brush.verticalGradient(listOf(GameTokens.Raised, GameTokens.Surface)))) { content() }
+    }
+}
+
+/** Native camera controls; fit returns to the complete scene, focus uses the selected real building. */
+@Composable
+internal fun CityCameraControls(focused: Boolean, enabled: Boolean, onFit: () -> Unit, onFocus: () -> Unit) {
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(GameTokens.Small, Alignment.End)) {
+        listOf(false, true).forEach { expand ->
+            Surface(onClick = if (expand) onFocus else onFit, enabled = enabled,
+                modifier = Modifier.size(GameTokens.Target).semantics {
+                    contentDescription = if (expand) { if (focused) "Şəhər görünüşünə qayıt" else "Binanı böyüt" } else "Kameranı sıfırla"
+                }, color = androidx.compose.ui.graphics.Color.Transparent, shape = RoundedCornerShape(GameTokens.ControlRadius)) {
+                MenuRelief(shape = RoundedCornerShape(GameTokens.ControlRadius)) {
+                    androidx.compose.foundation.Canvas(Modifier.align(Alignment.Center).size(GameTokens.Inset)) {
+                        val stroke = GameTokens.Hairline.toPx() * 2
+                        val ink = if (enabled) GameTokens.Text else GameTokens.Muted
+                        val w = size.width; val h = size.height
+                        if (expand) {
+                            val arm = w / 3
+                            listOf(0f to 0f, w to 0f, 0f to h, w to h).forEach { (x, y) ->
+                                drawLine(ink, androidx.compose.ui.geometry.Offset(x, y), androidx.compose.ui.geometry.Offset(if (x == 0f) arm else w - arm, y), stroke)
+                                drawLine(ink, androidx.compose.ui.geometry.Offset(x, y), androidx.compose.ui.geometry.Offset(x, if (y == 0f) arm else h - arm), stroke)
+                            }
+                        } else {
+                            drawRoundRect(ink, topLeft = androidx.compose.ui.geometry.Offset(0f, h / 4),
+                                size = androidx.compose.ui.geometry.Size(w, h * 3 / 4), cornerRadius = CornerRadius(stroke), style = Stroke(stroke))
+                            drawCircle(ink, w / 5, androidx.compose.ui.geometry.Offset(w / 2, h * 5 / 8), style = Stroke(stroke))
+                            drawLine(ink, androidx.compose.ui.geometry.Offset(w / 3, h / 4), androidx.compose.ui.geometry.Offset(w / 3, 0f), stroke)
+                            drawLine(ink, androidx.compose.ui.geometry.Offset(w / 3, 0f), androidx.compose.ui.geometry.Offset(w * 2 / 3, 0f), stroke)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+internal fun CityMode(label: String, icon: MobileIcon, active: Boolean, modifier: Modifier) {
+    val shape = RoundedCornerShape(GameTokens.CardRadius)
+    Surface(modifier = modifier.semantics { if (active) selected = true else disabled() },
+        color = Color.Transparent, shape = shape) {
+        MenuRelief(shape = shape, kind = if (active) MenuSkin.Selected else MenuSkin.Panel) {
+            Row(Modifier.fillMaxWidth().heightIn(min = GameTokens.Target)
+                .then(if (active) Modifier.background(Brush.verticalGradient(listOf(GameTokens.MobileHome.PlayTop,
+                    GameTokens.Accent, GameTokens.MobileHome.PlayBottom))) else Modifier).padding(GameTokens.Small),
+                verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(GameTokens.Quarter, Alignment.CenterHorizontally)) {
+                if (LocalDensity.current.fontScale <= 1f)
+                    MobileMenuIcon(icon, Modifier.size(GameTokens.Inset), if (active) GameTokens.Background else GameTokens.Muted)
+                Text(label, Modifier.weight(1f, fill = false).horizontalScroll(rememberScrollState()), softWrap = false, color = if (active) GameTokens.Background else GameTokens.Muted,
+                    fontFamily = GameTypeface, fontSize = GameTokens.Body, fontWeight = FontWeight.Bold)
+            }
+        }
     }
 }

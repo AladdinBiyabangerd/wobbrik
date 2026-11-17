@@ -85,6 +85,7 @@ internal fun CityContent(scene: CityScene?, failed: Boolean, onRetry: () -> Unit
         })
     }
     val chosen = buildings.firstOrNull { it.source.building.id == selected }
+        ?: if (LocalMobileMenuShell.current) buildings.lastOrNull() else null
     BoxWithConstraints(Modifier.fillMaxSize().background(Brush.radialGradient(listOf(GameTokens.Surface, GameTokens.Background)))
         .safeDrawingPadding().padding(GameTokens.Gap)) {
         // The reference groups the scene and its action panel into one board. In a
@@ -94,7 +95,8 @@ internal fun CityContent(scene: CityScene?, failed: Boolean, onRetry: () -> Unit
         // its primary view/back action stays outside the scroll area.
         val tallPortrait = maxHeight > maxWidth * 2 && LocalDensity.current.fontScale <= 1f
         val sceneHeight = if (tallPortrait) maxWidth else maxHeight
-        val scrollScene = LocalMobileMenuShell.current && LocalDensity.current.fontScale > 1f
+        val scrollScene = LocalMobileMenuShell.current &&
+            (LocalDensity.current.fontScale > 1f || maxHeight < GameTokens.CompactHeight)
         Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(GameTokens.Small, Alignment.CenterVertically)) {
             val body: @Composable ColumnScope.() -> Unit = {
                 CityHeader(scene?.membership?.population?.toString(), onHome, cached = cached)
@@ -192,6 +194,11 @@ internal fun CityContent(scene: CityScene?, failed: Boolean, onRetry: () -> Unit
                 if (selected == null) selected = buildings.lastOrNull()?.source?.building?.id
                 focused = !focused
             }
+            if (LocalMobileMenuShell.current && scene != null) CityCameraControls(focused, buildings.isNotEmpty(),
+                onFit = { focused = false; selected = null }, onFocus = {
+                    if (selected == null) selected = chosen?.source?.building?.id
+                    focused = !focused
+                })
             if (scrollScene) HomeButton(if (focused) "Geri" else "Bax", primary = true, compact = true,
                 showPlayIcon = !focused, enabled = buildings.isNotEmpty(), onClick = onView)
             else CityViewPanel(chosen?.source?.building, focused, buildings.isNotEmpty(), onView)
