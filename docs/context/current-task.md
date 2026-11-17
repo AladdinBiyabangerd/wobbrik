@@ -31,6 +31,11 @@ Tam app/PNG pariteti və mərhələ qəbulu açıqdır. İnventar Bina məlumat�
 
 Yeni feature-a keçmədən istifadəçinin növbəti dar vizual tapşırığını götür. Son müəyyən edilmiş namizəd: PLAN§1.1/02-market üst orta əsasında yalnız Bina məlumatı panelinin təsdiqli sətirlərini mövcud real field-lərlə tutuşdur; serverdə olmayan səviyyəni uydurma. Hazır üst xülasə/Yeni elan/Mənim elanlarım kompozisiyasını təkrarlama. Profilə toxunma, Ərazini qaytarma. Merge/push/CI-ni ayrıca tapşırıq olmadan etmə.
 
-## Remote integration — 17 November 2026
+## Remote integration — 17 November 2026 (completed)
 
 User authorized reviewed native UI branch push and history-preserving remote main merge, followed by local main update. Review: docs/reviews/2026-11-17-native-ui-remote-merge.md. Production source unchanged since 2f1a623; focused premerge checks PASS. Two dirty generated .dm files remain outside commits. AppBackend Wobbrik branches are already merged; remove only merged obsolete refs/worktrees while preserving unrelated dirty recipe work. Exact next step after integration: await the next scoped user task; outstanding visual parity limitations above remain.
+
+- Completed: native UI branch pushed and merged preserving history as Wobbrik main `0315674`; local main fast-forwarded and matched remote. GitHub connector PR creation returned 403, so normal Git merge/push was used. No force push. Focused premerge checks PASS; no CI/deploy/emulator. Two local generated .dm changes excluded and retained.
+- AppBackend: 16 explicitly verified merged obsolete Wobbrik local refs and remote attempt-abandon ref removed; no old worktrees remained. New persistent feat/wobbrik and feat/dailyplate branches exist locally/remotely. User-requested policy committed in AGENTS.md and .cursor/rules/app-branches.mdc; merged/pushed main cb684a7. No backend runtime/schema/API change. Temporary task worktrees removed after use.
+- Decisions: AppBackend app work uses only its persistent branch; main integration, push/deploy permissions and safe dirty-work handling remain enforced. Prior visual parity/runtime limitations remain unresolved.
+- Exact next step: await a new scoped user task; read this handoff and docs/PLAN.md §1.1. Do not start another feature, deploy or CI automatically.
