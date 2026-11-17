@@ -63,21 +63,65 @@ internal fun MobileOwnedBuildingDetail(building: OwnedBuilding, city: CityMember
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(GameTokens.Small), content = labels)
             }
         }
+        val informationShape = RoundedCornerShape(GameTokens.ControlRadius)
+        MenuRelief(Modifier.fillMaxWidth().border(GameTokens.Hairline,
+            Brush.verticalGradient(listOf(GameTokens.MobileHome.RimLight, GameTokens.MobileHome.Rim)), informationShape),
+            shape = informationShape, kind = MenuSkin.Commerce) {
+            Column(Modifier.padding(GameTokens.Small), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+                Row(verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+                    Surface(color = GameTokens.Text, shape = RoundedCornerShape(GameTokens.Target)) {
+                        Box(Modifier.size(GameTokens.Inset * LocalDensity.current.fontScale), contentAlignment = Alignment.Center) {
+                            Text("i", color = GameTokens.Background, fontFamily = GameTypeface, fontWeight = FontWeight.Bold)
+                        }
+                    }
+                    Text("Bina məlumatı", color = GameTokens.Text, fontFamily = GameTypeface,
+                        fontSize = GameTokens.Body, fontWeight = FontWeight.Bold)
+                }
+                MenuRelief(Modifier.fillMaxWidth(), shape = RoundedCornerShape(GameTokens.Small), kind = MenuSkin.Track) {
+                    Column(Modifier.padding(GameTokens.Small), verticalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {
+                        // The contract has no building level. Reference sample numbers do not create one.
+                        BuildingInformationRow(MobileIcon.Layers, "Hündürlük", "${building.floors} mərtəbə")
+                        BuildingInformationRow(MobileIcon.City, "Bina növü", buildingName(building, catalog))
+                        BuildingInformationRow(MobileIcon.Account, "Sakinlər", building.residents.toString())
+                    }
+                }
+            }
+        }
+        Text(when {
+            city == null -> "Şəhərə aidlik yüklənməyib"
+            city.buildings[building.id] == building.revision -> "✓ Şəhərdə yerləşdirilib"
+            building.id in city.buildings -> "Şəhər məlumatı dəyişib. Yenilə."
+            else -> "İnventardadır"
+        }, color = GameTokens.Accent, fontFamily = GameTypeface)
         MenuRelief(Modifier.fillMaxWidth()) {
             Column(Modifier.padding(GameTokens.Small), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-                Text("Bina məlumatı", color = GameTokens.Text, fontFamily = GameTypeface, fontWeight = FontWeight.Bold)
-                Text("${building.floors} mərtəbə · ${building.residents} sakin", color = GameTokens.Muted)
-                Text(when {
-                    city == null -> "Şəhərə aidlik yüklənməyib"
-                    city.buildings[building.id] == building.revision -> "✓ Şəhərdə yerləşdirilib"
-                    building.id in city.buildings -> "Şəhər məlumatı dəyişib. Yenilə."
-                    else -> "İnventardadır"
-                }, color = GameTokens.Accent)
-                Text("Maksimum satış", color = GameTokens.Muted)
+                Text("Maksimum satış", color = GameTokens.Muted, fontFamily = GameTypeface)
                 CommercePrice(building.maxPrice)
-                if(building.traded) Text("Alınmış bina yenidən satılmır", color = GameTokens.Muted)
+                if(building.traded) Text("Alınmış bina yenidən satılmır", color = GameTokens.Muted, fontFamily = GameTypeface)
                 CommerceAction("Binanı sil", enabled = canDelete, onClick = onDelete)
             }
+        }
+    }
+}
+
+/** A natural-height row; large type stacks the value rather than squeezing either column. */
+@Composable
+private fun BuildingInformationRow(icon: MobileIcon, label: String, value: String) {
+    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+        MobileMenuIcon(icon, Modifier.size(GameTokens.Inset), GameTokens.Muted)
+        if (LocalDensity.current.fontScale > 1f) {
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {
+                Text(label, color = GameTokens.Muted, fontFamily = GameTypeface, fontSize = GameTokens.Label)
+                Text(value, Modifier.horizontalScroll(rememberScrollState()), color = GameTokens.Text,
+                    fontFamily = GameTypeface, fontSize = GameTokens.Body, softWrap = false)
+            }
+        } else {
+            Text(label, Modifier.weight(1f), color = GameTokens.Text, fontFamily = GameTypeface, fontSize = GameTokens.Label)
+            Text(value, Modifier.weight(1f).horizontalScroll(rememberScrollState()), color = GameTokens.Text,
+                fontFamily = GameTypeface, fontSize = GameTokens.Label, softWrap = false,
+                textAlign = androidx.compose.ui.text.style.TextAlign.End)
         }
     }
 }
