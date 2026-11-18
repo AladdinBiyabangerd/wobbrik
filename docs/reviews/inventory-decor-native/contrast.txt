@@ -1,0 +1,8 @@
+
+android-billing/app/src/main/kotlin/com/aladdin/wobbrik/GameTokens.kt  —  tokens
+    Metadata           on PanelTop             7.41  needs 4.5  OK
+    Metadata           on PanelBottom          8.24  needs 4.5  OK
+    Unlocked           on PanelTop             9.10  needs 4.5  OK
+    Background         on Accent              10.85  needs 4.5  OK
+    Text               on PanelTop            12.51  needs 4.5  OK
+    Text               on PanelBottom         13.91  needs 4.5  OK

@@ -16,15 +16,29 @@ import kotlin.math.roundToInt
 internal fun rememberDecorationArt(): Map<String, CosmeticSprite> {
     val context = LocalContext.current
     return remember(context) {
+        loadDecorationArt(context)
+    }
+}
+
+/** Inventory decodes off the UI dispatcher, never per card. */
+@Composable
+internal fun rememberOwnedDecorationArt(): Map<String, CosmeticSprite> {
+    val context = LocalContext.current
+    val result = androidx.compose.runtime.produceState(emptyMap<String, CosmeticSprite>(), context) {
+        value = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) { loadDecorationArt(context) }
+    }
+    return result.value
+}
+
+private fun loadDecorationArt(context: android.content.Context): Map<String, CosmeticSprite> {
         val metadata = JSONObject(context.assets.open("city/purchase-art.json").bufferedReader().use { it.readText() })
         val image = context.assets.open("city/${metadata.getString("source")}").use { BitmapFactory.decodeStream(it) }.asImageBitmap()
         val sprites = metadata.getJSONArray("sprites")
-        (0 until sprites.length()).associate { i ->
+        return (0 until sprites.length()).associate { i ->
             val entry = sprites.getJSONObject(i)
             entry.getString("id") to CosmeticSprite(image, IntOffset(entry.getInt("x"), entry.getInt("y")),
                 IntSize(entry.getInt("width"), entry.getInt("height")))
         }
-    }
 }
 
 @Composable
