@@ -32,6 +32,17 @@ object InventoryReads {
             value.getValue("traded").jsonPrimitive.also { require(!it.isString) }.boolean, geometry)
     }
     fun building(body: String) = building(Json.parseToJsonElement(body).jsonObject)
+    /** Opaque engine recovery is unused by inventory; do not let it evict the read cache.
+     * Old servers ignore view=display, so normalize their full response locally too.
+     * IDs, revision, geometry, parts and pagination remain verbatim server data. */
+    internal fun displayBody(body: String): String {
+        val root = Json.parseToJsonElement(body).jsonObject
+        val buildings = root.getValue("buildings").jsonArray
+        if (buildings.none { it.jsonObject["snapshot"]?.let { value -> value != JsonNull } == true }) return body
+        return JsonObject(root + ("buildings" to JsonArray(buildings.map {
+            JsonObject(it.jsonObject - "snapshot")
+        }))).toString()
+    }
     fun inventory(body: String): InventoryPage {
         val r = Json.parseToJsonElement(body).jsonObject
         val buildings = r.getValue("buildings").jsonArray.map { building(it.jsonObject) }
@@ -55,7 +66,7 @@ object InventoryReads {
 /** One refresh owns its pages. Different city revisions are rejected, never unioned. */
 class InventoryRepository(private val backend: GameplayReads) {
     suspend fun page(session: BillingSession, cursor: String? = null) =
-        InventoryReads.inventory(backend.read(session, "inventory" + query(cursor)))
+        InventoryReads.inventory(backend.read(session, "inventory" + query(cursor) + "&view=display"))
     suspend fun building(session: BillingSession, id: String): OwnedBuilding {
         InventoryReads.id(id)
         return InventoryReads.building(backend.read(session, "buildings/$id")).also { require(it.id == id) }

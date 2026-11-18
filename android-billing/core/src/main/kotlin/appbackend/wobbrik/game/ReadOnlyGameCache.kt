@@ -46,7 +46,9 @@ class ReadOnlyGameCache(private val files: (String) -> JournalFile) {
         val bodies = linkedMapOf<String, String>()
         val reader = GameplayReads { expected, path ->
             require(expected == session && allowedReadPath(path))
-            backend.read(expected, path).also { body ->
+            backend.read(expected, path).let { body ->
+                if (path.startsWith("inventory?")) InventoryReads.displayBody(body) else body
+            }.also { body ->
                 // Scene detail reads may complete on different IO workers.
                 synchronized(bodies) {
                     val previous = bodies.put(path, body)
@@ -87,6 +89,8 @@ class ReadOnlyGameCache(private val files: (String) -> JournalFile) {
             // detail bodies. Never alias filters, scope, cursor or account revisions.
             val body = bodies[path] ?: if (path.endsWith("&include=previews") && MarketReads.allowedPath(path))
                 bodies[path.removeSuffix("&include=previews")]
+            else if (path.endsWith("&view=display") && allowedReadPath(path))
+                bodies[path.removeSuffix("&view=display")]
             else if (path.endsWith("&include=details") && allowedReadPath(path))
                 bodies[path.removeSuffix("&include=details")] else null
             requireNotNull(body) { "View path not cached" }.jsonPrimitive.content

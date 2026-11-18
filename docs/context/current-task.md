@@ -1,43 +1,44 @@
-# Cari tapşırıq — İnventar review və commit / 18 noyabr 2026
+# Cari tapşırıq — İnventar payload/cache gecikməsi / 18 noyabr 2026
 
 ## Completed
 
-- Profil optimizasiyası ayrıca `db6e70d` commit-indədir: session/epoch-scoped cached identity, fresh edit gate və paralel/paylaşılan mobile portrait IO. Əvvəlki host təkrar profil mətn ölçüsü451–475→24–38ms; cold sürətlənmə sübut olunmayıb.
-- Qalan İnventar/cache/chrome diff-i lokal review edildi; əlavə correctness problemi/düzəliş ehtiyacı tapılmadı. Unrelated disk-write kilidindən azad replay,1/2sütun lazy rows və shell-owned async logo birlikdə ayrıca İnventar commit-i ilə saxlanır.
-- Əvvəlki ölçmələr ayrıca review-larda qorunur: controlled disk gözləməsi621→1ms; real-Home host ilk inventory191→160ms. Device/percentile deyil, bütün app performansının bitməsi deyil.
+- İnventar böyük opaque checkpoint-ləri istifadə etmədən download/cache edirdi. Qəbul edilən böyük səhifə140000byte cache limitini keçir, optional persistence alınmır, təkrar giriş yenidən şəbəkəyə gedirdi. Baseline regression gözlənildiyi kimi FAIL; son source PASS.
+- AppBackend additive `view=display` SQL-də checkpoint-i götürmür; metadata/accepted geometry/cursor dəyişmir. Köhnə inventory/detail qalır. Typed fixture335225→10905byte,1HTTP/11SQL sabit; race host48–52→11–12ms. Production/device ölçüsü deyil.
+- Kotlin yeni view istəyir; köhnə serverin full cavabından yalnız inventory cache üçün snapshot çıxarılır. Köhnə query cache replay-i exact cursor/account/revision ilə saxlanır. Legacy ilk download sürətlənmir; təkrar replay0HTTP olur. UID/epoch/revision/fresh mutation gate və final sync saxlanır.
+- Əvvəlki Profil `db6e70d` və İnventar `8cd7bae` işləri tarixdə saxlanır; əvvəlki disk-lock/chrome/row düzəlişləri bu işdə dəyişmir.
 
 ## Current state
 
-`fix/inventory-review`, parent `db6e70d`. Profil və İnventar ayrı commit-lərdədir. İki release baseline-profile binarisi ayrıca dirty saxlanır, bu işdə dəyişdirilməyib və commit-ə daxil deyil. CI/main merge/push/deploy yoxdur. AppBackend dəyişməyib.
+Android `fix/inventory-payload-latency`, baza8cd7bae; AppBackend persistent `feat/wobbrik`, baza838c0c7. Paired scoped diff-lər lokal review və yoxlamalardan keçib, ayrıca repository commit-ləri ilə saxlanır. Main merge/push/deploy/CI yoxdur. İki release baseline-profile owner binarisi dirty saxlanır, dəyişdirilmir və commit-ə daxil deyil.
 
 ## Decisions
 
-- Yeganə plan docs/PLAN.md§1.1/§2–3; yeni stack/dizayn/prewarm yoxdur.
-- Cache UID/view üzrə file lock saxlayır; eyni fayl read/write serialdır. Cached məlumat Ready/mutation capability-si deyil; fresh/revision/epoch/sole journal sərhədləri dəyişmir.
-- Profil memory-si login epoch-a bağlı yalnız server identity display-idir. Hər giriş fon GET edir; load/error halında redaktə fresh cavabadək disabled-dır.
-- CI yalnız ayrıca tələb ilə main-də lokal; emulator avtomatik açılmır. Merge ayrıca istifadəçi təsdiqinə bağlıdır.
+- Yeganə plan docs/PLAN.md§1.1/§2–3. Yeni infrastruktur/dizayn/prewarm/cache limiti yoxdur.
+- Cached baxış Ready/mutasiya hüququ yaratmır; server authority, sole journal, hesab izolyasiyası saxlanır.
+- Backend deploy ayrıca tapşırıqdır; deploy olmadan yeni wire payload qənaəti production-da yoxdur. Köhnə serverdə mobil cache normalizasiyası işləyir.
+- CI yalnız ayrıca istifadəçi tələbi ilə main-də; emulator avtomatik açılmır; merge ayrıca təsdiqə bağlıdır.
 
 ## Remaining work
 
-- İki release baseline-profile binarisinin ayrıca owner dəyişiklikləri qalır.
-- Digər menyuların konkret call path-ləri, production2+s/İnventar10+s ölçüləri, ART/frame/GPU/HTTP/payload/yaddaş/battery və authenticated Android→GoE2E açıqdır.
-- Profil ilk GET/~35ms composition və route remount portrait IO xərci qalır. İnventarda host class-load/ilk preparation və warm sürətlənmə məhdudiyyətləri əvvəlki review-da göstərilir.
-- Font2kiçik illustration/horizontal tabs, iki sətir dock, tam PNG parity və real inset/IME/locale/TalkBack borcları saxlanır.
+- İstifadəçinin cihazındakı10+s-in dəqiq tam səbəbi hələ təsdiqlənməyib: bağlı cihaz yoxdur, emulator açılmayıb. Production HTTP/RTT/SQL contention və real payload paylanması, ART/frame/GPU/yaddaş/battery, authenticated Android→Go E2E yoxlanmayıb. Lokal fixture səbəb və düzəlişi sübut edir,10+s-in tam həlli deyil.
+- Çox böyük accepted geometry mövcud transport/cache limitini hələ keçə bilər; final sync/persistence fresh təqdimat yolunda qalır.
+- Əvvəlki Profil ilk GET/composition/portrait IO; digər menyu call path-ləri və2+s ölçüləri açıqdır.
+- Əvvəlki font2kiçik illustration/horizontal tabs, iki sətir dock, tam PNG parity və inset/IME/locale/TalkBack borcları qalır. İki baseline-profile owner dəyişməsi ayrıca qalır.
 
 ## Relevant files
 
-- docs/reviews/2026-11-18-inventory-final-review.md — cari scope, tapıntılar və yenilənmiş checks.
-- docs/reviews/2026-11-18-inventory-{first-open,composition-profile}.md; inventory-{first-open,composition-profile}/{render,evidence,rendered}/.
-- android-billing/app/src/main/kotlin/com/aladdin/wobbrik/{InventoryScreen,MobileHomeScreen,MobileMenuShell}.kt; core/src/{main,test}/kotlin/appbackend/wobbrik/game/ReadOnlyGameCache{,Test}.kt.
-- docs/reviews/2026-11-18-profile-open-latency.md; Profil production/QA faylları həmin review-dadır.
+- docs/reviews/2026-11-18-inventory-payload-latency.md; inventory-payload/evidence/.
+- android-billing/core/src/main/kotlin/appbackend/wobbrik/game/{InventoryReads,ReadOnlyGameCache,GameplayHttpBackend}.kt.
+- core InventoryPayloadTest/InventoryReadsTest; core/src/test/resources/inventory-display-backend.json.
+- AppBackend internal/wobbrik/market.go; internal/platform/wobbrik_{http,inventory_payload_test}.go; docs/wobbrik-game-api.md və paired review.
+- Əvvəlki review-lar: 2026-11-18-inventory-{first-open,composition-profile,final-review}.md; 2026-11-18-profile-open-latency.md.
 
 ## Checks performed
 
-- Yenilənmiş cache6/6PASS1s və native inventory7+rows4=11/11PASS13s. Yeni production dəyişməsi yoxdur; eyni source-da bu chatdəki core154/app37unit+assembleDebug+lintDebugPASS51s nəticəsi reuse edilir. CI deyil.
-- DiffcheckPASS; native XML və sourceSHA inventory-composition-profile/evidence/review-final/ altındadır.
--4yenilənmiş native PNG açılıb01-main.pngilə müqayisə edilib:320font1loading/320font2ready/360font1ready/390font2ready+syntheticinset. Kontrast13.00/8.22/8.99PASS. Tam PNG/device parity deyil.
-- Backend müqaviləsi yoxlanıb; API/domain/schema dəyişikliyi tələb olunmur. Backend test/E2E/emulator yoxdur.
+- Android core158/app37unit, assembleDebug/lintDebug PASS58s; final source XML və SHA evidence-dədir. CI deyil.
+- Backend full real disposable PostgreSQL18 race suite PASS(platform30.889s), vet/build PASS; son test-only output dəyişikliyindən sonra focused regression PASS2.453s. Disposable DB yoxlamalardan sonra dayandırılıb.
+- Lokal diff review/diffcheck PASS. UI/art/layout dəyişməyib; yeni visual render və cihaz nəticəsi iddia edilmir. `adb devices -l` boşdur.
 
 ## Exact next step
 
-Cari lokal review və commit tapşırığı tamamlanıb. Sonrakı böyük işi yeni chatdə bu handoff və docs/PLAN.md§1.1 ilə başlat. İstifadəçi konkret növbəti menyu/call path seçəndə yalnız həmin axını ölç; repo-nu yenidən bütöv scan etmə. İki baseline-profile owner binary-sinə toxunma. CI/merge/push/deploy avtomatik yoxdur.
+Bu payload/cache vahidini istifadəçiyə review üçün təqdim et. Main merge/deploy/CI avtomatik yoxdur. Sonrakı ölçmədə yalnız İnventarın real hesab/cihaz axınını hədəflə: request mərhələləri və byte ölçüsü, final sync, cache hit/miss və first-frame vaxtını ayır; mövcud sübutu10+s-in tam həlli kimi təqdim etmə. Yeni böyük işi yeni chatdə bu handoff və docs/PLAN.md§1.1 ilə davam et. Owner baseline-profile binarilərinə toxunma.

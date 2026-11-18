@@ -26,6 +26,10 @@ class InventoryReadsTest {
     @Test fun onlyBoundedReadPathsAreAllowed() {
         assertTrue(allowedReadPath("inventory?limit=20&cursor=b-1"))
         assertTrue(allowedReadPath("buildings/b-1"))
+        assertTrue(allowedReadPath("inventory?limit=20&view=display"))
+        assertTrue(allowedReadPath("inventory?limit=20&cursor=b-1&view=display"))
+        listOf("inventory?limit=20&view=full", "inventory?limit=20&view=display&uid=other",
+            "inventory?limit=100&view=display", "city?limit=20&view=display").forEach { assertFalse(it, allowedReadPath(it)) }
         listOf("buildings/../sync", "inventory?limit=100000", "inventory?limit=20&uid=other", "city/placement").forEach {
             assertFalse(it, allowedReadPath(it))
         }
