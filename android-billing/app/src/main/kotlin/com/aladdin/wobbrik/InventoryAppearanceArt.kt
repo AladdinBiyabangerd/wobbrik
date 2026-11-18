@@ -24,24 +24,25 @@ internal fun DrawScope.appearancePartPreview(purple: Map<String, CosmeticSprite>
     val height = GameTokens.AppearanceCollection.SampleHeight
     val scale = minOf(size.width / width, size.height / height)
     withTransform({ translate((size.width-width*scale)/2, (size.height-height*scale)/2); scale(scale, scale, Offset.Zero) }) {
-        sprite(purple["garden"], 0f, 263f, width, 77f)
+        sprite(purple["garden"], 0f, 248f, width, 92f)
         val sample = wall.copy(origin=IntOffset(wall.origin.x+(wall.size.width*.14f).toInt(),
             wall.origin.y+(wall.size.height*.29f).toInt()),
             size=IntSize((wall.size.width*.64f).toInt(),(wall.size.height*.48f).toInt()))
         repeat(2) { floor ->
             val y = 20f+floor*139f
             purplePlane(sample, listOf(Offset(45f,y),Offset(229f,y-11f),Offset(229f,y+128f),Offset(45f,y+139f)))
-            // Only the stone rim is sampled; the selected material owns the entire face.
+            // Sample the complete jointed corner, not a tiny flat patch stretched into a ribbon.
+            // Coordinates are local atlas pixels; the selected material still owns the face.
             for (x in listOf(45f,217f)) purpleSurface(shell,
-                listOf(80f,72f,90f,74f,90f,80f,80f,78f),
+                listOf(203f,108f,232f,112f,213f,232f,187f,227f),
                 listOf(Offset(x,y),Offset(x+12f,y-1f),Offset(x+12f,y+138f),Offset(x,y+139f)))
             // Trim is sampled from the shell's existing stone cornice, rather than a new skin.
-            purpleSurface(shell, listOf(16f,63f,241f,90f,241f,100f,16f,73f),
+            purpleSurface(shell, listOf(8f,47f,245f,75f,241f,104f,16f,76f),
                 listOf(Offset(38f,y-9f),Offset(236f,y-21f),Offset(236f,y-7f),Offset(38f,y+5f)))
             val window = if (parts["window"] == "base_1_window") purple["arch"] else art[parts["window"]]
             sprite(window, 99f, y+22f, 77f, 94f)
         }
-        purpleSurface(shell, listOf(16f,63f,241f,90f,241f,100f,16f,73f),
+        purpleSurface(shell, listOf(8f,47f,245f,75f,241f,104f,16f,76f),
             listOf(Offset(38f,291f),Offset(236f,279f),Offset(236f,293f),Offset(38f,305f)))
         sprite(purple["balcony"], 73f, 108f, 104f, 79f)
     }

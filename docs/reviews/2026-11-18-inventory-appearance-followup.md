@@ -1,0 +1,9 @@
+# Görünüş — vizual düzəliş
+
+Branch `feat/inventory-appearance-redesign`; review scope `InventoryAppearanceScreen.kt` və `InventoryAppearanceArt.kt` diff-i. Əvvəlki işin sübutu `2026-11-18-inventory-appearance-native.md`-də qalır.
+
+Təsdiqli `docs/design/inventory-appearance-v1/proposal.png` ilə native render müqayisə edildi. Kartın içindəki ayrıca şəhər fonu çıxarıldı: artıq illüstrasiya və mətn eyni native gradient səthdədir. Fasadın kənarları kiçik hamar rəng parçası əvəzinə mövcud atlasın daş birləşmələrindən götürülür; karnizin üst/bevel hissəsi daxil edildi, bağın görünən sahəsi artırıldı. Filtr mətninə mövcud SemiBold çəkisi tətbiq edildi. Yeni UI rəngi/ölçü tokeni və raster əlavə edilmədi. Atlas koordinatları UI ölçüsü deyil. Mətn, faktiki kataloq sırası, qiymət, default seçim, server/journal və read axını dəyişmir.
+
+Fokuslu native testlər 5/5, assembleDebug və lintDebug PASS. 390×844/320×568 fontScale1/2 və 360×640 font2 inset/uzun balans renderləri açılıb baxıldı; uzun status scroll və default preference failure/retry də mövcud testlərlə yoxlandı. Altı kontrast cütü PASS, minimum7.26:1. Sübut: `inventory-appearance-native/followup/`. CI işlədilmədi, emulator açılmadı. Əlavə şəbəkə/bitmap decode yolu yoxdur; ölçülmüş performans yaxşılaşması iddia edilmir. AppBackend API/DTO/domain/schema dəyişiklik tələb etmir: yalnız mövcud display art/səth və mətn çəkisi dəyişir.
+
+Tam vizual uyğunluq PASS deyil: atlasdan yığılan fasad hələ generativ authority illüstrasiyasının daş/bitki həndəsəsi ilə eyni deyil. Bəzi host readback-lərində Play görünmür, digərlərində görünür; bunun runtime səbəbi təsdiqlənməyib. Bu dəyişiklik shared navbarı dəyişmir. Böyük şrift kateqoriyalarında üfüqi scroll, kartlarda şaquli scroll saxlanır. Cihaz/ART/GPU/real hesab yoxlanmayıb. Owner release `.dm` və city-detail-costs review dəyişikliklərinə toxunulmadı. Merge/push/deploy yoxdur.

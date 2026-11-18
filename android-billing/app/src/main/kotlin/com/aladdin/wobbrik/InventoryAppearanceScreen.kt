@@ -15,7 +15,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.*
@@ -205,7 +204,7 @@ private fun AppearanceFilter(label: String, active: Boolean, onClick: () -> Unit
                 .border(GameTokens.InventoryCollection.OutlineWidth, if(active) GameTokens.Accent else GameTokens.InventoryCollection.Outline, shape)
                 .padding(horizontal = GameTokens.Small, vertical = GameTokens.Quarter),
                 color = if (active) GameTokens.Background else GameTokens.InventoryCollection.Metadata,
-                fontSize = GameTokens.Caption, softWrap = false)
+                fontSize = GameTokens.Caption, fontWeight = FontWeight.SemiBold, softWrap = false)
         }
     }
 }
@@ -221,7 +220,6 @@ private fun AppearanceCard(item: CatalogItem, available: Boolean, snapshot: Game
             GameTokens.InventoryCollection.PanelBottom))).border(GameTokens.InventoryCollection.OutlineWidth,
             GameTokens.InventoryCollection.Outline, shape)) {
             Box(Modifier.fillMaxWidth().height(artHeight)) {
-                LocalCollectionBackdrop.current?.let { Image(it, null, Modifier.matchParentSize(), contentScale = ContentScale.FillBounds) }
                 preview(Modifier.fillMaxSize().padding(horizontal = GameTokens.Small, vertical = GameTokens.Quarter))
             }
             Column(Modifier.fillMaxWidth().padding(start = GameTokens.InventoryCollection.CardInset,
