@@ -37,9 +37,8 @@ internal fun InventoryDecorContent(catalog: RecoveryCatalog?, copies: List<Decor
     val large = LocalDensity.current.fontScale > 1f
     LaunchedEffect(category) { state.scrollToItem(0) }
     BoxWithConstraints(Modifier.fillMaxSize().padding(horizontal = GameTokens.InventoryCollection.ScreenInset)) {
-        val compact = maxHeight < GameTokens.MobileUi.CompactHeight - GameTokens.Target * 3
-        val height = if (large) GameTokens.InventoryCollection.LargeTypeArtHeight else if (compact)
-            GameTokens.AppearanceCollection.CompactArtHeight else GameTokens.AppearanceCollection.ArtHeight
+        val height = if (large) GameTokens.InventoryCollection.LargeTypeArtHeight else
+            ((maxWidth - GameTokens.Small) / 2) * GameTokens.DecorCollection.ArtHeightFraction
         Column(Modifier.fillMaxSize().padding(bottom = LocalCollectionDockClearance.current)) {
             LazyVerticalGrid(GridCells.Fixed(if (large) 1 else 2), state = state,
                 modifier = Modifier.weight(1f).semantics { contentDescription = "Dekor nüsxələri" },
@@ -63,16 +62,16 @@ internal fun InventoryDecorContent(catalog: RecoveryCatalog?, copies: List<Decor
                         .background(Brush.verticalGradient(listOf(GameTokens.InventoryCollection.PanelTop, GameTokens.InventoryCollection.PanelBottom)))
                         .border(GameTokens.InventoryCollection.OutlineWidth, GameTokens.InventoryCollection.Outline, shape)
                         .semantics(mergeDescendants = true) {}) {
-                        PurchaseArt(art[copy.itemId], Modifier.fillMaxWidth().height(height).padding(GameTokens.Small))
+                        PurchaseArt(art[copy.itemId], Modifier.fillMaxWidth().height(height).padding(GameTokens.Quarter), allowUpscale = true)
                         Column(Modifier.padding(start = GameTokens.InventoryCollection.CardInset, end = GameTokens.Small,
                             bottom = GameTokens.InventoryCollection.CardInset), verticalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {
-                            Text(names[copy.itemId] ?: copy.itemId, color = GameTokens.Text, fontSize = GameTokens.Body, fontWeight = FontWeight.Bold)
+                            Text(names[copy.itemId] ?: copy.itemId, color = GameTokens.Text, fontSize = GameTokens.Body, lineHeight = GameTokens.Body, fontWeight = FontWeight.Bold)
                             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {
-                                if (copy.position != null) Text("✓", color = GameTokens.AppearanceCollection.Unlocked, fontSize = GameTokens.Body, fontWeight = FontWeight.Bold)
+                                if (copy.position != null) Text("✓", color = GameTokens.AppearanceCollection.Unlocked, fontSize = GameTokens.Body, lineHeight = GameTokens.Body, fontWeight = FontWeight.Bold)
                                 else MobileMenuIcon(MobileIcon.Inventory, Modifier.size(GameTokens.Gap), GameTokens.InventoryCollection.Metadata)
                                 Text(if (copy.position != null) "Şəhərdə" else "Saxlanılır",
                                     color = if (copy.position != null) GameTokens.AppearanceCollection.Unlocked else GameTokens.InventoryCollection.Metadata,
-                                    fontSize = GameTokens.Label, fontWeight = FontWeight.SemiBold)
+                                    fontSize = GameTokens.Label, lineHeight = GameTokens.Body, fontWeight = FontWeight.SemiBold)
                             }
                         }
                     }
@@ -116,12 +115,12 @@ private fun DecorFilters(category: String, onCategory: (String) -> Unit) {
                         else listOf(GameTokens.InventoryCollection.PanelTop, GameTokens.InventoryCollection.PanelBottom)))
                     .border(GameTokens.InventoryCollection.OutlineWidth, if (active) GameTokens.Accent else GameTokens.InventoryCollection.Outline, shape)
                     .padding(GameTokens.Quarter), horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(GameTokens.Quarter, Alignment.CenterVertically)) {
+                    verticalArrangement = Arrangement.Center) {
                     val tint = if (active) GameTokens.Background else GameTokens.Text
                     if (key == "all") DecorAllIcon(tint)
                     else Icon(painterResource(when(key) {
                         "tree" -> R.drawable.inventory_decor_tree; "bench" -> R.drawable.inventory_decor_bench
-                        "streetlight" -> R.drawable.city_decor_light; else -> R.drawable.inventory_decor_road
+                        "streetlight" -> R.drawable.inventory_decor_light; else -> R.drawable.inventory_decor_road
                     }), null, Modifier.size(GameTokens.AppearanceCollection.CategoryIcon), tint = tint)
                     Text(label, color = tint, fontSize = GameTokens.Caption, fontWeight = FontWeight.Bold, softWrap = false)
                 }
@@ -145,14 +144,17 @@ private fun DecorAllIcon(tint: Color) {
 private fun DecorMarketAction(onClick: () -> Unit) {
     val interaction = remember { MutableInteractionSource() }
     val shape = RoundedCornerShape(GameTokens.CardRadius)
-    Surface(onClick = onClick, interactionSource = interaction, color = Color.Transparent,
-        modifier = Modifier.fillMaxWidth().collectionPress(interaction)) {
-        Box(Modifier.heightIn(min = GameTokens.Target).clip(shape)
-            .background(Brush.verticalGradient(listOf(GameTokens.InventoryCollection.PanelTop, GameTokens.InventoryCollection.PanelBottom)))
-            .border(GameTokens.InventoryCollection.OutlineWidth, GameTokens.Accent, shape)
-            .padding(horizontal = GameTokens.Small, vertical = GameTokens.Small), contentAlignment = Alignment.Center) {
-            Text("Dekor üçün Bazara keç", color = GameTokens.Text, fontSize = GameTokens.Label,
-                fontWeight = FontWeight.Bold, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+    val large = LocalDensity.current.fontScale > 1f
+    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+        Surface(onClick = onClick, interactionSource = interaction, color = Color.Transparent,
+            modifier = Modifier.fillMaxWidth(if (large) 1f else GameTokens.DecorCollection.MarketWidthFraction).collectionPress(interaction)) {
+            Box(Modifier.heightIn(min = GameTokens.Target).clip(shape)
+                .background(Brush.verticalGradient(listOf(GameTokens.InventoryCollection.PanelTop, GameTokens.InventoryCollection.PanelBottom)))
+                .border(GameTokens.InventoryCollection.OutlineWidth, GameTokens.Accent, shape)
+                .padding(horizontal = GameTokens.Small, vertical = GameTokens.Small), contentAlignment = Alignment.Center) {
+                Text("Dekor üçün Bazara keç", color = GameTokens.Text, fontSize = GameTokens.Label,
+                    fontWeight = FontWeight.Bold, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+            }
         }
     }
 }

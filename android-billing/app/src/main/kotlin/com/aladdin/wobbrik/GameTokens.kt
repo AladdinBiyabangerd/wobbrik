@@ -121,6 +121,11 @@ internal object GameTokens {
         const val SampleWidth = 280f
         const val SampleHeight = 340f
     }
+    /** Art/card and centred CTA proportions measured from the approved Dekor proposal. */
+    internal object DecorCollection {
+        const val ArtHeightFraction = 0.52f
+        const val MarketWidthFraction = 0.64f
+    }
     internal object OwnedDetail {
         val HeroHeight = Target * 6
         val CompactHeroHeight = Target * 3

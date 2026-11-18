@@ -9,3 +9,5 @@ Nümunə açılıb baxılıb: ilkin səhv dam siluetli Yol ikonu yol işarəsi i
 Kiçik portret, font2, inset/loading/error/empty/cache state-ləri native renderlə yoxlanmış sayılmır; implementasiya zamanı mövcud tokenlər, minimum48dp target və uyğun scroll saxlanmalıdır. Mövcud token kontrastı: Text/PanelTop12.51:1, Metadata/PanelTop7.41:1, Unlocked/PanelTop9.10:1; generativ PNG native kontrast/a11y sübutu deyil. Backend/API/schema/domain dəyişmir. İstifadəçi dizaynı təsdiqləyib; təkrar dizayn təsdiqi tələb edilmir.
 
 18 noyabr implementasiya qeydi: native UI/data vahidi `feat/inventory-decor-native` branch-indədir. Yoxlama və açıq asset/paritet məhdudiyyətləri: `../../reviews/2026-11-18-inventory-decor-native.md`. Əvvəlki yoxlanmamış hal qeydləri ilkin dizayn mərhələsinə aiddir; cari nəticə review-dadır.
+
+18 noyabr asset/layout davamı: altı illüstrasiya üçün şəffaf ayrıca atlas və native kart/filtr/CTA düzəlişləri tətbiq edildi. Mənbə/prompt `assets/`, son render və məhdudiyyətlər `../../reviews/2026-11-18-inventory-decor-parity.md`-dədir. Əvvəlki asset boşluğu qeydi bu son nəticə ilə birlikdə oxunmalıdır; piksel eyniliyi iddia edilmir.

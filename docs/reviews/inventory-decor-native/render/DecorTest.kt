@@ -83,7 +83,7 @@ abstract class DecorHost {
   compose.onNodeWithText("Dekor").assertIsSelected()
   compose.onNodeWithText("Dekor üçün Bazara keç").assertIsDisplayed().performClick()
   assertEquals(1,market)
-  capture("decor-$name");capture("decor-$name")
+  capture("decor-$name-first");capture("decor-$name")
   if(insets) {
    compose.onNodeWithText(catalog.items.first().name).performScrollTo().assertIsDisplayed()
    capture("decor-long-$name")

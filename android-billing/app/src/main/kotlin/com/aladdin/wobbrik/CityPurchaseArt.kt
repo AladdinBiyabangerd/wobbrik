@@ -25,13 +25,15 @@ internal fun rememberDecorationArt(): Map<String, CosmeticSprite> {
 internal fun rememberOwnedDecorationArt(): Map<String, CosmeticSprite> {
     val context = LocalContext.current
     val result = androidx.compose.runtime.produceState(emptyMap<String, CosmeticSprite>(), context) {
-        value = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) { loadDecorationArt(context) }
+        value = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            loadDecorationArt(context) + loadDecorationArt(context, "owned-decor-art-v1.json")
+        }
     }
     return result.value
 }
 
-private fun loadDecorationArt(context: android.content.Context): Map<String, CosmeticSprite> {
-        val metadata = JSONObject(context.assets.open("city/purchase-art.json").bufferedReader().use { it.readText() })
+private fun loadDecorationArt(context: android.content.Context, metadataFile: String = "purchase-art.json"): Map<String, CosmeticSprite> {
+        val metadata = JSONObject(context.assets.open("city/$metadataFile").bufferedReader().use { it.readText() })
         val image = context.assets.open("city/${metadata.getString("source")}").use { BitmapFactory.decodeStream(it) }.asImageBitmap()
         val sprites = metadata.getJSONArray("sprites")
         return (0 until sprites.length()).associate { i ->
@@ -53,12 +55,12 @@ internal fun rememberLandArt(): CosmeticSprite {
     }
 }
 
-/** No bitmap upsampling: dp × density may never exceed the source crop's pixels. */
+/** Legacy thumbnails retain their pixel cap; dedicated inventory art fits the native card. */
 @Composable
-internal fun PurchaseArt(art: CosmeticSprite?, modifier: Modifier) {
+internal fun PurchaseArt(art: CosmeticSprite?, modifier: Modifier, allowUpscale: Boolean = false) {
     Canvas(modifier) {
         if (art != null) {
-            val scale = minOf(1f, size.width / art.size.width, size.height / art.size.height)
+            val scale = minOf(if (allowUpscale) Float.MAX_VALUE else 1f, size.width / art.size.width, size.height / art.size.height)
             val width = (art.size.width * scale).roundToInt().coerceAtLeast(1)
             val height = (art.size.height * scale).roundToInt().coerceAtLeast(1)
             drawImage(art.image, srcOffset = art.origin, srcSize = art.size,

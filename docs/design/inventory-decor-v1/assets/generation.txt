@@ -1,0 +1,8 @@
+18 November 2026 — built-in image_gen, transparent background.
+Reference: ../proposal.png (approved visual authority).
+Output: owned-decor-atlas-v1.png; production copy in app assets/city.
+No UI surfaces, text, buttons or icons are baked into this atlas.
+
+Use case: background-extraction. Edit target is the attached approved mobile UI. Extract/reconstruct ONLY its six central inventory illustrations into ONE production transparent sprite atlas, 2 columns x 3 rows, evenly spaced equal cells. In reading order: single lush round lime-green tree with thick brown trunk, flowers and paving; pair of one large and one small tree with flowers/paving; ornate curved wrought iron wooden bench with flower pot shrubs and paving; single glowing bronze Victorian street lantern with shrubs flowers paving; short straight stone paved path with flowers along its edges; grove of three trees with flowers paving. Faithfully preserve each object's exact silhouette, colors, proportions, angle and detailed polished 3D cartoon style from reference. Each object isolated on genuine transparent alpha, generous gutters, no card surfaces, no blue backgrounds, no text, labels, icons, frames or UI. Keep warm lantern glow softly transparent. High resolution sharp illustration details. This is asset extraction from approved design, not a new design.
+
+Production metadata: owned-decor-art-v1.json. Coordinates isolate six illustrations, excluding neighbouring art; other catalog IDs retain existing purchase-art sprites. Original alpha is preserved. No generated image editing, recolouring or background replacement is applied after generation; metadata only selects source rectangles.

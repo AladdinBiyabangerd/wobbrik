@@ -1,0 +1,47 @@
+{
+  "source": "owned-decor-atlas-v1.png",
+  "sprites": [
+    {
+      "id": "decor_tree_1",
+      "x": 320,
+      "y": 18,
+      "width": 287,
+      "height": 300
+    },
+    {
+      "id": "decor_tree_2",
+      "x": 856,
+      "y": 21,
+      "width": 348,
+      "height": 303
+    },
+    {
+      "id": "decor_bench_1",
+      "x": 267,
+      "y": 402,
+      "width": 403,
+      "height": 232
+    },
+    {
+      "id": "decor_streetlight_1",
+      "x": 874,
+      "y": 324,
+      "width": 313,
+      "height": 318
+    },
+    {
+      "id": "decor_road_1",
+      "x": 246,
+      "y": 721,
+      "width": 447,
+      "height": 229
+    },
+    {
+      "id": "decor_tree_3",
+      "x": 825,
+      "y": 665,
+      "width": 399,
+      "height": 305
+    }
+  ]
+}
