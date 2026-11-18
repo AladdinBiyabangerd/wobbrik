@@ -108,6 +108,19 @@ internal object GameTokens {
         const val ArtScale = 1.15f
         const val PressedScale = 0.96f
     }
+    internal object AppearanceCollection {
+        val Unlocked = Color(0xFF2FF468) // sampled from the approved collection PNG
+        val CategoryHeight = Target
+        val CategoryIcon = Inset
+        val CategoryRadius = ControlRadius - Quarter
+        val ArtHeight = Target * 3 + Small
+        val CompactArtHeight = Target * 2 + Inset
+        val LargeTypeArtHeight = Target * 2
+        val FilterRadius = CardRadius
+        // A decorative two-storey sample, never accepted building geometry.
+        const val SampleWidth = 280f
+        const val SampleHeight = 340f
+    }
     internal object OwnedDetail {
         val HeroHeight = Target * 6
         val CompactHeroHeight = Target * 3

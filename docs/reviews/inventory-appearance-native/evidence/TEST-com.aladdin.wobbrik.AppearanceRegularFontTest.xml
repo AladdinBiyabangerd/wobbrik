@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.aladdin.wobbrik.AppearanceRegularFontTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-11-18T11:40:45.097Z" hostname="Macs-MacBook-Pro.local" time="9.673">
+  <properties/>
+  <testcase name="screen" classname="com.aladdin.wobbrik.AppearanceRegularFontTest" time="9.673"/>
+  <system-out><![CDATA[APPEARANCE regular-font2 afterRefreshSync=2 catalog=2 inventoryCityDetailReads=0 extraBytes=0 preferenceWrites=1 artPrepareMs=358 firstContentMs=767 preferenceReturnMs=43
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

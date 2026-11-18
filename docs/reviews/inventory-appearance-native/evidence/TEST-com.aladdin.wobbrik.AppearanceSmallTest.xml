@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.aladdin.wobbrik.AppearanceSmallTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-11-18T11:40:55.331Z" hostname="Macs-MacBook-Pro.local" time="8.202">
+  <properties/>
+  <testcase name="screen" classname="com.aladdin.wobbrik.AppearanceSmallTest" time="8.202"/>
+  <system-out><![CDATA[APPEARANCE small afterRefreshSync=2 catalog=2 inventoryCityDetailReads=0 extraBytes=0 preferenceWrites=1 artPrepareMs=344 firstContentMs=930 preferenceReturnMs=57
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

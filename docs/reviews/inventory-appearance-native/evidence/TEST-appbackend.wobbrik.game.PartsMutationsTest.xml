@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="appbackend.wobbrik.game.PartsMutationsTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-11-18T11:43:42.857Z" hostname="Macs-MacBook-Pro.local" time="0.038">
+  <properties/>
+  <testcase name="definitiveRejectionClearsJournalButUnknownFailureRetainsIt" classname="appbackend.wobbrik.game.PartsMutationsTest" time="0.007"/>
+  <testcase name="bothRoutesPersistExactEnvelopeAndRetryAfterLostResponse" classname="appbackend.wobbrik.game.PartsMutationsTest" time="0.021"/>
+  <testcase name="staleReadyCannotPurchaseOrEditAfterSameUidRelogin" classname="appbackend.wobbrik.game.PartsMutationsTest" time="0.006"/>
+  <testcase name="malformedOrUncommittedReceiptsCannotCompleteMutations" classname="appbackend.wobbrik.game.PartsMutationsTest" time="0.002"/>
+  <testcase name="wireAndReceiptRejectChangedIdentityRevisionAndExtraFields" classname="appbackend.wobbrik.game.PartsMutationsTest" time="0.002"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

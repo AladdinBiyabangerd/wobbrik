@@ -46,7 +46,7 @@ internal val LocalCollectionDockClearance = staticCompositionLocalOf { GameToken
 /** Inventory list/detail keep the same content slot: chrome changes never remount the read owner. */
 @Composable
 internal fun CollectionInventoryShell(coins: Long?, onPlay: (() -> Unit)?, onPage: (String) -> Unit,
-    detail: Boolean, reportDetail: (Boolean) -> Unit, content: @Composable () -> Unit) {
+    detail: Boolean, reportDetail: (Boolean) -> Unit, page: String = "inventory", content: @Composable () -> Unit) {
     val art = rememberResourceArt(R.drawable.inventory_collection_backdrop, R.drawable.inventory_collection_header).first.images
     BoxWithConstraints(Modifier.fillMaxSize().background(GameTokens.InventoryCollection.Background)
         .safeDrawingPadding().consumeWindowInsets(WindowInsets.safeDrawing).imePadding()) {
@@ -58,7 +58,7 @@ internal fun CollectionInventoryShell(coins: Long?, onPlay: (() -> Unit)?, onPag
         Column(Modifier.fillMaxSize()) {
             CollectionHeader(coins, art?.getOrNull(1))
             if(!detail) Box(Modifier.padding(horizontal = GameTokens.InventoryCollection.ScreenInset)) {
-                CollectionTabs("inventory", onPage)
+                CollectionTabs(page, onPage)
             }
             Box(Modifier.weight(1f).fillMaxWidth().clipToBounds().then(if(detail)
                 Modifier.padding(bottom = collectionClearance) else Modifier)) {

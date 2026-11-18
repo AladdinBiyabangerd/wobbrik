@@ -18,7 +18,9 @@ import kotlinx.coroutines.CancellationException
 /** Approved parts flow: catalog → permanent unlock; owned building → draft → explicit apply. */
 @Composable
 internal fun PartsScreen(configured: WobbrikApplication.Bootstrap.Configured,
-    ready: AuthenticatedRecoveryOwner.State.Ready, buildingId: String?, onBack: () -> Unit) {
+    ready: AuthenticatedRecoveryOwner.State.Ready, buildingId: String?, onBack: () -> Unit,
+    initialItemId: String? = null, onUse: ((CatalogItem) -> Unit)? = null,
+    useEnabled: Boolean = true, useError: Boolean = false) {
     val sizing = mobileUiSizing()
     val largeFont = androidx.compose.ui.platform.LocalDensity.current.fontScale > 1f
     val art = rememberCosmeticArt() + rememberGameWindowArt()
@@ -29,7 +31,7 @@ internal fun PartsScreen(configured: WobbrikApplication.Bootstrap.Configured,
     var choosing by remember { mutableStateOf(buildingId == null) }
     var openedOnly by remember { mutableStateOf(false) }
     var achievementOnly by remember { mutableStateOf(false) }
-    var selected by remember { mutableStateOf<CatalogItem?>(null) }
+    var selected by remember(initialItemId) { mutableStateOf(catalog?.items?.firstOrNull { it.id == initialItemId }) }
     var building by remember { mutableStateOf<OwnedBuilding?>(null) }
     var draft by remember { mutableStateOf(emptyMap<String, String>()) }
     var failed by remember { mutableStateOf(false) }
@@ -47,7 +49,7 @@ internal fun PartsScreen(configured: WobbrikApplication.Bootstrap.Configured,
         } catch (cancelled: CancellationException) { throw cancelled }
         catch (_: Exception) { failed = true }
     }
-    val back = { if (selected != null) selected = null else if (buildingId != null && choosing) choosing = false else onBack() }
+    val back = { if (initialItemId != null) onBack() else if (selected != null) selected = null else if (buildingId != null && choosing) choosing = false else onBack() }
     BackHandler(onBack = back)
     Column(Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(GameTokens.Surface, GameTokens.Background)))
         .safeDrawingPadding().padding(GameTokens.Gap), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
@@ -67,13 +69,15 @@ internal fun PartsScreen(configured: WobbrikApplication.Bootstrap.Configured,
                 Text(item.name, color = GameTokens.Text, fontSize = sizing.heading, fontWeight = FontWeight.Bold)
                 Canvas(Modifier.fillMaxWidth().height(sizing.detailArt)) { partPreview(atlases, art, previewParts + (item.category to item.id), item.category) }
                 Text("Bina dəyərinə +${item.weight}", color = GameTokens.Accent, fontSize = sizing.heading)
-                Text(partAccess(item, ready), color = GameTokens.Text, fontWeight = FontWeight.Bold)
+                Text(partAccess(item, ready.snapshot), color = GameTokens.Text, fontWeight = FontWeight.Bold)
                 if (item.method == "coins") Text("Hesabda daimi açılır", color = GameTokens.Muted)
                 if (item.id !in art) Text("Hissənin qrafikası mövcud deyil", color = GameTokens.Danger)
             }
-            HomeButton(label = if (available) "✓ Açılıb" else "Aç", primary = true,
-                enabled = !available && item.method == "coins" && item.price?.let { it <= ready.snapshot.coins } == true,
-                onClick = { mutations.buy(ready, item.id) })
+            if (useError) Text("Seçim saxlanmadı. Yenidən cəhd et.", color = GameTokens.Danger)
+            HomeButton(label = if (available && onUse != null) "Standart görünüş seç" else if (available) "✓ Açılıb" else "Aç", primary = true,
+                enabled = if (available && onUse != null) useEnabled && item.id in art else
+                    !available && item.method == "coins" && item.price?.let { it <= ready.snapshot.coins } == true,
+                onClick = { if (available && onUse != null) onUse(item) else mutations.buy(ready, item.id) })
         } else {
             Text(if (buildingId == null) "Hissələr · ${catalog?.items?.count { it.category in FinishCosmetics.categories } ?: 0}" else "Bina görünüşü",
                 color = GameTokens.Text, fontSize = sizing.heading, fontWeight = FontWeight.Bold)
@@ -151,7 +155,7 @@ internal fun PartsScreen(configured: WobbrikApplication.Bootstrap.Configured,
                         Column(Modifier.partsFrame().padding(GameTokens.Small), verticalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {
                             Canvas(Modifier.fillMaxWidth().height(sizing.cardArt)) { partPreview(atlases, art, previewParts + (choice.category to choice.id), choice.category) }
                             Text(choice.name, color = GameTokens.Text, fontWeight = FontWeight.Bold)
-                            Text(if (active) "✓ Seçilib" else partAccess(choice, ready), color = if (available) GameTokens.Success else GameTokens.Muted)
+                            Text(if (active) "✓ Seçilib" else partAccess(choice, ready.snapshot), color = if (available) GameTokens.Success else GameTokens.Muted)
                         }
                     }
                 }
@@ -170,11 +174,11 @@ internal fun PartsScreen(configured: WobbrikApplication.Bootstrap.Configured,
 private fun partCategory(category: String) = when (category) {
     "wall" -> "Divar"; "window" -> "Pəncərə"; "entrance" -> "Giriş"; "roof" -> "Dam"; else -> "İşıq"
 }
-private fun partAccess(item: CatalogItem, ready: AuthenticatedRecoveryOwner.State.Ready): String = when {
+internal fun partAccess(item: CatalogItem, snapshot: GameSnapshot): String = when {
     item.method == "free" -> "Pulsuz"
-    FinishCosmetics.available(item, ready.snapshot) -> "✓ Açılıb"
+    FinishCosmetics.available(item, snapshot) -> "✓ Açılıb"
     item.method == "coins" -> "${item.price ?: "—"} sikkə"
-    item.method == "reward" -> "Reklam ${ready.snapshot.account?.partProgress?.firstOrNull { it.itemId == item.id }?.completed ?: 0}/${item.views ?: "—"} · Hazır deyil"
+    item.method == "reward" -> "Reklam ${snapshot.account?.partProgress?.firstOrNull { it.itemId == item.id }?.completed ?: 0}/${item.views ?: "—"} · Hazır deyil"
     item.method == "achievement" -> "Nailiyyətlə açılır"
     else -> "Daimi alış · Hazır deyil"
 }

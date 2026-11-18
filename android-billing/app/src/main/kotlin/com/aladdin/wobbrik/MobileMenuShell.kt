@@ -52,8 +52,8 @@ private fun MobileMenuShellContent(page: String, coins: Long?, onPlay: (() -> Un
     }
     var commerceDetail by remember(page) { mutableStateOf(false) }
     val reportDetail = remember(page) { { active: Boolean -> commerceDetail = active } }
-    if (page == "inventory") {
-        CollectionInventoryShell(coins, onPlay, onPage, commerceDetail, reportDetail, content)
+    if (page == "inventory" || page == "collection") {
+        CollectionInventoryShell(coins, onPlay, onPage, commerceDetail, reportDetail, page, content)
         return
     }
     Column(Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(GameTokens.Surface, GameTokens.Background)))

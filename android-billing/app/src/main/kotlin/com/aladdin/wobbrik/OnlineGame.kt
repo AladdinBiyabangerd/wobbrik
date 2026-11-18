@@ -243,6 +243,12 @@ private fun AuthenticatedGame(app: WobbrikApplication) {
             }
             return@menuContent
         }
+        if (page == "collection" && mobileMenu && configured != null && view != null) {
+            key(InventoryReadKey(ready ?: view.account)) {
+                InventoryAppearanceScreen(configured, view, app.cosmeticDefaults) { page = "inventory" }
+            }
+            return@menuContent
+        }
         if (page == "collection" && ready != null) {
             val uid = ready.accountKey
             var selection by remember(ready) { mutableStateOf(ready.catalog?.let {
