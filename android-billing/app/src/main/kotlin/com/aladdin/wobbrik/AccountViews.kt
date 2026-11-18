@@ -51,6 +51,7 @@ class AccountViews(private val backend: GameplayHttpBackend, private val cache: 
             if (local != null) { onCached(); onLocal(local) }
         }
         // Parsing, hashing, file reads and fsync must not run on the Compose/UI dispatcher.
+        val presentationContext = currentCoroutineContext()
         val result = withContext(Dispatchers.IO) {
             if (view.ready == null) {
                 cache.replay(session, view.account, key, block) to true
@@ -63,7 +64,16 @@ class AccountViews(private val backend: GameplayHttpBackend, private val cache: 
                     synchronized(this@AccountViews) {
                         if (epoch === capability && login == session) completed.remove(key)
                     }
-                    cache.capture(session, view.account, key, backend, block).also {
+                    cache.capture(session, view.account, key, backend, onVerified = { value ->
+                        if (onLocal != null) withContext(presentationContext) {
+                            current()
+                            // Accepted display data need not wait for fsync. Keep the
+                            // existing display-only gate until the read completes.
+                            onCached()
+                            onLocal(value)
+                            current()
+                        }
+                    }, block = block).also {
                         synchronized(this@AccountViews) {
                             if (epoch === capability && login == session) completed.add(key)
                         }

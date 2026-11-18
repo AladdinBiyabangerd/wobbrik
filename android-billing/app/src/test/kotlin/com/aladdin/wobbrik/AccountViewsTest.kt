@@ -78,6 +78,7 @@ class AccountViewsTest {
         val account = ReadOnlyAccount("alice", RecoveryDtos.snapshot(body),
             RecoveryCatalog("wobbrik-v1", "wobbrik-structural-v1", emptyList(), emptyList()))
         val view = AccountView(account, AuthenticatedRecoveryOwner.State.Ready(account.snapshot, account.catalog, "alice"))
+        var syncBody = body
         var calls = 0
         var bytes = 0
         var gate: CompletableDeferred<Unit>? = null
@@ -85,7 +86,7 @@ class AccountViewsTest {
         val backend = GameplayHttpBackend(sessions, GameplayTransport { path, _, _ ->
             calls++
             if (gate != null) { entered.complete(Unit); gate?.await() }
-            val response = if (path == "sync") body else """{"buildings":[]}"""
+            val response = if (path == "sync") syncBody else """{"buildings":[]}"""
             bytes += response.toByteArray().size
             GameplayResponse(200, response)
         })
@@ -118,6 +119,66 @@ class AccountViewsTest {
         repeat(10) { f.views.read(f.view, f.session, "inventory-") { InventoryRepository(it).page(f.session) } }
         assertEquals(calls, f.calls); assertEquals(bytes, f.bytes)
         println("PERF controlled250ms local=$localMs ms live=$liveMs ms; warm10 requests=${f.calls-calls} bytes=${f.bytes-bytes}")
+    }
+
+    @Test fun verifiedInventoryIsPresentedBeforeOptionalDiskWrite() = runBlocking {
+        val f = Fixture()
+        val writeEntered = CompletableDeferred<Unit>()
+        val release = java.util.concurrent.CountDownLatch(1)
+        val cache = ReadOnlyGameCache { key -> object : JournalFile {
+            override fun read() = f.rows[key]
+            override fun replace(bytes: ByteArray) {
+                writeEntered.complete(Unit)
+                check(release.await(5, java.util.concurrent.TimeUnit.SECONDS))
+                f.rows[key] = bytes.clone()
+            }
+        } }
+        val views = AccountViews(f.backend, cache, f.sessions)
+        var presented = false; var cached = false; var fresh = false
+        val callerThread = Thread.currentThread()
+        val read = async {
+            views.read(f.view, f.session, "inventory-", onCached = { cached = true },
+                onLocal = {
+                    assertSame(callerThread, Thread.currentThread())
+                    assertEquals(2, f.calls)
+                    assertTrue(cached); assertFalse(fresh)
+                    presented = true
+                }, onFresh = { fresh = true }) { InventoryRepository(it).page(f.session) }
+        }
+        try {
+            withTimeout(5000) { writeEntered.await() }
+            assertTrue("Verified data is hidden behind optional disk persistence", presented)
+            assertFalse(fresh); assertFalse(read.isCompleted)
+        } finally { release.countDown() }
+        read.await()
+        assertTrue(fresh)
+        val calls = f.calls
+        views.read(f.view, f.session, "inventory-") { InventoryRepository(it).page(f.session) }
+        assertEquals(calls, f.calls)
+    }
+
+    @Test fun changedFinalRevisionNeverPublishesOrPersistsLiveInventory() = runBlocking {
+        val f = Fixture()
+        f.syncBody = f.body.replace("\"revision\":1", "\"revision\":2")
+        var presented = false; var fresh = false
+        val result = runCatching {
+            f.views.read(f.view, f.session, "inventory-", onLocal = { presented = true },
+                onFresh = { fresh = true }) { InventoryRepository(it).page(f.session) }
+        }
+        assertTrue(result.isFailure)
+        assertFalse(presented); assertFalse(fresh); assertTrue(f.rows.isEmpty())
+        assertEquals(2, f.calls)
+    }
+
+    @Test fun cancellationFromVerifiedPresentationDoesNotPersistOrPublishFreshness() = runBlocking {
+        val f = Fixture()
+        var fresh = false
+        val result = runCatching {
+            f.views.read(f.view, f.session, "inventory-", onLocal = { throw CancellationException("left view") },
+                onFresh = { fresh = true }) { InventoryRepository(it).page(f.session) }
+        }
+        assertTrue(result.exceptionOrNull() is CancellationException)
+        assertFalse(fresh); assertTrue(f.rows.isEmpty())
     }
 
     @Test fun accountSwitchDuringLocalReplayRejectsBeforeTransport() = runBlocking {
