@@ -114,7 +114,6 @@ internal object GameTokens {
         val LargeTypeHeroHeight = Target * 2
         val SectionGap = Small
         val Title = 20.sp // measured from approved detail proposal at390dp
-        const val HeroScale = 1.2f
         val StatHeight = Target + Small
         val OwnershipFill = Color(0xFF0A3B37)
         val ActionHeight = Target

@@ -15,7 +15,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -63,11 +62,7 @@ internal fun MobileOwnedBuildingDetail(building: OwnedBuilding, city: CityMember
                     onDrawWithContent { drawContent(); drawRect(fade); drawRect(sides) }
                 }, contentScale = ContentScale.Crop)
             }
-            BuildingPreview(building, Modifier.fillMaxSize().then(if(!largeFont && !mobileUiSizing().compact && usesPurpleTemplate(building.parts))
-                Modifier.graphicsLayer {
-                    scaleX = GameTokens.OwnedDetail.HeroScale; scaleY = GameTokens.OwnedDetail.HeroScale
-                    translationY = -GameTokens.Gap.toPx()
-                } else Modifier))
+            BuildingPreview(building, Modifier.fillMaxSize())
         }
         Text(buildingName(building, catalog), Modifier.fillMaxWidth(), color = GameTokens.Text,
             fontFamily = GameTypeface, fontSize = GameTokens.OwnedDetail.Title, lineHeight = GameTokens.Title,
