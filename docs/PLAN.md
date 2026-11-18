@@ -23,6 +23,8 @@ Google vahidinin sübutu: [Android review](reviews/2026-11-13-required-google-si
 
 ### 1.1. Vahid mobil UI və funksional düzəlişlər — 15 noyabr, təsdiqli icra tapşırığı
 
+**18 noyabr — İnventar/Dekor dizayn tapşırığı:** istifadəçi Görünüşün vizual düzəlişindən sonra Dekor üçün yeni dizayn nümunəsi istədi. Təklif `design/inventory-decor-v1/proposal.png`-dədir; hələ təsdiqlənmiş authority və native implementasiya deyil. Kolleksiya chrome-u, real sahiblik nüsxələri və Şəhərdə/Saxlanılır statusları əsas götürülür. Alış Bazar yolundadır; yeni placement və ərazi girişi yoxdur.
+
 **18 noyabr — İnventar/Görünüş:** istifadəçi `design/inventory-appearance-v1/proposal.png` nümunəsini “birə bir implement et” ilə təsdiqlədi. Mobil Görünüş tabı yeni kolleksiya header/navbarı, beş hissə kateqoriyası, Açıq/Nailiyyət filtrləri və art-led kataloq kartları ilə native qurulur. Hissə adları, qiymətlər və açılma statusları real qəbul edilmiş kataloqdan gəlir; PNG nümunə məlumatları yeni domain qaydası deyil. Mövcud hissə detalı/alış və hesab üzrə standart görünüş seçimi saxlanır. Binaya tətbiq, planşet, digər səhifələr və mərhələ qəbulu bu vahidə daxil deyil.
 
 **18 noyabr — navbar təsdiqi və detal dizaynı:** istifadəçi Pixel6 emulatorunda gördüyü yeni Inventory navbarını app-in vahid navbarı kimi təsdiqlədi; köhnə navbar üslubu ləğv edilir. Authority yeni `InventoryCollectionChrome.kt` içindəki CollectionNavbar görünüşüdür (7slot və aktiv səhifə vurğusu saxlanır). Digər menu route-larında legacy navbarın native şəkildə əvəzlənməsi icra borcudur; hələ həyata keçirilməyib. Hazırkı yeni tapşırıq bina detalı üçün bu vizual dildə dizayn nümunəsi hazırlamaqdır; detalın yeni implementasiyası və digər ekran redesign-ı bu dizayn işi ilə tamamlanmış sayılmır.
