@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="appbackend.wobbrik.game.ReadOnlyGameCacheTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-11-18T08:32:26.090Z" hostname="Macs-MacBook-Pro.local" time="0.219">
+  <properties/>
+  <testcase name="racingRevisionDoesNotReplacePreviousBundleAndCacheDiskFailureDoesNotFailLiveView" classname="appbackend.wobbrik.game.ReadOnlyGameCacheTest" time="0.073"/>
+  <testcase name="epochChangeDuringReadCannotCacheAnotherLoginResponse" classname="appbackend.wobbrik.game.ReadOnlyGameCacheTest" time="0.001"/>
+  <testcase name="acceptedCatalogAndSnapshotReopenWithoutGrantingReady" classname="appbackend.wobbrik.game.ReadOnlyGameCacheTest" time="0.005"/>
+  <testcase name="completeViewReplaysWithoutNetworkAndMissingPagesOrRevisionFailClosed" classname="appbackend.wobbrik.game.ReadOnlyGameCacheTest" time="0.007"/>
+  <testcase name="inventoryReplayDoesNotWaitForUnrelatedAccountFsync" classname="appbackend.wobbrik.game.ReadOnlyGameCacheTest" time="0.016"/>
+  <testcase name="sameViewReadCannotResolveAnInProgressWrite" classname="appbackend.wobbrik.game.ReadOnlyGameCacheTest" time="0.115"/>
+  <system-out><![CDATA[CACHE-LOCK localAndBlockedWriterMs=5 localBeforeRelease=true HTTP=2
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -26,7 +26,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.font.FontWeight
@@ -99,12 +98,19 @@ internal fun MobileHomeScreen(snapshot: GameSnapshot?, active: Boolean, onPlay: 
 /** Shared menu header: profile is reached through the dock, balance stays right aligned. */
 @Composable
 internal fun MobileMenuHeader(coins: Long?) {
+    val (logoArt, retryLogo) = LocalMenuLogo.current ?: rememberResourceArt(R.drawable.wobbrik_logo)
+    val logo = logoArt.images?.singleOrNull()
     val largeBalance = (coins?.toString()?.length ?: 1) > 6
     Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
         Row(Modifier.fillMaxWidth().heightIn(min = GameTokens.Target), verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-            Image(painterResource(R.drawable.wobbrik_logo), "Wobbrik", Modifier.weight(1f).height(GameTokens.Target),
-                contentScale = ContentScale.Fit, alignment = Alignment.CenterStart)
+            Box(Modifier.weight(1f).height(GameTokens.Target), contentAlignment = Alignment.CenterStart) {
+                if (logo != null) Image(logo, "Wobbrik", Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Fit, alignment = Alignment.CenterStart)
+                else if (logoArt.failed) TextButton(onClick = retryLogo) {
+                    Text("Wobbrik", color = GameTokens.Text, fontFamily = GameTypeface)
+                }
+            }
             if (!largeBalance) MobileHomeBalance(coins)
         }
         if (largeBalance) Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) { MobileHomeBalance(coins) }

@@ -1,7 +1,7 @@
 package appbackend.wobbrik.game
 
 import appbackend.wobbrik.billing.*
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 import org.junit.Assert.*
 import org.junit.Test
 import java.io.IOException
@@ -62,6 +62,80 @@ class ReadOnlyGameCacheTest {
             result
         } }.isFailure)
         assertTrue(f.bytes.isEmpty())
+    }
+    @Test fun inventoryReplayDoesNotWaitForUnrelatedAccountFsync() = runBlocking {
+        val f = Fixture()
+        val entered = java.util.concurrent.CountDownLatch(1)
+        val release = java.util.concurrent.CountDownLatch(1)
+        var blockWrites = false
+        val cache = ReadOnlyGameCache { key ->
+            val file = f.files(key)
+            object : JournalFile {
+                override fun read() = file.read()
+                override fun replace(bytes: ByteArray) {
+                    if (blockWrites) {
+                        entered.countDown()
+                        check(release.await(5, java.util.concurrent.TimeUnit.SECONDS))
+                    }
+                    file.replace(bytes)
+                }
+            }
+        }
+        cache.capture(f.session, f.account, "inventory-", f.backend) { InventoryRepository(it).page(f.session) }
+        blockWrites = true
+        val writer = async(Dispatchers.IO) { cache.accepted(f.account) }
+        check(entered.await(5, java.util.concurrent.TimeUnit.SECONDS))
+        val start = System.nanoTime()
+        val local = async(Dispatchers.IO) {
+            cache.replay(f.session, f.account, "inventory-") { InventoryRepository(it).page(f.session) }
+        }
+        val completedWhileWriteBlocked = try {
+            withTimeoutOrNull(600) { local.await() } != null
+        } finally { release.countDown() }
+        local.await(); writer.await()
+        println("CACHE-LOCK localAndBlockedWriterMs=${(System.nanoTime()-start)/1_000_000} localBeforeRelease=$completedWhileWriteBlocked HTTP=${f.calls}")
+        assertTrue("Inventory must not wait for the account file fsync", completedWhileWriteBlocked)
+    }
+    @Test fun sameViewReadCannotResolveAnInProgressWrite() = runBlocking {
+        val f = Fixture()
+        val entered = java.util.concurrent.CountDownLatch(1)
+        val release = java.util.concurrent.CountDownLatch(1)
+        val reading = CompletableDeferred<Unit>()
+        var blockWrites = false
+        val writing = java.util.concurrent.atomic.AtomicBoolean()
+        val overlapped = java.util.concurrent.atomic.AtomicBoolean()
+        val cache = ReadOnlyGameCache { key ->
+            val file = f.files(key)
+            object : JournalFile {
+                override fun read(): ByteArray? {
+                    if (writing.get()) overlapped.set(true)
+                    return file.read()
+                }
+                override fun replace(bytes: ByteArray) {
+                    if (blockWrites) {
+                        writing.set(true); entered.countDown()
+                        check(release.await(5, java.util.concurrent.TimeUnit.SECONDS))
+                    }
+                    file.replace(bytes); writing.set(false)
+                }
+            }
+        }
+        suspend fun capture() = cache.capture(f.session, f.account, "inventory-", f.backend) { InventoryRepository(it).page(f.session) }
+        capture(); blockWrites = true
+        val writer = async(Dispatchers.IO) { capture() }
+        check(entered.await(5, java.util.concurrent.TimeUnit.SECONDS))
+        val reader = async(Dispatchers.IO) {
+            reading.complete(Unit)
+            cache.replay(f.session, f.account, "inventory-") { InventoryRepository(it).page(f.session) }
+        }
+        try {
+            reading.await(); delay(100)
+            assertFalse(reader.isCompleted); assertFalse(overlapped.get())
+        } finally { release.countDown() }
+        writer.await(); assertEquals(emptyList<OwnedBuilding>(), reader.await().buildings)
+        assertFalse(overlapped.get())
+        // Reacquisition after the last user exits still serializes the same file.
+        repeat(10) { assertTrue(cache.replay(f.session, f.account, "inventory-") { InventoryRepository(it).page(f.session) }.buildings.isEmpty()) }
     }
     companion object {
         private const val catalog = """{"rules_version":"wobbrik-v1","engine_version":"wobbrik-structural-v1","items":[],"land_offers":[]}"""

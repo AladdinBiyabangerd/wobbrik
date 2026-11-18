@@ -1,0 +1,23 @@
+# İnventar optimizasiyaları — yekun lokal diff review
+
+18 noyabr 2026. Branch `fix/inventory-review`, parent `db6e70d` (Profil commit-i). Review scope: əvvəlki `54621a7` bazasından qalan, parentdə hələ commit edilməmiş `InventoryScreen.kt`, `MobileHomeScreen.kt`, `MobileMenuShell.kt`, core `ReadOnlyGameCache.kt` və `ReadOnlyGameCacheTest.kt`; iki ilkin review, opt-in QA fixture-ləri və müqayisəli ölçmə sübutları. Bu vahid ayrıca commit-lə saxlanır. İki release `baselineProfiles/*/app-release.dm` binarisi scope xaricində saxlanıb, yazılmayıb/reset edilməyib. Merge/push/deploy/CI yoxdur.
+
+## Nəticə
+
+Əlavə correctness problemi tapılmadı; production/test mənbəyinə bu review-da yeni düzəliş lazım olmadı. Əvvəlki dəqiq performans sübutları `2026-11-18-inventory-first-open.md` və `2026-11-18-inventory-composition-profile.md`-də saxlanır. Onlardakı branch/uncommitted status tarixi ölçmə vaxtına aiddir; cari review və commit scope-u bu sənəddir.
+
+- **Cache concurrency:** UID/view-dən eyni SHA-256 fayl açarı saxlanır. Ayrı fayllarda IO bir-birini application monitorunda bloklamır. Eyni faylın read/write/AtomicFile leftover resolution-u eyni monitor altında serialdır. Monitoru gözləyən caller də users sayına daxildir; buna görə son aktiv holder çıxanda gözləyən üçün başqa monitor yaranmır. Exception və reentrant `accepted → account` hallarında users sayı finally ilə balanslanır. `accepted` monoton revision compare+write-i eyni account fayl kilidində saxlayır. Production-da bir application-owned cache instance istifadə olunur; process-lərarası file locking iddiası yoxdur.
+- **UI composition:** mobil1/2sütun lazy rows eyni kart, renderer, gap və ID-lərlə işləyir. Son tək kartın yarım-sətir eni,20-ci kartadək scroll/klik və collection row/column semantikası yoxlandı. Tablet adaptive grid və əvvəlki kart content-i saxlanır. Silinmə/sıralama sonrası hər kartın bütün transient UI state-nin qorunması və TalkBack runtime ayrıca yoxlanmayıb.
+- **Logo:** shell-owned mövcud config/density-scoped ResourceArtLoading IO loader-i reuse edir. Home↔İnventar eyni bitmap/state-ni alır; hər route-da painterResource decode-u yoxdur. Singleton/Activity retention əlavə olunmur. Konfiqurasiya/worker cancellation sərhədi mövcud helper-dədir; loading ölçüsü rezervlidir, failure retry var. İlk loading-də logo hələ görünməyə bilər.
+- **Authority:** DTO/cache formatı/UID/revision yoxlamaları, fresh detail mutation gate və server sync bracket dəyişmir. Cache Ready, yeni wallet və ya qəbul edilməmiş ownership yaratmır. AppBackend inventory/building owner/revision müqaviləsi və application cache yaradılması yoxlandı; API/domain/schema dəyişikliyi tələb olunmur. Backend dəyişməyib, backend test/E2E işlədilməyib.
+
+## Yoxlamalar
+
+- Cari source-da fokuslu `:core:test --tests '*ReadOnlyGameCacheTest'`: **6/6PASS**,0failure/error/skip, Gradle1s. Unrelated account fsync bloklu ikən inventory replay və eyni faylda read/write serialization ayrıca yoxlanır.
+- Cari source-da iki opt-in init ilə `InventoryFirstOpenTest`7 + `InventoryRowsTest`4: **11/11PASS**,0failure/error/skip, Gradle13s. Cached metadata disk/art/network bloklu ikən görünür; cached detail fresh cavabadək command almır; scroll/son kart/doğru clickID və logo identity yoxlanır.
+- Unit/build/lint nəticəsi eyni source üçün bu chatdə artıq son Profil yoxlamasında yenilənib: **core154/app37unit + assembleDebug + lintDebug PASS51s** (`/private/tmp/wobbrik-profile-checks.log`, Profil review-su). Ondan sonra production source dəyişmədiyi üçün eyni geniş yoxlamalar təkrar işə salınmadı. Bunlar CI deyil.
+- `git diff --check` PASS. Mənbə SHA256 və yeni core/native XML-ləri `inventory-composition-profile/evidence/review-final/` altındadır. Tracing/profiler yeni production dependency deyil; JFR/ölçmə əvvəlki opt-in fixture-lərdə qalır, bu review-da yeni cold benchmark iddiası verilmir.
+
+`ui-craft` tətbiq edildi: mövcud GameTokens/ölçü pillələri yoxlandı, yeni dəyər yazılmadı. Yeni320/font1loading,320/font2ready,360/font1ready,390/font2ready+syntheticinset PNG-ləri açılıb `01-main.png` ilə müqayisə edildi. Kart/crop/sütun və native chrome saxlanır. Kontrast Text/Surface13,00; Muted8,22; Accent8,99PASS. Əvvəlki font2kiçik illustration/horizontal tabs və kiçik portret iki sətir dock borcları qalır. Tam PNG parity, real OS inset/IME/locale/TalkBack/tablet/GPU yoxlanmayıb. PNG-lər mövcud repo ignore qaydasına görə yalnız lokal saxlanır; measurement/test mətnləri commit-ə daxildir.
+
+Production10+s/menyu2+s şikayətinin real əvvəl/sonra ölçüsü, Android ART/frame/payload/yaddaş/GPU və authenticated E2E açıq qalır. Emulator açılmayıb. Bu commit bütün app performansının və redesign-ın tamamlanması deyil.

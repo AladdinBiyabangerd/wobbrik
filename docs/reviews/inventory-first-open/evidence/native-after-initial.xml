@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.aladdin.wobbrik.InventoryFirstOpenTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-11-18T07:46:09.777Z" hostname="Macs-MacBook-Pro.local" time="9.19">
+  <properties/>
+  <testcase name="cachedRouteWithArtAndNetworkBlocked" classname="com.aladdin.wobbrik.InventoryFirstOpenTest" time="6.175"/>
+  <testcase name="cachedDetailDoesNotGrantCommandsWhileArtLoads" classname="com.aladdin.wobbrik.InventoryFirstOpenTest" time="0.223"/>
+  <testcase name="cachedAccountBypassesInitialGateButNewLoginDoesNot" classname="com.aladdin.wobbrik.InventoryFirstOpenTest" time="0.071"/>
+  <testcase name="normalFont2" classname="com.aladdin.wobbrik.InventoryFirstOpenTest" time="0.749"/>
+  <testcase name="otherTemplateUsesSameAsyncPreview" classname="com.aladdin.wobbrik.InventoryFirstOpenTest" time="0.799"/>
+  <testcase name="smallFont1" classname="com.aladdin.wobbrik.InventoryFirstOpenTest" time="0.619"/>
+  <testcase name="smallFont2" classname="com.aladdin.wobbrik.InventoryFirstOpenTest" time="0.554"/>
+  <system-out><![CDATA[LOCAL-FIRST warmRouteCachedMs=333 art=Loading blockedNetwork=true diskStillBlocked=true additionalRequests=2
+LOCAL-FIRST remount=0 hostMs=66 addedHTTP=0
+LOCAL-FIRST remount=1 hostMs=33 addedHTTP=0
+LOCAL-FIRST warmRouteCachedMs=47 art=Loading blockedNetwork=true diskStillBlocked=true additionalRequests=2
+LOCAL-FIRST remount=0 hostMs=18 addedHTTP=0
+LOCAL-FIRST remount=1 hostMs=18 addedHTTP=0
+LOCAL-FIRST warmRouteCachedMs=59 art=Loading blockedNetwork=true diskStillBlocked=true additionalRequests=2
+LOCAL-FIRST remount=0 hostMs=28 addedHTTP=0
+LOCAL-FIRST remount=1 hostMs=33 addedHTTP=0
+LOCAL-FIRST warmRouteCachedMs=53 art=Loading blockedNetwork=true diskStillBlocked=true additionalRequests=2
+LOCAL-FIRST remount=0 hostMs=16 addedHTTP=0
+LOCAL-FIRST remount=1 hostMs=16 addedHTTP=0
+LOCAL-FIRST warmRouteCachedMs=34 art=Loading blockedNetwork=true diskStillBlocked=true additionalRequests=2
+LOCAL-FIRST remount=0 hostMs=16 addedHTTP=0
+LOCAL-FIRST remount=1 hostMs=15 addedHTTP=0
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

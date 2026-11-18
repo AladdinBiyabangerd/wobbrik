@@ -1,44 +1,43 @@
-# Cari tapşırıq — Profil açılışı / 18 noyabr 2026
+# Cari tapşırıq — İnventar review və commit / 18 noyabr 2026
 
 ## Completed
 
-- Əvvəlki İnventar/core cache/chrome optimizasiyaları saxlanır: disk-kilid gözləməsi621→1ms; real-Home host ilk inventory191→160ms; main header decode çıxarılıb. Əvvəlki review-lar ayrıca qalır.
-- Profil təkrar mount-da son server ad/avatarını itirib GET gözləyirdi. Session/epoch-scoped, yalnız yaddaşda display memory authenticated root-a qoşuldu; background GET və fresh editor load saxlanır. Cached/loading/error profil redaktə hüququ vermir.
-- Mobil portrait IO profile GET-lə paralel başlayır, overview/editor/picker bir route-owned sheet paylaşır. Tablet və Home eager art dəyişmir.
-- Controlled400ms HTTP ilə host təkrar profil mətni451–475→24–38ms, avatar493–516→66–83ms. Hər giriş1GET/61response byte olaraq qalır. Cold ilk mətn529→582ms nümunələrində sürətlənmə sübut olunmayıb; main composition~35ms qalır. Device/percentile deyil.
+- Profil optimizasiyası ayrıca `db6e70d` commit-indədir: session/epoch-scoped cached identity, fresh edit gate və paralel/paylaşılan mobile portrait IO. Əvvəlki host təkrar profil mətn ölçüsü451–475→24–38ms; cold sürətlənmə sübut olunmayıb.
+- Qalan İnventar/cache/chrome diff-i lokal review edildi; əlavə correctness problemi/düzəliş ehtiyacı tapılmadı. Unrelated disk-write kilidindən azad replay,1/2sütun lazy rows və shell-owned async logo birlikdə ayrıca İnventar commit-i ilə saxlanır.
+- Əvvəlki ölçmələr ayrıca review-larda qorunur: controlled disk gözləməsi621→1ms; real-Home host ilk inventory191→160ms. Device/percentile deyil, bütün app performansının bitməsi deyil.
 
 ## Current state
 
-`fix/profile-open-latency`, baza54621a7. Əvvəlki owner inventory/cache/chrome dirty işi + bu vahiddə4production UI faylı, QA/docs dəyişiklikləri var. İki release baseline-profile binary-si iş ərzində ayrıca dirty göründü, toxunulmadı. Profil vahidi ayrıca commit-lə saxlanır; əvvəlki owner diff-i bu commit-ə daxil deyil. CI/merge/push/deploy yoxdur. AppBackend dəyişməyib.
+`fix/inventory-review`, parent `db6e70d`. Profil və İnventar ayrı commit-lərdədir. İki release baseline-profile binarisi ayrıca dirty saxlanır, bu işdə dəyişdirilməyib və commit-ə daxil deyil. CI/main merge/push/deploy yoxdur. AppBackend dəyişməyib.
 
 ## Decisions
 
-- Yeganə plan docs/PLAN.md§1.1/§2–3; yeni stack/dizayn/prewarm yaradılmır.
-- Profil memory-si yalnız son server identity-nin display-i üçündür, editor revision/capability deyil. Hər login epoch, eyni UID re-login daxil, yeni boş memory alır. Fresh GET uğursuzsa cached view qalır, Dəyiş disabled-dır.
-- HTTP/public profile revision, conflict/exact retry, iqtisadi wallet/journal/authority dəyişmir. İlk proses girişi üçün saxta profil göstərilmir; durable profil cache əlavə edilməyib.
-- CI yalnız ayrıca tələb ilə main-də lokal. Emulator avtomatik açılmır; ölçülməmiş runtime/render PASS deyil.
+- Yeganə plan docs/PLAN.md§1.1/§2–3; yeni stack/dizayn/prewarm yoxdur.
+- Cache UID/view üzrə file lock saxlayır; eyni fayl read/write serialdır. Cached məlumat Ready/mutation capability-si deyil; fresh/revision/epoch/sole journal sərhədləri dəyişmir.
+- Profil memory-si login epoch-a bağlı yalnız server identity display-idir. Hər giriş fon GET edir; load/error halında redaktə fresh cavabadək disabled-dır.
+- CI yalnız ayrıca tələb ilə main-də lokal; emulator avtomatik açılmır. Merge ayrıca istifadəçi təsdiqinə bağlıdır.
 
 ## Remaining work
 
-- Digər menyuların konkret call path-ləri; production2+s/İnventar10+s şikayətinin real əvvəl/sonra ölçüsü. ART/frame/GPU/HTTP/payload/yaddaş/battery və authenticated Android→GoE2E ölçülməyib.
-- Profil cold ilk GET və~35ms ilkin composition xərci qalır; route remount portrait IO hələ var. First-open/app-wide sürətlənmə iddiası yoxdur.
-- Əvvəlki font2/iki sətir dock/PNG parity/real inset/IME/locale/TalkBack borcları saxlanır. Yeni alternativ dizayn tətbiq edilməyib.
-- Əvvəlki inventory/chrome/core diff-i commit edilməyib. Profil commit-i main-ə merge edilməyib; merge istifadəçi təsdiqinə bağlıdır.
+- İki release baseline-profile binarisinin ayrıca owner dəyişiklikləri qalır.
+- Digər menyuların konkret call path-ləri, production2+s/İnventar10+s ölçüləri, ART/frame/GPU/HTTP/payload/yaddaş/battery və authenticated Android→GoE2E açıqdır.
+- Profil ilk GET/~35ms composition və route remount portrait IO xərci qalır. İnventarda host class-load/ilk preparation və warm sürətlənmə məhdudiyyətləri əvvəlki review-da göstərilir.
+- Font2kiçik illustration/horizontal tabs, iki sətir dock, tam PNG parity və real inset/IME/locale/TalkBack borcları saxlanır.
 
 ## Relevant files
 
-- android-billing/app/src/main/kotlin/com/aladdin/wobbrik/{PublicAccountScreen,OnlineGame,NativeProfileOverview,NativeProfileEditor}.kt
-- docs/reviews/2026-11-18-profile-open-latency.md; profile-open-latency/{render,evidence,rendered}/
-- docs/reviews/mobile-sizing-visual/render/NativeProfileEditorRenderTest.kt — async art wait düzəlişi.
-- Əvvəlki docs/reviews/2026-11-18-inventory-{composition-profile,first-open}.md. Profil QA fixture-i əvvəlki uncommitted testdən asılı olmamaq üçün eyni snapshot/catalog ilə müstəqilləşdirilib.
+- docs/reviews/2026-11-18-inventory-final-review.md — cari scope, tapıntılar və yenilənmiş checks.
+- docs/reviews/2026-11-18-inventory-{first-open,composition-profile}.md; inventory-{first-open,composition-profile}/{render,evidence,rendered}/.
+- android-billing/app/src/main/kotlin/com/aladdin/wobbrik/{InventoryScreen,MobileHomeScreen,MobileMenuShell}.kt; core/src/{main,test}/kotlin/appbackend/wobbrik/game/ReadOnlyGameCache{,Test}.kt.
+- docs/reviews/2026-11-18-profile-open-latency.md; Profil production/QA faylları həmin review-dadır.
 
 ## Checks performed
 
-- Son normal core154/app37unit+assembleDebug+lintDebugPASS51s; CI deyil. DiffcheckPASS.
-- Native12/12PASS20s:2actual profile flow +5overview +5editor/avatar matrix. Ayrıca isolated profile ölçmə1/1PASS10s. Error/fresh gate, retry/save və eyni UID/new epoch/başqa hesab yoxlanıb. Aralıq FAIL-lər düzəldilib, review-da qeyd olunub.
--9native PNG və03-account.png açılıb müqayisə edilib; fresh/cached-error,320/390font1/2,360font2syntheticinset/uzunad/balans, editor və picker. Kontrast Text13.00/Muted8.22/Accent8.99/Danger8.37PASS. PNG-lər repo qaydasına görə ignored-dur, lokal saxlanır.
-- Backend profile API/domain/schema uyğunluğu yoxlanıb; dəyişiklik tələb olunmur. Backend test/E2E işlədilməyib. Emulator açılmayıb.
+- Yenilənmiş cache6/6PASS1s və native inventory7+rows4=11/11PASS13s. Yeni production dəyişməsi yoxdur; eyni source-da bu chatdəki core154/app37unit+assembleDebug+lintDebugPASS51s nəticəsi reuse edilir. CI deyil.
+- DiffcheckPASS; native XML və sourceSHA inventory-composition-profile/evidence/review-final/ altındadır.
+-4yenilənmiş native PNG açılıb01-main.pngilə müqayisə edilib:320font1loading/320font2ready/360font1ready/390font2ready+syntheticinset. Kontrast13.00/8.22/8.99PASS. Tam PNG/device parity deyil.
+- Backend müqaviləsi yoxlanıb; API/domain/schema dəyişikliyi tələb olunmur. Backend test/E2E/emulator yoxdur.
 
 ## Exact next step
 
-Bu handoff və18noyabr profile review-nu oxu. İstifadəçinin konkret növbəti menyu/call path göstərişini icra et; bütün app-i yenidən scan etmə və host rəqəmlərini device kimi təqdim etmə. Diff review/commit istənərsə əvvəlki owner işini ayıraraq saxla. CI/merge/push/deploy avtomatik yoxdur.
+Cari lokal review və commit tapşırığı tamamlanıb. Sonrakı böyük işi yeni chatdə bu handoff və docs/PLAN.md§1.1 ilə başlat. İstifadəçi konkret növbəti menyu/call path seçəndə yalnız həmin axını ölç; repo-nu yenidən bütöv scan etmə. İki baseline-profile owner binary-sinə toxunma. CI/merge/push/deploy avtomatik yoxdur.

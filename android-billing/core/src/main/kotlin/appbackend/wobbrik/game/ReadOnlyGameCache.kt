@@ -9,23 +9,33 @@ data class ReadOnlyAccount(val uid: String, val snapshot: GameSnapshot, val cata
 
 /** Atomic, account-scoped cache. A view is a complete captured read, never a union of live and cached pages. */
 class ReadOnlyGameCache(private val files: (String) -> JournalFile) {
-    private fun file(uid: String, view: String): JournalFile {
+    private class FileLock(var users: Int = 0)
+    private val locks = mutableMapOf<String, FileLock>()
+
+    // DurableJournalFile.read resolves .new/.bak leftovers, so readers and writers of
+    // the SAME file must serialize. An unrelated account/view fsync must not gate it.
+    // Retain locks only while in use, including callers waiting to enter the monitor.
+    private fun <T> withFile(uid: String, view: String, block: (JournalFile) -> T): T {
         require(uid.isNotBlank())
         val key = MessageDigest.getInstance("SHA-256").digest("${uid.length}:$uid:$view".toByteArray(Charsets.UTF_8))
             .joinToString("") { "%02x".format(it) }
-        return files(key)
+        val lock = synchronized(locks) { locks.getOrPut(key) { FileLock() }.also { it.users++ } }
+        try { return synchronized(lock) { block(files(key)) } }
+        finally { synchronized(locks) { if (--lock.users == 0) locks.remove(key) } }
     }
-    @Synchronized fun accepted(account: ReadOnlyAccount) {
+    fun accepted(account: ReadOnlyAccount) {
         val snapshot = account.snapshot.wire ?: return
         val catalog = account.catalog.wire ?: return
         // Reparse at both boundaries; malformed or unsupported data never becomes an offline model.
         RecoveryDtos.snapshot(snapshot); RecoveryDtos.catalog(catalog)
-        val previous = runCatching { account(account.uid) }.getOrNull()
-        if (previous != null && previous.snapshot.revision > account.snapshot.revision) return
-        write(account.uid, "account", buildJsonObject { put("snapshot", snapshot); put("catalog", catalog) })
+        withFile(account.uid, "account") { file ->
+            val previous = runCatching { account(account.uid) }.getOrNull()
+            if (previous != null && previous.snapshot.revision > account.snapshot.revision) return@withFile
+            write(file, account.uid, "account", buildJsonObject { put("snapshot", snapshot); put("catalog", catalog) })
+        }
     }
-    @Synchronized fun account(uid: String): ReadOnlyAccount? {
-        val data = read(uid, "account") ?: return null
+    fun account(uid: String): ReadOnlyAccount? {
+        val data = withFile(uid, "account") { read(it, uid, "account") } ?: return null
         return ReadOnlyAccount(uid, RecoveryDtos.snapshot(data.getValue("snapshot").jsonPrimitive.content),
             RecoveryDtos.catalog(data.getValue("catalog").jsonPrimitive.content))
     }
@@ -55,8 +65,8 @@ class ReadOnlyGameCache(private val files: (String) -> JournalFile) {
         val after = backend.sync(session)
         require(after.revision == account.snapshot.revision) { "Account changed; refresh required" }
         try {
-            synchronized(this) {
-                write(session.uid, view, buildJsonObject {
+            withFile(session.uid, view) { file ->
+                write(file, session.uid, view, buildJsonObject {
                     put("revision", after.revision)
                     put("bodies", buildJsonObject { bodies.forEach { (path, body) -> put(path, body) } })
                 })
@@ -67,7 +77,7 @@ class ReadOnlyGameCache(private val files: (String) -> JournalFile) {
     suspend fun <T> replay(session: BillingSession, account: ReadOnlyAccount, view: String,
         block: suspend (GameplayReads) -> T): T {
         require(session.uid == account.uid)
-        val data = synchronized(this) { requireNotNull(read(session.uid, view)) { "View not cached" } }
+        val data = withFile(session.uid, view) { requireNotNull(read(it, session.uid, view)) { "View not cached" } }
         require(data.getValue("revision").jsonPrimitive.long == account.snapshot.revision) { "Cached view is stale" }
         val bodies = data.getValue("bodies").jsonObject
         return block(GameplayReads { expected, path ->
@@ -82,18 +92,18 @@ class ReadOnlyGameCache(private val files: (String) -> JournalFile) {
             requireNotNull(body) { "View path not cached" }.jsonPrimitive.content
         })
     }
-    private fun read(uid: String, view: String): JsonObject? {
-        val bytes = file(uid, view).read() ?: return null
+    private fun read(file: JournalFile, uid: String, view: String): JsonObject? {
+        val bytes = file.read() ?: return null
         require(bytes.size <= DurableJournalFile.MaxBytes)
         val root = Json.parseToJsonElement(bytes.toString(Charsets.UTF_8)).jsonObject
         require(root.getValue("version").jsonPrimitive.int == 1 && root.getValue("uid").jsonPrimitive.content == uid &&
             root.getValue("view").jsonPrimitive.content == view)
         return root.getValue("data").jsonObject
     }
-    private fun write(uid: String, view: String, data: JsonObject) {
+    private fun write(file: JournalFile, uid: String, view: String, data: JsonObject) {
         val body = buildJsonObject { put("version", 1); put("uid", uid); put("view", view); put("data", data) }
             .toString().toByteArray(Charsets.UTF_8)
         require(body.size <= DurableJournalFile.MaxBytes)
-        file(uid, view).replace(body)
+        file.replace(body)
     }
 }

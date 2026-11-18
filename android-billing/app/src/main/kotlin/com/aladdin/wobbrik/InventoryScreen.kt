@@ -5,6 +5,8 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -22,6 +24,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.semantics.CollectionInfo
+import androidx.compose.ui.semantics.CollectionItemInfo
+import androidx.compose.ui.semantics.collectionInfo
+import androidx.compose.ui.semantics.collectionItemInfo
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -170,29 +176,26 @@ internal fun InventoryScreen(configured: WobbrikApplication.Bootstrap.Configured
                         Text("Binalar", color = GameTokens.Accent, fontWeight = FontWeight.Bold)
                     }
                 }
-                LazyVerticalGrid(if (sizing.portrait) GridCells.Fixed(if (largeFont) 1 else 2) else GridCells.Adaptive(GameTokens.PanelWidth / 2 - GameTokens.Gap), Modifier.weight(1f),
-                    horizontalArrangement = Arrangement.spacedBy(GameTokens.Small), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-                    items(buildings, key = { it.id }) { building ->
-                        if(LocalMobileMenuShell.current) MobileOwnedBuildingCard(building, ready.catalog, city) { onSelectBuilding(building.id) }
-                        else Surface(onClick = { onSelectBuilding(building.id) }, color = GameTokens.Surface,
-                            shape = RoundedCornerShape(if (sizing.portrait) GameTokens.ControlRadius else GameTokens.CardRadius), border = BorderStroke(GameTokens.Hairline, GameTokens.Raised)) {
-                            if (sizing.portrait && largeFont) Row(Modifier.padding(GameTokens.Small),
-                                verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-                                BuildingPreview(building, Modifier.size(GameTokens.Target))
-                                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {
-                                    Text(buildingName(building, ready.catalog), color = GameTokens.Text, fontSize = GameTokens.Body, fontWeight = FontWeight.SemiBold)
-                                    Text("${building.floors} mərtəbə  ›", color = GameTokens.Muted, fontSize = GameTokens.Caption)
-                                }
-                            } else Column(Modifier.background(Brush.verticalGradient(if (sizing.portrait)
-                                listOf(GameTokens.Raised, GameTokens.Surface) else listOf(GameTokens.Surface, GameTokens.Surface)))
-                                .padding(GameTokens.Small), verticalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {
-                                if (sizing.portrait) BuildingPreview(building, Modifier.fillMaxWidth().height(sizing.listPreview))
-                                else Surface(color = GameTokens.Background, shape = RoundedCornerShape(GameTokens.ControlRadius)) {
-                                    BuildingPreview(building, Modifier.fillMaxWidth().height(sizing.listPreview))
-                                }
+                InventoryBuildingGrid(buildings, sizing.portrait, largeFont, Modifier.weight(1f)) { building ->
+                    if(LocalMobileMenuShell.current) MobileOwnedBuildingCard(building, ready.catalog, city) { onSelectBuilding(building.id) }
+                    else Surface(onClick = { onSelectBuilding(building.id) }, color = GameTokens.Surface,
+                        shape = RoundedCornerShape(if (sizing.portrait) GameTokens.ControlRadius else GameTokens.CardRadius), border = BorderStroke(GameTokens.Hairline, GameTokens.Raised)) {
+                        if (sizing.portrait && largeFont) Row(Modifier.padding(GameTokens.Small),
+                            verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+                            BuildingPreview(building, Modifier.size(GameTokens.Target))
+                            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {
                                 Text(buildingName(building, ready.catalog), color = GameTokens.Text, fontSize = GameTokens.Body, fontWeight = FontWeight.SemiBold)
-                                Text("${building.floors} mərtəbə  ›", color = GameTokens.Muted, fontSize = if (sizing.portrait) GameTokens.Caption else GameTokens.Body)
+                                Text("${building.floors} mərtəbə  ›", color = GameTokens.Muted, fontSize = GameTokens.Caption)
                             }
+                        } else Column(Modifier.background(Brush.verticalGradient(if (sizing.portrait)
+                            listOf(GameTokens.Raised, GameTokens.Surface) else listOf(GameTokens.Surface, GameTokens.Surface)))
+                            .padding(GameTokens.Small), verticalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {
+                            if (sizing.portrait) BuildingPreview(building, Modifier.fillMaxWidth().height(sizing.listPreview))
+                            else Surface(color = GameTokens.Background, shape = RoundedCornerShape(GameTokens.ControlRadius)) {
+                                BuildingPreview(building, Modifier.fillMaxWidth().height(sizing.listPreview))
+                            }
+                            Text(buildingName(building, ready.catalog), color = GameTokens.Text, fontSize = GameTokens.Body, fontWeight = FontWeight.SemiBold)
+                            Text("${building.floors} mərtəbə  ›", color = GameTokens.Muted, fontSize = if (sizing.portrait) GameTokens.Caption else GameTokens.Body)
                         }
                     }
                 }
@@ -233,6 +236,36 @@ internal fun InventoryScreen(configured: WobbrikApplication.Bootstrap.Configured
                 onSelectBuilding(null); cursor = null
             }
         })
+    }
+}
+
+/** Mobile inventory has fixed equal columns, so lazily compose rows without the
+ * grid's extra track/slot machinery. Tablet retains its existing grid. */
+@Composable
+private fun InventoryBuildingGrid(buildings: List<OwnedBuilding>, portrait: Boolean, largeFont: Boolean,
+    modifier: Modifier, content: @Composable (OwnedBuilding) -> Unit) {
+    if (!portrait) {
+        LazyVerticalGrid(GridCells.Adaptive(GameTokens.PanelWidth / 2 - GameTokens.Gap), modifier,
+            horizontalArrangement = Arrangement.spacedBy(GameTokens.Small),
+            verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+            items(buildings, key = { it.id }) { content(it) }
+        }
+        return
+    }
+    val columns = if (largeFont) 1 else 2
+    val rows = remember(buildings, columns) { buildings.chunked(columns) }
+    LazyColumn(modifier.semantics { collectionInfo = CollectionInfo(rows.size, columns) },
+        verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+        itemsIndexed(rows, key = { _, row -> row.first().id }) { rowIndex, row ->
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+                row.forEachIndexed { column, building -> key(building.id) {
+                    Box(Modifier.weight(1f).semantics {
+                        collectionItemInfo = CollectionItemInfo(rowIndex, 1, column, 1)
+                    }) { content(building) }
+                } }
+                repeat(columns - row.size) { Spacer(Modifier.weight(1f)) }
+            }
+        }
     }
 }
 
