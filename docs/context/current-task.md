@@ -1,53 +1,42 @@
-# Cari tapşırıq — İnventar təqdimatının disk gözləməsi / 18 noyabr 2026
+# Cari tapşırıq — İnventar refresh/art reuse / 18 noyabr 2026
 
 ## Completed
 
-- Yeni vahid: `ReadOnlyGameCache.capture` final server revision yoxlamasından sonra, optional disk yazısından əvvəl accepted təqdimat callback-i verir. `AccountViews` bunu çağıranın dispatcher-ində mövcud display-only callback-ə çatdırır. Fresh/mutasiya gate-i və tamamlanmış-cache reuse əvvəlki kimi read tamamlandıqda açılır. Yavaş disk artıq bina məlumatının təqdimatını saxlamır.
-- Baseline regression gözlənildiyi kimi FAIL; düzəlişlə PASS. Real Kotlin repository/cache → loopback Go HTTP middleware → disposable PostgreSQL axını da yoxlanıb; identity synthetic-dir. Backend production/API/schema dəyişməsi lazım deyil. Heç bir UI/layout/art dəyişməsi yoxdur.
-
-- İnventar böyük opaque checkpoint-ləri istifadə etmədən download/cache edirdi. Qəbul edilən böyük səhifə140000byte cache limitini keçir, optional persistence alınmır, təkrar giriş yenidən şəbəkəyə gedirdi. Baseline regression gözlənildiyi kimi FAIL; son source PASS.
-- AppBackend additive `view=display` SQL-də checkpoint-i götürmür; metadata/accepted geometry/cursor dəyişmir. Köhnə inventory/detail qalır. Typed fixture335225→10905byte,1HTTP/11SQL sabit; race host48–52→11–12ms. Production/device ölçüsü deyil.
-- Kotlin yeni view istəyir; köhnə serverin full cavabından yalnız inventory cache üçün snapshot çıxarılır. Köhnə query cache replay-i exact cursor/account/revision ilə saxlanır. Legacy ilk download sürətlənmir; təkrar replay0HTTP olur. UID/epoch/revision/fresh mutation gate və final sync saxlanır.
-- Əvvəlki Profil `db6e70d` və İnventar `8cd7bae` işləri tarixdə saxlanır; əvvəlki disk-lock/chrome/row düzəlişləri bu işdə dəyişmir.
+- Yeni vahid: sticky `retry > 0` bütün sonrakı list/detail/pagination keçidlərində cache bypass edirdi. Refresh generation yalnız bir oxuda istehlak edilir; explicit city refresh saxlanır.
+- `inventory_garden` hər qeyri-purple kart üçün ayrıca decode edilirdi. İndi İnventar composition scope-u ilk real tələbdən sonra bir bitmap-i IO-da yükləyib kart/detal/refresh arasında paylaşır; ekran çıxanda buraxır. Process cache/prewarm/token/dizayn dəyişikliyi yoxdur.
+- Əvvəlki commit-lər: `940ec3d` accepted təqdimatı optional disk yazısından əvvəl verir; `3c7c19d` display payload/cache normalizasiyası; `8cd7bae` əvvəlki disk-lock/art/composition işi. Server revision bracket və fresh/mutasiya gate-i saxlanır.
 
 ## Current state
 
-Android `fix/inventory-payload-latency`, baza8cd7bae; AppBackend persistent `feat/wobbrik`, baza838c0c7. Paired scoped diff-lər lokal review və yoxlamalardan keçib, ayrıca repository commit-ləri ilə saxlanır. Main merge/push/deploy/CI yoxdur. İki release baseline-profile owner binarisi dirty saxlanır, dəyişdirilmir və commit-ə daxil deyil.
+Android `fix/inventory-refresh-art-reuse`, baza `940ec3d`; scoped source/test diff lokal review edilib. AppBackend mövcud `feat/wobbrik` dəyişməyib. Main merge/push/deploy/CI yoxdur. İki owner release baseline-profile binarisi dirty saxlanır və commit-ə daxil deyil.
 
 ## Decisions
 
-- Son istifadəçi göstərişi: cihazsız davam et və problemi düzəlt; ayrıca ölçmə hesabatı deliverable deyil. Cihaz/emulator tələb edilmir. Lokal HTTP inteqrasiyası Android cihaz/production ölçüsü kimi təqdim edilmir.
-
-- Yeganə plan docs/PLAN.md§1.1/§2–3. Yeni infrastruktur/dizayn/prewarm/cache limiti yoxdur.
-- Cached baxış Ready/mutasiya hüququ yaratmır; server authority, sole journal, hesab izolyasiyası saxlanır.
-- Backend deploy ayrıca tapşırıqdır; deploy olmadan yeni wire payload qənaəti production-da yoxdur. Köhnə serverdə mobil cache normalizasiyası işləyir.
-- CI yalnız ayrıca istifadəçi tələbi ilə main-də; emulator avtomatik açılmır; merge ayrıca təsdiqə bağlıdır.
+- Yeganə plan `docs/PLAN.md` §1.1/§2–3. Son istifadəçi: cihazsız qalan gecikmə səbəblərini yoxla və düzəlt; ayrıca ölçmə hesabatı deliverable deyil.
+- Cihaz/emulator tələb edilmir və açılmır. Lokal native/HTTP fixture production10+s-in tam həlli sübutu deyil.
+- Cache yalnız dəqiq UID/login/capability/revision daxilində təqdimat üçündür. Server authority/sole journal dəyişmir.
+- Backend display payload qənaəti production-da ayrıca deploy tələb edir. Bu yeni vahidə backend/API/schema dəyişikliyi lazım deyil.
 
 ## Remaining work
 
-- İstifadəçinin cihazındakı10+s-in dəqiq tam səbəbi hələ təsdiqlənməyib: bağlı cihaz yoxdur, emulator açılmayıb. Production HTTP/RTT/SQL contention və real payload paylanması, ART/frame/GPU/yaddaş/battery, authenticated Android→Go E2E yoxlanmayıb. Lokal fixture səbəb və düzəlişi sübut edir,10+s-in tam həlli deyil.
-- Çox böyük accepted geometry mövcud transport/cache limitini hələ keçə bilər; final sync/persistence fresh təqdimat yolunda qalır.
-- Əvvəlki Profil ilk GET/composition/portrait IO; digər menyu call path-ləri və2+s ölçüləri açıqdır.
-- Əvvəlki font2kiçik illustration/horizontal tabs, iki sətir dock, tam PNG parity və inset/IME/locale/TalkBack borcları qalır. İki baseline-profile owner dəyişməsi ayrıca qalır.
+- Böyük hesabda optional `inventory-city` bütün city səhifələrini oxuyur; bunun HTTP/SQL/final-sync xərci və detail-in istifadə olunmayan opaque payload-u növbəti dar ölçmə nöqtələridir. Bunlar bu vahiddə ölçülmüş yeni root cause kimi təsdiqlənməyib və düzəldilməyib.
+- Production RTT/SQL contention/paylanma, Android ART/frame/GPU/battery və Firebase-authenticated device E2E yoxlanmayıb. Əvvəlki lokal Kotlin→Go HTTP→real disposable PostgreSQL synthetic identity probe-u PASS idi; yeni native test real server probe-u deyil.
+- Çox böyük accepted geometry transport/cache limitini hələ keçə bilər. Final sync fresh təqdimatdan əvvəl, persistence freshness/completion yolunda qalır.
+- Tam PNG parity, kiçik illustration/horizontal tabs, iki-sətir dock, inset/IME/locale/TalkBack borcları qalır.
 
 ## Relevant files
 
-- Yeni vahid: app `AccountViews.kt`, core `ReadOnlyGameCache.kt`, app `AccountViewsTest.kt`; review `docs/reviews/2026-11-18-inventory-presentation-persistence.md`.
-
-- docs/reviews/2026-11-18-inventory-payload-latency.md; inventory-payload/evidence/.
-- android-billing/core/src/main/kotlin/appbackend/wobbrik/game/{InventoryReads,ReadOnlyGameCache,GameplayHttpBackend}.kt.
-- core InventoryPayloadTest/InventoryReadsTest; core/src/test/resources/inventory-display-backend.json.
-- AppBackend internal/wobbrik/market.go; internal/platform/wobbrik_{http,inventory_payload_test}.go; docs/wobbrik-game-api.md və paired review.
-- Əvvəlki review-lar: 2026-11-18-inventory-{first-open,composition-profile,final-review}.md; 2026-11-18-profile-open-latency.md.
+- `android-billing/app/src/main/kotlin/com/aladdin/wobbrik/InventoryScreen.kt`: refresh token, garden scope, preview.
+- App `AccountViews.kt`, `AccountViewsTest.kt`; core `InventoryReads.kt`, `ReadOnlyGameCache.kt`, `GameplayHttpBackend.kt`.
+- `docs/reviews/2026-11-18-inventory-refresh-art-reuse.md`; əvvəlki `inventory-presentation-persistence` və `inventory-payload-latency` review-ları.
+- Lokal native QA: `/private/tmp/wobbrik-inventory-refresh-host`, `/private/tmp/wobbrik-inventory-refresh.init.gradle`, `/private/tmp/wobbrik-inventory-refresh-renders`.
 
 ## Checks performed
 
-- Yeni vahid: core suite, bütün app unit suite, assembleDebug/lintDebug PASS. Diskdən əvvəl təqdimat/caller dispatcher, final revision mismatch və callback cancellation regression-ları PASS. Lokal real HTTP+PostgreSQL probe PASS; temporary overlay repo source-u dəyişmir. Disposable server/DB dayandırılır. UI render yoxlanmayıb; vizual dəyişiklik iddiası yoxdur.
-
-- Android core158/app37unit, assembleDebug/lintDebug PASS58s; final source XML və SHA evidence-dədir. CI deyil.
-- Backend full real disposable PostgreSQL18 race suite PASS(platform30.889s), vet/build PASS; son test-only output dəyişikliyindən sonra focused regression PASS2.453s. Disposable DB yoxlamalardan sonra dayandırılıb.
-- Lokal diff review/diffcheck PASS. UI/art/layout dəyişməyib; yeni visual render və cihaz nəticəsi iddia edilmir. `adb devices -l` boşdur.
+- Baseline sticky-refresh regression FAIL; düzəlişlə app41unit PASS, assembleDebug/lintDebug PASS. Son native7/7PASS: list→refresh→detail→back reuse və dörd consumer üçün bir native bitmap/scope davamlılığı.
+- Native320/360/390portret, font1/font2 renderləri alınıb; kiçik/normal font1/font2 açılıb baxılıb və approved PNG/README ilə müqayisə edilib. Əvvəlki vizual borclar bağlanmır. Seçilmiş real text/background kontrast cütləri PASS; app-wide contrast PASS deyil.
+- Lokal diff review/diffcheckPASS. Backend source/API/schema dəyişməyib; yeni backend test/deploy yoxdur. Owner binariləri toxunulmazdır.
 
 ## Exact next step
 
-Disk gözləməsini təqdimat yolundan çıxaran kiçik düzəliş lokal review edilib; istifadəçi review-u gözlənilir. Main merge/deploy/CI avtomatik yoxdur. Yeni performans işi yalnız ayrıca konkret scope ilə davam etdirilir; production 10+s-in tam həlli iddia edilmir. Owner baseline-profile binarilərinə toxunma.
+Cari refresh/art reuse vahidinin istifadəçi review-u; avtomatik main merge/CI/deploy yoxdur. Yeni chatdə yalnız böyük-hesab İnventar city paging/detail payload yolunu ölç, sübut edilmiş redundant işi düzəlt. `docs/PLAN.md` §1.1 və burada göstərilən dar fayllarla başla; bütün app-i yenidən scan etmə. Owner binarilərinə toxunma.

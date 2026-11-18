@@ -42,6 +42,12 @@ internal class InventoryReadKey(private val ready: Any) {
     override fun hashCode() = System.identityHashCode(ready)
 }
 
+/** A user refresh belongs to one read, not every later list/detail/page visit. */
+internal class InventoryRefreshRequest {
+    private var consumed = 0
+    fun consume(generation: Int): Boolean = (generation != consumed).also { consumed = generation }
+}
+
 /** Destination-local reads are cancelled and discarded whenever the exact Ready epoch changes. */
 @Composable
 internal fun InventoryScreen(configured: WobbrikApplication.Bootstrap.Configured,
@@ -59,6 +65,7 @@ internal fun InventoryScreen(configured: WobbrikApplication.Bootstrap.Configured
     val sizing = mobileUiSizing()
     val largeFont = LocalDensity.current.fontScale > 1f
     var retry by remember { mutableIntStateOf(0) }
+    val refreshRequest = remember(ready) { InventoryRefreshRequest() }
     var deleteCandidate by remember(ready, selected) { mutableStateOf<OwnedBuilding?>(null) }
     val deletion = remember(configured) { BuildingDeletion(configured.recovery) }
     var cursor by remember { mutableStateOf<String?>(null) }
@@ -69,6 +76,7 @@ internal fun InventoryScreen(configured: WobbrikApplication.Bootstrap.Configured
     var loading by remember(ready, selected) { mutableStateOf(true) }
     var failed by remember(ready, selected) { mutableStateOf(false) }
     LaunchedEffect(ready, selected, cursor, retry) {
+        val refresh = refreshRequest.consume(retry)
         loading = true; failed = false; fromCache = ready.ready == null
         try {
             val session = requireNotNull(configured.sessions.current())
@@ -80,7 +88,7 @@ internal fun InventoryScreen(configured: WobbrikApplication.Bootstrap.Configured
                     next = page.next
                 }
                 val page = configured.views?.read(ready, session, "inventory-${cursor.orEmpty()}",
-                    onCached = { fromCache = true }, refresh = retry > 0, onLocal = { present(it) }, onFresh = { fromCache = false }) {
+                    onCached = { fromCache = true }, refresh = refresh, onLocal = { present(it) }, onFresh = { fromCache = false }) {
                     InventoryRepository(it).page(session, cursor)
                 } ?: configured.inventory.page(session, cursor)
                 present(page)
@@ -93,7 +101,7 @@ internal fun InventoryScreen(configured: WobbrikApplication.Bootstrap.Configured
                 // Detail has its own accepted bundle: optional membership must not gate it.
                 // Legacy detail bundles already contain this exact building path.
                 val building = configured.views?.read(ready, session, "detail-$selected",
-                    onCached = { fromCache = true }, refresh = retry > 0,
+                    onCached = { fromCache = true }, refresh = refresh,
                     onLocal = { present(it) }, onFresh = { fromCache = false }) { reader ->
                     InventoryRepository(reader).building(session, requireNotNull(selected))
                 } ?: configured.inventory.building(session, requireNotNull(selected))
@@ -119,6 +127,9 @@ internal fun InventoryScreen(configured: WobbrikApplication.Bootstrap.Configured
     if(LocalMobileMenuShell.current) CommerceDetailChrome(selected != null)
     val back = { if (selected != null) onSelectBuilding(null) else onHome() }
     BackHandler(onBack = back)
+    val needsGarden = LocalBuildingArt.current.status == ArtPreparation.Ready &&
+        (buildings.any { !usesPurpleTemplate(it.parts) } || detail?.let { !usesPurpleTemplate(it.parts) } == true)
+    InventoryGardenArt(needsGarden) {
     Box(Modifier.fillMaxSize().then(if(LocalMobileMenuShell.current) Modifier else Modifier.background(Brush.verticalGradient(listOf(GameTokens.Surface, GameTokens.Background))))
         .then(if(LocalMobileMenuShell.current) Modifier else Modifier.safeDrawingPadding()).padding(GameTokens.Gap)) {
         Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
@@ -228,6 +239,7 @@ internal fun InventoryScreen(configured: WobbrikApplication.Bootstrap.Configured
             else if (!LocalMobileMenuShell.current) InventoryButton(if (selected == null) "Ana ekran" else "İnventara qayıt", onClick = back)
         }
     }
+    } // The list and detail share one composition-owned garden decode.
     deleteCandidate?.let { candidate ->
         BuildingDeleteConfirmation(onDismiss = { deleteCandidate = null }, onConfirm = {
             deleteCandidate = null
@@ -433,6 +445,20 @@ private fun DetailRow(label: String, value: String) {
     }
 }
 
+/** Share the nodpi inventory illustration across cards, without retaining Activity/account state
+ * or decoding it for a purple-only inventory. Other preview destinations keep their own scope. */
+internal val LocalInventoryGarden = staticCompositionLocalOf<Pair<ResourceArt, () -> Unit>?> { null }
+
+@Composable
+internal fun InventoryGardenArt(required: Boolean, content: @Composable () -> Unit) {
+    // A refresh briefly clears the rows. Keep an already requested illustration
+    // until this screen leaves, so list/detail and row replacement do not decode again.
+    var requested by remember { mutableStateOf(false) }
+    SideEffect { if (required) requested = true }
+    val garden = if (required || requested) rememberResourceArt(R.drawable.inventory_garden) else null
+    CompositionLocalProvider(LocalInventoryGarden provides garden, content = content)
+}
+
 /** Server metadata stays real; approved art is a decorative owned-building presentation. */
 @Composable
 internal fun BuildingPreview(building: OwnedBuilding, modifier: Modifier) {
@@ -448,7 +474,7 @@ internal fun BuildingPreview(building: OwnedBuilding, modifier: Modifier) {
     // Purple already carries its approved garden in the atlas. Other templates load
     // their decorative island on IO without withholding the building's metadata.
     val garden = if (purpleTemplate) null else {
-        val (resource, retry) = rememberResourceArt(R.drawable.inventory_garden)
+        val (resource, retry) = LocalInventoryGarden.current ?: rememberResourceArt(R.drawable.inventory_garden)
         val image = resource.images?.singleOrNull()
         if (image == null) {
             Box(modifier) { ApprovedArtStatus(if (resource.failed) ArtPreparation.Failed else ArtPreparation.Loading, retry) }

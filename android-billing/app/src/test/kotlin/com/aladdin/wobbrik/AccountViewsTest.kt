@@ -181,6 +181,25 @@ class AccountViewsTest {
         assertFalse(fresh); assertTrue(f.rows.isEmpty())
     }
 
+    @Test fun oneInventoryRefreshDoesNotForceAllSubsequentVisitsOnline() = runBlocking {
+        val f = Fixture()
+        val refresh = InventoryRefreshRequest()
+        suspend fun open(generation: Int) = f.views.read(f.view, f.session, "inventory-",
+            refresh = refresh.consume(generation)) { InventoryRepository(it).page(f.session) }
+        open(0)
+        assertEquals(2, f.calls)
+        open(1)
+        assertEquals(4, f.calls)
+        repeat(10) { open(1) }
+        assertEquals("Navigation after refresh must reuse the completed read", 4, f.calls)
+        open(2)
+        assertEquals(6, f.calls)
+        open(2)
+        assertEquals(6, f.calls)
+        // A new destination scope must not inherit a previous refresh request.
+        assertFalse(InventoryRefreshRequest().consume(0))
+    }
+
     @Test fun accountSwitchDuringLocalReplayRejectsBeforeTransport() = runBlocking {
         val f = Fixture(); f.seed()
         val calls = f.calls
