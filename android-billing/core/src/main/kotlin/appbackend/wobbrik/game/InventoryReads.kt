@@ -7,7 +7,7 @@ import java.math.BigInteger
 /** Owner-scoped read models; these never grant wallet, placement or cosmetic rights. */
 data class OwnedBuilding(val id: String, val revision: Long, val floors: Long, val residents: Long,
     val baseValue: Long, val maxPrice: Long, val parts: Map<String, String>, val traded: Boolean,
-    val geometry: AcceptedCityGeometry?)
+    val geometry: AcceptedCityGeometry?, val inCity: Boolean? = null)
 data class InventoryPage(val buildings: List<OwnedBuilding>, val next: String?)
 data class CityMembership(val revision: Long, val population: BigInteger,
     val buildings: Map<String, Long>, val next: String?)
@@ -29,7 +29,8 @@ object InventoryReads {
         require(geometry == null || geometry.geometry.centers.size.toLong() == floors)
         return OwnedBuilding(value.text("id").also(::id), value.number("revision").also { require(it > 0) },
             floors, value.number("residents"), value.number("base_value"), value.number("max_price"), parts,
-            value.getValue("traded").jsonPrimitive.also { require(!it.isString) }.boolean, geometry)
+            value.getValue("traded").jsonPrimitive.also { require(!it.isString) }.boolean, geometry,
+            value["in_city"]?.let { it.jsonPrimitive.also { p -> require(!p.isString) }.boolean })
     }
     fun building(body: String) = building(Json.parseToJsonElement(body).jsonObject)
     /** Opaque engine recovery is unused by inventory; do not let it evict the read cache.

@@ -71,7 +71,7 @@ internal fun InventoryScreen(configured: WobbrikApplication.Bootstrap.Configured
     var cursor by remember { mutableStateOf<String?>(null) }
     var buildings by remember(ready) { mutableStateOf(emptyList<OwnedBuilding>()) }
     var next by remember(ready) { mutableStateOf<String?>(null) }
-    var city by remember(ready) { mutableStateOf<CityMembership?>(null) }
+    val city: CityMembership? = null // Membership arrives with the selected building; no whole-city scan.
     var detail by remember(ready, selected) { mutableStateOf<OwnedBuilding?>(null) }
     var loading by remember(ready, selected) { mutableStateOf(true) }
     var failed by remember(ready, selected) { mutableStateOf(false) }
@@ -110,19 +110,6 @@ internal fun InventoryScreen(configured: WobbrikApplication.Bootstrap.Configured
         } catch (cancelled: CancellationException) { throw cancelled }
         catch (_: Exception) { failed = true }
         finally { loading = false }
-    }
-    // Shared presentation data survives list/detail navigation and pagination.
-    // It never grants mutation capability and cannot delay either building read.
-    LaunchedEffect(ready, retry) {
-        val session = configured.sessions.current() ?: return@LaunchedEffect
-        try {
-            val membership = configured.views?.read(ready, session, "inventory-city",
-                refresh = retry > 0, onLocal = {
-                    if (ready.current(configured, session)) city = it
-                }) { InventoryRepository(it).city(session) } ?: configured.inventory.city(session)
-            if (ready.current(configured, session)) city = membership
-        } catch (cancelled: CancellationException) { throw cancelled }
-        catch (_: Exception) { /* Optional presentation data never hides inventory. */ }
     }
     if(LocalMobileMenuShell.current) CommerceDetailChrome(selected != null)
     val back = { if (selected != null) onSelectBuilding(null) else onHome() }
@@ -369,12 +356,7 @@ private fun BuildingDetailContent(building: OwnedBuilding, city: CityMembership?
         when (tab) {
             0 -> {
                 DetailRow("Mərtəbə", building.floors.toString()); DetailRow("Sakin", building.residents.toString())
-                Text(when {
-                    city == null -> "Şəhərə aidlik yüklənməyib"
-                    city.buildings[building.id] == building.revision -> "✓ Şəhərdə yerləşdirilib"
-                    building.id in city.buildings -> "Şəhər məlumatı dəyişib. Yenilə."
-                    else -> "İnventardadır"
-                }, color = GameTokens.Muted)
+                Text(building.cityStatus(city), color = GameTokens.Muted)
                 DetailRow("Hər mərtəbəyə", if (building.residents.toBigInteger() == building.floors.toBigInteger() * java.math.BigInteger.valueOf(4)) "4 sakin" else "—")
                 DetailRow("Passiv gəlir", "Yaratmır")
             }

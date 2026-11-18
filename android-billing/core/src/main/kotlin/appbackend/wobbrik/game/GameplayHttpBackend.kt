@@ -99,7 +99,7 @@ class UrlConnectionGameplayTransport(origin: String) : GameplayTransport {
     override suspend fun request(path: String, bearer: String, body: String?): GameplayResponse = withContext(Dispatchers.IO) {
         require(allowedReadPath(path) || path in setOf("sync", "catalog", "market/list", "market/withdraw", "market/buy", "shop/buy", "buildings/edit", "buildings/delete", "attempts/start", "attempts/checkpoint", "attempts/finish", "attempts/abandon"))
         val suffix = if (path == "catalog") "catalog?rules_version=wobbrik-v1" else path
-        val responseLimit = if (path.startsWith("inventory?") || path.startsWith("market/")) 1_048_576 else 65_536
+        val responseLimit = if (path.startsWith("inventory?") || path.startsWith("market/") || path.startsWith("buildings/")) 1_048_576 else 65_536
         val connection = URI("$base/v1/apps/wobbrik/game/$suffix").toURL().openConnection() as HttpURLConnection
         // Close the underlying socket, rather than disconnecting while the HTTPS
         // implementation may hold its connection/SSL read lock. Ownership is per request.

@@ -135,4 +135,88 @@ class InventoryPayloadTest {
         assertEquals(20, result.buildings.size)
         assertTrue(runCatching { cache.replay(session, account, "inventory-") { InventoryRepository(it).page(session, "b-19") } }.isFailure)
     }
+    @Test fun inlineMembershipIsStrictAndDoesNotRequestCity() = runBlocking {
+        val base = Json.parseToJsonElement(page(false)).jsonObject.getValue("buildings").jsonArray.first().jsonObject
+        val session = BillingSession("alice", "epoch")
+        for (placed in listOf(true, false)) {
+            val body = JsonObject(base + ("in_city" to JsonPrimitive(placed))).toString()
+            var calls = 0
+            val repo = InventoryRepository(GameplayReads { _, path ->
+                assertEquals("buildings/b-0?view=display", path); calls++; body
+            })
+            assertEquals(placed, repo.building(session, "b-0").inCity)
+            assertEquals(1, calls)
+        }
+        assertNull(InventoryReads.building(base).inCity)
+        for (invalid in listOf(JsonPrimitive("true"), JsonNull, JsonPrimitive(1))) {
+            assertTrue(runCatching { InventoryReads.building(JsonObject(base + ("in_city" to invalid))) }.isFailure)
+        }
+    }
+
+    @Test fun maximumEscapingPageSurvivesRealAtomicFileAndLegacyJournalStaysBounded() = runBlocking {
+        val dir = java.nio.file.Files.createTempDirectory("inventory-cache-budget").toFile()
+        try {
+            val fs = IoJournalFileSystem { }
+            fun files(key: String): JournalFile = DurableJournalFile(dir, key, fs, ReadOnlyGameCache.MaxBytes)
+            val sessions = AccountSessions { "token" }.also { it.onAuthChanged("alice") }
+            val session = sessions.current()!!
+            val account = ReadOnlyAccount("alice", RecoveryDtos.snapshot(snapshot), RecoveryCatalog("wobbrik-v1", "wobbrik-structural-v1", emptyList(), emptyList()))
+            // A valid response body just below the 1 MiB transport ceiling; escaping doubles it on disk.
+            val base = Json.parseToJsonElement(page(false)).jsonObject.getValue("buildings").jsonArray.first().jsonObject
+            val wire = JsonObject((base - "snapshot") + ("padding" to JsonPrimitive("\\".repeat(520000)))).toString()
+            assertTrue(wire.toByteArray().size < 1_048_576)
+            val backend = GameplayHttpBackend(sessions, GameplayTransport { path, _, _ ->
+                GameplayResponse(200, if(path == "sync") snapshot else wire)
+            })
+            val cache = ReadOnlyGameCache(::files)
+            cache.capture(session, account, "large", backend) { it.read(session, "buildings/b-0?view=display") }
+            assertEquals(wire, ReadOnlyGameCache(::files).replay(session, account, "large") {
+                it.read(session, "buildings/b-0?view=display")
+            })
+            val file = dir.listFiles()!!.single()
+            assertTrue(file.length() > 1_048_576)
+            val committed = file.readBytes()
+            assertTrue(runCatching { files(file.name).replace(ByteArray(ReadOnlyGameCache.MaxBytes + 1)) }.isFailure)
+            assertArrayEquals(committed, file.readBytes())
+            assertTrue(runCatching { DurableJournalFile(dir, "command", fs).replace(ByteArray(DurableJournalFile.MaxBytes + 1)) }.isFailure)
+        } finally { dir.deleteRecursively() }
+    }
+
+    // Retains the previous 3001-member boundary regression, now expected to persist/replay.
+    @Test fun cityAboveLegacyJournalLimitReplaysWithIndependentCacheBudget() = runBlocking {
+        val sessions = AccountSessions { "token" }.also { it.onAuthChanged("alice") }
+        val session = sessions.current()!!
+        val account = ReadOnlyAccount("alice", RecoveryDtos.snapshot(snapshot), RecoveryCatalog("wobbrik-v1", "wobbrik-structural-v1", emptyList(), emptyList()))
+        val files = mutableMapOf<String, ByteArray>()
+        val cache = ReadOnlyGameCache { key -> object : JournalFile {
+            override fun read() = files[key]
+            override fun replace(bytes: ByteArray) { files[key] = bytes.clone() }
+        } }
+        var requests = 0
+        var network = true
+        val backend = GameplayHttpBackend(sessions, GameplayTransport { path, _, _ ->
+            check(network); requests++
+            val wire = if (path == "sync") snapshot else {
+                val start = path.substringAfter("&cursor=b-", "0").toInt() + 1
+                val end = minOf(start + 99, 3001)
+                buildJsonObject {
+                    put("rules_version", "wobbrik-v1"); put("revision", 1); put("population", "120040")
+                    putJsonArray("buildings") { for (i in start..end) add(buildJsonObject {
+                        put("building_id", "b-$i"); put("building_revision", 1)
+                    }) }
+                    if (end < 3001) put("next_cursor", "b-$end")
+                }.toString()
+            }
+            assertTrue(wire.toByteArray().size <= 65_536)
+            GameplayResponse(200, wire)
+        })
+        var verified = false
+        val live = cache.capture(session, account, "inventory-city", backend,
+            onVerified = { verified = true }) { InventoryRepository(it).city(session) }
+        assertTrue(verified); assertEquals(3001, live.buildings.size); assertEquals(32, requests)
+        assertTrue(files.values.single().size > DurableJournalFile.MaxBytes)
+        network = false
+        assertEquals(live, cache.replay(session, account, "inventory-city") { InventoryRepository(it).city(session) })
+        assertEquals(32, requests)
+    }
 }

@@ -1,33 +1,34 @@
-# Cari tapşırıq — Inventory city paging/detail costs / 18 noyabr 2026
+# Cari tapşırıq — Inventory bounded membership/cache / 18 noyabr 2026
 
 ## Completed
 
-- `docs/PLAN.md` §1.1 üzrə cihazsız böyük-hesab oxusu: existing plain City100 istifadə edilir;1001bina üçün51→11city səhifəsi. Optional membership hələ bütün şəhəri oxuyur.
-- Hər səhifədə accumulated map köçürülməsi aradan qaldırılıb; refresh-local linear accumulator, final copy, revision/population/duplicate/cursor checks saxlanır.
-- AppBackend additive building detail `?view=display`: istifadə olunmayan opaque snapshot SQL-dən alınmır. Mobil display istəyir, old-server snapshot-u cache üçün silir, legacy detail və20-page city bundle-larını tam cursor chain ilə replay edir.
+- İstifadəçinin performans1–2 göstərişi: InventoryScreen-in bütün şəhər membership oxusu çıxarıldı. Display inventory/detail serverdən same-statement owner-scoped optional in_city alır; şəhər ölçüsünə bağlı paging/population işi yoxdur.
+- Cache mövcud page/detail key-lərində atomik qalır; oxu cache-inə ayrıca8MiB büdcə verildi. Default sole command journal140000byte dəyişmir. Detail transport1MiB-dir.3001membership və near1MiB escaped body offline replay regression-ları keçir.
+- AppBackend paired field/API müqaviləsi, true/false/legacy/foreign/deleted regression-ları və lokal diff review tamamlandı.
 
 ## Current state
 
-Android `fix/inventory-city-detail-costs`, baza `efbd9e9`; AppBackend `feat/wobbrik`, baza `1ef8b32`. Paired scoped diff lokal review edilib. Owner iki release baseline-profile binarisi dirty saxlanır və işə daxil deyil. Main merge/CI/push/deploy yoxdur.
+Android `fix/inventory-bounded-membership-cache`, baza6bb1457; backend `feat/wobbrik`, baza32ad8f7. Owner iki release baseline-profile binarisi dəyişmədən scope xaricində saxlanır. Əvvəlki city-detail review əlavəsi tarixi qeyddir. Main merge/CI/push/deploy yoxdur.
 
 ## Decisions
 
-Yeganə plan `docs/PLAN.md` §1.1/§2–3. Server wallet/ownership authority, sole journal, UID/login/capability/revision və final-sync/fresh-mutation gate saxlanır. Yeni endpoint/schema/domain/wallet qaydası yoxdur; detail-in additive display read müqaviləsi sənədləşdirilib. Cihaz/emulator açılmır. City100 mövcud serverdə işləyir; detail wire qənaəti ayrıca backend deploy tələb edir.
+Yeganə plan docs/PLAN.md§1.1/§2–3. in_city yalnız display read metadata-sıdır; wallet/ownership authority, UID/login/capability/revision və final-sync/fresh mutation gate saxlanır. Legacy/old-server missing field naməlumdur, tam şəhər fallback yoxdur.8MiB cache yalnız read-only namespace-ə ötürülür; yeni chunk/manifest/DB/journal formatı yoxdur.1MiB wire/8MiB cache sonlu hədlərdir, arbitrary payload dəstəyi deyil.
 
 ## Remaining work
 
-Production10+s, RTT/SQL contention/paylanma, fiziki frame/ART/GPU/battery və Firebase-authenticated Android→Go E2E yoxlanmayıb. City hələ O(N) bütün membership-i yükləyir və hər page population hesablayır; huge city/geometry transport/cache limitini keçə bilər. Bir final sync qalır. Əvvəlki PNG parity/inset/IME/locale/TalkBack borcları bağlanmır.
+Yeni status metadata-sı ayrıca backend deploy tələb edir; köhnə serverdə naməlum qalır. Production10+s/2+s, RTT/SQL contention/paylanma, fiziki frame/ART/GPU/yaddaş/battery və Firebase-authenticated Android→GoE2E yoxlanmayıb. Şəhər ekranının öz tam-scene böyük-view hədləri bu Inventory vahidi ilə həll edilmiş sayılmır. Profil ilk-açılış/ümumi app performansı və əvvəlki PNG/inset/IME/locale/TalkBack borcları açıqdır.
 
 ## Relevant files
 
-Core `InventoryReads.kt`, `GameplayHttpBackend.kt`, `ReadOnlyGameCache.kt`; tests `InventoryReadsTest`, `InventoryPayloadTest`, scene/parts/menu fixtures. AppBackend `internal/wobbrik/market.go`, `internal/platform/wobbrik_http.go`, inventory payload/city probe tests; `docs/wobbrik-game-api.md`. Review: `docs/reviews/2026-11-18-inventory-city-detail-costs.md`; evidence `docs/reviews/inventory-city-detail/`.
+Core InventoryReads.kt, GameplayHttpBackend.kt, ReadOnlyGameCache.kt, DurableJournalFile.kt; AndroidAttemptJournal.kt; InventoryScreen.kt, MobileInventoryPresentation.kt, WobbrikApplication.kt. InventoryPayloadTest və inventory-first-open/detail-latency native harness-ləri. Backend market.go, inventory payload/city probe tests və docs/wobbrik-game-api.md. Review docs/reviews/2026-11-18-inventory-bounded-membership-cache.md; evidence inventory-bounded-membership/.
 
 ## Checks performed
 
-- Real disposable PostgreSQL18 + authenticated HTTP middleware/synthetic identity,1001bina: final sync daxil52→12HTTP,849→209SQL,107864→94388byte; lokal race sample7.160→1.561s. Production ölçməsi deyil.
-- Detail typed10floor valid opaque fixture16758→542byte; geometry/metadata bərabərdir, display11SQL. Legacy query/snapshot, invalid view, foreign owner yoxlanıb.
-- Android core162/app41unit, assembleDebug/lintDebug PASS35s; backend focused racePASS16.639s, full race suitePASS(platform42.509s), vet/buildPASS. İlkin port/fixture uğursuzluqları review-da qeyd edilib və final suite-lər təkrar keçirilib. Diffcheck/lokal reviewPASS. Disposable DB dayandırılıb.
+- Normal core165unit/appunit/assembleDebug/lintDebugPASS11s; final native16/16PASS16s. Native route-lərdə0cityHTTP; cached detail fresh-mutation gate saxlanır. Real atomic file near1MiB escaped payload, default journal limit və3001membership cache/replayPASS.
+- Disposable PostgreSQL18/race1001bina: old City100membership+sync12HTTP/209SQL/94387byte/1.701s; new inventory20+sync2HTTP/44SQL/9028byte/23.05ms. Əvvəlki ölçüyə inventory page daxil deyildi; production E2E nisbəti deyil.
+- Backend full racePASS(platform34.356s), final focused probePASS16.743s, vet/build/diffcheckPASS. İlkin fixture/compile/FK səhvləri düzəldilib final yoxlamalar təkrar keçirilib. Disposable DB dayandırılıb; production istifadə olunmayıb.
+- ui-craft: tokenlər saxlanır; Text/Muted/Success kontrastPASS.320/360/390font1/2native renderlər, inset/uzun balans; list/detail/status nümunələri açılıb approvedPNG ilə müqayisə edildi. Əvvəlki layout/parity borcları bağlanmır. Emulator açılmayıb.
 
 ## Exact next step
 
-Bu dar paired vahidin istifadəçi review-u; avtomatik main merge/CI/push/deploy yoxdur. Növbəti ayrıca performans işi yalnız yeni göstərişlə; bu nəticələri bütün10+s gecikmənin həlli kimi təqdim etmə. Əvvəlki owner binarilərinə toxunma.
+Bu paired performans1–2 vahidinin istifadəçi review-u. Main merge/CI/push/deploy avtomatik yoxdur. Yeni böyük işə keçməzdən əvvəl yeni chat tövsiyə olunur; owner binarilərinə toxunma.

@@ -10,6 +10,9 @@ data class ReadOnlyAccount(val uid: String, val snapshot: GameSnapshot, val cata
 
 /** Atomic, account-scoped cache. A view is a complete captured read, never a union of live and cached pages. */
 class ReadOnlyGameCache(private val files: (String) -> JournalFile) {
+    // A page can contain 1 MiB of wire JSON; wrapper string escaping can expand it up to 6x.
+    // Independent of the 140 kB sole mutation journal. Views retain their existing page/detail keys.
+    companion object { const val MaxBytes = 8 * 1024 * 1024 }
     private class FileLock(var users: Int = 0)
     private val locks = mutableMapOf<String, FileLock>()
 
@@ -113,7 +116,7 @@ class ReadOnlyGameCache(private val files: (String) -> JournalFile) {
     }
     private fun read(file: JournalFile, uid: String, view: String): JsonObject? {
         val bytes = file.read() ?: return null
-        require(bytes.size <= DurableJournalFile.MaxBytes)
+        require(bytes.size <= MaxBytes)
         val root = Json.parseToJsonElement(bytes.toString(Charsets.UTF_8)).jsonObject
         require(root.getValue("version").jsonPrimitive.int == 1 && root.getValue("uid").jsonPrimitive.content == uid &&
             root.getValue("view").jsonPrimitive.content == view)
@@ -122,7 +125,7 @@ class ReadOnlyGameCache(private val files: (String) -> JournalFile) {
     private fun write(file: JournalFile, uid: String, view: String, data: JsonObject) {
         val body = buildJsonObject { put("version", 1); put("uid", uid); put("view", view); put("data", data) }
             .toString().toByteArray(Charsets.UTF_8)
-        require(body.size <= DurableJournalFile.MaxBytes)
+        require(body.size <= MaxBytes)
         file.replace(body)
     }
 }

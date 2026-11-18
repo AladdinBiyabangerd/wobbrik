@@ -28,18 +28,20 @@ interface JournalFileSystem {
  * the committed state and is restored, as AtomicFile.openRead did; `.new` is never committed and is
  * deleted. Not thread-safe; [DiskAttemptJournal] serialises access and must be the only writer.
  */
-class DurableJournalFile(private val directory: File, name: String, private val fs: JournalFileSystem) : JournalFile {
+class DurableJournalFile(private val directory: File, name: String, private val fs: JournalFileSystem,
+    private val maxBytes: Int = MaxBytes) : JournalFile {
+    init { require(maxBytes > 0) }
     private val base = File(directory, name)
     private val next = File(directory, "$name.new")
     private val backup = File(directory, "$name.bak")
 
     override fun read(): ByteArray? {
         resolveLeftovers()
-        return if (fs.exists(base)) fs.read(base, MaxBytes) else null
+        return if (fs.exists(base)) fs.read(base, maxBytes) else null
     }
 
     override fun replace(bytes: ByteArray) {
-        require(bytes.size <= MaxBytes) { "Journal too large" }
+        require(bytes.size <= maxBytes) { "Journal too large" }
         resolveLeftovers()
         try {
             fs.writeSynced(next, bytes)

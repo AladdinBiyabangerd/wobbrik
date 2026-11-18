@@ -125,7 +125,7 @@ class WobbrikApplication : Application(), DefaultLifecycleObserver {
             token
         }
         val backend = GameplayHttpBackend(sessions, transport)
-        val readCache = appbackend.wobbrik.game.ReadOnlyGameCache(appbackend.wobbrik.game.androidGameIntentFiles(this, "read-only-game"))
+        val readCache = appbackend.wobbrik.game.ReadOnlyGameCache(appbackend.wobbrik.game.androidGameIntentFiles(this, "read-only-game", appbackend.wobbrik.game.ReadOnlyGameCache.MaxBytes))
         val owner = AuthenticatedRecoveryOwner(
             sessions, backend, androidAttemptJournal(this), recoveryScope,
             onStateChanged = engineHost::onRecoveryChanged,

@@ -44,6 +44,9 @@ Google vahidinin sübutu: [Android review](reviews/2026-11-13-required-google-si
 
 **17 noyabr — cari performans prioriteti:** istifadəçi sadə menyu keçidlərinin təxminən2+s, İnventarın10+s çəkdiyini bildirir (hələ ölçülməyib) və optimizasiyanı növbəti prioritet kimi tapşırır. Lokal məlumatı olan menyu/baxışlar şəbəkəni gözləmədən açılmalı, sinxronizasiya arxa planda və qənaətli işləməlidir; hər UI hərəkətinə real-time sorğu tələb olunmur. Mobil və AppBackend tərəfi eyni axın üzrə yoxlanmalıdır. Mövcud server-authoritative wallet/mülkiyyət/qəbul, hesab izolyasiyası və sole journal sərhədləri saxlanır; bu göstəriş ikinci lokal wallet və ya qəbul edilməmiş nəticəni təsdiqlənmiş kimi göstərmək icazəsi deyil. Əvvəl/sonra ölçüləri və sorğu/byte sayları ilə gecikmə, təkrarlanan oxular və art decode/main-thread işi yoxlanır; yeni infrastruktur yalnız ölçülmüş ehtiyacla seçilir.
 
+18 noyabr — Inventory performans1–2: route-un bütün şəhər membership oxusu çıxarılıb; paired AppBackend display bina cavabında same-statement owner-scoped optional in_city qaytarır. Cache page/detail üzrə mövcud atomik formatda ayrıca8MiB büdcə, detail wire1MiB; sole command journal140000byte saxlanır. Legacy sahə yoxdursa unknown, city fallback yoxdur. Fokuslu Android/native və real disposable PostgreSQL/race yoxlamaları review-da: `reviews/2026-11-18-inventory-bounded-membership-cache.md`. Deploy/production latency və bütün app performans qəbulu deyil.
+
+
 **Tamamlanma sərhədi:** təkcə navbarın və ya ana ekranın hazır olması bütün tapşırığın qəbulu deyil. Bildirilən altı ekranın və digər menyu ekranlarının vahid üslubu, real giriş yolları, işləməyən əməliyyatlar, city asset keyfiyyəti, mobile responsive və ölçülmüş axıcılıq ayrıca izlənir; bitməmiş iş handoff-da açıq qalır.
 
 ## 2. Arxitektura və server müqaviləsi

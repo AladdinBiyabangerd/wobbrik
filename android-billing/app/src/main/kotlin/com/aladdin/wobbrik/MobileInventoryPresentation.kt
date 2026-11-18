@@ -29,7 +29,7 @@ internal fun MobileOwnedBuildingCard(building: OwnedBuilding, catalog: RecoveryC
             RoundedCornerShape(GameTokens.ControlRadius)), shape = RoundedCornerShape(GameTokens.ControlRadius), kind = MenuSkin.Commerce) {
             Column(Modifier.padding(GameTokens.Small), verticalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {
                 val largeFont = LocalDensity.current.fontScale > 1f
-                val inCity = city?.buildings?.get(building.id) == building.revision
+                val inCity = building.isInCity(city)
                 Box(Modifier.fillMaxWidth()) {
                     BuildingPreview(building, Modifier.fillMaxWidth()
                         .then(if(!largeFont) Modifier.padding(top = GameTokens.Inset + GameTokens.Small) else Modifier)
@@ -100,7 +100,7 @@ internal fun MobileOwnedBuildingDetail(building: OwnedBuilding, city: CityMember
                 }
             }
         }
-        val placed = city?.buildings?.get(building.id) == building.revision
+        val placed = building.isInCity(city)
         MenuRelief(Modifier.fillMaxWidth(), shape = RoundedCornerShape(GameTokens.ControlRadius), kind = MenuSkin.Track) {
             Row(Modifier.padding(GameTokens.Small), verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
@@ -109,12 +109,7 @@ internal fun MobileOwnedBuildingDetail(building: OwnedBuilding, city: CityMember
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {
                     Text("Şəhər statusu", color = GameTokens.Muted, fontFamily = GameTypeface,
                         fontSize = GameTokens.Label)
-                    Text(when {
-                        city == null -> "Şəhərə aidlik yüklənməyib"
-                        placed -> "✓ Şəhərdə yerləşdirilib"
-                        building.id in city.buildings -> "Şəhər məlumatı dəyişib. Yenilə."
-                        else -> "İnventardadır"
-                    }, color = if (placed) GameTokens.Success else GameTokens.Text,
+                    Text(building.cityStatus(city), color = if (placed) GameTokens.Success else GameTokens.Text,
                         fontFamily = GameTypeface, fontSize = GameTokens.Body, fontWeight = FontWeight.Bold)
                 }
             }
@@ -207,3 +202,14 @@ private fun OwnedBuildingDetailArtwork(building: OwnedBuilding, modifier: Modifi
         }
     })
 }
+
+/** Same-statement server membership wins; legacy cached/server bodies remain explicitly unknown. */
+internal fun OwnedBuilding.cityStatus(city: CityMembership?): String = when {
+    inCity == true -> "✓ Şəhərdə yerləşdirilib"
+    inCity == false -> "İnventardadır"
+    city == null -> "Şəhərə aidlik yüklənməyib"
+    city.buildings[id] == revision -> "✓ Şəhərdə yerləşdirilib"
+    id in city.buildings -> "Şəhər məlumatı dəyişib. Yenilə."
+    else -> "İnventardadır"
+}
+internal fun OwnedBuilding.isInCity(city: CityMembership?): Boolean = inCity ?: (city?.buildings?.get(id) == revision)

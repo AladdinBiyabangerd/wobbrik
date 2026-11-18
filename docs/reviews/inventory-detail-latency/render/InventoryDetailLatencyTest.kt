@@ -39,9 +39,10 @@ class InventoryDetailLatencyTest {
   val snapshotBody="""{"rules_version":"wobbrik-v1","revision":1,"coins":1250,"xp":0,"attempt":null,"server_time":"2026-11-05T00:00:00Z","first_online_at":"2026-11-05T00:00:00Z","grace_until":"2026-11-05T20:00:00Z","level":1,"rescues":0,"achievements":[],"unlocks":[],"land":[],"part_progress":[]}"""
   var snapshot=RecoveryDtos.snapshot(snapshotBody)
   val catalog=RecoveryCatalog("wobbrik-v1","wobbrik-structural-v1",FinishCosmetics.categories.map {c->CatalogItem("base_1_$c","Bənövşəyi ev",c,"free",0,null,null)},emptyList())
+  var membership: Boolean? = true
   fun building(i:Int):String {
    val parts=FinishCosmetics.categories.joinToString(",") {"\"$it\":\"base_1_$it\""}
-   return """{"id":"b-$i","revision":1,"floors":12,"residents":48,"base_value":500,"max_price":600,"parts":{$parts},"traded":false,"accepted_geometry":{"geometry":{"version":"city-geometry-v1","centers_x_ticks":[${(0..11).joinToString(","){"0"}}]},"attempt_id":"attempt","sequence":1,"operation_id":"op","rules_version":"wobbrik-v1","engine_version":"wobbrik-structural-v1"}}"""
+   return """{"id":"b-$i","revision":1,"floors":12,"residents":48,"base_value":500,"max_price":600,"parts":{$parts},"traded":false,${membership?.let { "\"in_city\":$it," } ?: ""}"accepted_geometry":{"geometry":{"version":"city-geometry-v1","centers_x_ticks":[${(0..11).joinToString(","){"0"}}]},"attempt_id":"attempt","sequence":1,"operation_id":"op","rules_version":"wobbrik-v1","engine_version":"wobbrik-structural-v1"}}"""
   }
   val calls=AtomicInteger();val bytes=AtomicInteger();val cityCalls=AtomicInteger();val commands=AtomicInteger()
   val paths=ConcurrentHashMap.newKeySet<String>()
@@ -98,11 +99,12 @@ class InventoryDetailLatencyTest {
    compose.runOnIdle {selected.value="b-1"}
    compose.waitUntil(15000) {text("Bina məlumatı")}
    assertFalse(f.cityGate.isCompleted)
-   assertTrue(text("Şəhərə aidlik yüklənməyib"))
-   assertEquals(1,f.cityCalls.get())
+   assertTrue(text("✓ Şəhərdə yerləşdirilib"))
+   assertEquals(0,f.cityCalls.get())
    println("INVENTORY detail-visible-with-city-blocked requests=${f.calls} responseUtf8Bytes=${f.bytes}")
    f.cityGate.complete(Unit)
    compose.waitUntil(15000) {text("✓ Şəhərdə yerləşdirilib")}
+   compose.onNodeWithText("✓ Şəhərdə yerləşdirilib").performScrollTo().assertIsDisplayed()
    compose.waitForIdle();compose.runOnUiThread {
     val v=compose.activity.window.decorView;val b=Bitmap.createBitmap(v.width,v.height,Bitmap.Config.ARGB_8888);v.draw(Canvas(b))
     val dir=File("/private/tmp/wobbrik-inventory-detail");dir.mkdirs()
@@ -114,11 +116,36 @@ class InventoryDetailLatencyTest {
    compose.waitUntil(15000) {text("12 mərtəbə  ›")}
    compose.runOnIdle {selected.value="b-1"}
    compose.waitUntil(15000) {text("Bina məlumatı")}
-   assertEquals(1,f.cityCalls.get());assertEquals(settledCalls,f.calls.get())
+   assertEquals(0,f.cityCalls.get());assertEquals(settledCalls,f.calls.get())
    assertEquals(0,f.commands.get())
   } finally {f.close()}
  }
 
+ @Test fun unplacedAndLegacyStatusDoNotScanCity() {
+  val f=Fixture().apply {membership=false}
+  try {
+   compose.setContent { androidx.compose.material3.MaterialTheme {
+    MobileMenuShell("inventory",f.ready().snapshot.coins,{}, {}) {
+     InventoryScreen(f.configured,f.ready(),"b-1",{},{},{},{},{})
+    }
+   }}
+   compose.waitUntil(15000) {text("İnventardadır")}
+   compose.onNodeWithText("İnventardadır").performScrollTo().assertIsDisplayed()
+   assertEquals(0,f.cityCalls.get())
+  } finally {f.close()}
+ }
+ @Test fun legacyServerStatusRemainsUnknownWithoutCityFallback() {
+  val f=Fixture().apply {membership=null}
+  try {
+   compose.setContent { androidx.compose.material3.MaterialTheme {
+    MobileMenuShell("inventory",f.ready().snapshot.coins,{}, {}) {
+     InventoryScreen(f.configured,f.ready(),"b-1",{},{},{},{},{})
+    }
+   }}
+   compose.waitUntil(15000) {text("Şəhərə aidlik yüklənməyib")}
+   assertEquals(0,f.cityCalls.get())
+  } finally {f.close()}
+ }
  @Test fun legacyDetailCacheShowsBeforeNetworkAndCannotDelete() {
   val f=Fixture()
   try {
