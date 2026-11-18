@@ -49,7 +49,9 @@ class ReadOnlyGameCache(private val files: (String) -> JournalFile) {
         val reader = GameplayReads { expected, path ->
             require(expected == session && allowedReadPath(path))
             backend.read(expected, path).let { body ->
-                if (path.startsWith("inventory?")) InventoryReads.displayBody(body) else body
+                if (path.startsWith("inventory?")) InventoryReads.displayBody(body)
+                else if (path.startsWith("buildings/") && path.endsWith("?view=display")) InventoryReads.detailDisplayBody(body)
+                else body
             }.also { body ->
                 // Scene detail reads may complete on different IO workers.
                 synchronized(bodies) {
@@ -92,10 +94,15 @@ class ReadOnlyGameCache(private val files: (String) -> JournalFile) {
         val bodies = data.getValue("bodies").jsonObject
         return block(GameplayReads { expected, path ->
             require(expected == session && allowedReadPath(path))
-            // The additive market representation did not exist in older complete bundles.
-            // Replay the identical legacy query, then let the repository use its captured
-            // detail bodies. Never alias filters, scope, cursor or account revisions.
-            val body = bodies[path] ?: if (path.endsWith("&include=previews") && MarketReads.allowedPath(path))
+            // Legacy complete city bundles use smaller pages: replay their exact cursor
+            // chain (the parser accepts <=100), never skip ahead or splice live data.
+            // Display/preview aliases only remove the additive representation query.
+            // Never alias filters, scope, cursor, UID or accepted account revision.
+            val body = bodies[path] ?: if (path.startsWith("city?limit=100"))
+                bodies[path.replace("city?limit=100", "city?limit=20")]
+            else if (path.startsWith("buildings/") && path.endsWith("?view=display"))
+                bodies[path.removeSuffix("?view=display")]
+            else if (path.endsWith("&include=previews") && MarketReads.allowedPath(path))
                 bodies[path.removeSuffix("&include=previews")]
             else if (path.endsWith("&view=display") && allowedReadPath(path))
                 bodies[path.removeSuffix("&view=display")]

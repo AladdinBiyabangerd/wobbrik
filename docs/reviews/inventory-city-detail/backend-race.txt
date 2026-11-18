@@ -1,0 +1,9 @@
+?   	appbackend/cmd/legal-preview	[no test files]
+ok  	appbackend/cmd/server	2.593s
+?   	appbackend/firebase/provider-check	[no test files]
+ok  	appbackend/internal/dailyplate	1.426s
+ok  	appbackend/internal/legalpages	4.246s
+ok  	appbackend/internal/mealvision	7.828s
+ok  	appbackend/internal/platform	42.509s
+ok  	appbackend/internal/wobbrik	3.257s
+ok  	appbackend/migrations	3.243s

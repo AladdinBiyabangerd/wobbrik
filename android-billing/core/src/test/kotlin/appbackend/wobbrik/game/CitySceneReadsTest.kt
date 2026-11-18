@@ -34,7 +34,7 @@ class CitySceneReadsTest {
             assertNull(body)
             GameplayResponse(200, when {
                 path.startsWith("city?") -> { cityCalls++; city(entries = member()) }
-                path == "buildings/b-1" -> building
+                path == "buildings/b-1?view=display" -> building
                 else -> """{"copies":[{"id":"d-1","item_id":"tree_1","position":$position},{"id":"d-2","item_id":"tree_1"}]}"""
             })
         })
@@ -116,7 +116,7 @@ class CitySceneReadsTest {
                             entry.dropLast(1) + ",\"detail\":" + building.replace("b-1", id) + "}"
                         else entry
                     })
-                    path.startsWith("buildings/") -> building.replace("b-1", path.substringAfter("/"))
+                    path.startsWith("buildings/") -> building.replace("b-1", path.substringAfter("/").substringBefore("?"))
                     else -> """{"copies":[]}"""
                 }
                 bytes += response.toByteArray(Charsets.UTF_8).size
@@ -157,13 +157,13 @@ class CitySceneReadsTest {
                 path.startsWith("city?") && path.contains("cursor=") -> city(entries = member().replace("b-1", "b-2"))
                 path.endsWith("include=details") -> first
                 path.startsWith("city?") -> if (race) first.replace("\"revision\":1", "\"revision\":2") else first
-                path == "buildings/b-2" -> detail.replace("b-1", "b-2")
+                path == "buildings/b-2?view=display" -> detail.replace("b-1", "b-2")
                 else -> """{"copies":[]}"""
             })
         })
         val result = CitySceneRepository(backend).load(sessions.current()!!)
         assertEquals(5, calls.size)
-        assertEquals(listOf("buildings/b-2"), calls.filter { it.startsWith("buildings/") })
+        assertEquals(listOf("buildings/b-2?view=display"), calls.filter { it.startsWith("buildings/") })
         assertEquals(2, result.buildings.size)
         assertEquals(List(10) { 0L }, result.buildings.first().building.geometry!!.geometry.centers)
         race = true

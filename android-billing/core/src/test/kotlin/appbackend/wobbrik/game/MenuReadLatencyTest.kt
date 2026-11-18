@@ -25,7 +25,7 @@ class MenuReadLatencyTest {
             delay(40)
             val response = when {
                 path.startsWith("city?") -> city()
-                path.startsWith("buildings/") -> building(path.substringAfter('/'))
+                path.startsWith("buildings/") -> building(path.substringAfter('/').substringBefore('?'))
                 path.startsWith("decorations?") -> """{"copies":[]}"""
                 path.startsWith("market?") -> """{"listings":[${(1..count).joinToString(",", transform = ::listing)}]}"""
                 path.startsWith("market/") -> path.substringAfter("market/l-").toInt().let { """{"listing":${listing(it)},"building":${building("b-$it")}}""" }
@@ -64,7 +64,7 @@ class MenuReadLatencyTest {
             val live = backend(sessions, Meter())
             val reader = GameplayReads { expected, path ->
                 val body = live.read(expected, path)
-                if (path == "buildings/b-1") {
+                if (path == "buildings/b-1?view=display") {
                     if (changeEpoch) sessions.onAuthChanged("alice")
                     body.replace("\"revision\":1", "\"revision\":2")
                 } else body

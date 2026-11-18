@@ -1,0 +1,15 @@
+=== RUN   TestIntegrationInventoryCityPagingProbe
+    wobbrik_inventory_city_probe_test.go:102: INVENTORY_CITY buildings=1001 limit=20 requestsIncludingFinalSync=52 sql=849 bytes=107864 elapsed=7.160335917s
+    wobbrik_inventory_city_probe_test.go:102: INVENTORY_CITY buildings=1001 limit=100 requestsIncludingFinalSync=12 sql=209 bytes=94388 elapsed=1.5613635s
+--- PASS: TestIntegrationInventoryCityPagingProbe (14.54s)
+=== RUN   TestIntegrationInventoryPayloadProbe
+    wobbrik_inventory_payload_test.go:85: INVENTORY display=false sample=0 requests=1 sql=11 bytes=335225 elapsed=49.665625ms
+    wobbrik_inventory_payload_test.go:85: INVENTORY display=false sample=1 requests=1 sql=11 bytes=335225 elapsed=47.569042ms
+    wobbrik_inventory_payload_test.go:85: INVENTORY display=false sample=2 requests=1 sql=11 bytes=335225 elapsed=48.812334ms
+    wobbrik_inventory_payload_test.go:85: INVENTORY display=true sample=0 requests=1 sql=11 bytes=10905 elapsed=11.12175ms
+    wobbrik_inventory_payload_test.go:85: INVENTORY display=true sample=1 requests=1 sql=11 bytes=10905 elapsed=11.5205ms
+    wobbrik_inventory_payload_test.go:85: INVENTORY display=true sample=2 requests=1 sql=11 bytes=10905 elapsed=10.969083ms
+    wobbrik_inventory_payload_test.go:161: DETAIL legacyBytes=16758 displayBytes=542 sql=11 elapsed=8.440375ms
+--- PASS: TestIntegrationInventoryPayloadProbe (0.63s)
+PASS
+ok  	appbackend/internal/platform	16.639s

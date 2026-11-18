@@ -52,6 +52,37 @@ class InventoryReadsTest {
         })
         try { InventoryRepository(backend).page(old); fail("stale response accepted") } catch (_: AccountChanged) { }
     }
+    @Test fun largeCityUsesBoundedHundredPagesWithoutLosingMembership() = runBlocking {
+        val sessions = AccountSessions { "token" }.also { it.onAuthChanged("alice") }
+        val paths = mutableListOf<String>()
+        val reader = GameplayReads { _, path ->
+            paths += path
+            assertTrue(allowedReadPath(path))
+            assertTrue(path.startsWith("city?limit=100"))
+            val start = path.substringAfter("&cursor=b-", "0").toInt() + 1
+            val end = minOf(start + 99, 1001)
+            city(1, (start..end).joinToString(",") { """{"building_id":"b-$it","building_revision":1}""" },
+                if (end < 1001) """, "next_cursor":"b-$end"""" else "")
+        }
+        val result = InventoryRepository(reader).city(sessions.current()!!)
+        assertEquals(1001, result.buildings.size)
+        assertEquals(11, paths.size)
+        assertEquals(1L, result.buildings["b-1001"])
+        assertNull(result.next)
+        listOf("city?limit=101", "city?limit=100&include=details", "city?limit=100&uid=bob",
+            "buildings/b-1?view=full", "buildings/b-1?view=display&uid=bob").forEach { assertFalse(it, allowedReadPath(it)) }
+        assertTrue(allowedReadPath("buildings/b-1?view=display"))
+    }
+    @Test fun cityRejectsDuplicateMembershipAcrossPages() = runBlocking {
+        val sessions = AccountSessions { "token" }.also { it.onAuthChanged("alice") }
+        var calls = 0
+        val reader = GameplayReads { _, _ ->
+            calls++
+            city(1, """{"building_id":"b-1","building_revision":1}""",
+                if (calls == 1) """, "next_cursor":"b-1"""" else "")
+        }
+        assertTrue(runCatching { InventoryRepository(reader).city(sessions.current()!!) }.isFailure)
+    }
     private fun rejected(block: () -> Unit) {
         try { block(); fail("invalid read accepted") } catch (_: IllegalArgumentException) { }
     }

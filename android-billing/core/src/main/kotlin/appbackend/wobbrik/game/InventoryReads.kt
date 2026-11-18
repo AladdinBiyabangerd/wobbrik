@@ -43,6 +43,10 @@ object InventoryReads {
             JsonObject(it.jsonObject - "snapshot")
         }))).toString()
     }
+    internal fun detailDisplayBody(body: String): String {
+        val root = Json.parseToJsonElement(body).jsonObject
+        return if ("snapshot" in root) JsonObject(root - "snapshot").toString() else body
+    }
     fun inventory(body: String): InventoryPage {
         val r = Json.parseToJsonElement(body).jsonObject
         val buildings = r.getValue("buildings").jsonArray.map { building(it.jsonObject) }
@@ -50,14 +54,15 @@ object InventoryReads {
         val next = r.next(); require(next == null || next == buildings.lastOrNull()?.id)
         return InventoryPage(buildings, next)
     }
-    fun city(body: String): CityMembership {
+    fun city(body: String, limit: Int = 20): CityMembership {
+        require(limit in 1..100)
         val r = Json.parseToJsonElement(body).jsonObject
         require(r.text("rules_version") == "wobbrik-v1")
         val population = r.text("population").also { require(Regex("0|[1-9][0-9]*").matches(it)) }.toBigInteger()
         val entries = r.getValue("buildings").jsonArray.map { e -> val b = e.jsonObject
             b.text("building_id").also(::id) to b.number("building_revision")
         }
-        require(entries.size <= 20 && entries.map { it.first }.distinct().size == entries.size)
+        require(entries.size <= limit && entries.map { it.first }.distinct().size == entries.size)
         val next = r.next(); require(next == null || next == entries.lastOrNull()?.first)
         return CityMembership(r.number("revision"), population, entries.toMap(), next)
     }
@@ -69,25 +74,27 @@ class InventoryRepository(private val backend: GameplayReads) {
         InventoryReads.inventory(backend.read(session, "inventory" + query(cursor) + "&view=display"))
     suspend fun building(session: BillingSession, id: String): OwnedBuilding {
         InventoryReads.id(id)
-        return InventoryReads.building(backend.read(session, "buildings/$id")).also { require(it.id == id) }
+        return InventoryReads.building(backend.read(session, "buildings/$id?view=display")).also { require(it.id == id) }
     }
     suspend fun city(session: BillingSession): CityMembership {
         var cursor: String? = null
         var result: CityMembership? = null
         val seen = mutableSetOf<String>()
+        val buildings = linkedMapOf<String, Long>()
         do {
-            val page = InventoryReads.city(backend.read(session, "city" + query(cursor)))
+            val page = InventoryReads.city(backend.read(session, "city" + query(cursor, 100)), limit = 100)
             val previous = result
             if (previous != null) require(previous.revision == page.revision && previous.population == page.population) { "City changed; refresh required" }
-            require(page.buildings.keys.none { it in result?.buildings.orEmpty() })
-            result = page.copy(buildings = previous?.buildings.orEmpty() + page.buildings)
+            require(page.buildings.keys.none { it in buildings })
+            buildings.putAll(page.buildings)
+            result = page
             cursor = page.next
             require(cursor == null || seen.add(cursor))
         } while (cursor != null)
-        return requireNotNull(result)
+        return requireNotNull(result).copy(buildings = buildings.toMap())
     }
-    private fun query(cursor: String?): String {
+    private fun query(cursor: String?, limit: Int = 20): String {
         cursor?.let(InventoryReads::id)
-        return "?limit=20" + (cursor?.let { "&cursor=$it" } ?: "")
+        return "?limit=$limit" + (cursor?.let { "&cursor=$it" } ?: "")
     }
 }
