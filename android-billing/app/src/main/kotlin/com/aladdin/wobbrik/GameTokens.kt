@@ -69,6 +69,22 @@ internal object GameTokens {
         val NavbarHeight = Target + Inset + Small
         val LargeFontNavbarHeight = Target * 2 + Gap
     }
+    /** Art-led Inventory trial; existing palette, isolated from other menu screens. */
+    internal object InventoryCollection {
+        val ArtHeight = Target * 3 + Inset
+        val CompactArtHeight = Target * 3
+        val LargeTypeArtHeight = Target * 2
+        val CardInset = Small + Quarter
+        val CardGap = Small
+        val DockHeight = Target + Small * 2
+        val PlayDiameter = Target
+        val NavIcon = Inset
+        val NavLabel = MobileHome.CompactNavLabel
+        val TabIcon = Gap
+        val IndicatorHeight = Quarter / 2
+        val Outline = Raised
+        const val PressedScale = 0.96f
+    }
     internal object Achievements {
         // Transparent illustration sheet derived from the approved 01-main artwork.
         val Trophy = intArrayOf(48, 112, 690, 440)

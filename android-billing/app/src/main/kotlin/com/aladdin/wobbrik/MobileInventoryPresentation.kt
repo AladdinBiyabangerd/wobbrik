@@ -1,5 +1,11 @@
 package com.aladdin.wobbrik
 
+import androidx.compose.foundation.Image
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -21,27 +27,46 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import appbackend.wobbrik.game.*
 
+internal val LocalCollectionBackdrop = staticCompositionLocalOf<ImageBitmap?> { null }
+
 @Composable
 internal fun MobileOwnedBuildingCard(building: OwnedBuilding, catalog: RecoveryCatalog?, city: CityMembership?, onClick: () -> Unit) {
-    Surface(onClick = onClick, color = Color.Transparent, shape = RoundedCornerShape(GameTokens.ControlRadius)) {
-        MenuRelief(Modifier.fillMaxWidth().border(GameTokens.Hairline,
-            Brush.verticalGradient(listOf(GameTokens.MobileHome.RimLight, GameTokens.MobileHome.Rim)),
-            RoundedCornerShape(GameTokens.ControlRadius)), shape = RoundedCornerShape(GameTokens.ControlRadius), kind = MenuSkin.Commerce) {
-            Column(Modifier.padding(GameTokens.Small), verticalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {
-                val largeFont = LocalDensity.current.fontScale > 1f
-                val inCity = building.isInCity(city)
-                Box(Modifier.fillMaxWidth()) {
-                    BuildingPreview(building, Modifier.fillMaxWidth()
-                        .then(if(!largeFont) Modifier.padding(top = GameTokens.Inset + GameTokens.Small) else Modifier)
-                        .height(if(largeFont) GameTokens.Target else mobileUiSizing().cardArt))
-                    if(inCity && !largeFont) OwnedCitySeal(Modifier.align(Alignment.TopEnd))
-                }
-                // Large type gets its own natural-height row, keeping the art and label unobscured.
-                if(inCity && largeFont) OwnedCitySeal()
-                Text(buildingName(building, catalog), Modifier.horizontalScroll(rememberScrollState()), color = GameTokens.Text,
-                    fontFamily = GameTypeface, fontSize = GameTokens.Body, fontWeight = FontWeight.Bold, softWrap = false)
-                Text("${building.floors} mərtəbə  ›", Modifier.horizontalScroll(rememberScrollState()), color = GameTokens.Muted,
-                    fontFamily = GameTypeface, fontSize = GameTokens.Caption, softWrap = false)
+    val shape = RoundedCornerShape(GameTokens.ControlRadius)
+    val largeFont = LocalDensity.current.fontScale > 1f
+    val artHeight = when {
+        largeFont -> GameTokens.InventoryCollection.LargeTypeArtHeight
+        mobileUiSizing().compact -> GameTokens.InventoryCollection.CompactArtHeight
+        else -> GameTokens.InventoryCollection.ArtHeight
+    }
+    val interaction = androidx.compose.runtime.remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+    val feedback = LocalGameFeedback.current
+    Surface(onClick = { feedback(); onClick() }, interactionSource = interaction,
+        modifier = Modifier.fillMaxWidth().collectionPress(interaction),
+        color = GameTokens.Surface, shape = shape,
+        border = androidx.compose.foundation.BorderStroke(GameTokens.Hairline, GameTokens.InventoryCollection.Outline)) {
+        Column(Modifier.padding(GameTokens.InventoryCollection.CardInset),
+            verticalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {
+            Box(Modifier.fillMaxWidth().height(artHeight)) {
+                LocalCollectionBackdrop.current?.let { Image(it, null, Modifier.matchParentSize().drawWithCache {
+                    val vertical = Brush.verticalGradient(0f to GameTokens.Surface, .12f to Color.Transparent,
+                        .85f to Color.Transparent, 1f to GameTokens.Surface)
+                    val horizontal = Brush.horizontalGradient(0f to GameTokens.Surface, .12f to Color.Transparent,
+                        .88f to Color.Transparent, 1f to GameTokens.Surface)
+                    onDrawWithContent { drawContent(); drawRect(vertical); drawRect(horizontal) }
+                }, contentScale = ContentScale.Crop) }
+                // Accepted geometry and selected modular art, never a baked sample tower.
+                BuildingPreview(building, Modifier.fillMaxSize())
+
+            }
+            Text(buildingName(building, catalog),
+                color = GameTokens.Text, fontFamily = GameTypeface, fontSize = GameTokens.Label,
+                fontWeight = FontWeight.Bold, lineHeight = GameTokens.Body)
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {
+                Text("${building.floors} mərtəbə", Modifier.weight(1f).horizontalScroll(rememberScrollState()),
+                    color = GameTokens.Muted, fontFamily = GameTypeface, fontSize = GameTokens.Caption,
+                    lineHeight = GameTokens.Body, softWrap = false)
+                if(building.isInCity(city)) MobileMenuIcon(MobileIcon.City,
+                    Modifier.size(GameTokens.Gap).semantics { contentDescription = "Şəhərdə" }, GameTokens.Success)
             }
         }
     }
@@ -159,16 +184,6 @@ private fun BuildingInformationRow(icon: MobileIcon, label: String, value: Strin
                 fontFamily = GameTypeface, fontSize = GameTokens.Label, softWrap = false,
                 textAlign = androidx.compose.ui.text.style.TextAlign.End)
         }
-    }
-}
-
-/** Read-only membership seal: only an exact accepted city revision earns it. */
-@Composable
-private fun OwnedCitySeal(modifier: Modifier = Modifier) {
-    Surface(modifier = modifier, color = GameTokens.Success, shape = RoundedCornerShape(GameTokens.Target)) {
-        Text("✓ Şəhərdə", Modifier.padding(horizontal = GameTokens.Small, vertical = GameTokens.Quarter),
-            color = GameTokens.Background, fontFamily = GameTypeface, fontSize = GameTokens.Caption,
-            fontWeight = FontWeight.Bold)
     }
 }
 

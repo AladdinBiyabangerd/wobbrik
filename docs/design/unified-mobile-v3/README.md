@@ -21,3 +21,5 @@ Son təsdiqli PNG-lər native Compose implementasiyası üçün təsdiqlənib; t
 
 
 15 noyabr 2026 — son istifadəçi qərarı: mobil Bazar daxilində Ərazi tabı və ərazi alış girişi çıxarılır. Son əlavə göstərişlə mobil İnventarın Ərazi tabı da çıxarılır. Saxlanmış server hüquqları dəyişmir; ərazi üçün menyu girişi və yeni alternativ yer yoxdur. Ərazi alışının yeni yeri istifadəçi tərəfindən sonra göstəriləcək; yeni yer uydurulmur. Bu qərar əvvəlki Bazar/Ərazi PNG girişini əvəz edir.
+
+18 noyabr 2026 — yalnız İnventar/Binalar kök ekranı üçün istifadəçi yeni `../inventory-art-led-v1/reference.png` nümunəsinin native implementasiyasını ayrıca branch-də istəyib. Bu ekranın kart/tab/navbar üslubu üçün yeni istinad üstündür. Digər səhifələr dəyişmir və yeni üsluba keçirilməsi ayrıca qəbul gözləyir. İcra scope-u `../../PLAN.md` §1.1-dədir.

@@ -52,12 +52,15 @@ private fun MobileMenuShellContent(page: String, coins: Long?, onPlay: (() -> Un
     }
     var commerceDetail by remember(page) { mutableStateOf(false) }
     val reportDetail = remember(page) { { active: Boolean -> commerceDetail = active } }
-    Column(Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(GameTokens.Surface, GameTokens.Background)))
+    val collectionTrial = page == "inventory" && !commerceDetail
+    val backdrop = if (collectionTrial) rememberResourceArt(R.drawable.inventory_collection_backdrop).first.images?.singleOrNull() else null
+    Column(Modifier.fillMaxSize().background(Brush.verticalGradient(if (collectionTrial)
+        listOf(GameTokens.Background, GameTokens.Background) else listOf(GameTokens.Surface, GameTokens.Background)))
         .safeDrawingPadding().consumeWindowInsets(WindowInsets.safeDrawing).imePadding()) {
-        Box(Modifier.padding(horizontal = GameTokens.Gap, vertical = GameTokens.Small)) { MobileMenuHeader(coins) }
+        Box(Modifier.padding(horizontal = GameTokens.Gap, vertical = GameTokens.Small)) { MobileMenuHeader(coins, collectionTrial) }
         if (!commerceDetail && page in inventoryTabs.map { it.route }) {
             Column(Modifier.padding(horizontal = GameTokens.Gap), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-                CommerceTabs(inventoryTabs, page, onPage)
+                if (collectionTrial) CollectionTabs(page, onPage) else CommerceTabs(inventoryTabs, page, onPage)
             }
         }
         if (!commerceDetail && (page in marketTabs.map { it.route } || page == "market-own")) {
@@ -117,10 +120,12 @@ private fun MobileMenuShellContent(page: String, coins: Long?, onPlay: (() -> Un
         }
         Box(Modifier.weight(1f).fillMaxWidth().clipToBounds()) {
             CompositionLocalProvider(LocalMobileMenuShell provides true, LocalCommerceDetail provides reportDetail,
+                LocalCollectionBackdrop provides backdrop,
                 LocalTextStyle provides LocalTextStyle.current.copy(fontFamily = GameTypeface)) { content() }
         }
         Box(Modifier.padding(horizontal = GameTokens.Quarter, vertical = GameTokens.Small)) {
-            MobileMenuNavbar(mobileMenuDestination(page), false, onPlay != null, { onPlay?.invoke() }, onPage)
+            if (collectionTrial) CollectionNavbar(onPlay, onPage)
+            else MobileMenuNavbar(mobileMenuDestination(page), false, onPlay != null, { onPlay?.invoke() }, onPage)
         }
     }
 }

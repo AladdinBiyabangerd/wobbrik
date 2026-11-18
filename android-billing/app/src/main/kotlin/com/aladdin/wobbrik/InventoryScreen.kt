@@ -159,7 +159,7 @@ internal fun InventoryScreen(configured: WobbrikApplication.Bootstrap.Configured
                     if(!LocalMobileMenuShell.current) InventoryToolbar(largeFont, { onParts(null) }, onDecorations, onLand, enabled = canMutate)
                     if (LocalMobileMenuShell.current) Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                         Text("${buildings.size}${if(next != null) "+" else ""} bina", Modifier.weight(1f), color = GameTokens.Text, fontWeight = FontWeight.Bold)
-                        CommerceAction("↻", Modifier.width(GameTokens.Target), enabled = !loading) { cursor = null; buildings = emptyList(); next = null; retry++ }
+                        CollectionRefresh(enabled = !loading) { cursor = null; buildings = emptyList(); next = null; retry++ }
                     }
                     else Text("Binalar", Modifier.padding(top = GameTokens.Small, bottom = GameTokens.Quarter),
                         color = GameTokens.Text, fontSize = GameTokens.Hint, fontWeight = FontWeight.Bold)

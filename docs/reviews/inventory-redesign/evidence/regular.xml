@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.aladdin.wobbrik.InventoryRedesignRegularTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-11-18T10:16:03.587Z" hostname="Macs-MacBook-Pro.local" time="6.483">
+  <properties/>
+  <testcase name="render" classname="com.aladdin.wobbrik.InventoryRedesignRegularTest" time="6.483"/>
+  <system-out><![CDATA[REQUEST inventory?limit=20&view=display
+REQUEST buildings/b-1?view=display
+REQUEST inventory?limit=20&view=display
+REQUEST inventory?limit=20&view=display
+INVENTORY-REDESIGN regular inventoryReads=3 cityReads=0 bytes=13833
+REQUEST decorations?limit=20
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

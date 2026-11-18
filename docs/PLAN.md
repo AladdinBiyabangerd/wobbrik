@@ -23,6 +23,8 @@ Google vahidinin sübutu: [Android review](reviews/2026-11-13-required-google-si
 
 ### 1.1. Vahid mobil UI və funksional düzəlişlər — 15 noyabr, təsdiqli icra tapşırığı
 
+**18 noyabr 2026 — məhdud dizayn sınağı:** istifadəçi yeni art-led İnventar maketinin və onun aktiv səhifə vurğulu yığcam 7-slot navbarının ayrıca branch-də native implementasiyasını və ekran şəklini istəyib. İstinad `design/inventory-art-led-v1/reference.png`; yalnız İnventar/Binalar kök ekranı üçün əvvəlki PNG-dən üstün icra göstərişidir. Digər səhifələrin redesign-ı bu nəticənin ayrıca istifadəçi qəbulundan sonra başlayır. Real binalar və authority müqaviləsi saxlanır; generativ maket real hesab/device/render sübutu deyil.
+
 15 noyabr 2026 — son istifadəçi qərarı: mobil Bazar daxilində Ərazi tabı və ərazi alış girişi çıxarılır. Son əlavə göstərişlə mobil İnventarın Ərazi tabı da çıxarılır. Saxlanmış server hüquqları dəyişmir; ərazi üçün menyu girişi və yeni alternativ yer yoxdur. Ərazi alışının yeni yeri istifadəçi tərəfindən sonra göstəriləcək; yeni yer uydurulmur. Bu qərar əvvəlki Bazar/Ərazi PNG girişini əvəz edir.
 
 **Cari icra qərarı — 15 noyabr 2026:** app son təsdiqli PNG-lərə uyğun native Kotlin + Compose komponentləri ilə yenidən qurulur. Vizual mənbə `design/unified-mobile-v3/README.md`: Home `home-approved-frameless.png`, digər ekranlar `01-main.png`–`05-owned-and-listings.png`. Təsdiqli dizaynın implementasiyasına icazə var; yeni nümunə/təkrar təsdiq dövrəsi açılmır. Yeni alternativ dizayn ayrıca razılıq tələb edir.

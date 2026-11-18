@@ -1,47 +1,9 @@
-# Son inteqrasiya — 18 noyabr 2026
+# Cari tapşırıq — İnventar art-led dizayn sınağı / 18 noyabr 2026
 
-- Completed: istifadəçinin açıq göstərişi ilə docs/performance-by-default əvvəl remote-a push edildi; Android acc1066 tarixçəsi main-ə --no-ff ilə fde0c0f kimi merge/push edildi. Paired AppBackend343d402 eyni qaydada399f9fe main merge/push oldu. Merge tree-ləri uyğun reviewed branch tree-ləri ilə eynidir, konflikt yoxdur.
-- Current state: bu son docs-only inteqrasiya qeydi ayrıca branch-də hazırlanır və main-ə tarixçə saxlanmaqla daxil edilir. Owner iki dirty release binarisi və köhnə city-detail review əlavəsi commit/push edilmədən saxlanır.
-- Decisions: main merge və remote push istifadəçi tərəfindən açıq icazəlidir; CI/deploy istənməyib, işlədilməyib. Əvvəlki no-merge statusları aşağıda tarixidir.
-- Remaining work: deploy və production/device performans sübutları açıqdır; yeni feature başlanmır.
-- Relevant files: AGENTS.md, .cursor/rules/performance.mdc, docs/reviews/2026-11-18-performance-by-default-rule.md və bounded-membership review-u.
-- Checks performed: fetch, main/origin əsas uyğunluğu, diffcheck, konfliktsiz merge və branch/main tree equality. Əvvəlki focused test nəticələri aşağıdadır; merge-dən sonra suite/CI təkrar işlədilməyib.
-- Exact next step: son docs qeydi daxil lokal main/remote main hash bərabərliyini təsdiqlə; gələcək ayrıca tapşırığa qədər kod dəyişmə.
-
----
-# Cari tapşırıq — Inventory bounded membership/cache / 18 noyabr 2026
-
-## Completed
-
-- İstifadəçinin performans1–2 göstərişi: InventoryScreen-in bütün şəhər membership oxusu çıxarıldı. Display inventory/detail serverdən same-statement owner-scoped optional in_city alır; şəhər ölçüsünə bağlı paging/population işi yoxdur.
-- Cache mövcud page/detail key-lərində atomik qalır; oxu cache-inə ayrıca8MiB büdcə verildi. Default sole command journal140000byte dəyişmir. Detail transport1MiB-dir.3001membership və near1MiB escaped body offline replay regression-ları keçir.
-- AppBackend paired field/API müqaviləsi, true/false/legacy/foreign/deleted regression-ları və lokal diff review tamamlandı.
-
-## Current state
-
-18 noyabr davamı: istifadəçi yeni səhifələrin də ilk implementasiyadan performanslı hazırlanmasını tələb edib. `docs/performance-by-default` (baza083eedb) branch-ində AGENTS.md və always-on `.cursor/rules/performance.mdc` eyni qayda ilə yenilənib; bu docs-only vahiddir, runtime dəyişmir.
-
-Android `fix/inventory-bounded-membership-cache`, baza6bb1457; backend `feat/wobbrik`, baza32ad8f7. Owner iki release baseline-profile binarisi dəyişmədən scope xaricində saxlanır. Əvvəlki city-detail review əlavəsi tarixi qeyddir. Main merge/CI/push/deploy yoxdur.
-
-## Decisions
-
-Yeganə plan docs/PLAN.md§1.1/§2–3. in_city yalnız display read metadata-sıdır; wallet/ownership authority, UID/login/capability/revision və final-sync/fresh mutation gate saxlanır. Legacy/old-server missing field naməlumdur, tam şəhər fallback yoxdur.8MiB cache yalnız read-only namespace-ə ötürülür; yeni chunk/manifest/DB/journal formatı yoxdur.1MiB wire/8MiB cache sonlu hədlərdir, arbitrary payload dəstəyi deyil.
-
-## Remaining work
-
-Yeni status metadata-sı ayrıca backend deploy tələb edir; köhnə serverdə naməlum qalır. Production10+s/2+s, RTT/SQL contention/paylanma, fiziki frame/ART/GPU/yaddaş/battery və Firebase-authenticated Android→GoE2E yoxlanmayıb. Şəhər ekranının öz tam-scene böyük-view hədləri bu Inventory vahidi ilə həll edilmiş sayılmır. Profil ilk-açılış/ümumi app performansı və əvvəlki PNG/inset/IME/locale/TalkBack borcları açıqdır.
-
-## Relevant files
-
-Core InventoryReads.kt, GameplayHttpBackend.kt, ReadOnlyGameCache.kt, DurableJournalFile.kt; AndroidAttemptJournal.kt; InventoryScreen.kt, MobileInventoryPresentation.kt, WobbrikApplication.kt. InventoryPayloadTest və inventory-first-open/detail-latency native harness-ləri. Backend market.go, inventory payload/city probe tests və docs/wobbrik-game-api.md. Review docs/reviews/2026-11-18-inventory-bounded-membership-cache.md; evidence inventory-bounded-membership/.
-
-## Checks performed
-
-- Normal core165unit/appunit/assembleDebug/lintDebugPASS11s; final native16/16PASS16s. Native route-lərdə0cityHTTP; cached detail fresh-mutation gate saxlanır. Real atomic file near1MiB escaped payload, default journal limit və3001membership cache/replayPASS.
-- Disposable PostgreSQL18/race1001bina: old City100membership+sync12HTTP/209SQL/94387byte/1.701s; new inventory20+sync2HTTP/44SQL/9028byte/23.05ms. Əvvəlki ölçüyə inventory page daxil deyildi; production E2E nisbəti deyil.
-- Backend full racePASS(platform34.356s), final focused probePASS16.743s, vet/build/diffcheckPASS. İlkin fixture/compile/FK səhvləri düzəldilib final yoxlamalar təkrar keçirilib. Disposable DB dayandırılıb; production istifadə olunmayıb.
-- ui-craft: tokenlər saxlanır; Text/Muted/Success kontrastPASS.320/360/390font1/2native renderlər, inset/uzun balans; list/detail/status nümunələri açılıb approvedPNG ilə müqayisə edildi. Əvvəlki layout/parity borcları bağlanmır. Emulator açılmayıb.
-
-## Exact next step
-
-Daimi performans qaydasının və paired performans1–2 vahidinin istifadəçi review-u. Main merge/CI/push/deploy avtomatik yoxdur. Yeni böyük işə keçməzdən əvvəl yeni chat tövsiyə olunur; owner binarilərinə toxunma.
+- Completed: istifadəçi yeni maketin yalnız İnventar/Binalar kök ekranını ayrıca branch-də implement etməyi təsdiqlədi. Böyük modular bina kartları, yığcam tablar/wallet/refresh, aktiv səhifə vurğulu7-slot native navbar, lokal press animasiyası və paylaşılan optional plaza fonu əlavə edildi. Digər ekranlar dəyişmir.
+- Current state: `feat/inventory-art-led-redesign`, baza81e0705. Native render5/5 və host build/lintPASS52s; Renderer-siz normal app unit/build/lint PASS25s; lokal diff review tamamlandı. Owner iki release .dm və əvvəlki city-detail review əlavəsinə toxunulmayıb. Main merge/CI/push yoxdur.
+- Decisions: yeganə plan docs/PLAN.md§1.1, yeni scope yalnız bir ekran. İstinad docs/design/inventory-art-led-v1/reference.png. Digər səhifələr yalnız istifadəçi nəticəni bəyəndikdən sonra ayrıca tapşırıqla başlanır. Bina artı/geometry/data authority saxlanır; tam generativ art/piksel pariteti iddiası yoxdur.
+- Remaining work: istifadəçinin native görüntü review-u; real hesab/device screenshot-u yoxdur (adb devices boşdur), emulator açılmayıb. Header scenery və generativ tower işıqlandırması ilə fərqlər review-da açıqdır. Bütün app redesign-ı və düymə animasiyası tamamlanmayıb.
+- Relevant files: InventoryCollectionChrome.kt, MobileInventoryPresentation.kt, MobileMenuShell.kt, MobileHomeScreen.kt, InventoryScreen.kt, GameTokens.kt; res/drawable-nodpi/inventory_collection_backdrop.png; docs/design/inventory-art-led-v1/README.md; docs/reviews/2026-11-18-inventory-art-led-redesign.md və inventory-redesign/{render,evidence}/.
+- Checks performed:390×844/320×568 font1/2,360×640font2 simulated inset/uzun ad/uzun balans native renderləri açılıb maketlə müqayisə edildi; card→detail→back/refresh/Dekor,48dp target testləri5/5PASS. Axın3inventory+1detail/13833byte,0city/0mutation; synthetic9bina.5kontrast cütüPASS7.08–13.00. Backend müqaviləsi dəyişmir, backend dəyişikliyi lazım deyil. git diffcheckPASS. Physical/ART/GPU/cache/performance/locale/IME suite təkrar ölçülməyib.
+- Exact next step: İstifadəçinin native render review-unu gözlə. Başqa ekranı avtomatik başlama; dəyişiklik istəsə bu branch-də həmin ekranı düzəlt. Main merge/CI/push ayrıca göstərişsiz yoxdur.

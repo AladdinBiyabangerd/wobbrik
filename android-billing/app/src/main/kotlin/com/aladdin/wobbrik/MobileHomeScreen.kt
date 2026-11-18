@@ -97,7 +97,7 @@ internal fun MobileHomeScreen(snapshot: GameSnapshot?, active: Boolean, onPlay: 
 
 /** Shared menu header: profile is reached through the dock, balance stays right aligned. */
 @Composable
-internal fun MobileMenuHeader(coins: Long?) {
+internal fun MobileMenuHeader(coins: Long?, collectionTrial: Boolean = false) {
     val (logoArt, retryLogo) = LocalMenuLogo.current ?: rememberResourceArt(R.drawable.wobbrik_logo)
     val logo = logoArt.images?.singleOrNull()
     val largeBalance = (coins?.toString()?.length ?: 1) > 6
@@ -111,14 +111,27 @@ internal fun MobileMenuHeader(coins: Long?) {
                     Text("Wobbrik", color = GameTokens.Text, fontFamily = GameTypeface)
                 }
             }
-            if (!largeBalance) MobileHomeBalance(coins)
+            if (!largeBalance) MobileHomeBalance(coins, collectionTrial)
         }
-        if (largeBalance) Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) { MobileHomeBalance(coins) }
+        if (largeBalance) Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) { MobileHomeBalance(coins, collectionTrial) }
     }
 }
 
 @Composable
-private fun MobileHomeBalance(coins: Long?) {
+private fun MobileHomeBalance(coins: Long?, collectionTrial: Boolean = false) {
+    if (collectionTrial) {
+        androidx.compose.material3.Surface(color = GameTokens.Surface, shape = RoundedCornerShape(GameTokens.CardRadius),
+            border = androidx.compose.foundation.BorderStroke(GameTokens.Hairline, GameTokens.Raised)) {
+            Row(Modifier.padding(GameTokens.Small), verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {
+                MobileMenuIcon(MobileIcon.Coin, Modifier.size(GameTokens.Inset))
+                Text(coins?.toString() ?: "—", Modifier.weight(1f, fill = false).horizontalScroll(rememberScrollState()),
+                    color = GameTokens.Text, fontFamily = GameTypeface, fontSize = GameTokens.Body,
+                    fontWeight = FontWeight.Bold, softWrap = false)
+            }
+        }
+        return
+    }
     MenuRelief(shape = RoundedCornerShape(GameTokens.CardRadius), kind = MenuSkin.Wallet) {
     Row(Modifier.padding(GameTokens.Small),
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {
