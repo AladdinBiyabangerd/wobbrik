@@ -8,6 +8,8 @@
 
 ## Current state
 
+18 noyabr davamı: istifadəçi yeni səhifələrin də ilk implementasiyadan performanslı hazırlanmasını tələb edib. `docs/performance-by-default` (baza083eedb) branch-ində AGENTS.md və always-on `.cursor/rules/performance.mdc` eyni qayda ilə yenilənib; bu docs-only vahiddir, runtime dəyişmir.
+
 Android `fix/inventory-bounded-membership-cache`, baza6bb1457; backend `feat/wobbrik`, baza32ad8f7. Owner iki release baseline-profile binarisi dəyişmədən scope xaricində saxlanır. Əvvəlki city-detail review əlavəsi tarixi qeyddir. Main merge/CI/push/deploy yoxdur.
 
 ## Decisions
@@ -31,4 +33,4 @@ Core InventoryReads.kt, GameplayHttpBackend.kt, ReadOnlyGameCache.kt, DurableJou
 
 ## Exact next step
 
-Bu paired performans1–2 vahidinin istifadəçi review-u. Main merge/CI/push/deploy avtomatik yoxdur. Yeni böyük işə keçməzdən əvvəl yeni chat tövsiyə olunur; owner binarilərinə toxunma.
+Daimi performans qaydasının və paired performans1–2 vahidinin istifadəçi review-u. Main merge/CI/push/deploy avtomatik yoxdur. Yeni böyük işə keçməzdən əvvəl yeni chat tövsiyə olunur; owner binarilərinə toxunma.
