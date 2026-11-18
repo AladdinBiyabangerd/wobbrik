@@ -66,20 +66,23 @@ abstract class MobileCommerceProductionHost {
    AccountRecovery("now","first","later",7,0,emptyList(),emptyList(),listOf("land_1"),emptyList(),28))
   fun building(id:Int):String {
    val parts=FinishCosmetics.categories.joinToString(",") {"\"$it\":\"base_${id}_$it\""}
-   return """{"id":"b-$id","revision":1,"floors":10,"residents":40,"base_value":20,"max_price":24,"parts":{$parts},"traded":false,"accepted_geometry":{"geometry":{"version":"city-geometry-v1","centers_x_ticks":[${(0..9).joinToString(","){(it*2500).toString()}}]},"attempt_id":"attempt","sequence":1,"operation_id":"op","rules_version":"wobbrik-v1","engine_version":"wobbrik-structural-v1"}}"""
+   return """{"id":"b-$id","revision":1,"floors":10,"residents":40,"base_value":20,"max_price":${if(id == 4) Long.MAX_VALUE else 24},"parts":{$parts},"traded":${id == 3},"accepted_geometry":{"geometry":{"version":"city-geometry-v1","centers_x_ticks":[${(0..9).joinToString(","){(it*2500).toString()}}]},"attempt_id":"attempt","sequence":1,"operation_id":"op","rules_version":"wobbrik-v1","engine_version":"wobbrik-structural-v1"}}"""
   }
   fun listing(id:Int)="""{"id":"l-$id","building_id":"b-$id","revision":1,"building_revision":1,"price":24,"fee":2,"status":"active"}"""
   var failDecor=false
+  var failCity=false
+  var cityFailureStatus=503
   var submissions=0
   val reads=GameplayHttpBackend(sessions,GameplayTransport {path,_,body->
    assertNull(body)
+   if(failCity && path.startsWith("city?")) return@GameplayTransport GameplayResponse(cityFailureStatus,"""{"error":"unavailable"}""")
    if(failDecor && path.startsWith("decorations?")) return@GameplayTransport GameplayResponse(503,"""{"error":"unavailable"}""")
    GameplayResponse(200,when {
     path.startsWith("inventory?")->"""{"buildings":[${(1..4).joinToString(","){building(it)}}]}"""
     path.startsWith("buildings/")->building(path.substringAfter("b-").toInt())
     path.startsWith("market?") || path.startsWith("market/own?")->"""{"listings":[${(1..4).joinToString(","){listing(it)}}]}"""
     path.startsWith("market/l-")->path.substringAfter("l-").toInt().let {"""{"listing":${listing(it)},"building":${building(it)}}"""}
-    path.startsWith("city?")->"""{"rules_version":"wobbrik-v1","revision":1,"population":"40","buildings":[{"building_id":"b-1","building_revision":1,"residents":40}]}"""
+    path.startsWith("city?")->"""{"rules_version":"wobbrik-v1","revision":1,"population":"40","buildings":[{"building_id":"b-1","building_revision":1,"residents":40},{"building_id":"b-2","building_revision":2,"residents":40}]}"""
     path.startsWith("decorations?")->"""{"copies":[{"id":"copy-a","item_id":"decor_bench_1","position":{"x_ticks":"0","y_ticks":"0","quarter_turns":0}},{"id":"copy-b","item_id":"decor_tree_1"}]}"""
     else->error(path)
    })
@@ -124,15 +127,62 @@ abstract class MobileCommerceProductionHost {
    waitText("10 mərtəbə  ›")
    compose.onNodeWithContentDescription("Oyunu başlat").assertIsDisplayed()
    compose.onAllNodesWithContentDescription("Geri").assertCountEquals(0)
+   compose.onAllNodesWithText("✓ Şəhərdə").assertCountEquals(1)
+   compose.onNodeWithText("✓ Şəhərdə").assertIsDisplayed()
    capture("inventory-$name")
    compose.onAllNodesWithText("10 mərtəbə  ›")[0].performScrollTo().performClick()
    waitText("✓ Sənindir")
+   compose.onNodeWithText("İnventar · Binalar").assertIsDisplayed().assertHasNoClickAction()
+   compose.onNodeWithContentDescription("Geri").assertIsDisplayed().assertHeightIsAtLeast(GameTokens.Target)
    compose.onNodeWithText("Bina görünüşü").assertIsDisplayed().assertHeightIsAtLeast(GameTokens.Target)
    capture("detail-$name")
    compose.onNodeWithText("✓ Sənindir").performScrollTo().assertIsDisplayed().assertHasNoClickAction()
    capture("detail-ownership-$name")
+   compose.onNodeWithText("Bina məlumatı").performScrollTo().assertIsDisplayed()
+   capture("detail-information-heading-$name")
+   compose.onNodeWithText("Hündürlük").performScrollTo().assertIsDisplayed()
+   compose.onNodeWithText("Bina növü").performScrollTo().assertIsDisplayed()
+   capture("detail-information-$name")
+   compose.onNodeWithText("Sakinlər").performScrollTo().assertIsDisplayed()
+   compose.onNodeWithText("40").performScrollTo().assertIsDisplayed()
+   compose.onAllNodesWithText("Səviyyə", substring = true).assertCountEquals(0)
+   capture("detail-information-residents-$name")
+   compose.onNodeWithText("Şəhər statusu").performScrollTo().assertIsDisplayed().assertHasNoClickAction()
+   compose.onNodeWithText("✓ Şəhərdə yerləşdirilib").performScrollTo().assertIsDisplayed().assertHasNoClickAction()
+   capture("detail-city-status-$name")
+   compose.onNodeWithText("Maksimum satış").performScrollTo().assertIsDisplayed().assertHasNoClickAction()
+   // The coin row owns horizontal scroll; reveal that row through the outer detail scroll first.
+   compose.onNodeWithText("24").onParent().performScrollTo()
+   compose.onNodeWithText("24").assertIsDisplayed().assertHasNoClickAction()
+   capture("detail-sale-price-$name")
+   compose.onNodeWithText("Binanı sil").performScrollTo().assertIsDisplayed().assertIsEnabled().assertHeightIsAtLeast(GameTokens.Target)
+   capture("detail-delete-action-$name")
+   compose.onNodeWithText("Binanı sil").performClick()
+   waitText("Bina silinsin?")
+   compose.runOnIdle { assertEquals(0, submissions) }
+   capture("detail-delete-confirm-$name", true)
+   compose.onNodeWithText("Ləğv et").assertIsDisplayed().performClick()
+   compose.onAllNodesWithText("Bina silinsin?").assertCountEquals(0)
+   compose.onNodeWithText("Bina görünüşü").assertIsDisplayed()
    compose.onNodeWithText("Bina görünüşü").performClick()
    compose.runOnIdle {assertEquals("parts",page)}
+   for ((index, status) in listOf(1 to "Şəhər məlumatı dəyişib. Yenilə.", 2 to "İnventardadır")) {
+    go("inventory");waitText("10 mərtəbə  ›")
+    compose.runOnIdle { selected = "b-${index + 1}" }
+    waitText("✓ Sənindir")
+    compose.onNodeWithText(status).performScrollTo().assertIsDisplayed().assertHasNoClickAction()
+    compose.onAllNodesWithText("✓ Şəhərdə yerləşdirilib").assertCountEquals(0)
+   }
+   compose.onNodeWithText("Alınmış bina yenidən satılmır").performScrollTo().assertIsDisplayed()
+   compose.onNodeWithText("Satışa çıxar").assertIsNotEnabled()
+   compose.onNodeWithText("Binanı sil").performScrollTo().assertIsEnabled()
+   capture("detail-traded-$name")
+   go("inventory");waitText("10 mərtəbə  ›")
+   compose.runOnIdle { selected = "b-4" }
+   waitText("✓ Sənindir")
+   compose.onAllNodesWithText(Long.MAX_VALUE.toString()).onLast().onParent().performScrollTo()
+   compose.onAllNodesWithText(Long.MAX_VALUE.toString()).onLast().assertIsDisplayed().assertHasNoClickAction()
+   capture("detail-sale-long-price-$name")
    go("owned-decorations");waitText("✓ Şəhərdə")
    capture("owned-decor-$name")
    compose.onNode(hasScrollToIndexAction()).performScrollToNode(hasText("Saxlanılır"))
@@ -143,9 +193,19 @@ abstract class MobileCommerceProductionHost {
    compose.runOnIdle {failDecor=false}
    compose.onNodeWithText("Yenidən cəhd et").performScrollTo().performClick();waitText("✓ Şəhərdə")
    compose.onAllNodesWithText("Ərazi").assertCountEquals(0)
-   go("decorations");waitText("Ağac");capture("decor-shop-$name")
+   go("decorations");waitText("Nüsxə: 1");capture("decor-shop-$name")
+   compose.onAllNodesWithText("✓ Sahibsən")[0].performScrollTo().assertIsDisplayed()
+   compose.onAllNodesWithText("Nüsxə: 1")[0].performScrollTo().assertIsDisplayed()
+   if(font > 1f) compose.onNode(hasScrollToIndexAction()).performSemanticsAction(
+       androidx.compose.ui.semantics.SemanticsActions.ScrollBy) { scroll ->
+       scroll(0f, with(compose.density) { (GameTokens.Target * 2).toPx() })
+   }
+   capture("decor-ownership-$name")
    compose.onNode(hasScrollToIndexAction()).performScrollToNode(hasText("Skamya"))
-   compose.onNodeWithText("Skamya").performClick();compose.waitForIdle();capture("decor-selected-$name",font>1f)
+   compose.onNodeWithText("Skamya").performClick();compose.waitForIdle()
+   // Owning a copy must not disable buying another one.
+   compose.onAllNodesWithText("Al").onLast().assertIsEnabled()
+   capture("decor-selected-$name",font>1f)
    compose.onNodeWithText("Ləğv et").assertIsDisplayed().performClick()
    compose.onNodeWithText("Mənim elanlarım").performClick();marketLoaded("Elanı geri götür")
    compose.onNodeWithText("+ Yeni elan").assertIsDisplayed().assertHeightIsAtLeast(GameTokens.Target)
@@ -206,7 +266,37 @@ abstract class MobileCommerceProductionHost {
    compose.onAllNodesWithText(snapshot.coins.toString()).onLast().assertIsDisplayed()
    capture("buy-confirm-balance-$name",true)
    compose.onNodeWithText("Ləğv et").assertIsDisplayed().performClick()
+   compose.runOnIdle {assertEquals(0,submissions);failCity=true}
+   go("inventory");waitText("10 mərtəbə  ›")
+   compose.onAllNodesWithText("✓ Şəhərdə").assertCountEquals(0)
+   compose.onAllNodesWithText("Məlumat yenilənmədi.", substring=true).assertCountEquals(0)
+   capture("inventory-city-unavailable-$name")
+   compose.onAllNodesWithText("10 mərtəbə  ›")[0].performScrollTo().performClick()
+   waitText("✓ Sənindir")
+   compose.onNodeWithText("Şəhərə aidlik yüklənməyib").performScrollTo().assertIsDisplayed().assertHasNoClickAction()
+   compose.onAllNodesWithText("✓ Şəhərdə yerləşdirilib").assertCountEquals(0)
+   compose.onAllNodesWithText("Məlumat yenilənmədi.", substring=true).assertCountEquals(0)
+   compose.onNodeWithText("Bina görünüşü").assertIsDisplayed().assertIsEnabled()
+   compose.onNodeWithText("Satışa çıxar").assertIsDisplayed().assertIsEnabled()
+   capture("detail-city-unavailable-$name")
+   compose.onNodeWithText("Binanı sil").performScrollTo().assertIsDisplayed().assertIsEnabled()
    compose.runOnIdle {assertEquals(0,submissions)}
+   // An unavailable city must not trap the user on the detail route.
+   compose.onNodeWithContentDescription("Geri").performClick()
+   waitText("10 mərtəbə  ›")
+   compose.runOnIdle {cityFailureStatus=403}
+   compose.onAllNodesWithText("10 mərtəbə  ›")[0].performScrollTo().performClick()
+   waitText("Məlumat yenilənmədi. Bağlantını yoxla və yenidən cəhd et.")
+   compose.onAllNodesWithText("✓ Sənindir").assertCountEquals(0)
+   compose.onAllNodesWithText("Binanı sil").assertCountEquals(0)
+   compose.onAllNodesWithText("Satışa çıxar").assertCountEquals(0)
+   compose.onNodeWithContentDescription("Geri").performClick()
+   compose.runOnIdle {failDecor=true}
+   go("decorations")
+   compose.onNode(hasScrollToIndexAction()).performScrollToNode(hasText("Dekor inventarı yüklənmədi"))
+   waitText("Dekor inventarı yüklənmədi")
+   compose.onAllNodesWithText("✓ Sahibsən").assertCountEquals(0)
+   compose.onNodeWithText("Yenidən cəhd et").performScrollTo().assertIsDisplayed()
   } finally {scope.cancel()}
  }
 }

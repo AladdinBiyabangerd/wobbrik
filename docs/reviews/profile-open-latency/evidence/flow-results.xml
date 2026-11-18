@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.aladdin.wobbrik.ProfileOpenLatencyTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-11-18T08:21:36.288Z" hostname="Macs-MacBook-Pro.local" time="0.887">
+  <properties/>
+  <testcase name="successfulSaveIsTheNextCachedDisplayButStillRequiresFreshLoad" classname="com.aladdin.wobbrik.ProfileOpenLatencyTest" time="0.143"/>
+  <testcase name="cachedDisplayIsNotAnEditorCapabilityAndEpochsAreIsolated" classname="com.aladdin.wobbrik.ProfileOpenLatencyTest" time="0.744"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

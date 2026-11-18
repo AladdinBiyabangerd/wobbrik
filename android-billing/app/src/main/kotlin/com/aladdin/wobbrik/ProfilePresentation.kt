@@ -32,7 +32,6 @@ import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -52,11 +51,14 @@ private val LocalProfileBoards = staticCompositionLocalOf<ProfileBoards?> { null
 private fun ProfileArtProvider(content: @Composable () -> Unit) {
     if (LocalProfileBoards.current != null) content()
     else {
-        val profile = ImageBitmap.imageResource(R.drawable.profile_v2_board)
-        val editor = ImageBitmap.imageResource(R.drawable.profile_edit_board)
-        val skin = ImageBitmap.imageResource(R.drawable.profile_skin_clean)
-        val panel = ImageBitmap.imageResource(R.drawable.profile_panel_clean)
-        val boards = remember(profile, editor, skin, panel) { ProfileBoards(profile, editor, skin, panel) }
+        val (art, retry) = rememberResourceArt(R.drawable.profile_v2_board, R.drawable.profile_edit_board,
+            R.drawable.profile_skin_clean, R.drawable.profile_panel_clean)
+        val images = art.images
+        if (images == null) {
+            ApprovedArtStatus(if (art.failed) ArtPreparation.Failed else ArtPreparation.Loading, retry)
+            return
+        }
+        val boards = remember(images) { ProfileBoards(images[0], images[1], images[2], images[3]) }
         CompositionLocalProvider(LocalProfileBoards provides boards,
             LocalTextStyle provides LocalTextStyle.current.copy(fontFamily = GameTypeface,
                 fontWeight = FontWeight.Bold,

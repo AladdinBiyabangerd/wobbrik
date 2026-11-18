@@ -21,6 +21,9 @@ import androidx.compose.ui.graphics.Brush
 /** Menu content owns contextual actions; the authenticated host owns the dock and Play capability. */
 internal val LocalMobileMenuShell = staticCompositionLocalOf { false }
 
+/** Shared only by a mounted mobile shell, never retained by a process singleton. */
+internal val LocalMenuLogo = staticCompositionLocalOf<Pair<ResourceArt, () -> Unit>?> { null }
+
 internal fun mobileMenuDestination(page: String): String = when (page) {
     "parts", "collection" -> "inventory"
     "owned-decorations", "owned-land" -> "inventory"
@@ -32,6 +35,15 @@ internal fun mobileMenuDestination(page: String): String = when (page) {
 
 @Composable
 internal fun MobileMenuShell(page: String, coins: Long?, onPlay: (() -> Unit)?,
+    onPage: (String) -> Unit, content: @Composable () -> Unit) {
+    val logo = rememberResourceArt(R.drawable.wobbrik_logo)
+    CompositionLocalProvider(LocalMenuLogo provides logo) {
+        MobileMenuShellContent(page, coins, onPlay, onPage, content)
+    }
+}
+
+@Composable
+private fun MobileMenuShellContent(page: String, coins: Long?, onPlay: (() -> Unit)?,
     onPage: (String) -> Unit, content: @Composable () -> Unit) {
     if (page == "home") {
         // Home owns its frameless header/body and bottom safe-area dock.

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.aladdin.wobbrik.engine.LocalGameHostTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-11-17T12:53:49.162Z" hostname="Macs-MacBook-Pro.local" time="0.008">
+  <properties/>
+  <testcase name="offlineSceneUsesRealPhysicsAndDurablyQueuesMultipleResults" classname="com.aladdin.wobbrik.engine.LocalGameHostTest" time="0.005"/>
+  <testcase name="lifecycleDoesNotAdvanceBackgroundTimeAndOpenLeaveDiscardsOnlyOpenScene" classname="com.aladdin.wobbrik.engine.LocalGameHostTest" time="0.0"/>
+  <testcase name="reusedSnapshotsTrackEveryInputLifecycleAndSceneChange" classname="com.aladdin.wobbrik.engine.LocalGameHostTest" time="0.001"/>
+  <testcase name="sameUidNewEpochRevokesOpenSceneAndCorruptQueueNeverGetsOverwritten" classname="com.aladdin.wobbrik.engine.LocalGameHostTest" time="0.0"/>
+  <testcase name="diskFailureRetainsTerminalAcrossLeaveAndAuthEpochUntilExplicitRetry" classname="com.aladdin.wobbrik.engine.LocalGameHostTest" time="0.002"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -56,6 +56,7 @@ abstract class NativeEditorHost {
   org.junit.Assert.assertEquals(1,saved)
   compose.onNodeWithTag("profile-name").performScrollTo().performTextReplacement("Pilot")
   org.junit.Assert.assertEquals("Pilot",changed)
+  compose.waitUntil(10000) { compose.onAllNodesWithContentDescription("İnşaatçı avatarı").fetchSemanticsNodes().isNotEmpty() }
   compose.onNodeWithContentDescription("İnşaatçı avatarı").performScrollTo()
   compose.runOnUiThread {
    fun invalidate(v:android.view.View) {
@@ -84,6 +85,7 @@ abstract class NativeEditorHost {
    bitmap.recycle()
   }
   compose.onNodeWithTag("profile-avatar").performScrollTo().performClick()
+  compose.waitUntil(10000) { compose.onAllNodesWithContentDescription("Pilot avatarı").fetchSemanticsNodes().isNotEmpty() }
   compose.onNodeWithTag("avatar-pilot").performClick().assertIsSelected()
   org.junit.Assert.assertEquals("",applied)
   compose.runOnUiThread {

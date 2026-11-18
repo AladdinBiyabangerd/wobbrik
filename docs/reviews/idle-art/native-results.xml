@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.aladdin.wobbrik.OffMainArtTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-11-17T13:00:46.454Z" hostname="Macs-MacBook-Pro.local" time="10.761">
+  <properties/>
+  <testcase name="failureSmallFont2" classname="com.aladdin.wobbrik.OffMainArtTest" time="8.26"/>
+  <testcase name="coldDecodeRunsOffMainWhileNativeNavigationResponds" classname="com.aladdin.wobbrik.OffMainArtTest" time="1.689"/>
+  <testcase name="loadingSmallFont1" classname="com.aladdin.wobbrik.OffMainArtTest" time="0.192"/>
+  <testcase name="loadingSmallFont2" classname="com.aladdin.wobbrik.OffMainArtTest" time="0.179"/>
+  <testcase name="failureNormalFont1" classname="com.aladdin.wobbrik.OffMainArtTest" time="0.173"/>
+  <testcase name="loadingNormalFont2Insets" classname="com.aladdin.wobbrik.OffMainArtTest" time="0.193"/>
+  <testcase name="failedLoadRetriesAndCancelledProducerCannotPublishReady" classname="com.aladdin.wobbrik.OffMainArtTest" time="0.075"/>
+  <system-out><![CDATA[ART-BLOCKED navigationHostMs=47
+ART-READY helperCompositionUs=91
+ART-IO decodeMs=285 offMain=true
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

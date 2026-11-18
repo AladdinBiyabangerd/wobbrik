@@ -35,6 +35,20 @@ Koddan əvvəl bu faylı və `docs/context/current-task.md`-ni oxu. Paralel əsa
 - Boş layer/framework və vaxtından əvvəl abstraksiya yaratma. Bitirməzdən əvvəl yerləşmə, dublikat və importları yoxla; uyğun build/test nəticələrini dürüst qeyd et.
 - Dirty owner işini səssiz stash/reset/force ilə məhv etmə. Diagnostic ekran real domain/repository çağırmalıdır; demo/synthetic adapter açıq işarələnməlidir.
 
+## Performans — yeni və dəyişən səhifələr
+
+- Hər yeni ekran, tab, detail və naviqasiya axını ilk implementasiyadan performans nəzərə alınaraq hazırlanır; optimizasiya ayrıca son mərhələyə saxlanmır. Bu qayda həmin axına xidmət edən mobil və AppBackend oxularına da aiddir.
+- Koddan əvvəl mövcud repository/cache/art helper-lərini tap; ilk açılış, təkrar giriş və refresh üçün hansı məlumatın göstəriləcəyini, hansı sorğuların lazım olduğunu və işin nə ilə böyüdüyünü müəyyən et. Yeni paralel plan/framework yaratma.
+- Uyğun qəbul edilmiş lokal məlumat varsa ekran onu şəbəkəni gözləmədən göstərir; zəruri sinxronizasiya arxa planda gedir. İlk girişdə cache yoxdursa shell və əlçatan loading/error/retry görünür; əlaqəsiz və optional məlumat əsas məzmunu bloklamır.
+- Display cache mutasiya icazəsi deyil. UID/login epoch, account revision, fresh mutation və final-sync sərhədlərini saxla; köhnə/başqa hesab məlumatını və qəbul edilməmiş nəticəni fresh kimi göstərmə. Sorğu azaltmaq üçün authority yoxlamasını çıxarma.
+- Oxu göstərilən səhifə/detail ilə məhdud olmalıdır. Bir status üçün bütün kolleksiyanı/şəhəri gəzmə, kart başına N+1 sorğu yaratma, eyni aggregate-i hər page üçün təkrarlama. Lazım olan read metadata-sını serverdə owner-scoped projection/bounded batch və uyğun indekslə al; backend uyğunluğunu eyni vahiddə yoxla. Məsələn, İnventar şəhər statusunu display bina cavabındakı `in_city`-dən alır, bütün City səhifələrindən deyil.
+- Pagination, cursor və parallelism məhdud olur; təkrar mount/recomposition/back naviqasiyası eyni qəbul edilmiş oxunu səbəbsiz təkrarlamır. Refresh və revision dəyişikliyi düzgün invalidation edir; route/account dəyişəndə iş ləğv olunur, köhnə cavab yeni state-ə yazılmır. Polling yalnız konkret lifecycle ehtiyacı ilə və görünməyən ekranda dayandırılaraq istifadə olunur.
+- Main/UI thread-də disk/network I/O, bitmap decode və ağır parse/hesablama etmə. Art-ı uyğun lifecycle/config/density sərhədində paylaş; kart/recomposition başına decode/bitmap allocation və səbəbsiz frame-state yeniləməsi yaratma. Böyük siyahıda sabit key-li lazy komponentlər və linear accumulation istifadə et; gizli eager prewarm ilə xərci başqa ekrana köçürmə.
+- DTO yalnız axının istifadə etdiyi məlumatı daşıyır; opaque snapshot kimi ağır unused sahələri display cavabına qatma. Wire, parse, bitmap və tam serializə edilmiş cache paketinin ölçüsünü birlikdə nəzərə al; JSON escaping/wrapper xərcini say. Page/detail cache-ni hesab/revision üzrə atomik saxla; oxu cache həddini command journal həddi ilə qarışdırma. Cache write uğursuzluğu uğurlu live oxunu pozmur; sonsuz payload/cache artımı həll deyil.
+- Yeni/dəyişən axın üçün cold/warm/cache-hit/cache-miss/offline/refresh və böyük-hesab hallarından uyğun olanları yoxla. Fokuslu testlər request/byte sayını, lazımsız oxunun olmadığını, cache replay/invalidation və hesab/revision/cancellation sərhədlərini yoxlamalıdır; scheduler-dən asılı sərt millisecond assertion-ları unit testə yazma.
+- Optimallaşdırma iddiasına eyni scope/fixture-də əvvəl–sonra ölçmə əlavə et. Yeni axında ilkin request/byte və ilk məzmun/təkrar giriş ölçüsünü qeyd et; backend dəyişibsə SQL sayı ilə yanaşı sorğunun planını/scan və aggregate xərcini uyğun böyük-hesab fixture-ində yoxla. Host/JVM/synthetic nəticəsini production/ART/frame/GPU nəticəsi kimi təqdim etmə; ölçülməyən halları açıq yaz. Məhsul üçün təsdiqlənməmiş latency büdcəsi uydurma.
+- Lokal review-da bu qaydaları yoxla, sübut və məhdudiyyətləri `docs/reviews/` altında yaz. Vizual dəyişiklik varsa ayrıca `ui-craft`/native render qaydaları qüvvədədir. Emulator/canlı yoxlama avtomatik tələb edilmir; CI yalnız istifadəçinin ayrıca göstərişi ilə main-də lokaldır.
+
 # Working notes
 
 ## Branch, commit və lokal CI

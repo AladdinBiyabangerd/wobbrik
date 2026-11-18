@@ -5,6 +5,8 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -22,8 +24,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.res.imageResource
+import androidx.compose.ui.semantics.CollectionInfo
+import androidx.compose.ui.semantics.CollectionItemInfo
+import androidx.compose.ui.semantics.collectionInfo
+import androidx.compose.ui.semantics.collectionItemInfo
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -36,6 +40,12 @@ import kotlinx.coroutines.CancellationException
 internal class InventoryReadKey(private val ready: Any) {
     override fun equals(other: Any?) = other is InventoryReadKey && ready === other.ready
     override fun hashCode() = System.identityHashCode(ready)
+}
+
+/** A user refresh belongs to one read, not every later list/detail/page visit. */
+internal class InventoryRefreshRequest {
+    private var consumed = 0
+    fun consume(generation: Int): Boolean = (generation != consumed).also { consumed = generation }
 }
 
 /** Destination-local reads are cancelled and discarded whenever the exact Ready epoch changes. */
@@ -55,33 +65,47 @@ internal fun InventoryScreen(configured: WobbrikApplication.Bootstrap.Configured
     val sizing = mobileUiSizing()
     val largeFont = LocalDensity.current.fontScale > 1f
     var retry by remember { mutableIntStateOf(0) }
+    val refreshRequest = remember(ready) { InventoryRefreshRequest() }
     var deleteCandidate by remember(ready, selected) { mutableStateOf<OwnedBuilding?>(null) }
     val deletion = remember(configured) { BuildingDeletion(configured.recovery) }
     var cursor by remember { mutableStateOf<String?>(null) }
     var buildings by remember(ready) { mutableStateOf(emptyList<OwnedBuilding>()) }
     var next by remember(ready) { mutableStateOf<String?>(null) }
-    var city by remember(ready) { mutableStateOf<CityMembership?>(null) }
+    val city: CityMembership? = null // Membership arrives with the selected building; no whole-city scan.
     var detail by remember(ready, selected) { mutableStateOf<OwnedBuilding?>(null) }
     var loading by remember(ready, selected) { mutableStateOf(true) }
     var failed by remember(ready, selected) { mutableStateOf(false) }
     LaunchedEffect(ready, selected, cursor, retry) {
+        val refresh = refreshRequest.consume(retry)
         loading = true; failed = false; fromCache = ready.ready == null
         try {
             val session = requireNotNull(configured.sessions.current())
             check(ready.current(configured, session))
             if (selected == null) {
-                val page = configured.views?.read(ready, session, "inventory-${cursor.orEmpty()}", onCached = { fromCache = true }, refresh = retry > 0) { appbackend.wobbrik.game.InventoryRepository(it).page(session, cursor) } ?: configured.inventory.page(session, cursor)
-                check(ready.current(configured, session))
-                buildings = if (cursor == null) page.buildings else (buildings + page.buildings).distinctBy { it.id }
-                next = page.next
+                fun present(page: InventoryPage) {
+                    check(ready.current(configured, session))
+                    buildings = if (cursor == null) page.buildings else (buildings + page.buildings).distinctBy { it.id }
+                    next = page.next
+                }
+                val page = configured.views?.read(ready, session, "inventory-${cursor.orEmpty()}",
+                    onCached = { fromCache = true }, refresh = refresh, onLocal = { present(it) }, onFresh = { fromCache = false }) {
+                    InventoryRepository(it).page(session, cursor)
+                } ?: configured.inventory.page(session, cursor)
+                present(page)
             } else {
-                detail = null; city = null
-                val (building, membership) = configured.views?.read(ready, session, "detail-$selected", onCached = { fromCache = true }, refresh = retry > 0) { reader ->
-                    val repository = appbackend.wobbrik.game.InventoryRepository(reader)
-                    repository.building(session, requireNotNull(selected)) to repository.city(session)
-                } ?: (configured.inventory.building(session, requireNotNull(selected)) to configured.inventory.city(session))
-                check(ready.current(configured, session))
-                detail = building; city = membership
+                detail = null
+                fun present(building: OwnedBuilding) {
+                    check(ready.current(configured, session))
+                    detail = building
+                }
+                // Detail has its own accepted bundle: optional membership must not gate it.
+                // Legacy detail bundles already contain this exact building path.
+                val building = configured.views?.read(ready, session, "detail-$selected",
+                    onCached = { fromCache = true }, refresh = refresh,
+                    onLocal = { present(it) }, onFresh = { fromCache = false }) { reader ->
+                    InventoryRepository(reader).building(session, requireNotNull(selected))
+                } ?: configured.inventory.building(session, requireNotNull(selected))
+                present(building)
             }
         } catch (cancelled: CancellationException) { throw cancelled }
         catch (_: Exception) { failed = true }
@@ -90,10 +114,20 @@ internal fun InventoryScreen(configured: WobbrikApplication.Bootstrap.Configured
     if(LocalMobileMenuShell.current) CommerceDetailChrome(selected != null)
     val back = { if (selected != null) onSelectBuilding(null) else onHome() }
     BackHandler(onBack = back)
+    val needsGarden = LocalBuildingArt.current.status == ArtPreparation.Ready &&
+        (buildings.any { !usesPurpleTemplate(it.parts) } || detail?.let { !usesPurpleTemplate(it.parts) } == true)
+    InventoryGardenArt(needsGarden) {
     Box(Modifier.fillMaxSize().then(if(LocalMobileMenuShell.current) Modifier else Modifier.background(Brush.verticalGradient(listOf(GameTokens.Surface, GameTokens.Background))))
         .then(if(LocalMobileMenuShell.current) Modifier else Modifier.safeDrawingPadding()).padding(GameTokens.Gap)) {
         Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-            if(LocalMobileMenuShell.current && selected != null) CommerceTitle("Bina detalı", back)
+            if(LocalMobileMenuShell.current && selected != null) CommerceTitle("Bina detalı", back) {
+                Row(verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {
+                    MobileMenuIcon(MobileIcon.Inventory, Modifier.size(GameTokens.Inset), GameTokens.Muted)
+                    Text("İnventar · Binalar", color = GameTokens.Muted, fontFamily = GameTypeface,
+                        fontSize = GameTokens.Label, modifier = Modifier.weight(1f))
+                }
+            }
             if(!LocalMobileMenuShell.current) Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
                 Surface(onClick = back, shape = if (sizing.portrait) RoundedCornerShape(GameTokens.ControlRadius) else CircleShape, color = GameTokens.Raised,
                     border = if (sizing.portrait) null else BorderStroke(GameTokens.Hairline, GameTokens.Muted), modifier = Modifier.size(GameTokens.Target)) {
@@ -140,29 +174,26 @@ internal fun InventoryScreen(configured: WobbrikApplication.Bootstrap.Configured
                         Text("Binalar", color = GameTokens.Accent, fontWeight = FontWeight.Bold)
                     }
                 }
-                LazyVerticalGrid(if (sizing.portrait) GridCells.Fixed(if (largeFont) 1 else 2) else GridCells.Adaptive(GameTokens.PanelWidth / 2 - GameTokens.Gap), Modifier.weight(1f),
-                    horizontalArrangement = Arrangement.spacedBy(GameTokens.Small), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-                    items(buildings, key = { it.id }) { building ->
-                        if(LocalMobileMenuShell.current) MobileOwnedBuildingCard(building, ready.catalog) { onSelectBuilding(building.id) }
-                        else Surface(onClick = { onSelectBuilding(building.id) }, color = GameTokens.Surface,
-                            shape = RoundedCornerShape(if (sizing.portrait) GameTokens.ControlRadius else GameTokens.CardRadius), border = BorderStroke(GameTokens.Hairline, GameTokens.Raised)) {
-                            if (sizing.portrait && largeFont) Row(Modifier.padding(GameTokens.Small),
-                                verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-                                BuildingPreview(building, Modifier.size(GameTokens.Target))
-                                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {
-                                    Text(buildingName(building, ready.catalog), color = GameTokens.Text, fontSize = GameTokens.Body, fontWeight = FontWeight.SemiBold)
-                                    Text("${building.floors} mərtəbə  ›", color = GameTokens.Muted, fontSize = GameTokens.Caption)
-                                }
-                            } else Column(Modifier.background(Brush.verticalGradient(if (sizing.portrait)
-                                listOf(GameTokens.Raised, GameTokens.Surface) else listOf(GameTokens.Surface, GameTokens.Surface)))
-                                .padding(GameTokens.Small), verticalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {
-                                if (sizing.portrait) BuildingPreview(building, Modifier.fillMaxWidth().height(sizing.listPreview))
-                                else Surface(color = GameTokens.Background, shape = RoundedCornerShape(GameTokens.ControlRadius)) {
-                                    BuildingPreview(building, Modifier.fillMaxWidth().height(sizing.listPreview))
-                                }
+                InventoryBuildingGrid(buildings, sizing.portrait, largeFont, Modifier.weight(1f)) { building ->
+                    if(LocalMobileMenuShell.current) MobileOwnedBuildingCard(building, ready.catalog, city) { onSelectBuilding(building.id) }
+                    else Surface(onClick = { onSelectBuilding(building.id) }, color = GameTokens.Surface,
+                        shape = RoundedCornerShape(if (sizing.portrait) GameTokens.ControlRadius else GameTokens.CardRadius), border = BorderStroke(GameTokens.Hairline, GameTokens.Raised)) {
+                        if (sizing.portrait && largeFont) Row(Modifier.padding(GameTokens.Small),
+                            verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+                            BuildingPreview(building, Modifier.size(GameTokens.Target))
+                            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {
                                 Text(buildingName(building, ready.catalog), color = GameTokens.Text, fontSize = GameTokens.Body, fontWeight = FontWeight.SemiBold)
-                                Text("${building.floors} mərtəbə  ›", color = GameTokens.Muted, fontSize = if (sizing.portrait) GameTokens.Caption else GameTokens.Body)
+                                Text("${building.floors} mərtəbə  ›", color = GameTokens.Muted, fontSize = GameTokens.Caption)
                             }
+                        } else Column(Modifier.background(Brush.verticalGradient(if (sizing.portrait)
+                            listOf(GameTokens.Raised, GameTokens.Surface) else listOf(GameTokens.Surface, GameTokens.Surface)))
+                            .padding(GameTokens.Small), verticalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {
+                            if (sizing.portrait) BuildingPreview(building, Modifier.fillMaxWidth().height(sizing.listPreview))
+                            else Surface(color = GameTokens.Background, shape = RoundedCornerShape(GameTokens.ControlRadius)) {
+                                BuildingPreview(building, Modifier.fillMaxWidth().height(sizing.listPreview))
+                            }
+                            Text(buildingName(building, ready.catalog), color = GameTokens.Text, fontSize = GameTokens.Body, fontWeight = FontWeight.SemiBold)
+                            Text("${building.floors} mərtəbə  ›", color = GameTokens.Muted, fontSize = if (sizing.portrait) GameTokens.Caption else GameTokens.Body)
                         }
                     }
                 }
@@ -195,6 +226,7 @@ internal fun InventoryScreen(configured: WobbrikApplication.Bootstrap.Configured
             else if (!LocalMobileMenuShell.current) InventoryButton(if (selected == null) "Ana ekran" else "İnventara qayıt", onClick = back)
         }
     }
+    } // The list and detail share one composition-owned garden decode.
     deleteCandidate?.let { candidate ->
         BuildingDeleteConfirmation(onDismiss = { deleteCandidate = null }, onConfirm = {
             deleteCandidate = null
@@ -203,6 +235,36 @@ internal fun InventoryScreen(configured: WobbrikApplication.Bootstrap.Configured
                 onSelectBuilding(null); cursor = null
             }
         })
+    }
+}
+
+/** Mobile inventory has fixed equal columns, so lazily compose rows without the
+ * grid's extra track/slot machinery. Tablet retains its existing grid. */
+@Composable
+private fun InventoryBuildingGrid(buildings: List<OwnedBuilding>, portrait: Boolean, largeFont: Boolean,
+    modifier: Modifier, content: @Composable (OwnedBuilding) -> Unit) {
+    if (!portrait) {
+        LazyVerticalGrid(GridCells.Adaptive(GameTokens.PanelWidth / 2 - GameTokens.Gap), modifier,
+            horizontalArrangement = Arrangement.spacedBy(GameTokens.Small),
+            verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+            items(buildings, key = { it.id }) { content(it) }
+        }
+        return
+    }
+    val columns = if (largeFont) 1 else 2
+    val rows = remember(buildings, columns) { buildings.chunked(columns) }
+    LazyColumn(modifier.semantics { collectionInfo = CollectionInfo(rows.size, columns) },
+        verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+        itemsIndexed(rows, key = { _, row -> row.first().id }) { rowIndex, row ->
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+                row.forEachIndexed { column, building -> key(building.id) {
+                    Box(Modifier.weight(1f).semantics {
+                        collectionItemInfo = CollectionItemInfo(rowIndex, 1, column, 1)
+                    }) { content(building) }
+                } }
+                repeat(columns - row.size) { Spacer(Modifier.weight(1f)) }
+            }
+        }
     }
 }
 
@@ -249,7 +311,7 @@ private fun BuildingDetail(building: OwnedBuilding, city: CityMembership?, catal
         MobileOwnedBuildingDetail(building, city, catalog, modifier, canDelete, onDelete)
         return
     }
-    val art = rememberCosmeticArt()
+    val art = if (LocalBuildingArt.current.status == ArtPreparation.Ready) rememberCosmeticArt() else emptyMap()
     val value = remember(building, catalog) { BuildingValueBreakdown.from(building, catalog) }
     val largeFont = LocalDensity.current.fontScale > 1.3f
     var tab by rememberSaveable(building.id) { mutableIntStateOf(0) }
@@ -294,12 +356,7 @@ private fun BuildingDetailContent(building: OwnedBuilding, city: CityMembership?
         when (tab) {
             0 -> {
                 DetailRow("Mərtəbə", building.floors.toString()); DetailRow("Sakin", building.residents.toString())
-                Text(when {
-                    city == null -> "Şəhərə aidlik yüklənməyib"
-                    city.buildings[building.id] == building.revision -> "✓ Şəhərdə yerləşdirilib"
-                    building.id in city.buildings -> "Şəhər məlumatı dəyişib. Yenilə."
-                    else -> "İnventardadır"
-                }, color = GameTokens.Muted)
+                Text(building.cityStatus(city), color = GameTokens.Muted)
                 DetailRow("Hər mərtəbəyə", if (building.residents.toBigInteger() == building.floors.toBigInteger() * java.math.BigInteger.valueOf(4)) "4 sakin" else "—")
                 DetailRow("Passiv gəlir", "Yaratmır")
             }
@@ -370,15 +427,44 @@ private fun DetailRow(label: String, value: String) {
     }
 }
 
+/** Share the nodpi inventory illustration across cards, without retaining Activity/account state
+ * or decoding it for a purple-only inventory. Other preview destinations keep their own scope. */
+internal val LocalInventoryGarden = staticCompositionLocalOf<Pair<ResourceArt, () -> Unit>?> { null }
+
+@Composable
+internal fun InventoryGardenArt(required: Boolean, content: @Composable () -> Unit) {
+    // A refresh briefly clears the rows. Keep an already requested illustration
+    // until this screen leaves, so list/detail and row replacement do not decode again.
+    var requested by remember { mutableStateOf(false) }
+    SideEffect { if (required) requested = true }
+    val garden = if (required || requested) rememberResourceArt(R.drawable.inventory_garden) else null
+    CompositionLocalProvider(LocalInventoryGarden provides garden, content = content)
+}
+
 /** Server metadata stays real; approved art is a decorative owned-building presentation. */
 @Composable
 internal fun BuildingPreview(building: OwnedBuilding, modifier: Modifier) {
+    val preparation = LocalBuildingArt.current
+    if (preparation.status != ArtPreparation.Ready) {
+        Box(modifier) { ApprovedArtStatus(preparation.status, preparation.retry) }
+        return
+    }
     val art = rememberCosmeticArt() + rememberGameWindowArt()
     val atlases = rememberGameAtlases()
     val purple = rememberPurpleBuildingArt()
-    val gardenImage = ImageBitmap.imageResource(R.drawable.inventory_garden)
-    val garden = remember(gardenImage) { CosmeticSprite(gardenImage, androidx.compose.ui.unit.IntOffset.Zero,
-        androidx.compose.ui.unit.IntSize(gardenImage.width, gardenImage.height)) }
+    val purpleTemplate = usesPurpleTemplate(building.parts)
+    // Purple already carries its approved garden in the atlas. Other templates load
+    // their decorative island on IO without withholding the building's metadata.
+    val garden = if (purpleTemplate) null else {
+        val (resource, retry) = LocalInventoryGarden.current ?: rememberResourceArt(R.drawable.inventory_garden)
+        val image = resource.images?.singleOrNull()
+        if (image == null) {
+            Box(modifier) { ApprovedArtStatus(if (resource.failed) ArtPreparation.Failed else ArtPreparation.Loading, retry) }
+            return
+        }
+        remember(image) { CosmeticSprite(image, androidx.compose.ui.unit.IntOffset.Zero,
+            androidx.compose.ui.unit.IntSize(image.width, image.height)) }
+    }
     val centers = building.geometry?.geometry?.centers
     val missing = building.parts.values.any { it !in art }
     if (centers == null || missing) {
@@ -388,8 +474,8 @@ internal fun BuildingPreview(building: OwnedBuilding, modifier: Modifier) {
         return
     }
     Canvas(modifier.semantics { contentDescription = "${building.floors} mərtəbəli bina" }) {
-        if (usesPurpleTemplate(building.parts)) purpleBuilding(purple, art, atlases, building.parts, centers)
-        else buildingPreview(atlases, art, building.parts, centers, garden)
+        if (purpleTemplate) purpleBuilding(purple, art, atlases, building.parts, centers)
+        else buildingPreview(atlases, art, building.parts, centers, requireNotNull(garden))
     }
 }
 

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.aladdin.wobbrik.AccountViewsTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-11-17T12:17:27.584Z" hostname="Macs-MacBook-Pro.local" time="0.292">
+  <properties/>
+  <testcase name="otherRevisionCannotBePresentedFromLocalCache" classname="com.aladdin.wobbrik.AccountViewsTest" time="0.007"/>
+  <testcase name="localPresentationPrecedesNetworkAndNeverGrantsFreshness" classname="com.aladdin.wobbrik.AccountViewsTest" time="0.267"/>
+  <testcase name="accountSwitchDuringLocalReplayRejectsBeforeTransport" classname="com.aladdin.wobbrik.AccountViewsTest" time="0.003"/>
+  <testcase name="transientReadFailuresUseWholeCachedViewButAuthorizationNeverFallsBack" classname="com.aladdin.wobbrik.AccountViewsTest" time="0.011"/>
+  <testcase name="cancellationAfterLocalPresentationDoesNotPublishFreshData" classname="com.aladdin.wobbrik.AccountViewsTest" time="0.004"/>
+  <system-out><![CDATA[PERF controlled250ms local=1 ms live=257 ms; warm10 requests=0 bytes=0
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -53,6 +53,11 @@ internal fun OnlineGame(app: WobbrikApplication) {
 @Composable
 private fun AuthenticatedGame(app: WobbrikApplication) {
     val configured = app.bootstrap as? WobbrikApplication.Bootstrap.Configured
+    val profileDisplay = rememberProfileDisplayMemory(configured, configured?.sessions?.current())
+    var artRetry by remember { mutableIntStateOf(0) }
+    // Overlap immutable APK decode with recovery; optional art never holds the account sync gate.
+    val artPreparation = if (ApprovedArt.prepared) ArtPreparation.Ready
+        else rememberArtPreparation(artRetry) { ApprovedArt.prepare(app.assets) }
     // Ready is a capability: structural equality must not retain an old auth epoch.
     // Read the canonical object every frame; StateFlow/Compose conflation may skip
     // a short Recovering transition between two equal server snapshots.
@@ -138,6 +143,23 @@ private fun AuthenticatedGame(app: WobbrikApplication) {
             configured?.recovery?.onForeground()
         }
     }
+    // One gate per login epoch, never per Ready/revision or menu destination.
+    val initialEpoch = configured?.sessions?.current()
+    // The frame loop above observes recovery. Re-sample for this composition's
+    // epoch/key change so a previous frame's Ready cannot open the new login gate.
+    val initialRecovery = remember(initialEpoch, state, cached, readOnly) {
+        Triple(configured?.recovery?.state?.value, configured?.recovery?.cached?.value?.coins,
+            configured?.recovery?.readOnly?.value != null)
+    }
+    if (InitialAccountSync(initialEpoch, initialRecovery.first, initialRecovery.second,
+            canBrowseCached = initialRecovery.third,
+            onRetry = { configured?.recovery?.onForeground() })) return
+    if (needsBundledArt(page) && artPreparation != ArtPreparation.Ready) {
+        MobileMenuShell(page, ready?.snapshot?.coins ?: cached?.coins, null, { page = it }) {
+            ApprovedArtStatus(artPreparation) { artRetry++ }
+        }
+        return
+    }
     if (page == "game" && localState.playing && localState.scene != null) {
         GameScene(localState, localHost, onDrop = { localHost.drop() }, onPause = { localHost.pause() },
             onResume = { if (localState.choosingFinish) localHost.retryTerminal() else localHost.resume() },
@@ -201,7 +223,7 @@ private fun AuthenticatedGame(app: WobbrikApplication) {
         }
         if (page in setOf("account", "leaderboard") && ready != null && configured?.profiles != null && configured.leaderboard != null) {
             key(InventoryReadKey(ready)) {
-                if (page == "account") PublicAccountScreen(configured, ready, { page = "home" }, { page = it })
+                if (page == "account") PublicAccountScreen(configured, ready, { page = "home" }, { page = it }, profileDisplay)
                 else LeaderboardScreen(configured, ready, { page = if (mobileMenu) "achievements" else "account" })
             }
             return@menuContent
@@ -212,9 +234,13 @@ private fun AuthenticatedGame(app: WobbrikApplication) {
             return@menuContent
         }
         if (page == "inventory" && view != null && configured != null) {
-            key(InventoryReadKey(ready ?: view.account)) { InventoryScreen(configured, view, selected = inventoryBuilding, onSelectBuilding = { inventoryBuilding = it }, onHome = { page = "home" },
+            key(InventoryReadKey(ready ?: view.account)) {
+                CompositionLocalProvider(LocalBuildingArt provides BuildingArtState(artPreparation) { artRetry++ }) {
+                    InventoryScreen(configured, view, selected = inventoryBuilding, onSelectBuilding = { inventoryBuilding = it }, onHome = { page = "home" },
                 onParts = { partsBuilding = it; page = "parts" }, onDecorations = { inventoryBuilding = null; page = if(mobileMenu) "owned-decorations" else "decorations" }, onLand = { inventoryBuilding = null; page = if(mobileMenu) "owned-land" else "land" },
-                onMarket = { marketBuilding = inventoryBuilding; page = "market" }) }
+                onMarket = { marketBuilding = inventoryBuilding; page = "market" })
+                }
+            }
             return@menuContent
         }
         if (page == "collection" && ready != null) {

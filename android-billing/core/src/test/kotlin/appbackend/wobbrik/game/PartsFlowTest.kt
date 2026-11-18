@@ -52,7 +52,7 @@ class PartsFlowTest {
                     }
                     GameplayResponse(200, """{"revision":$revision,"accepted_at":"2026-11-13T00:00:00Z","result":$result}""")
                 }
-                "buildings/building" -> {
+                "buildings/building?view=display" -> {
                     val parts = if (edited) free + ("wall" to "coins_wall_1") else free
                     val encoded = JsonObject(parts.mapValues { JsonPrimitive(it.value) })
                     GameplayResponse(200, """{"id":"building","revision":${if (edited) 3 else 2},"floors":10,"residents":40,"base_value":${if (edited) 24 else 20},"max_price":${if (edited) 28 else 24},"parts":$encoded,"traded":false}""")

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.aladdin.wobbrik.InventoryLocalFirstTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-11-17T13:48:17.705Z" hostname="Macs-MacBook-Pro.local" time="7.271">
+  <properties/>
+  <testcase name="cachedRouteWithArtAndNetworkBlocked" classname="com.aladdin.wobbrik.InventoryLocalFirstTest" time="7.271"/>
+  <system-out><![CDATA[LOCAL-FIRST warmRouteCachedMs=1384 art=Ready blockedNetwork=true additionalRequests=2
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

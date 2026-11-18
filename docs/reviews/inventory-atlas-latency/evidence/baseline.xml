@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.aladdin.wobbrik.InventoryAtlasLatencyTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-11-17T13:40:56.527Z" hostname="Macs-MacBook-Pro.local" time="7.015">
+  <properties/>
+  <testcase name="purpleDecodeMounts" classname="com.aladdin.wobbrik.InventoryAtlasLatencyTest" time="5.776"/>
+  <testcase name="rootTiming" classname="com.aladdin.wobbrik.InventoryAtlasLatencyTest" time="1.239"/>
+  <system-out><![CDATA[ATLAS mount=0 card=0 main=true wallMs=90 cpuMs=88 newBitmaps=4 rgbaBytes=25161744
+ATLAS mount=0 card=1 main=true wallMs=87 cpuMs=87 newBitmaps=4 rgbaBytes=25161744
+ATLAS mount=0 card=2 main=true wallMs=85 cpuMs=84 newBitmaps=4 rgbaBytes=25161744
+ATLAS mount=0 card=3 main=true wallMs=86 cpuMs=86 newBitmaps=4 rgbaBytes=25161744
+ATLAS mount=1 card=0 main=true wallMs=87 cpuMs=87 newBitmaps=4 rgbaBytes=25161744
+ATLAS mount=1 card=1 main=true wallMs=84 cpuMs=84 newBitmaps=4 rgbaBytes=25161744
+ATLAS mount=1 card=2 main=true wallMs=87 cpuMs=87 newBitmaps=4 rgbaBytes=25161744
+ATLAS mount=1 card=3 main=true wallMs=86 cpuMs=86 newBitmaps=4 rgbaBytes=25161744
+ATLAS prepareWallMs=0
+ATLAS rootFirstCardMs=905 requests=3 responseUtf8Bytes=2170 cityRequests=1
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

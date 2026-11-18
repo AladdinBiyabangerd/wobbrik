@@ -12,9 +12,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.remember
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
-import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.semantics.ProgressBarRangeInfo
@@ -27,7 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.font.FontWeight
@@ -42,17 +40,20 @@ import java.math.MathContext
 internal fun MobileHomeScreen(snapshot: GameSnapshot?, active: Boolean, onPlay: (() -> Unit)?,
     onPage: (String) -> Unit, status: String?, onRetry: () -> Unit, journalBlocked: Boolean) {
     val largeFont = LocalDensity.current.fontScale > 1f
-    val city = ImageBitmap.imageResource(R.drawable.home_city_cutout_v3)
-    val cityPainter = remember(city) { BitmapPainter(city,
-        IntOffset(GameTokens.MobileHome.HeroLeft, 0), IntSize(GameTokens.MobileHome.HeroWidth, city.height)) }
+    val (art, retryArt) = rememberResourceArt(R.drawable.home_city_cutout_v3)
+    val city = art.images?.single()
+    val cityPainter = remember(city) { city?.let { BitmapPainter(it,
+        IntOffset(GameTokens.MobileHome.HeroLeft, 0), IntSize(GameTokens.MobileHome.HeroWidth, it.height)) } }
     val accepted = snapshot != null && status == null && !journalBlocked
     Column(Modifier.fillMaxSize().background(Brush.radialGradient(listOf(GameTokens.Surface, GameTokens.Background)))
         .safeDrawingPadding().consumeWindowInsets(WindowInsets.safeDrawing)
-        .padding(top = GameTokens.MobileHome.HeaderTop, bottom = GameTokens.Quarter), horizontalAlignment = Alignment.CenterHorizontally) {
+        .padding(bottom = GameTokens.Quarter), horizontalAlignment = Alignment.CenterHorizontally) {
         // Frameless Home keeps independent header, illustration and stats surfaces.
+        if (!LocalMobileMenuShell.current) Box(Modifier.padding(horizontal = GameTokens.Gap, vertical = GameTokens.Small)) {
+            MobileMenuHeader(snapshot?.coins)
+        }
         Box(Modifier.padding(horizontal = GameTokens.Gap).weight(1f).fillMaxWidth()) {
             Column(Modifier.fillMaxSize().padding(GameTokens.Small), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-                if (!LocalMobileMenuShell.current) MobileMenuHeader(snapshot?.coins)
                 BoxWithConstraints(Modifier.weight(1f)) {
                     val available = maxHeight
                     Column(Modifier.fillMaxSize().then(if (largeFont || !accepted) Modifier.verticalScroll(rememberScrollState()) else Modifier),
@@ -63,10 +64,14 @@ internal fun MobileHomeScreen(snapshot: GameSnapshot?, active: Boolean, onPlay: 
                         if (accepted) {
                             if (!largeFont) BoxWithConstraints(Modifier.fillMaxWidth().weight(1f).clipToBounds(), contentAlignment = Alignment.Center) {
                                 val heroWidth = minOf(maxWidth, maxHeight * GameTokens.MobileHome.HeroAspectRatio)
-                                Image(cityPainter, null, Modifier.size(heroWidth, heroWidth / GameTokens.MobileHome.HeroAspectRatio), contentScale = ContentScale.FillBounds)
+                                if (cityPainter != null) Image(cityPainter, null, Modifier.size(heroWidth, heroWidth / GameTokens.MobileHome.HeroAspectRatio).testTag("home-city-hero"), contentScale = ContentScale.FillBounds)
                             }
-                            else if (available > GameTokens.PanelWidth) Image(cityPainter, null,
-                                Modifier.fillMaxWidth().height(GameTokens.MobileHome.LargeFontHero), contentScale = ContentScale.Fit)
+                            // Large text uses a bounded hero inside the scroll body even on short phones.
+                            else Box(Modifier.fillMaxWidth().height(GameTokens.MobileHome.LargeFontHero)) {
+                                if (cityPainter != null) Image(cityPainter, null,
+                                    Modifier.fillMaxSize().testTag("home-city-hero"), contentScale = ContentScale.Fit)
+                            }
+                            if (art.failed) TextButton(onClick = retryArt) { Text("Qrafikanı yenilə", color = GameTokens.Accent) }
                             MobileHomeStats(requireNotNull(snapshot), largeFont)
                             if (!largeFont && available > GameTokens.MobileUi.CompactHeight) Spacer(Modifier.height(GameTokens.MobileHome.StatBottomSpace))
                         } else {
@@ -93,12 +98,19 @@ internal fun MobileHomeScreen(snapshot: GameSnapshot?, active: Boolean, onPlay: 
 /** Shared menu header: profile is reached through the dock, balance stays right aligned. */
 @Composable
 internal fun MobileMenuHeader(coins: Long?) {
+    val (logoArt, retryLogo) = LocalMenuLogo.current ?: rememberResourceArt(R.drawable.wobbrik_logo)
+    val logo = logoArt.images?.singleOrNull()
     val largeBalance = (coins?.toString()?.length ?: 1) > 6
     Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
         Row(Modifier.fillMaxWidth().heightIn(min = GameTokens.Target), verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-            Image(painterResource(R.drawable.wobbrik_logo), "Wobbrik", Modifier.weight(1f).height(GameTokens.Target),
-                contentScale = ContentScale.Fit, alignment = Alignment.CenterStart)
+            Box(Modifier.weight(1f).height(GameTokens.Target), contentAlignment = Alignment.CenterStart) {
+                if (logo != null) Image(logo, "Wobbrik", Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Fit, alignment = Alignment.CenterStart)
+                else if (logoArt.failed) TextButton(onClick = retryLogo) {
+                    Text("Wobbrik", color = GameTokens.Text, fontFamily = GameTypeface)
+                }
+            }
             if (!largeBalance) MobileHomeBalance(coins)
         }
         if (largeBalance) Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) { MobileHomeBalance(coins) }

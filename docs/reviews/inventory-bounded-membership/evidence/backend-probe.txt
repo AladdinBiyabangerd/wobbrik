@@ -1,0 +1,7 @@
+=== RUN   TestIntegrationInventoryCityPagingProbe
+    wobbrik_inventory_city_probe_test.go:105: INVENTORY_CITY buildings=1001 limit=20 requestsIncludingFinalSync=52 sql=849 bytes=107864 elapsed=7.566049166s
+    wobbrik_inventory_city_probe_test.go:105: INVENTORY_CITY buildings=1001 limit=100 requestsIncludingFinalSync=12 sql=209 bytes=94387 elapsed=1.701442042s
+    wobbrik_inventory_city_probe_test.go:134: INVENTORY_INLINE buildings=1001 displayed=20 requestsIncludingFinalSync=2 sql=44 bytes=9028 elapsed=23.0515ms
+--- PASS: TestIntegrationInventoryCityPagingProbe (15.22s)
+PASS
+ok  	appbackend/internal/platform	16.743s

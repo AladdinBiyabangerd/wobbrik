@@ -40,12 +40,22 @@ internal fun CityScreen(configured: WobbrikApplication.Bootstrap.Configured,
         try {
             val session = requireNotNull(configured.sessions.current())
             check(ready.current(configured, session))
-            val loaded = configured.views?.read(ready, session, "city", onCached = { fromCache = true }, refresh = retry > 0) { CitySceneRepository(it).load(session) } ?: configured.cityScene.load(session)
+            val loaded = configured.views?.read(ready, session, "city",
+                onCached = { fromCache = true }, refresh = retry > 0,
+                onLocal = { local ->
+                    check(ready.current(configured, session))
+                    scene = local
+                },
+                onFresh = {
+                    check(ready.current(configured, session))
+                    fromCache = false
+                }) { CitySceneRepository(it).load(session) } ?: configured.cityScene.load(session)
             check(ready.current(configured, session))
             scene = loaded
         } catch (cancelled: CancellationException) { throw cancelled }
         catch (failure: Exception) {
             android.util.Log.w("WobbrikCity", "City read failed", failure)
+            scene = null
             failed = true
         }
     }
@@ -56,6 +66,10 @@ internal fun CityScreen(configured: WobbrikApplication.Bootstrap.Configured,
 @Composable
 internal fun CityContent(scene: CityScene?, failed: Boolean, onRetry: () -> Unit,
     onHome: () -> Unit, onInventory: () -> Unit, lifeTimeSeconds: Double? = null, cached: Boolean = false) {
+    if (failed && LocalMobileMenuShell.current) {
+        CityErrorContent(onRetry, onHome, onInventory)
+        return
+    }
     var selected by remember(scene) { mutableStateOf<String?>(null) }
     var focused by remember(scene) { mutableStateOf(false) }
     BackHandler(focused) { focused = false }
@@ -81,6 +95,7 @@ internal fun CityContent(scene: CityScene?, failed: Boolean, onRetry: () -> Unit
         })
     }
     val chosen = buildings.firstOrNull { it.source.building.id == selected }
+        ?: if (LocalMobileMenuShell.current) buildings.lastOrNull() else null
     BoxWithConstraints(Modifier.fillMaxSize().background(Brush.radialGradient(listOf(GameTokens.Surface, GameTokens.Background)))
         .safeDrawingPadding().padding(GameTokens.Gap)) {
         // The reference groups the scene and its action panel into one board. In a
@@ -90,7 +105,8 @@ internal fun CityContent(scene: CityScene?, failed: Boolean, onRetry: () -> Unit
         // its primary view/back action stays outside the scroll area.
         val tallPortrait = maxHeight > maxWidth * 2 && LocalDensity.current.fontScale <= 1f
         val sceneHeight = if (tallPortrait) maxWidth else maxHeight
-        val scrollScene = LocalMobileMenuShell.current && LocalDensity.current.fontScale > 1f
+        val scrollScene = LocalMobileMenuShell.current &&
+            (LocalDensity.current.fontScale > 1f || maxHeight < GameTokens.CompactHeight)
         Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(GameTokens.Small, Alignment.CenterVertically)) {
             val body: @Composable ColumnScope.() -> Unit = {
                 CityHeader(scene?.membership?.population?.toString(), onHome, cached = cached)
@@ -165,7 +181,7 @@ internal fun CityContent(scene: CityScene?, failed: Boolean, onRetry: () -> Unit
                 when {
                     failed -> {
                         Text("Şəhəri oxumaq mümkün olmadı", color = GameTokens.Danger)
-                        if (!scrollScene) HomeButton(label = "Yenilə", onClick = onRetry)
+                        HomeButton(label = "Yenilə", onClick = onRetry)
                     }
                     scene == null -> Text("Şəhər yüklənir…", color = GameTokens.Muted)
                     else -> {
@@ -188,8 +204,12 @@ internal fun CityContent(scene: CityScene?, failed: Boolean, onRetry: () -> Unit
                 if (selected == null) selected = buildings.lastOrNull()?.source?.building?.id
                 focused = !focused
             }
-            if (scrollScene && failed) HomeButton("Yenilə", primary = true, compact = true, onClick = onRetry)
-            else if (scrollScene) HomeButton(if (focused) "Geri" else "Bax", primary = true, compact = true,
+            if (LocalMobileMenuShell.current && scene != null) CityCameraControls(focused, buildings.isNotEmpty(),
+                onFit = { focused = false; selected = null }, onFocus = {
+                    if (selected == null) selected = chosen?.source?.building?.id
+                    focused = !focused
+                })
+            if (scrollScene) HomeButton(if (focused) "Geri" else "Bax", primary = true, compact = true,
                 showPlayIcon = !focused, enabled = buildings.isNotEmpty(), onClick = onView)
             else CityViewPanel(chosen?.source?.building, focused, buildings.isNotEmpty(), onView)
             CityNavigation(onInventory)

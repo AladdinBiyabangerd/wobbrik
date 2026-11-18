@@ -1,7 +1,12 @@
 package appbackend.wobbrik.game
 
 import appbackend.wobbrik.billing.*
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.InternalCoroutinesApi
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
 import java.io.IOException
@@ -90,12 +95,22 @@ class UrlConnectionGameplayTransport(origin: String) : GameplayTransport {
         require(it.scheme == "https" && !it.host.isNullOrBlank() && it.userInfo == null && it.query == null && it.fragment == null)
         require(it.path.isNullOrEmpty() || it.path == "/")
     }.toString().trimEnd('/')
+    @OptIn(InternalCoroutinesApi::class)
     override suspend fun request(path: String, bearer: String, body: String?): GameplayResponse = withContext(Dispatchers.IO) {
         require(allowedReadPath(path) || path in setOf("sync", "catalog", "market/list", "market/withdraw", "market/buy", "shop/buy", "buildings/edit", "buildings/delete", "attempts/start", "attempts/checkpoint", "attempts/finish", "attempts/abandon"))
         val suffix = if (path == "catalog") "catalog?rules_version=wobbrik-v1" else path
-        val responseLimit = if (path.startsWith("inventory?") || path.startsWith("market/")) 1_048_576 else 65_536
+        val responseLimit = if (path.startsWith("inventory?") || path.startsWith("market/") || path.startsWith("buildings/")) 1_048_576 else 65_536
         val connection = URI("$base/v1/apps/wobbrik/game/$suffix").toURL().openConnection() as HttpURLConnection
+        // Close the underlying socket, rather than disconnecting while the HTTPS
+        // implementation may hold its connection/SSL read lock. Ownership is per request.
+        val sockets = RequestSockets((connection as javax.net.ssl.HttpsURLConnection).sslSocketFactory)
+        connection.sslSocketFactory = sockets
+        val context = currentCoroutineContext()
+        val cancellation = context[Job]!!.invokeOnCompletion(onCancelling = true, invokeImmediately = true) { cause ->
+            if (cause is CancellationException) sockets.cancel()
+        }
         try {
+            context.ensureActive()
             connection.instanceFollowRedirects = false
             connection.connectTimeout = 8000; connection.readTimeout = 8000
             connection.setRequestProperty("Authorization", "Bearer $bearer")
@@ -120,12 +135,56 @@ class UrlConnectionGameplayTransport(origin: String) : GameplayTransport {
             } ?: byteArrayOf()
             if (bytes.size > responseLimit) throw IOException("Gameplay response too large")
             GameplayResponse(status, String(bytes, Charsets.UTF_8))
-        } finally { connection.disconnect() }
+        } catch (failure: IOException) {
+            context.ensureActive()
+            throw failure
+        } finally {
+            cancellation.dispose()
+            connection.disconnect()
+        }
     }
 }
 
 /** Keep authenticated GET paths constrained; IDs/cursors cannot escape the game API. */
 internal fun allowedReadPath(path: String): Boolean =
+    Regex("city\\?limit=100(?:&cursor=[A-Za-z0-9_-]{1,128})?").matches(path) ||
+    Regex("buildings/[A-Za-z0-9_-]{1,128}\\?view=display").matches(path) ||
+    Regex("city\\?limit=20(?:&cursor=[A-Za-z0-9_-]{1,128})?&include=details").matches(path) ||
+    Regex("inventory\\?limit=20(?:&cursor=[A-Za-z0-9_-]{1,128})?&view=display").matches(path) ||
     path == "profile" || LeaderboardReads.allowedPath(path) || MarketReads.allowedPath(path) ||
     Regex("(?:inventory|city|decorations)\\?limit=20(?:&cursor=[A-Za-z0-9_-]{1,128})?").matches(path) ||
         Regex("(?:buildings|attempts|operations)/[A-Za-z0-9_-]{1,128}").matches(path)
+
+/** Tracks only this connection's sockets, including the raw socket under TLS. */
+private class RequestSockets(private val delegate: javax.net.ssl.SSLSocketFactory) : javax.net.ssl.SSLSocketFactory() {
+    private val sockets = mutableListOf<java.net.Socket>()
+    private var cancelled = false
+    private fun track(socket: java.net.Socket): java.net.Socket {
+        val close = synchronized(this) {
+            if (cancelled) true else { sockets.add(socket); false }
+        }
+        if (close) {
+            runCatching { socket.close() }
+            throw IOException("Gameplay request cancelled")
+        }
+        return socket
+    }
+    fun cancel() {
+        val owned = synchronized(this) { cancelled = true; sockets.toList() }
+        // Raw sockets are registered before layered TLS sockets.
+        owned.forEach { runCatching { it.close() } }
+    }
+    override fun getDefaultCipherSuites() = delegate.defaultCipherSuites
+    override fun getSupportedCipherSuites() = delegate.supportedCipherSuites
+    override fun createSocket(socket: java.net.Socket, host: String, port: Int, autoClose: Boolean): java.net.Socket {
+        track(socket)
+        return track(delegate.createSocket(socket, host, port, autoClose))
+    }
+    override fun createSocket(): java.net.Socket = track(delegate.createSocket())
+    override fun createSocket(host: String, port: Int): java.net.Socket = track(delegate.createSocket(host, port))
+    override fun createSocket(host: String, port: Int, local: java.net.InetAddress, localPort: Int): java.net.Socket =
+        track(delegate.createSocket(host, port, local, localPort))
+    override fun createSocket(host: java.net.InetAddress, port: Int): java.net.Socket = track(delegate.createSocket(host, port))
+    override fun createSocket(host: java.net.InetAddress, port: Int, local: java.net.InetAddress, localPort: Int): java.net.Socket =
+        track(delegate.createSocket(host, port, local, localPort))
+}

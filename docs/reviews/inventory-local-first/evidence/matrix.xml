@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.aladdin.wobbrik.InventoryLocalFirstTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-11-17T13:51:19.007Z" hostname="Macs-MacBook-Pro.local" time="8.961">
+  <properties/>
+  <testcase name="cachedRouteWithArtAndNetworkBlocked" classname="com.aladdin.wobbrik.InventoryLocalFirstTest" time="6.979"/>
+  <testcase name="cachedAccountBypassesInitialGateButNewLoginDoesNot" classname="com.aladdin.wobbrik.InventoryLocalFirstTest" time="0.092"/>
+  <testcase name="normalFont2" classname="com.aladdin.wobbrik.InventoryLocalFirstTest" time="0.777"/>
+  <testcase name="smallFont1" classname="com.aladdin.wobbrik.InventoryLocalFirstTest" time="0.588"/>
+  <testcase name="smallFont2" classname="com.aladdin.wobbrik.InventoryLocalFirstTest" time="0.524"/>
+  <system-out><![CDATA[LOCAL-FIRST warmRouteCachedMs=366 art=Loading blockedNetwork=true additionalRequests=2
+LOCAL-FIRST remount=0 hostMs=60 addedHTTP=0
+LOCAL-FIRST remount=1 hostMs=45 addedHTTP=0
+LOCAL-FIRST warmRouteCachedMs=62 art=Loading blockedNetwork=true additionalRequests=2
+LOCAL-FIRST remount=0 hostMs=22 addedHTTP=0
+LOCAL-FIRST remount=1 hostMs=19 addedHTTP=0
+LOCAL-FIRST warmRouteCachedMs=45 art=Loading blockedNetwork=true additionalRequests=2
+LOCAL-FIRST remount=0 hostMs=22 addedHTTP=0
+LOCAL-FIRST remount=1 hostMs=21 addedHTTP=0
+LOCAL-FIRST warmRouteCachedMs=37 art=Loading blockedNetwork=true additionalRequests=2
+LOCAL-FIRST remount=0 hostMs=12 addedHTTP=0
+LOCAL-FIRST remount=1 hostMs=14 addedHTTP=0
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

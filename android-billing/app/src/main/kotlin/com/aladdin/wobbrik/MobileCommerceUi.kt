@@ -21,7 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 /** Native commerce controls use the established menu palette and dimension scale. */
 @Composable
 internal fun CommerceAction(label: String, modifier: Modifier = Modifier.fillMaxWidth(), primary: Boolean = false,
-    enabled: Boolean = true, icon: MobileIcon? = null, compact: Boolean = false, onClick: () -> Unit) {
+    enabled: Boolean = true, icon: MobileIcon? = null, compact: Boolean = false, destructive: Boolean = false, onClick: () -> Unit) {
     val feedback = LocalGameFeedback.current
     val shape = RoundedCornerShape(GameTokens.ControlRadius)
     Surface(onClick = { feedback(); onClick() }, enabled = enabled, modifier = modifier.heightIn(min = GameTokens.Target),
@@ -33,7 +33,7 @@ internal fun CommerceAction(label: String, modifier: Modifier = Modifier.fillMax
                 listOf(GameTokens.MobileHome.PlayTop, GameTokens.Accent, GameTokens.MobileHome.PlayBottom))) else Modifier)
                 .padding(GameTokens.Small), verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(GameTokens.Quarter, Alignment.CenterHorizontally)) {
-                val color = if (!enabled) GameTokens.Muted else if (primary) GameTokens.Background else GameTokens.Text
+                val color = if (!enabled) GameTokens.Muted else if (primary) GameTokens.Background else if (destructive) GameTokens.Danger else GameTokens.Text
                 icon?.let { MobileMenuIcon(it, Modifier.size(if(compact) GameTokens.Gap else GameTokens.Inset), color) }
                 Text(label, Modifier.then(if (bounded) Modifier.weight(1f, fill = false) else Modifier).widthIn(max = GameTokens.MobileHome.NavbarLabelWidth * LocalDensity.current.fontScale).horizontalScroll(rememberScrollState()), color = color, fontFamily = GameTypeface,
                     fontSize = if(compact) GameTokens.Caption else GameTokens.Body, fontWeight = FontWeight.Bold, softWrap = false)
@@ -74,13 +74,23 @@ internal fun CommerceTabs(tabs: List<CommerceTab>, page: String, onPage: (String
 }
 
 @Composable
-internal fun CommerceTitle(title: String, onBack: () -> Unit) {
-    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-        CommerceAction("", Modifier.width(GameTokens.Target).semantics { contentDescription = "Geri" }, icon = MobileIcon.Back, onClick = onBack)
-        if(title == "Bazar") MobileMenuIcon(MobileIcon.Market, Modifier.size(GameTokens.Inset))
-        Text(title, Modifier.weight(1f).horizontalScroll(rememberScrollState()), color = GameTokens.Text,
-            fontSize = mobileUiSizing().heading, fontFamily = GameTypeface, fontWeight = FontWeight.Bold, softWrap = false)
+internal fun CommerceTitle(title: String, onBack: () -> Unit) = CommerceTitle(title, onBack, null)
+
+@Composable
+internal fun CommerceTitle(title: String, onBack: () -> Unit, supportingContent: (@Composable () -> Unit)?) {
+    val largeFont = LocalDensity.current.fontScale > 1f
+    Column(verticalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+            CommerceAction("", Modifier.width(GameTokens.Target).semantics { contentDescription = "Geri" }, icon = MobileIcon.Back, onClick = onBack)
+            if(title == "Bazar") MobileMenuIcon(MobileIcon.Market, Modifier.size(GameTokens.Inset))
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {
+                Text(title, Modifier.horizontalScroll(rememberScrollState()), color = GameTokens.Text,
+                    fontSize = mobileUiSizing().heading, fontFamily = GameTypeface, fontWeight = FontWeight.Bold, softWrap = false)
+                if (!largeFont) supportingContent?.invoke()
+            }
+        }
+        if (largeFont) supportingContent?.invoke()
     }
 }
 

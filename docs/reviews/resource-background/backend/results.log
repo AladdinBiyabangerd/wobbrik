@@ -1,0 +1,24 @@
+=== RUN   TestIntegrationCityLatencyProbe
+    city_latency_probe_test.go:38: CITY-HTTP sample=0 buildings=12 requests=15 sqlStatements=175 responseJSONBytes=6282 elapsed=73.56475ms
+    city_latency_probe_test.go:38: CITY-HTTP sample=1 buildings=12 requests=15 sqlStatements=175 responseJSONBytes=6282 elapsed=63.36675ms
+    city_latency_probe_test.go:38: CITY-HTTP sample=2 buildings=12 requests=15 sqlStatements=175 responseJSONBytes=6282 elapsed=61.744166ms
+    city_latency_probe_test.go:39: SQL count=15 prefix="INSERT INTO accounts(app,uid) VALUES($1,$2) ON CONFLICT DO NOTHING"
+    city_latency_probe_test.go:39: SQL count=15 prefix="INSERT INTO rate_windows(app,principal,bucket,hits) SELECT $1,$2,$3,1 WHERE NOT EXISTS(SELECT 1 FROM deleted_a"
+    city_latency_probe_test.go:39: SQL count=2 prefix="SELECT COALESCE((SELECT revision FROM wobbrik_accounts WHERE app=$1 AND uid=$2),0),clock_timestamp(),COALESCE("
+    city_latency_probe_test.go:39: SQL count=15 prefix="SELECT EXISTS(SELECT 1 FROM deleted_accounts WHERE app=$1 AND subject_hash=$2)"
+    city_latency_probe_test.go:39: SQL count=2 prefix="SELECT b.id,b.revision,b.residents,p.x,p.y,p.turns FROM wobbrik_city_buildings c JOIN wobbrik_buildings b ON ("
+    city_latency_probe_test.go:39: SQL count=15 prefix="SELECT blocked FROM accounts WHERE app=$1 AND uid=$2"
+    city_latency_probe_test.go:39: SQL count=2 prefix="SELECT blocked FROM accounts WHERE app=$1 AND uid=$2 FOR SHARE"
+    city_latency_probe_test.go:39: SQL count=1 prefix="SELECT d.id,d.item_id,p.x,p.y,p.turns FROM wobbrik_decorations d LEFT JOIN wobbrik_city_placements p ON p.app="
+    city_latency_probe_test.go:39: SQL count=12 prefix="SELECT id,creator_uid,revision,floors,residents,base_value,max_price,parts,snapshot,traded,accepted_geometry F"
+    city_latency_probe_test.go:39: SQL count=2 prefix="SELECT item_id,x,y,turns FROM wobbrik_city_parcels WHERE app=$1 AND uid=$2 ORDER BY item_id"
+    city_latency_probe_test.go:39: SQL count=30 prefix="SELECT pg_advisory_xact_lock(hashtextextended($1,0))"
+    city_latency_probe_test.go:39: SQL count=32 prefix="begin"
+    city_latency_probe_test.go:39: SQL count=32 prefix="commit"
+--- PASS: TestIntegrationCityLatencyProbe (0.40s)
+=== RUN   TestIntegrationCityReadReturnAtomic
+--- PASS: TestIntegrationCityReadReturnAtomic (0.18s)
+=== RUN   TestIntegrationCityHTTPBoundary
+--- PASS: TestIntegrationCityHTTPBoundary (0.19s)
+PASS
+ok  	appbackend/internal/platform	2.364s

@@ -52,8 +52,9 @@ internal fun NativeProfileOverview(profile: PublicProfile, level: String, xp: Lo
     progress: @Composable () -> Unit, showEdit: Boolean, enabled: Boolean, onEdit: () -> Unit) {
     val large = LocalDensity.current.fontScale > 1f
     val compact = mobileUiSizing().compact
+    val portraits = LocalAccountPortraitArt.current ?: rememberResourceArt(R.drawable.account_portraits_v3)
     @Composable fun portrait(modifier: Modifier) {
-        NativeAccountPortrait(profile.avatarId, modifier)
+        NativeAccountPortrait(profile.avatarId, modifier, resource = portraits)
     }
     Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(-GameTokens.Small)) {
         // Folded ribbon and central crown are native geometry, independent of text size.

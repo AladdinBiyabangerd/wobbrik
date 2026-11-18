@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="appbackend.wobbrik.game.InventoryPayloadTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-11-18T08:40:35.987Z" hostname="Macs-MacBook-Pro.local" time="1.366">
+  <properties/>
+  <testcase name="backendDisplayFixtureRetainsAcceptedGeometry" classname="appbackend.wobbrik.game.InventoryPayloadTest" time="0.004"/>
+  <testcase name="oversizedLegacyInventoryCanBeCachedAndReopenedWithoutNetwork" classname="appbackend.wobbrik.game.InventoryPayloadTest" time="1.291"/>
+  <testcase name="displayInventoryKeepsSameModelAndCanBeCached" classname="appbackend.wobbrik.game.InventoryPayloadTest" time="0.063"/>
+  <testcase name="legacyBundleAliasesOnlyExactDisplayQuery" classname="appbackend.wobbrik.game.InventoryPayloadTest" time="0.008"/>
+  <system-out><![CDATA[INVENTORY full=true wireBytes=324299 requests=2 cacheBytes=4409 captureMs=1274
+INVENTORY full=true replayMs=0 replayRequests=0
+INVENTORY full=false wireBytes=4119 requests=2 cacheBytes=4769 captureMs=20
+INVENTORY full=false replayMs=0 replayRequests=0
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

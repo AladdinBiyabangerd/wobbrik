@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.aladdin.wobbrik.ColdArtBaselineTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-11-17T12:52:25.449Z" hostname="Macs-MacBook-Pro.local" time="5.988">
+  <properties/>
+  <testcase name="initialBundledArtComposition" classname="com.aladdin.wobbrik.ColdArtBaselineTest" time="5.988"/>
+  <system-out><![CDATA[COLD-ART mainThread=true compositionMs=375 atlases=4 windows=14 cosmetics=68
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.aladdin.wobbrik.InventoryFirstOpenTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-11-18T07:48:38.051Z" hostname="Macs-MacBook-Pro.local" time="9.731">
+  <properties/>
+  <testcase name="cachedRouteWithArtAndNetworkBlocked" classname="com.aladdin.wobbrik.InventoryFirstOpenTest" time="6.743"/>
+  <testcase name="cachedDetailDoesNotGrantCommandsWhileArtLoads" classname="com.aladdin.wobbrik.InventoryFirstOpenTest" time="0.256"/>
+  <testcase name="cachedAccountBypassesInitialGateButNewLoginDoesNot" classname="com.aladdin.wobbrik.InventoryFirstOpenTest" time="0.066"/>
+  <testcase name="normalFont2" classname="com.aladdin.wobbrik.InventoryFirstOpenTest" time="0.76"/>
+  <testcase name="otherTemplateUsesSameAsyncPreview" classname="com.aladdin.wobbrik.InventoryFirstOpenTest" time="0.754"/>
+  <testcase name="smallFont1" classname="com.aladdin.wobbrik.InventoryFirstOpenTest" time="0.632"/>
+  <testcase name="smallFont2" classname="com.aladdin.wobbrik.InventoryFirstOpenTest" time="0.52"/>
+  <system-out><![CDATA[LOCAL-FIRST warmRouteCachedMs=361 art=Loading blockedNetwork=true diskStillBlocked=true additionalRequests=2 responseBytes=0
+LOCAL-FIRST remount=0 hostMs=113 addedHTTP=0
+LOCAL-FIRST remount=1 hostMs=52 addedHTTP=0
+LOCAL-FIRST warmRouteCachedMs=44 art=Loading blockedNetwork=true diskStillBlocked=true additionalRequests=2 responseBytes=0
+LOCAL-FIRST remount=0 hostMs=30 addedHTTP=0
+LOCAL-FIRST remount=1 hostMs=18 addedHTTP=0
+LOCAL-FIRST warmRouteCachedMs=46 art=Loading blockedNetwork=true diskStillBlocked=true additionalRequests=2 responseBytes=0
+LOCAL-FIRST remount=0 hostMs=51 addedHTTP=0
+LOCAL-FIRST remount=1 hostMs=43 addedHTTP=0
+LOCAL-FIRST warmRouteCachedMs=49 art=Loading blockedNetwork=true diskStillBlocked=true additionalRequests=2 responseBytes=0
+LOCAL-FIRST remount=0 hostMs=39 addedHTTP=0
+LOCAL-FIRST remount=1 hostMs=18 addedHTTP=0
+LOCAL-FIRST warmRouteCachedMs=34 art=Loading blockedNetwork=true diskStillBlocked=true additionalRequests=2 responseBytes=0
+LOCAL-FIRST remount=0 hostMs=12 addedHTTP=0
+LOCAL-FIRST remount=1 hostMs=13 addedHTTP=0
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

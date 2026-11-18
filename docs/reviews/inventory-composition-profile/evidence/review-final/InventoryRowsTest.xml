@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.aladdin.wobbrik.InventoryRowsTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-11-18T08:32:59.849Z" hostname="Macs-MacBook-Pro.local" time="0.697">
+  <properties/>
+  <testcase name="shellKeepsSameLogoAcrossHomeAndInventory" classname="com.aladdin.wobbrik.InventoryRowsTest" time="0.082"/>
+  <testcase name="fullPageScrollsToTwentiethBuilding" classname="com.aladdin.wobbrik.InventoryRowsTest" time="0.269"/>
+  <testcase name="oddPagePreservesFinalBuildingAndClickId" classname="com.aladdin.wobbrik.InventoryRowsTest" time="0.151"/>
+  <testcase name="largeFontSingleColumnScrollsToLastBuilding" classname="com.aladdin.wobbrik.InventoryRowsTest" time="0.195"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

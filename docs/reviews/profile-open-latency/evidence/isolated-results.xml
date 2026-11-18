@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.aladdin.wobbrik.ProfileOpenLatencyTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-11-18T08:18:22.542Z" hostname="Macs-MacBook-Pro.local" time="7.628">
+  <properties/>
+  <testcase name="firstAndReturningProfile" classname="com.aladdin.wobbrik.ProfileOpenLatencyTest" time="7.628"/>
+  <system-out><![CDATA[round,contentMs,avatarMs,requests,responseBytes
+0,581.593791,582.1695,1,61
+1,36.290208,78.780417,2,122
+2,38.084792,82.627459,3,183
+3,24.190042,66.439333,4,244
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

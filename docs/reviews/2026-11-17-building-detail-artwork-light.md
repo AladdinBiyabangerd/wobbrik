@@ -1,0 +1,13 @@
+# Bina detalı — artwork işığı
+
+Branch `feat/native-ui-parity`, baza `c272351`; authority PLAN §1.1 və unified-mobile-v3/02-market.png. Dar vahid: təsdiqli detal illüstrasiyasının arxasındakı mavi işıq native radial gradient ilə əlavə edilir. Yalnız MobileOwnedBuildingDetail artwork sahəsi dəyişir; normal və böyük şrift eyni feature-private helper-dən istifadə edir. Real BuildingPreview geometry/selected parts, fallback, ölçülər və semantika saxlanır. Yeni raster, token, kataloq binası və ya placement hüququ yoxdur. Native fon işığı PNG-dəki şüalı artwork-ün tam eyniliyi deyil; bütün detal/app pariteti iddia edilmir.
+
+Əməliyyatların yoxlanması: mövcud satış girişi artıq Tag ikonlu secondary CommerceAction-dır; Bina görünüşü real parts route-unu açır. PNG-nin Şəhərə yerləşdir əməliyyatı mövcud müqavilədən kənar yeni hüquq yaratmaq üçün əlavə edilmir. Bu vahid yalnız dekorativ UI fonudur: data/API/domain/schema/wallet/backend dəyişikliyi lazım deyil; əvvəlki müqavilə review-u qüvvədədir.
+
+İlkin Rim variantı fallback Muted mətn üçün 3.18:1 verdi və saxlanmadı. Mövcud Raised tokeni ilə Muted/Raised 6.48:1, Text/Raised 10.24:1 PASS. Radial fonun qalan hissəsi əvvəlki daha tünd panelə keçir. Yeni rəng/ölçü yoxdur. İlk shell cəhdi yanlış relative path səbəbindən edit etmədi; Gradle sandbox cache lock səbəbindən başlamadı. Düzgün path və icazəli Gradle run istifadə edildi; bu cəhdlər PASS sayılmır.
+
+İki əvvəlki baselineProfiles/{0,1}/app-release.dm bu vahidə daxil deyil. Emulator/CI/merge/push/deploy yoxdur. Real device/account/TalkBack/IME/real inset/API24/GPU/performance/locale/tablet yoxlanmır.
+
+Son Raised source ilə commerce5/5 PASS (failures/errors/skipped0), lintDebug PASS, BUILD SUCCESSFUL2m1s. Log `/private/tmp/wobbrik-building-detail-light-final.log`; renderlər `/private/tmp/wobbrik-building-detail-light-final/`. 390×844 və320×568 font1/font2,360×640 font2 simulated inset+uzun mətn/balans üzrə beş `detail-*` renderi açılıb 02-market.png ilə müqayisə edildi. İşıq yumşaqdır, bina konturu və mətnlər qorunur; font2/kiçik viewport body scroll saxlanır, əsas əməliyyatlar görünür. PNG-dəki güclü şüalar və artwork silueti tam uyğun deyil; real selected parts/geometry əvəzinə nümunə binası qoyulmur. Böyük ad horizontal scroll-u və navbarın mövcud adaptasiyası dəyişmir.
+
+Lokal diff review: dəyişiklik yalnız iki mobile detail artwork çağırışı və private helper-dir; kartlar/market/tablet renderer-i dəyişmir. Fon draw modifier-i input/semantika/ölçü əlavə etmir; fallback mətn kontrastı da nəzərə alınıb. Import/yerləşmə yoxlandı, dublikat domain/layer yoxdur. `git diff --check` PASS. Yalnız source, bu review və handoff commit edilir.

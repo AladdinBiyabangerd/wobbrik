@@ -1,0 +1,10 @@
+=== RUN   TestIntegrationInventoryPayloadProbe
+    wobbrik_inventory_payload_test.go:85: INVENTORY display=false sample=0 requests=1 sql=11 bytes=335225 elapsed=52.249583ms
+    wobbrik_inventory_payload_test.go:85: INVENTORY display=false sample=1 requests=1 sql=11 bytes=335225 elapsed=49.105334ms
+    wobbrik_inventory_payload_test.go:85: INVENTORY display=false sample=2 requests=1 sql=11 bytes=335225 elapsed=48.364083ms
+    wobbrik_inventory_payload_test.go:85: INVENTORY display=true sample=0 requests=1 sql=11 bytes=10905 elapsed=11.595667ms
+    wobbrik_inventory_payload_test.go:85: INVENTORY display=true sample=1 requests=1 sql=11 bytes=10905 elapsed=10.867042ms
+    wobbrik_inventory_payload_test.go:85: INVENTORY display=true sample=2 requests=1 sql=11 bytes=10905 elapsed=10.849167ms
+--- PASS: TestIntegrationInventoryPayloadProbe (0.62s)
+PASS
+ok  	appbackend/internal/platform	2.453s
