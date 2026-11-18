@@ -1,3 +1,14 @@
+# Son inteqrasiya — 18 noyabr 2026
+
+- Completed: istifadəçinin açıq göstərişi ilə docs/performance-by-default əvvəl remote-a push edildi; Android acc1066 tarixçəsi main-ə --no-ff ilə fde0c0f kimi merge/push edildi. Paired AppBackend343d402 eyni qaydada399f9fe main merge/push oldu. Merge tree-ləri uyğun reviewed branch tree-ləri ilə eynidir, konflikt yoxdur.
+- Current state: bu son docs-only inteqrasiya qeydi ayrıca branch-də hazırlanır və main-ə tarixçə saxlanmaqla daxil edilir. Owner iki dirty release binarisi və köhnə city-detail review əlavəsi commit/push edilmədən saxlanır.
+- Decisions: main merge və remote push istifadəçi tərəfindən açıq icazəlidir; CI/deploy istənməyib, işlədilməyib. Əvvəlki no-merge statusları aşağıda tarixidir.
+- Remaining work: deploy və production/device performans sübutları açıqdır; yeni feature başlanmır.
+- Relevant files: AGENTS.md, .cursor/rules/performance.mdc, docs/reviews/2026-11-18-performance-by-default-rule.md və bounded-membership review-u.
+- Checks performed: fetch, main/origin əsas uyğunluğu, diffcheck, konfliktsiz merge və branch/main tree equality. Əvvəlki focused test nəticələri aşağıdadır; merge-dən sonra suite/CI təkrar işlədilməyib.
+- Exact next step: son docs qeydi daxil lokal main/remote main hash bərabərliyini təsdiqlə; gələcək ayrıca tapşırığa qədər kod dəyişmə.
+
+---
 # Cari tapşırıq — Inventory bounded membership/cache / 18 noyabr 2026
 
 ## Completed
