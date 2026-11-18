@@ -118,7 +118,8 @@ internal fun InventoryScreen(configured: WobbrikApplication.Bootstrap.Configured
         (buildings.any { !usesPurpleTemplate(it.parts) } || detail?.let { !usesPurpleTemplate(it.parts) } == true)
     InventoryGardenArt(needsGarden) {
     Box(Modifier.fillMaxSize().then(if(LocalMobileMenuShell.current) Modifier else Modifier.background(Brush.verticalGradient(listOf(GameTokens.Surface, GameTokens.Background))))
-        .then(if(LocalMobileMenuShell.current) Modifier else Modifier.safeDrawingPadding()).padding(GameTokens.Gap)) {
+        .then(if(LocalMobileMenuShell.current) Modifier else Modifier.safeDrawingPadding()).then(if(LocalCollectionLayout.current) Modifier.padding(horizontal = GameTokens.InventoryCollection.ScreenInset)
+            else Modifier.padding(GameTokens.Gap))) {
         Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
             if(LocalMobileMenuShell.current && selected != null) CommerceTitle("Bina detalı", back) {
                 Row(verticalAlignment = Alignment.CenterVertically,
@@ -221,6 +222,8 @@ internal fun InventoryScreen(configured: WobbrikApplication.Bootstrap.Configured
                 Text("Məlumat yenilənmədi. Bağlantını yoxla və yenidən cəhd et.", color = GameTokens.Danger)
                 InventoryButton("Yenidən cəhd et") { retry++ }
             }
+            if(LocalCollectionLayout.current && (loading || failed || buildings.isEmpty()))
+                Spacer(Modifier.height(LocalCollectionDockClearance.current))
             if (!LocalMobileMenuShell.current && sizing.portrait) HomeButton(if (selected == null) "Ana ekran" else "İnventara qayıt",
                 icon = if (selected == null) R.drawable.ui_home else null, onClick = back)
             else if (!LocalMobileMenuShell.current) InventoryButton(if (selected == null) "Ana ekran" else "İnventara qayıt", onClick = back)
@@ -254,6 +257,7 @@ private fun InventoryBuildingGrid(buildings: List<OwnedBuilding>, portrait: Bool
     val columns = if (largeFont) 1 else 2
     val rows = remember(buildings, columns) { buildings.chunked(columns) }
     LazyColumn(modifier.semantics { collectionInfo = CollectionInfo(rows.size, columns) },
+        contentPadding = if(LocalCollectionLayout.current) PaddingValues(bottom = LocalCollectionDockClearance.current) else PaddingValues(),
         verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
         itemsIndexed(rows, key = { _, row -> row.first().id }) { rowIndex, row ->
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {

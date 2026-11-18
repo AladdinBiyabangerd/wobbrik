@@ -1,5 +1,6 @@
 package com.aladdin.wobbrik
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.Image
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.semantics.contentDescription
@@ -17,6 +18,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
@@ -42,31 +45,32 @@ internal fun MobileOwnedBuildingCard(building: OwnedBuilding, catalog: RecoveryC
     val feedback = LocalGameFeedback.current
     Surface(onClick = { feedback(); onClick() }, interactionSource = interaction,
         modifier = Modifier.fillMaxWidth().collectionPress(interaction),
-        color = GameTokens.Surface, shape = shape,
-        border = androidx.compose.foundation.BorderStroke(GameTokens.Hairline, GameTokens.InventoryCollection.Outline)) {
-        Column(Modifier.padding(GameTokens.InventoryCollection.CardInset),
-            verticalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {
-            Box(Modifier.fillMaxWidth().height(artHeight)) {
+        color = Color.Transparent, shape = shape,
+        border = androidx.compose.foundation.BorderStroke(GameTokens.InventoryCollection.OutlineWidth, GameTokens.InventoryCollection.Outline)) {
+        Column(Modifier.background(GameTokens.InventoryCollection.PanelBottom)) {
+            Box(Modifier.fillMaxWidth().padding(top = GameTokens.Quarter).height(artHeight).clipToBounds().background(Brush.verticalGradient(listOf(
+                GameTokens.InventoryCollection.PanelTop, GameTokens.InventoryCollection.PanelBottom)))) {
                 LocalCollectionBackdrop.current?.let { Image(it, null, Modifier.matchParentSize().drawWithCache {
-                    val vertical = Brush.verticalGradient(0f to GameTokens.Surface, .12f to Color.Transparent,
-                        .85f to Color.Transparent, 1f to GameTokens.Surface)
-                    val horizontal = Brush.horizontalGradient(0f to GameTokens.Surface, .12f to Color.Transparent,
-                        .88f to Color.Transparent, 1f to GameTokens.Surface)
-                    onDrawWithContent { drawContent(); drawRect(vertical); drawRect(horizontal) }
+                    val fade = Brush.verticalGradient(0f to GameTokens.InventoryCollection.PanelTop,
+                        .2f to Color.Transparent, .8f to Color.Transparent, 1f to GameTokens.InventoryCollection.PanelBottom)
+                    onDrawWithContent { drawContent(); drawRect(fade) }
                 }, contentScale = ContentScale.Crop) }
-                // Accepted geometry and selected modular art, never a baked sample tower.
-                BuildingPreview(building, Modifier.fillMaxSize())
-
+                BuildingPreview(building, Modifier.fillMaxSize().graphicsLayer {
+                    scaleX = GameTokens.InventoryCollection.ArtScale; scaleY = GameTokens.InventoryCollection.ArtScale
+                })
             }
-            Text(buildingName(building, catalog),
-                color = GameTokens.Text, fontFamily = GameTypeface, fontSize = GameTokens.Label,
-                fontWeight = FontWeight.Bold, lineHeight = GameTokens.Body)
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {
-                Text("${building.floors} mərtəbə", Modifier.weight(1f).horizontalScroll(rememberScrollState()),
-                    color = GameTokens.Muted, fontFamily = GameTypeface, fontSize = GameTokens.Caption,
-                    lineHeight = GameTokens.Body, softWrap = false)
-                if(building.isInCity(city)) MobileMenuIcon(MobileIcon.City,
-                    Modifier.size(GameTokens.Gap).semantics { contentDescription = "Şəhərdə" }, GameTokens.Success)
+            Column(Modifier.padding(start = GameTokens.InventoryCollection.CardInset, end = GameTokens.InventoryCollection.CardInset,
+                top = GameTokens.Quarter, bottom = GameTokens.InventoryCollection.CardInset),
+                verticalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {
+                Text(buildingName(building, catalog), color = GameTokens.Text, fontFamily = GameTypeface,
+                    fontSize = GameTokens.Body, fontWeight = FontWeight.Bold, lineHeight = GameTokens.Hint)
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {
+                    Text("${building.floors} mərtəbə", Modifier.weight(1f).horizontalScroll(rememberScrollState()),
+                        color = GameTokens.InventoryCollection.Metadata, fontFamily = GameTypeface, fontSize = GameTokens.Caption,
+                        lineHeight = GameTokens.Body, softWrap = false)
+                    if(building.isInCity(city)) MobileMenuIcon(MobileIcon.City,
+                        Modifier.size(GameTokens.Gap).semantics { contentDescription = "Şəhərdə" }, GameTokens.Success)
+                }
             }
         }
     }

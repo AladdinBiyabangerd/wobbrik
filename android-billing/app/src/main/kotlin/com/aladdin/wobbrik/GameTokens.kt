@@ -69,20 +69,43 @@ internal object GameTokens {
         val NavbarHeight = Target + Inset + Small
         val LargeFontNavbarHeight = Target * 2 + Gap
     }
-    /** Art-led Inventory trial; existing palette, isolated from other menu screens. */
+    /** Inventory reference measured at843px wide, scaled to native portrait coordinates. */
     internal object InventoryCollection {
-        val ArtHeight = Target * 3 + Inset
+        // Sampled from the approved reference, rather than the older blue palette.
+        val Background = Color(0xFF041E38)
+        val PanelTop = Color(0xFF0E3053)
+        val PanelBottom = Color(0xFF072849)
+        val DockBottom = Color(0xFF05213D)
+        val Selected = Color(0xFF092F53)
+        val Outline = Color(0xFF285F80)
+        val Metadata = Color(0xFF94C6F1)
+        val OutlineWidth = Hairline / 2
+        val ScreenInset = Gap - Quarter / 2
+        val HeaderHeight = Target + Small
+        val HeaderLogoWidth = Target * 2
+        val HeaderLogoHeight = Target - Small
+        // Alpha bounds of wobbrik_logo.png; painter crops without allocating a new bitmap.
+        const val LogoSourceX = 68
+        const val LogoSourceY = 102
+        const val LogoSourceWidth = 1614
+        const val LogoSourceHeight = 696
+        val WalletCoin = Inset - Quarter
+        val ArtHeight = Target * 3 + Gap
         val CompactArtHeight = Target * 3
         val LargeTypeArtHeight = Target * 2
         val CardInset = Small + Quarter
         val CardGap = Small
-        val DockHeight = Target + Small * 2
-        val PlayDiameter = Target
-        val NavIcon = Inset
+        val DockHeight = Target + Gap
+        val DockRadius = Inset - Quarter
+        val DockClearance = DockHeight + Gap
+        val PlayDiameter = Target - Small
+        val NavIcon = Inset - Quarter
         val NavLabel = MobileHome.CompactNavLabel
         val TabIcon = Gap
+        val TabVisualHeight = Target - Small - Quarter
         val IndicatorHeight = Quarter / 2
-        val Outline = Raised
+        val RefreshBody = Target - Gap
+        const val ArtScale = 1.15f
         const val PressedScale = 0.96f
     }
     internal object Achievements {

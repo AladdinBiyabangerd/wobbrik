@@ -59,13 +59,13 @@ abstract class InventoryRedesignHost {
   val scope=CoroutineScope(SupervisorJob()+Dispatchers.Unconfined)
   val sessions=AccountSessions {"token"}
   val catalog=RecoveryCatalog("wobbrik-v1","wobbrik-structural-v1",(1..6).flatMap {i->FinishCosmetics.categories.map {c->
-   CatalogItem("base_${i}_$c",if(c=="wall") (if(insets) "Uzun bina adı bütöv sözlərlə burada" else if(i==2) "Suvaq fasad" else "Kərpic hörgü") else c,c,"free",0,null,null)
+   CatalogItem("base_${i}_$c",if(c=="wall") (if(insets) "Uzun bina adı bütöv sözlərlə burada" else mapOf(1 to "Əhəngdaşı divar", 2 to "Kərpic hörgü", 3 to "Suvaq fasad")[i] ?: "Divar") else c,c,"free",0,null,null)
   }} + listOf(CatalogItem("decor_tree_1","Ağac","tree","copy",0,25,null),CatalogItem("decor_bench_1","Skamya","bench","copy",0,20,null)),
    listOf(LandOffer("land_1",150,200),LandOffer("land_2",500,400),LandOffer("land_3",1800,900)))
   val snapshot=GameSnapshot("wobbrik-v1",1,if(insets) Long.MAX_VALUE else 411,1050,null,
    AccountRecovery("now","first","later",7,0,emptyList(),emptyList(),listOf("land_1"),emptyList(),28))
   fun building(id:Int):String {
-   val parts=FinishCosmetics.categories.joinToString(",") {"\"$it\":\"base_${if(id==2) 2 else 1}_$it\""}
+   val parts=FinishCosmetics.categories.joinToString(",") {"\"$it\":\"base_${if(it=="wall") (if(id==2) 3 else 2) else 1}_$it\""}
    return """{"id":"b-$id","revision":1,"floors":${listOf(15,16,10,12)[(id-1)%4]},"residents":40,"base_value":20,"max_price":${if(id == 4) Long.MAX_VALUE else 24},"parts":{$parts},"traded":${id == 3},"in_city":${id==3},"accepted_geometry":{"geometry":{"version":"city-geometry-v1","centers_x_ticks":[${(0 until listOf(15,16,10,12)[(id-1)%4]).joinToString(","){(if(id==4) it*1200 else 0).toString()}}]},"attempt_id":"attempt","sequence":1,"operation_id":"op","rules_version":"wobbrik-v1","engine_version":"wobbrik-structural-v1"}}"""
   }
   fun listing(id:Int)="""{"id":"l-$id","building_id":"b-$id","revision":1,"building_revision":1,"price":24,"fee":2,"status":"active"}"""
@@ -133,6 +133,12 @@ abstract class InventoryRedesignHost {
     compose.onNodeWithContentDescription(label).assertIsDisplayed().assertHeightIsAtLeast(GameTokens.Target)
    }
    capture("inventory-$name")
+   // A fixed overlay must never prevent scrolling the final card above its controls.
+   compose.onNode(hasScrollToIndexAction()).performScrollToIndex(if(font > 1f) 8 else 4)
+   compose.onAllNodesWithText("15 mərtəbə").onLast().performScrollTo().assertIsDisplayed()
+   val lastCard = compose.onAllNodesWithText("15 mərtəbə").onLast().fetchSemanticsNode().boundsInRoot
+   val play = compose.onNodeWithContentDescription("Oyunu başlat").fetchSemanticsNode().boundsInRoot
+   assertTrue("Last card must scroll clear of dock", lastCard.bottom <= play.top)
    compose.onAllNodesWithText("15 mərtəbə")[0].performScrollTo().performClick()
 
    compose.waitUntil(15000) {compose.onAllNodesWithText("✓ Sənindir").fetchSemanticsNodes().isNotEmpty()}
