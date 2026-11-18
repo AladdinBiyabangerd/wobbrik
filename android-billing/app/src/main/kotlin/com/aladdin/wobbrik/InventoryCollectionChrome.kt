@@ -48,35 +48,28 @@ internal val LocalCollectionDockClearance = staticCompositionLocalOf { GameToken
 internal fun CollectionInventoryShell(coins: Long?, onPlay: (() -> Unit)?, onPage: (String) -> Unit,
     detail: Boolean, reportDetail: (Boolean) -> Unit, content: @Composable () -> Unit) {
     val art = rememberResourceArt(R.drawable.inventory_collection_backdrop, R.drawable.inventory_collection_header).first.images
-    BoxWithConstraints(Modifier.fillMaxSize().background(Brush.verticalGradient(if(detail)
-        listOf(GameTokens.Surface,GameTokens.Background) else listOf(GameTokens.InventoryCollection.Background,GameTokens.InventoryCollection.Background)))
+    BoxWithConstraints(Modifier.fillMaxSize().background(GameTokens.InventoryCollection.Background)
         .safeDrawingPadding().consumeWindowInsets(WindowInsets.safeDrawing).imePadding()) {
-        val wrappedDetailDock = maxWidth <
-            (GameTokens.Target * 6 + GameTokens.MobileHome.PlayDiameter + GameTokens.Quarter * 2)
         val wrappedCollectionDock = maxWidth < (GameTokens.Target * 7 + GameTokens.Small * 2)
         val collectionClearance = if(wrappedCollectionDock) GameTokens.Target * 2 + GameTokens.Gap else GameTokens.InventoryCollection.DockClearance
-        val detailClearance = (if(wrappedDetailDock) GameTokens.Target * 2 else GameTokens.MobileHome.NavbarHeight) + GameTokens.Small * 2
-        if(!detail) art?.getOrNull(1)?.let { Image(it, null,
+        art?.getOrNull(1)?.let { Image(it, null,
             Modifier.align(Alignment.BottomCenter).fillMaxWidth().height(GameTokens.Target * 2),
             contentScale = ContentScale.FillBounds) }
         Column(Modifier.fillMaxSize()) {
-            if(detail) Box(Modifier.padding(horizontal = GameTokens.Gap, vertical = GameTokens.Small)) { MobileMenuHeader(coins) }
-            else CollectionHeader(coins, art?.getOrNull(1))
+            CollectionHeader(coins, art?.getOrNull(1))
             if(!detail) Box(Modifier.padding(horizontal = GameTokens.InventoryCollection.ScreenInset)) {
                 CollectionTabs("inventory", onPage)
             }
             Box(Modifier.weight(1f).fillMaxWidth().clipToBounds().then(if(detail)
-                Modifier.padding(bottom = detailClearance) else Modifier)) {
+                Modifier.padding(bottom = collectionClearance) else Modifier)) {
                 CompositionLocalProvider(LocalMobileMenuShell provides true, LocalCommerceDetail provides reportDetail,
                     LocalCollectionLayout provides !detail, LocalCollectionDockClearance provides collectionClearance,
                     LocalCollectionBackdrop provides art?.firstOrNull(),
                     LocalTextStyle provides LocalTextStyle.current.copy(fontFamily = GameTypeface)) { content() }
             }
         }
-        Box(Modifier.align(Alignment.BottomCenter).padding(horizontal = if(detail) GameTokens.Quarter else GameTokens.Small,
-            vertical = if(detail) GameTokens.Small else GameTokens.Quarter)) {
-            if(detail) MobileMenuNavbar("inventory", false, onPlay != null, { onPlay?.invoke() }, onPage)
-            else CollectionNavbar(onPlay, onPage)
+        Box(Modifier.align(Alignment.BottomCenter).padding(horizontal = GameTokens.Small, vertical = GameTokens.Quarter)) {
+            CollectionNavbar(onPlay, onPage)
         }
     }
 }
@@ -212,7 +205,7 @@ private val collectionRight = listOf(CollectionDestination("Bazar", "market", Mo
     CollectionDestination("Uğurlar", "achievements", MobileIcon.Trophy), CollectionDestination("Profil", "account", MobileIcon.Account))
 
 @Composable
-internal fun CollectionNavbar(onPlay: (() -> Unit)?, onPage: (String) -> Unit) {
+internal fun CollectionNavbar(onPlay: (() -> Unit)?, onPage: (String) -> Unit, page: String = "inventory", active: Boolean = false) {
     BoxWithConstraints(Modifier.fillMaxWidth()) {
         val wrap = maxWidth < GameTokens.Target * 7
         val labels = LocalDensity.current.fontScale <= 1f && !wrap
@@ -222,12 +215,12 @@ internal fun CollectionNavbar(onPlay: (() -> Unit)?, onPage: (String) -> Unit) {
             GameTokens.InventoryCollection.DockBottom))).border(GameTokens.InventoryCollection.OutlineWidth,
             GameTokens.InventoryCollection.Outline, shape).heightIn(min = GameTokens.InventoryCollection.DockHeight)
             .padding(vertical = GameTokens.Quarter).selectableGroup(), verticalAlignment = Alignment.CenterVertically) {
-            CollectionNavSide(collectionLeft, labels, wrap, Modifier.width(side), onPage)
+            CollectionNavSide(collectionLeft, page, labels, wrap, Modifier.width(side), onPage)
             val interaction = remember { MutableInteractionSource() }
             val feedback = LocalGameFeedback.current
             Surface(onClick = { feedback(); onPlay?.invoke() }, enabled = onPlay != null, interactionSource = interaction,
                 color = Color.Transparent, modifier = Modifier.size(GameTokens.Target).collectionPress(interaction, onPlay != null)
-                    .semantics { contentDescription = "Oyunu başlat" }) {
+                    .semantics { contentDescription = if(active) "Cəhdə qayıt" else "Oyunu başlat" }) {
                 Box(contentAlignment = Alignment.Center) {
                     Box(Modifier.size(GameTokens.InventoryCollection.PlayDiameter).clip(CircleShape)
                         .background(Brush.verticalGradient(if(onPlay != null) listOf(GameTokens.MobileHome.PlayTop,GameTokens.Accent,
@@ -241,19 +234,19 @@ internal fun CollectionNavbar(onPlay: (() -> Unit)?, onPage: (String) -> Unit) {
                     }
                 }
             }
-            CollectionNavSide(collectionRight, labels, wrap, Modifier.width(side), onPage)
+            CollectionNavSide(collectionRight, page, labels, wrap, Modifier.width(side), onPage)
         }
     }
 }
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun CollectionNavSide(destinations: List<CollectionDestination>, labels: Boolean, wrap: Boolean,
+private fun CollectionNavSide(destinations: List<CollectionDestination>, page: String, labels: Boolean, wrap: Boolean,
     modifier: Modifier, onPage: (String) -> Unit) {
     FlowRow(modifier, maxItemsInEachRow = if(wrap) 2 else 3,
         horizontalArrangement = Arrangement.SpaceEvenly, verticalArrangement = Arrangement.Center) {
         destinations.forEach { item ->
-            val selected = item.route == "inventory"
+            val selected = item.route == page
             val interaction = remember { MutableInteractionSource() }
             val feedback = LocalGameFeedback.current
             val shape = RoundedCornerShape(GameTokens.Small + GameTokens.Quarter)

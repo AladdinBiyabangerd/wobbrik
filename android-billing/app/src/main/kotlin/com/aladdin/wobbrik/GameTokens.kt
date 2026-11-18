@@ -108,6 +108,17 @@ internal object GameTokens {
         const val ArtScale = 1.15f
         const val PressedScale = 0.96f
     }
+    internal object OwnedDetail {
+        val HeroHeight = Target * 6
+        val CompactHeroHeight = Target * 3
+        val LargeTypeHeroHeight = Target * 2
+        val SectionGap = Small
+        val Title = 20.sp // measured from approved detail proposal at390dp
+        const val HeroScale = 1.2f
+        val StatHeight = Target + Small
+        val OwnershipFill = Color(0xFF0A3B37)
+        val ActionHeight = Target
+    }
     internal object Achievements {
         // Transparent illustration sheet derived from the approved 01-main artwork.
         val Trophy = intArrayOf(48, 112, 690, 440)

@@ -66,7 +66,7 @@ abstract class InventoryRedesignHost {
    AccountRecovery("now","first","later",7,0,emptyList(),emptyList(),listOf("land_1"),emptyList(),28))
   fun building(id:Int):String {
    val parts=FinishCosmetics.categories.joinToString(",") {"\"$it\":\"base_${if(it=="wall") (if(id==2) 3 else 2) else 1}_$it\""}
-   return """{"id":"b-$id","revision":1,"floors":${listOf(15,16,10,12)[(id-1)%4]},"residents":40,"base_value":20,"max_price":${if(id == 4) Long.MAX_VALUE else 24},"parts":{$parts},"traded":${id == 3},"in_city":${id==3},"accepted_geometry":{"geometry":{"version":"city-geometry-v1","centers_x_ticks":[${(0 until listOf(15,16,10,12)[(id-1)%4]).joinToString(","){(if(id==4) it*1200 else 0).toString()}}]},"attempt_id":"attempt","sequence":1,"operation_id":"op","rules_version":"wobbrik-v1","engine_version":"wobbrik-structural-v1"}}"""
+   return """{"id":"b-$id","revision":1,"floors":${listOf(15,16,10,12)[(id-1)%4]},"residents":${listOf(15,16,10,12)[(id-1)%4]*4},"base_value":20,"max_price":${if(id == 4) Long.MAX_VALUE else 30},"parts":{$parts},"traded":${id == 3},"in_city":${id==3},"accepted_geometry":{"geometry":{"version":"city-geometry-v1","centers_x_ticks":[${(0 until listOf(15,16,10,12)[(id-1)%4]).joinToString(","){(if(id==4) it*1200 else 0).toString()}}]},"attempt_id":"attempt","sequence":1,"operation_id":"op","rules_version":"wobbrik-v1","engine_version":"wobbrik-structural-v1"}}"""
   }
   fun listing(id:Int)="""{"id":"l-$id","building_id":"b-$id","revision":1,"building_revision":1,"price":24,"fee":2,"status":"active"}"""
   var failDecor=false
@@ -142,7 +142,18 @@ abstract class InventoryRedesignHost {
    compose.onAllNodesWithText("15 mərtəbə")[0].performScrollTo().performClick()
 
    compose.waitUntil(15000) {compose.onAllNodesWithText("✓ Sənindir").fetchSemanticsNodes().isNotEmpty()}
-   compose.onNodeWithText("Bina görünüşü").assertIsDisplayed()
+   capture("detail-$name")
+   compose.onNodeWithText("✓ Sənindir").assertHasNoClickAction()
+   compose.onNodeWithText("60").performScrollTo().assertIsDisplayed()
+   compose.onNodeWithText("Maksimum satış").performScrollTo().assertIsDisplayed()
+   compose.onNodeWithText("30").assertExists()
+   compose.onNodeWithText("Bina görünüşü").performScrollTo().assertIsDisplayed().assertIsEnabled().assertHeightIsAtLeast(GameTokens.Target)
+   compose.onNodeWithText("Satışa çıxar").performScrollTo().assertIsEnabled().assertHeightIsAtLeast(GameTokens.Target)
+   capture("detail-actions-$name")
+   compose.onNodeWithText("Binanı sil").performScrollTo().assertIsDisplayed().performClick()
+   compose.onNodeWithText("Bina silinsin?").assertIsDisplayed()
+   compose.runOnIdle { assertEquals(0,submissions) }
+   compose.onNodeWithText("Ləğv et").performClick()
    compose.onNodeWithContentDescription("Geri").performClick()
    compose.waitUntil(15000) {compose.onAllNodesWithText("9 bina").fetchSemanticsNodes().isNotEmpty()}
    compose.onNodeWithContentDescription("Yenilə").performClick()

@@ -88,7 +88,7 @@ internal fun MobileHomeScreen(snapshot: GameSnapshot?, active: Boolean, onPlay: 
         }
         // Weighted content anchors the dock to the safe bottom at every window height.
         if (!LocalMobileMenuShell.current) Spacer(Modifier.height(GameTokens.Small))
-        if (!LocalMobileMenuShell.current) Box(Modifier.padding(horizontal = GameTokens.Quarter)) {
+        if (!LocalMobileMenuShell.current) Box(Modifier.padding(horizontal = GameTokens.Small)) {
             MobileMenuNavbar(page = "home", active = active, enabled = !journalBlocked && onPlay != null,
                 onPlay = { onPlay?.invoke() }, onPage = onPage)
         }

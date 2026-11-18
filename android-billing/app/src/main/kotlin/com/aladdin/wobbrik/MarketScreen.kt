@@ -550,9 +550,9 @@ internal fun MarketDialog(title: String, onDismiss: () -> Unit, compact: Boolean
     footer: @Composable () -> Unit, content: @Composable ColumnScope.() -> Unit) {
     val parentDensity = LocalDensity.current
     val configuration = LocalConfiguration.current
-    val wrappedDock = configuration.screenWidthDp.dp - GameTokens.Quarter * 2 <
-        GameTokens.Target * 6 + GameTokens.MobileHome.PlayDiameter
-    val dockHeight = (if(wrappedDock) GameTokens.Target * 2 else GameTokens.MobileHome.NavbarHeight) + GameTokens.Small * 2
+    val wrappedDock = configuration.screenWidthDp.dp - GameTokens.Small * 2 < GameTokens.Target * 7
+    val dockHeight = (if(wrappedDock) GameTokens.Target * 2 + GameTokens.Quarter * 2
+        else GameTokens.InventoryCollection.DockHeight) + GameTokens.Quarter * 2
     val availableHeight = LocalConfiguration.current.screenHeightDp.dp -
         if(bottomSheet) dockHeight + GameTokens.Gap * 2 else GameTokens.Target * 2
     val height = if (compact) minOf(availableHeight, compactHeight * LocalDensity.current.fontScale) else availableHeight

@@ -7,7 +7,7 @@ import androidx.compose.ui.geometry.*
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.graphics.drawscope.*
 
-internal enum class MobileIcon { Home, City, Inventory, Market, Trophy, Account, Play, Crown, Coin, Records, Palette, Tree, Layers, Tag, Cart, Refresh, Back }
+internal enum class MobileIcon { Home, City, Inventory, Market, Trophy, Account, Play, Crown, Coin, Records, Palette, Tree, Layers, Tag, Cart, Refresh, Back, Residents }
 
 /** Native scalable silhouettes, following the approved dock rather than raster crops. */
 @Composable
@@ -69,6 +69,13 @@ private fun DrawScope.drawMenuGlyph(icon: MobileIcon, tint: Color?) {
   MobileIcon.Trophy -> {
    drawRoundRect(light,Offset(3f,6f),Size(26f,12f),CornerRadius(5f),style=Stroke(2f))
    shape(8f,4f,24f,4f,23f,17f,20f,21f,17f,22f,17f,27f,24f,29f,8f,29f,15f,27f,15f,22f,12f,21f,9f,17f);drawCircle(ink,3f,Offset(16f,11f))
+  }
+  MobileIcon.Residents -> {
+   drawCircle(blue,4f,Offset(5f,11f));drawCircle(blue,4f,Offset(27f,11f))
+   shape(0f,28f,0f,23f,2f,18f,6f,17f,10f,20f,10f,28f)
+   shape(22f,28f,22f,20f,26f,17f,30f,18f,32f,23f,32f,28f)
+   drawCircle(blue,5.5f,Offset(16f,8f));drawCircle(light,5.5f,Offset(16f,8f),style=Stroke(.8f))
+   shape(7f,30f,7f,23f,10f,17f,14f,16f,16f,18f,18f,16f,22f,17f,25f,23f,25f,30f)
   }
   MobileIcon.Account -> {drawCircle(blue,6.5f,Offset(16f,9f));drawCircle(light,6.5f,Offset(16f,9f),style=Stroke(0.8f));shape(4f,29f,5f,23f,9f,18f,13f,17f,16f,19f,19f,17f,23f,18f,27f,23f,28f,29f)}
   MobileIcon.Play -> {val p=Path().apply{moveTo(9f,3f);lineTo(28f,16f);lineTo(9f,29f);close()};drawPath(p,ink);drawPath(p,GameTokens.MobileHome.Rim,style=Stroke(1f))}

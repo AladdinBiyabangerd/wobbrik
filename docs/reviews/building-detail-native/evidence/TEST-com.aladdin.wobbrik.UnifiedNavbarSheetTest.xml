@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.aladdin.wobbrik.UnifiedNavbarSheetTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-11-18T11:17:06.014Z" hostname="Macs-MacBook-Pro.local" time="13.209">
+  <properties/>
+  <testcase name="normalDock" classname="com.aladdin.wobbrik.UnifiedNavbarSheetTest" time="12.889"/>
+  <testcase name="wrappedDock" classname="com.aladdin.wobbrik.UnifiedNavbarSheetTest" time="0.312"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

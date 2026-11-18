@@ -1,0 +1,7 @@
+# Bina detalı dizaynı və navbar qərarı
+
+Branch `feat/inventory-art-led-redesign`, baza `c2600f1`. İstifadəçi Pixel6 emulatorunda emailsiz mockDebug/attached-debug ilə açılmış İnventar ekranının navbarını bütün app üçün təsdiqlədi. Köhnə navbar üslubu ləğv edilir; bütün route-larda native miqrasiya hələ implementasiya olunmayıb. Sonra yalnız bina detalı üçün yeni dizayn nümunəsi istənildi.
+
+`docs/PLAN.md`§1.1 və unified-mobile-v3 README bu qərarla yeniləndi. Native baxılan Inventory ekranı dizayn referansı olaraq built-in ImageGen-ə verildi. Yeni detail təklifi `docs/design/building-detail-v1/proposal.png`, tam prompt və məqsəd həmin qovluqdadır. Şəkil açılıb yoxlanıldı: geri, hero/ad/ownership,15mərtəbə/60sakin, maksimum satış30, inventory statusu, görünüş/satış/silmə action-ları və7-slot navbar var. Nümunə dəyərləri real data deyil. Native bina metadata/action müqaviləsi MobileOwnedBuildingDetail və InventoryScreen-dən yoxlanıldı; yeni domain feature əlavə edilmədi.
+
+Bu docs/design vahididir. Kotlin/backend/API/build dəyişmir. Build/unit/CI təkrar işlədilmədi; native render/font/inset/kontrast yoxlaması aparılmadı. Runtime ekranı kimi təqdim edilmir. Yalnız git diffcheck yoxlaması və generativ şəkil baxışı var. Owner iki release .dm və köhnə review əlavəsi toxunulmadan qalır. Merge/push/deploy yoxdur. Detal proposal-ının istifadəçi review-u və native implementasiya ayrıca addımdır.

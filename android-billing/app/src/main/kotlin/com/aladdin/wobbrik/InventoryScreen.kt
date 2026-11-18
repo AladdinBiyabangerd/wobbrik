@@ -121,14 +121,7 @@ internal fun InventoryScreen(configured: WobbrikApplication.Bootstrap.Configured
         .then(if(LocalMobileMenuShell.current) Modifier else Modifier.safeDrawingPadding()).then(if(LocalCollectionLayout.current) Modifier.padding(horizontal = GameTokens.InventoryCollection.ScreenInset)
             else Modifier.padding(GameTokens.Gap))) {
         Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-            if(LocalMobileMenuShell.current && selected != null) CommerceTitle("Bina detalı", back) {
-                Row(verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {
-                    MobileMenuIcon(MobileIcon.Inventory, Modifier.size(GameTokens.Inset), GameTokens.Muted)
-                    Text("İnventar · Binalar", color = GameTokens.Muted, fontFamily = GameTypeface,
-                        fontSize = GameTokens.Label, modifier = Modifier.weight(1f))
-                }
-            }
+            if(LocalMobileMenuShell.current && selected != null) OwnedDetailTitle(back)
             if(!LocalMobileMenuShell.current) Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
                 Surface(onClick = back, shape = if (sizing.portrait) RoundedCornerShape(GameTokens.ControlRadius) else CircleShape, color = GameTokens.Raised,
                     border = if (sizing.portrait) null else BorderStroke(GameTokens.Hairline, GameTokens.Muted), modifier = Modifier.size(GameTokens.Target)) {
@@ -202,14 +195,17 @@ internal fun InventoryScreen(configured: WobbrikApplication.Bootstrap.Configured
                 if (next != null && !loading && !failed) InventoryButton("Daha çox") { cursor = next }
                 if (!loading && !sizing.portrait) TextButton(onClick = { cursor = null; buildings = emptyList(); next = null; retry++ }) { Text("Yenilə", color = GameTokens.Accent) }
             } else if (detail != null) {
-                BuildingDetail(requireNotNull(detail), city, ready.catalog, Modifier.weight(1f), canMutate) { deleteCandidate = detail }
-                InventoryButton(if (fromCache) "Yalnız baxış" else "Bina görünüşü", enabled = canMutate) { onParts(detail?.id) }
-                if (onMarket != null && LocalMobileMenuShell.current) CommerceAction("Satışa çıxar", icon = MobileIcon.Tag,
-                    enabled = canMutate && detail?.traded == false, onClick = onMarket)
-                else if (onMarket != null) HomeButton("Bazara çıxar", icon = R.drawable.ui_market,
-                    enabled = canMutate && detail?.traded == false, onClick = onMarket)
-                if(!LocalMobileMenuShell.current) TextButton(enabled = canMutate, onClick = { deleteCandidate = detail }, modifier = Modifier.fillMaxWidth().heightIn(min = GameTokens.Target)) {
-                    Text("Binanı sil", color = if (canMutate) GameTokens.Danger else GameTokens.Muted)
+                if(LocalMobileMenuShell.current) MobileOwnedBuildingDetail(requireNotNull(detail), city, ready.catalog,
+                    Modifier.weight(1f), canMutate, { deleteCandidate = detail },
+                    if(fromCache) "Yalnız baxış" else "Bina görünüşü", { onParts(detail?.id) }, onMarket)
+                else {
+                    BuildingDetail(requireNotNull(detail), city, ready.catalog, Modifier.weight(1f), canMutate) { deleteCandidate = detail }
+                    InventoryButton(if (fromCache) "Yalnız baxış" else "Bina görünüşü", enabled = canMutate) { onParts(detail?.id) }
+                    if(onMarket != null) HomeButton("Bazara çıxar", icon = R.drawable.ui_market,
+                        enabled = canMutate && detail?.traded == false, onClick = onMarket)
+                    TextButton(enabled = canMutate, onClick = { deleteCandidate = detail }, modifier = Modifier.fillMaxWidth().heightIn(min = GameTokens.Target)) {
+                        Text("Binanı sil", color = if(canMutate) GameTokens.Danger else GameTokens.Muted)
+                    }
                 }
             } else Spacer(Modifier.weight(1f))
             if (fromCache && selected == null) Text("Keş · yalnız baxış", color = GameTokens.Muted, fontSize = GameTokens.Caption,
@@ -222,7 +218,7 @@ internal fun InventoryScreen(configured: WobbrikApplication.Bootstrap.Configured
                 Text("Məlumat yenilənmədi. Bağlantını yoxla və yenidən cəhd et.", color = GameTokens.Danger)
                 InventoryButton("Yenidən cəhd et") { retry++ }
             }
-            if(LocalCollectionLayout.current && (loading || failed || buildings.isEmpty()))
+            if(LocalCollectionLayout.current && selected == null && (loading || failed || buildings.isEmpty()))
                 Spacer(Modifier.height(LocalCollectionDockClearance.current))
             if (!LocalMobileMenuShell.current && sizing.portrait) HomeButton(if (selected == null) "Ana ekran" else "İnventara qayıt",
                 icon = if (selected == null) R.drawable.ui_home else null, onClick = back)
@@ -311,10 +307,6 @@ internal fun buildingName(building: OwnedBuilding, catalog: RecoveryCatalog?): S
 
 @Composable
 private fun BuildingDetail(building: OwnedBuilding, city: CityMembership?, catalog: RecoveryCatalog?, modifier: Modifier, canDelete: Boolean, onDelete: () -> Unit) {
-    if(LocalMobileMenuShell.current) {
-        MobileOwnedBuildingDetail(building, city, catalog, modifier, canDelete, onDelete)
-        return
-    }
     val art = if (LocalBuildingArt.current.status == ArtPreparation.Ready) rememberCosmeticArt() else emptyMap()
     val value = remember(building, catalog) { BuildingValueBreakdown.from(building, catalog) }
     val largeFont = LocalDensity.current.fontScale > 1.3f

@@ -63,7 +63,7 @@ internal class MockGameplayTransport(saved: String?, private val save: (String) 
             }
             path.startsWith("inventory?") -> response(obj { put("buildings", state.getValue("buildings")) })
             path.startsWith("buildings/") -> state.getValue("buildings").jsonArray.firstOrNull {
-                it.jsonObject.text("id") == path.substringAfter("buildings/")
+                it.jsonObject.text("id") == path.substringAfter("buildings/").substringBefore("?")
             }?.let(::response) ?: failure("not_found")
             path.startsWith("operations/") -> state.getValue("receipts").jsonObject[path.substringAfter("operations/")]?.let(::response) ?: failure("not_found")
             path.startsWith("attempts/") -> state.getValue("history").jsonObject[path.substringAfter("attempts/")]?.let(::response) ?: failure("not_found")

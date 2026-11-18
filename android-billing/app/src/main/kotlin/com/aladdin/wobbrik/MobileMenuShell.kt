@@ -123,7 +123,7 @@ private fun MobileMenuShellContent(page: String, coins: Long?, onPlay: (() -> Un
             CompositionLocalProvider(LocalMobileMenuShell provides true, LocalCommerceDetail provides reportDetail,
                 LocalTextStyle provides LocalTextStyle.current.copy(fontFamily = GameTypeface)) { content() }
         }
-        Box(Modifier.padding(horizontal = GameTokens.Quarter, vertical = GameTokens.Small)) {
+        Box(Modifier.padding(horizontal = GameTokens.Small, vertical = GameTokens.Quarter)) {
             MobileMenuNavbar(mobileMenuDestination(page), false, onPlay != null, { onPlay?.invoke() }, onPage)
         }
     }
