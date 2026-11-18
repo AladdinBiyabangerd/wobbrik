@@ -53,6 +53,7 @@ internal fun OnlineGame(app: WobbrikApplication) {
 @Composable
 private fun AuthenticatedGame(app: WobbrikApplication) {
     val configured = app.bootstrap as? WobbrikApplication.Bootstrap.Configured
+    val profileDisplay = rememberProfileDisplayMemory(configured, configured?.sessions?.current())
     var artRetry by remember { mutableIntStateOf(0) }
     // Overlap immutable APK decode with recovery; optional art never holds the account sync gate.
     val artPreparation = if (ApprovedArt.prepared) ArtPreparation.Ready
@@ -222,7 +223,7 @@ private fun AuthenticatedGame(app: WobbrikApplication) {
         }
         if (page in setOf("account", "leaderboard") && ready != null && configured?.profiles != null && configured.leaderboard != null) {
             key(InventoryReadKey(ready)) {
-                if (page == "account") PublicAccountScreen(configured, ready, { page = "home" }, { page = it })
+                if (page == "account") PublicAccountScreen(configured, ready, { page = "home" }, { page = it }, profileDisplay)
                 else LeaderboardScreen(configured, ready, { page = if (mobileMenu) "achievements" else "account" })
             }
             return@menuContent

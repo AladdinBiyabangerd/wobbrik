@@ -19,28 +19,58 @@ import appbackend.wobbrik.game.*
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 
+/** Display-only, in-memory last server identity. Never an editor revision/capability.
+ * Owned above navigation and replaced for every login epoch, including the same UID.
+ */
+internal class ProfileDisplayMemory(val session: appbackend.wobbrik.billing.BillingSession) {
+    var profile by mutableStateOf<PublicProfile?>(null)
+}
+
+@Composable
+internal fun rememberProfileDisplayMemory(configured: WobbrikApplication.Bootstrap.Configured?,
+    session: appbackend.wobbrik.billing.BillingSession?): ProfileDisplayMemory? {
+    return remember(configured, session) { session?.let(::ProfileDisplayMemory) }
+}
+
 /** Profile operations deliberately bypass the economic journal. One editor per login epoch. */
 @Composable
 internal fun PublicAccountScreen(configured: WobbrikApplication.Bootstrap.Configured,
-    ready: AuthenticatedRecoveryOwner.State.Ready, onHome: () -> Unit, onPage: (String) -> Unit) {
+    ready: AuthenticatedRecoveryOwner.State.Ready, onHome: () -> Unit, onPage: (String) -> Unit,
+    displayMemory: ProfileDisplayMemory? = null) {
+    // Start optional portrait IO alongside GET /profile, rather than after its response.
+    val portraits = if (LocalMobileMenuShell.current) rememberResourceArt(R.drawable.account_portraits_v3) else null
+    CompositionLocalProvider(LocalAccountPortraitArt provides portraits) {
+        PublicAccountContent(configured, ready, onHome, onPage, displayMemory)
+    }
+}
+
+@Composable
+private fun PublicAccountContent(configured: WobbrikApplication.Bootstrap.Configured,
+    ready: AuthenticatedRecoveryOwner.State.Ready, onHome: () -> Unit, onPage: (String) -> Unit,
+    displayMemory: ProfileDisplayMemory?) {
     val session = remember { requireNotNull(configured.sessions.current()) }
     val editor = remember { ProfileEditor(configured.sessions, requireNotNull(configured.profiles), session) }
     val scope = rememberCoroutineScope()
-    var profile by remember { mutableStateOf<PublicProfile?>(null) }
+    val display = displayMemory?.takeIf { it.session == session }
+    var profile by remember { mutableStateOf(display?.profile) }
     var name by remember { mutableStateOf("") }
     var avatar by remember { mutableStateOf("builder") }
     var editing by remember { mutableStateOf(false) }
     var pickingAvatar by remember { mutableStateOf(false) }
     var busy by remember { mutableStateOf(true) }
+    var fresh by remember { mutableStateOf(false) }
     var failed by remember { mutableStateOf(false) }
     var uncertain by remember { mutableStateOf(false) }
     var message by remember { mutableStateOf<String?>(null) }
     var reload by remember { mutableIntStateOf(0) }
     fun current() = configured.sessions.current() == session && configured.recovery.state.value === ready
-    fun adopt(value: PublicProfile) { profile = value; name = value.displayName; avatar = value.avatarId }
+    fun adopt(value: PublicProfile) {
+        profile = value; name = value.displayName; avatar = value.avatarId
+        display?.profile = value
+    }
     LaunchedEffect(reload) {
-        busy = true; failed = false
-        try { val value = editor.load(); if (current()) { adopt(value); uncertain = false } }
+        busy = true; failed = false; fresh = false
+        try { val value = editor.load(); if (current()) { adopt(value); uncertain = false; fresh = true } }
         catch (cancelled: CancellationException) { throw cancelled }
         catch (_: Exception) { if (current()) failed = true }
         finally { if (current()) busy = false }
@@ -65,7 +95,7 @@ internal fun PublicAccountScreen(configured: WobbrikApplication.Bootstrap.Config
     }
     if (editing) {
         val valid = runCatching { ProfileReplacement(profile?.revision ?: 0, name, avatar) }.isSuccess
-        ProfileEditView(name, avatar, !busy && !uncertain, !busy, !busy && profile != null && valid,
+        ProfileEditView(name, avatar, !busy && !uncertain, !busy, !busy && fresh && profile != null && valid,
             if (uncertain) "Təkrar saxla" else "Yadda saxla",
             onName = { if (it.codePointCount(0, it.length) <= PublicProfiles.MaxNameLength ||
                 it.codePointCount(0, it.length) < name.codePointCount(0, name.length)) name = it },
@@ -99,13 +129,13 @@ internal fun PublicAccountScreen(configured: WobbrikApplication.Bootstrap.Config
                             val required = interval.next.subtract(interval.start)
                             AccountXpProgress(earned, required, ready.snapshot.account?.level?.toString())
                         }
-                    }, showEdit = !pinnedEdit, enabled = !busy,
+                    }, showEdit = !pinnedEdit, enabled = !busy && fresh,
                     onEdit = { editing = true; message = null })
             }
             status()
             if (inlineShortcuts) ProfileNavbar(onHome, onPage)
         }
-        if (pinnedEdit && profile != null) ProfileAction("Dəyiş", enabled = !busy,
+        if (pinnedEdit && profile != null) ProfileAction("Dəyiş", enabled = !busy && fresh,
             modifier = Modifier.testTag("profile-edit")) { editing = true; message = null }
         if (!inlineShortcuts) ProfileNavbar(onHome, onPage)
     }

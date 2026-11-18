@@ -21,11 +21,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 
+/** One route-owned sheet shared by overview, editor and picker; no account data. */
+internal val LocalAccountPortraitArt = staticCompositionLocalOf<Pair<ResourceArt, () -> Unit>?> { null }
+
 /** Approved account head-and-shoulders art; frame and selection remain native. */
 @Composable
 internal fun NativeAccountPortrait(id: String, modifier: Modifier, selected: Boolean = true,
     resource: Pair<ResourceArt, () -> Unit>? = null) {
-    val (art, retry) = resource ?: rememberResourceArt(R.drawable.account_portraits_v3)
+    val (art, retry) = resource ?: LocalAccountPortraitArt.current ?: rememberResourceArt(R.drawable.account_portraits_v3)
     val sheet = art.images?.single()
     if (sheet == null) {
         Box(modifier, contentAlignment = Alignment.Center) {
@@ -101,7 +104,7 @@ internal fun NativeProfileEditView(name: String, avatar: String, editable: Boole
 internal fun NativeProfileAvatarSheet(avatars: List<String>, selected: String, onClose: () -> Unit, onApply: (String) -> Unit) {
     val feedback = LocalGameFeedback.current
     var pick by remember(selected) { mutableStateOf(selected) }
-    val portraits = rememberResourceArt(R.drawable.account_portraits_v3)
+    val portraits = LocalAccountPortraitArt.current ?: rememberResourceArt(R.drawable.account_portraits_v3)
     BoxWithConstraints(Modifier.fillMaxSize().safeDrawingPadding().padding(GameTokens.Small), contentAlignment = Alignment.Center) {
         MenuRelief(Modifier.fillMaxWidth().heightIn(max = maxHeight * GameTokens.Profile.SheetHeightFraction)) {
             Column(Modifier.padding(GameTokens.Small), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {

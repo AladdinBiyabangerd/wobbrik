@@ -52,7 +52,7 @@ internal fun NativeProfileOverview(profile: PublicProfile, level: String, xp: Lo
     progress: @Composable () -> Unit, showEdit: Boolean, enabled: Boolean, onEdit: () -> Unit) {
     val large = LocalDensity.current.fontScale > 1f
     val compact = mobileUiSizing().compact
-    val portraits = rememberResourceArt(R.drawable.account_portraits_v3)
+    val portraits = LocalAccountPortraitArt.current ?: rememberResourceArt(R.drawable.account_portraits_v3)
     @Composable fun portrait(modifier: Modifier) {
         NativeAccountPortrait(profile.avatarId, modifier, resource = portraits)
     }
