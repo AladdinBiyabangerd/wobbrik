@@ -50,8 +50,9 @@ internal fun CollectionInventoryShell(coins: Long?, onPlay: (() -> Unit)?, onPag
     val art = rememberResourceArt(R.drawable.inventory_collection_backdrop, R.drawable.inventory_collection_header).first.images
     BoxWithConstraints(Modifier.fillMaxSize().background(GameTokens.InventoryCollection.Background)
         .safeDrawingPadding().consumeWindowInsets(WindowInsets.safeDrawing).imePadding()) {
+        val listingIme = detail && mobileMenuDestination(page) == "market" && WindowInsets.ime.getBottom(LocalDensity.current) > 0
         val wrappedCollectionDock = maxWidth < (GameTokens.Target * 7 + GameTokens.Small * 2)
-        val collectionClearance = if(wrappedCollectionDock) GameTokens.Target * 2 + GameTokens.Gap else GameTokens.InventoryCollection.DockClearance
+        val collectionClearance = if(listingIme) GameTokens.Quarter else if(wrappedCollectionDock) GameTokens.Target * 2 + GameTokens.Gap else GameTokens.InventoryCollection.DockClearance
         art?.getOrNull(1)?.let { Image(it, null,
             Modifier.align(Alignment.BottomCenter).fillMaxWidth().height(GameTokens.Target * 2),
             contentScale = ContentScale.FillBounds) }
@@ -68,7 +69,7 @@ internal fun CollectionInventoryShell(coins: Long?, onPlay: (() -> Unit)?, onPag
                     LocalTextStyle provides LocalTextStyle.current.copy(fontFamily = GameTypeface)) { content() }
             }
         }
-        Box(Modifier.align(Alignment.BottomCenter).padding(horizontal = GameTokens.Small, vertical = GameTokens.Quarter)) {
+        if(!listingIme) Box(Modifier.align(Alignment.BottomCenter).padding(horizontal = GameTokens.Small, vertical = GameTokens.Quarter)) {
             CollectionNavbar(onPlay, onPage, mobileMenuDestination(page))
         }
     }

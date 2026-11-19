@@ -23,6 +23,8 @@ Google vahidinin sübutu: [Android review](reviews/2026-11-13-required-google-si
 
 ### 1.1. Vahid mobil UI və funksional düzəlişlər — 15 noyabr, təsdiqli icra tapşırığı
 
+**19 noyabr — Yeni elan:** istifadəçi `design/market-new-listing-v1/proposal-v4.png` və `price-keyboard-v1.png` nümunələrini təsdiqləyib native implementasiyaya başlamağı tapşırdı. Bina seçimi və şəkilsiz yığcam qiymət mərhələsi; komissiya/net xülasəsi bir sətirdə, tək dərc əməliyyatı. Rəqəm klaviaturası eyni xanada açılır; IME zamanı navbar gizlənir. Real maxPrice/komissiya/journal/authority saxlanır, sample məlumat yeni qayda deyil.
+
 **19 noyabr — Bazar dizaynı:** istifadəçi `design/market-collection-v1/proposal.png` dizaynını Kotlin + Compose ilə birəbir tətbiq etməyi təsdiqlədi. Real Bazar alış/elan/geri götürmə, fresh detail, journal və server authority saxlanır. Bu nümunə Bazarın əvvəlki PNG-sindən üstündür; Ərazi girişi yoxdur. Nümunə rəqəmlər/kataloq domain qaydası deyil. Mobil portret, planşet dəyişmir.
 
 **18 noyabr — İnventar/Dekor dizayn tapşırığı:** istifadəçi Görünüşün vizual düzəlişindən sonra Dekor üçün yeni dizayn nümunəsi istədi. İstifadəçi `design/inventory-decor-v1/proposal.png` dizaynını native Kotlin + Compose implementasiyası üçün təsdiqlədi; eyni dizayn təkrar təsdiqə çıxarılmır. Kolleksiya chrome-u, real sahiblik nüsxələri və Şəhərdə/Saxlanılır statusları əsas götürülür. Alış Bazar yolundadır; yeni placement və ərazi girişi yoxdur.

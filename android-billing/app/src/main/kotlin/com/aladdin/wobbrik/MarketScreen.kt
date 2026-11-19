@@ -129,7 +129,8 @@ internal fun MarketScreen(configured: WobbrikApplication.Bootstrap.Configured,
     }
     Box(Modifier.fillMaxSize().then(if(LocalMobileMenuShell.current) Modifier else Modifier.background(Brush.verticalGradient(listOf(GameTokens.Surface, GameTokens.Background)))).then(if(LocalMobileMenuShell.current) Modifier else Modifier.safeDrawingPadding()).padding(horizontal = if(nativeMenu) GameTokens.InventoryCollection.ScreenInset else GameTokens.Gap).padding(bottom = if(nativeMenu && detailId == null && !picker) LocalCollectionDockClearance.current else GameTokens.Gap)) {
         Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-            if(LocalMobileMenuShell.current && (detailId != null || picker)) CommerceTitle(if(picker) "Yeni elan" else "Bina detalı") { back() }
+            if(nativeMenu && picker) MarketListingHeading(false) { back() }
+            else if(nativeMenu && detailId != null) CommerceTitle("Bina detalı") { back() }
             if(!LocalMobileMenuShell.current) Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
                 MarketAction("‹", modifier = Modifier.width(GameTokens.Target).semantics { contentDescription = "Geri" }, onClick = { back() })
                 Text("Bazar", Modifier.weight(1f), color = GameTokens.Text, fontSize = sizing.heading, fontWeight = FontWeight.Bold)
@@ -183,10 +184,14 @@ internal fun MarketScreen(configured: WobbrikApplication.Bootstrap.Configured,
                         }
                     } }
                 } else if (picker) {
-                    item { Text("Satılacaq binanı seç", color = GameTokens.Text, fontSize = sizing.heading) }
+                    item { Text("Satılacaq binanı seç", color = GameTokens.Text, fontSize = sizing.heading, fontWeight = FontWeight.Bold) }
                     items(inventory.filter { !it.traded }, key = { it.id }) { building ->
-                        MarketBuildingCard(building, ready.catalog, "Maksimum ${building.maxPrice}", "Seç", !loading) { candidate = building }
+                        if(nativeMenu) MarketListingBuilding(building, ready.catalog, !loading) { candidate = building }
+                        else MarketBuildingCard(building, ready.catalog, "Maksimum ${building.maxPrice}", "Seç", !loading) { candidate = building }
                     }
+                    if(nativeMenu && inventory.any { !it.traded }) item { Text("Öz binalarından birini seç.", Modifier.fillMaxWidth().padding(vertical = GameTokens.Small),
+                        color = GameTokens.InventoryCollection.Metadata, textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                        fontSize = GameTokens.Body, fontWeight = FontWeight.Bold) }
                     if (inventoryNext != null && !loading) item { MarketAction("Daha çox") { inventoryCursor = inventoryNext } }
                     if (inventory.none { !it.traded } && !loading && !failed) item { Text("Bu səhifədə satıla bilən bina yoxdur. Satış üçün ən azı 10 mərtəbəli öz binanı qur.", color = GameTokens.Muted) }
                 } else {
@@ -425,85 +430,6 @@ internal fun MarketBuildingSummary(building: OwnedBuilding, catalog: RecoveryCat
 }
 
 /** Native route content: shell header and navbar remain visible while only the body scrolls. */
-@Composable
-private fun MarketSalePage(building: OwnedBuilding, catalog: RecoveryCatalog?, onDismiss: () -> Unit, onConfirm: (Long) -> Unit) {
-    var price by remember(building.id) { mutableStateOf("") }
-    val value = price.toLongOrNull()?.takeIf { it in 1..building.maxPrice }
-    val fee = value?.let(MarketMutations::fee)
-    Column(Modifier.fillMaxSize().imePadding().padding(GameTokens.Gap),
-        verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-        CommerceTitle("Yeni elan", onDismiss)
-        Column(Modifier.weight(1f).verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-            Text("Bazar · Mənim elanlarım", color = GameTokens.Muted, fontSize = GameTokens.Label)
-            MarketBuildingSummary(building, catalog)
-            MenuRelief(Modifier.fillMaxWidth(), shape = RoundedCornerShape(GameTokens.ControlRadius)) {
-                Column(Modifier.padding(GameTokens.Small), verticalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {
-                    Text("Qiymət", color = GameTokens.Text, fontSize = GameTokens.Body, fontWeight = FontWeight.Bold)
-                    OutlinedTextField(price, { text ->
-                        if (text.length <= 19 && text.all { it in '0'..'9' }) price = text
-                    }, modifier = Modifier.fillMaxWidth().semantics { contentDescription = "Qiymət" }, singleLine = true,
-                        leadingIcon = { MobileMenuIcon(MobileIcon.Coin, Modifier.size(GameTokens.Inset)) },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        shape = RoundedCornerShape(GameTokens.ControlRadius),
-                        isError = price.isNotEmpty() && value == null,
-                        placeholder = { Text("0", color = GameTokens.Muted) },
-                        textStyle = LocalTextStyle.current.copy(color = GameTokens.Text, fontSize = GameTokens.Title, fontWeight = FontWeight.Bold),
-                        colors = OutlinedTextFieldDefaults.colors(focusedTextColor = GameTokens.Text,
-                            unfocusedTextColor = GameTokens.Text, cursorColor = GameTokens.Accent,
-                            focusedBorderColor = GameTokens.Accent, unfocusedBorderColor = GameTokens.Muted,
-                            errorBorderColor = GameTokens.Danger, errorTextColor = GameTokens.Text))
-                    Text("Maksimum ${building.maxPrice} sikkə", color = if(price.isNotEmpty() && value == null) GameTokens.Danger else GameTokens.Muted,
-                        fontSize = GameTokens.Label)
-                }
-            }
-            MenuRelief(Modifier.fillMaxWidth(), shape = RoundedCornerShape(GameTokens.ControlRadius)) {
-                Column(Modifier.padding(GameTokens.Small), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-                    MarketSaleAmount("Komissiya (5%)", MobileIcon.Tag, fee, negative = true)
-                    HorizontalDivider(color = GameTokens.Raised)
-                    MarketSaleAmount("Alacağın", MobileIcon.Layers, value?.let { it - requireNotNull(fee) })
-                }
-            }
-            Row(horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-                Text("ⓘ", color = GameTokens.Muted, fontSize = GameTokens.Title)
-                Text("Elan yaradıldıqdan sonra Bazar bölməsində alıcılara görünəcək.", Modifier.weight(1f),
-                    color = GameTokens.Text, fontSize = GameTokens.Label)
-            }
-            Text("Eyni anda 5 aktiv elan. Bina şəhərində qalır.", color = GameTokens.Muted, fontSize = GameTokens.Label)
-        }
-        CommerceAction("Elanı dərc et", primary = true, enabled = value != null, icon = MobileIcon.Tag) {
-            onConfirm(requireNotNull(value))
-        }
-        CommerceAction("Ləğv et", onClick = onDismiss)
-    }
-}
-
-@Composable
-private fun MarketSaleAmount(label: String, icon: MobileIcon, amount: Long?, negative: Boolean = false) {
-    val heading: @Composable () -> Unit = {
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-            MobileMenuIcon(icon, Modifier.size(GameTokens.Inset))
-            Text(label, color = GameTokens.Text, fontSize = GameTokens.Body,
-                fontWeight = if(negative) FontWeight.Normal else FontWeight.Bold)
-        }
-    }
-    val money: @Composable () -> Unit = {
-        Row(Modifier.horizontalScroll(rememberScrollState()), verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {
-            Text(if(amount == null) "—" else (if(negative) "−" else "") + amount,
-                color = GameTokens.Text, fontSize = GameTokens.Body, fontWeight = FontWeight.Bold, softWrap = false)
-            MobileMenuIcon(MobileIcon.Coin, Modifier.size(GameTokens.Inset))
-        }
-    }
-    if(LocalDensity.current.fontScale > 1f) Column(verticalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {
-        heading(); money()
-    } else Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-        Box(Modifier.weight(1f)) { heading() }
-        money()
-    }
-}
-
 @Composable
 private fun MarketSaleDialog(building: OwnedBuilding, catalog: RecoveryCatalog?, onDismiss: () -> Unit, onConfirm: (Long) -> Unit) {
     var price by remember(building.id) { mutableStateOf("") }
