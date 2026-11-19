@@ -439,13 +439,14 @@ internal fun InventoryGardenArt(required: Boolean, content: @Composable () -> Un
 
 /** Server metadata stays real; approved art is a decorative owned-building presentation. */
 @Composable
-internal fun BuildingPreview(building: OwnedBuilding, modifier: Modifier) {
+internal fun BuildingPreview(building: OwnedBuilding, modifier: Modifier, marketMaterials: Boolean = false, marketWall: CosmeticSprite? = null) {
     val preparation = LocalBuildingArt.current
     if (preparation.status != ArtPreparation.Ready) {
         Box(modifier) { ApprovedArtStatus(preparation.status, preparation.retry) }
         return
     }
-    val art = rememberCosmeticArt() + rememberGameWindowArt()
+    val sourceArt = rememberCosmeticArt() + rememberGameWindowArt()
+    val art = if (marketMaterials && marketWall != null) sourceArt + (requireNotNull(building.parts["wall"]) to marketWall) else sourceArt
     val atlases = rememberGameAtlases()
     val purple = rememberPurpleBuildingArt()
     val purpleTemplate = usesPurpleTemplate(building.parts)
@@ -470,8 +471,8 @@ internal fun BuildingPreview(building: OwnedBuilding, modifier: Modifier) {
         return
     }
     Canvas(modifier.semantics { contentDescription = "${building.floors} mərtəbəli bina" }) {
-        if (purpleTemplate) purpleBuilding(purple, art, atlases, building.parts, centers)
-        else buildingPreview(atlases, art, building.parts, centers, requireNotNull(garden))
+        if (purpleTemplate) purpleBuilding(purple, art, atlases, building.parts, centers, marketMaterials)
+        else buildingPreview(atlases, art, building.parts, centers, requireNotNull(garden), marketMaterials, if (marketMaterials) purple["balcony"] else null)
     }
 }
 

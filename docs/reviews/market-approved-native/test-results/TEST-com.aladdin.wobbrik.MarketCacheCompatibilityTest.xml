@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.aladdin.wobbrik.MarketCacheCompatibilityTest" tests="18" skipped="0" failures="0" errors="0" timestamp="2026-11-18T13:51:16.324Z" hostname="Macs-MacBook-Pro.local" time="10.846">
+  <properties/>
+  <testcase name="routeTiming" classname="com.aladdin.wobbrik.MarketCacheCompatibilityTest" time="0.531"/>
+  <testcase name="freshCursorPageReplacesCachedPriceAndRemovedListing" classname="com.aladdin.wobbrik.MarketCacheCompatibilityTest" time="1.006"/>
+  <testcase name="staleRevisionAndQueryMismatchDoNotPublishLocalCards" classname="com.aladdin.wobbrik.MarketCacheCompatibilityTest" time="0.852"/>
+  <testcase name="embeddedCacheStillRequiresLiveDetailForPurchase" classname="com.aladdin.wobbrik.MarketCacheCompatibilityTest" time="0.325"/>
+  <testcase name="embeddedColdOwnUsesOnlyPageAndSync" classname="com.aladdin.wobbrik.MarketCacheCompatibilityTest" time="0.153"/>
+  <testcase name="smallCached" classname="com.aladdin.wobbrik.MarketCacheCompatibilityTest" time="0.721"/>
+  <testcase name="publicationTimingAndTraffic" classname="com.aladdin.wobbrik.MarketCacheCompatibilityTest" time="0.707"/>
+  <testcase name="embeddedColdPublicUsesOnlyPageAndSync" classname="com.aladdin.wobbrik.MarketCacheCompatibilityTest" time="0.148"/>
+  <testcase name="sameUidReloginCancelsInflightRead" classname="com.aladdin.wobbrik.MarketCacheCompatibilityTest" time="0.527"/>
+  <testcase name="cachedCardsBeforeNetwork" classname="com.aladdin.wobbrik.MarketCacheCompatibilityTest" time="0.706"/>
+  <testcase name="revisionChangeDuringCaptureClearsLocalCards" classname="com.aladdin.wobbrik.MarketCacheCompatibilityTest" time="0.477"/>
+  <testcase name="ownCacheUsesSeparateQuery" classname="com.aladdin.wobbrik.MarketCacheCompatibilityTest" time="0.713"/>
+  <testcase name="normalFont2InsetCached" classname="com.aladdin.wobbrik.MarketCacheCompatibilityTest" time="0.758"/>
+  <testcase name="smallFont2Cached" classname="com.aladdin.wobbrik.MarketCacheCompatibilityTest" time="0.624"/>
+  <testcase name="accountSwitchDoesNotPublishOldAccountCache" classname="com.aladdin.wobbrik.MarketCacheCompatibilityTest" time="0.535"/>
+  <testcase name="longBalanceCached" classname="com.aladdin.wobbrik.MarketCacheCompatibilityTest" time="0.745"/>
+  <testcase name="cachedBuyRequiresFreshDetailAndDoesNotGrantCommand" classname="com.aladdin.wobbrik.MarketCacheCompatibilityTest" time="0.29"/>
+  <testcase name="cachedTransientErrorAndDeniedRetry" classname="com.aladdin.wobbrik.MarketCacheCompatibilityTest" time="1.027"/>
+  <system-out><![CDATA[MARKET first-card-host-ms=40 requests=1 responseUtf8Bytes=0 details=0
+MARKET settled-host-ms=247 requests=14 responseUtf8Bytes=8776 details=12
+MARKET before-first-publication-ms=176 requests=13 responseUtf8Bytes=8501
+MARKET after-local-publication-ms=4 requests=0 responseUtf8Bytes=0
+MARKET after-local-publication-ms=226 requests=14 responseUtf8Bytes=8776
+MARKET after-fresh-publication-ms=226 requests=14 responseUtf8Bytes=8776
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

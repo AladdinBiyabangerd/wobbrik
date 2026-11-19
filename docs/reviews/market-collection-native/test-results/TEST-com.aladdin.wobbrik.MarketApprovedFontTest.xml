@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.aladdin.wobbrik.MarketApprovedFontTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-11-19T05:33:12.011Z" hostname="Macs-MacBook-Pro.local" time="3.687">
+  <properties/>
+  <testcase name="routes" classname="com.aladdin.wobbrik.MarketApprovedFontTest" time="3.687"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -12,6 +12,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
@@ -99,7 +100,7 @@ internal fun InventoryDecorContent(catalog: RecoveryCatalog?, copies: List<Decor
 }
 
 @Composable
-private fun DecorFilters(category: String, onCategory: (String) -> Unit) {
+internal fun DecorFilters(category: String, collectionMarket: Boolean = false, onCategory: (String) -> Unit) {
     val large = LocalDensity.current.fontScale > 1f
     Row(Modifier.fillMaxWidth().selectableGroup().then(if (large) Modifier.horizontalScroll(rememberScrollState()) else Modifier),
         horizontalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {
@@ -111,12 +112,18 @@ private fun DecorFilters(category: String, onCategory: (String) -> Unit) {
                 modifier = (if (large) Modifier.widthIn(min = GameTokens.Target * 2) else Modifier.weight(1f))
                     .collectionPress(interaction).semantics { selected = active; role = Role.Tab }) {
                 Column(Modifier.heightIn(min = GameTokens.AppearanceCollection.CategoryHeight).clip(shape)
-                    .background(Brush.verticalGradient(if (active) listOf(GameTokens.MobileHome.PlayTop, GameTokens.Accent, GameTokens.MobileHome.PlayBottom)
+                    .background(Brush.verticalGradient(if (active && !collectionMarket) listOf(GameTokens.MobileHome.PlayTop, GameTokens.Accent, GameTokens.MobileHome.PlayBottom)
                         else listOf(GameTokens.InventoryCollection.PanelTop, GameTokens.InventoryCollection.PanelBottom)))
                     .border(GameTokens.InventoryCollection.OutlineWidth, if (active) GameTokens.Accent else GameTokens.InventoryCollection.Outline, shape)
-                    .padding(GameTokens.Quarter), horizontalAlignment = Alignment.CenterHorizontally,
+                    .drawWithCache {
+                        onDrawBehind {
+                            if(collectionMarket && active) drawRoundRect(GameTokens.Accent,
+                                topLeft = androidx.compose.ui.geometry.Offset(0f, size.height - GameTokens.InventoryCollection.IndicatorHeight.toPx()),
+                                size = androidx.compose.ui.geometry.Size(size.width, GameTokens.InventoryCollection.IndicatorHeight.toPx()))
+                        }
+                    }.padding(GameTokens.Quarter), horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center) {
-                    val tint = if (active) GameTokens.Background else GameTokens.Text
+                    val tint = if (active && !collectionMarket) GameTokens.Background else if(active) GameTokens.Accent else GameTokens.Text
                     if (key == "all") DecorAllIcon(tint)
                     else Icon(painterResource(when(key) {
                         "tree" -> R.drawable.inventory_decor_tree; "bench" -> R.drawable.inventory_decor_bench

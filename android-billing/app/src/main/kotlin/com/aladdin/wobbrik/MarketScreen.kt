@@ -18,9 +18,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.Dp
@@ -129,7 +127,7 @@ internal fun MarketScreen(configured: WobbrikApplication.Bootstrap.Configured,
         }
         return
     }
-    Box(Modifier.fillMaxSize().then(if(LocalMobileMenuShell.current) Modifier else Modifier.background(Brush.verticalGradient(listOf(GameTokens.Surface, GameTokens.Background)))).then(if(LocalMobileMenuShell.current) Modifier else Modifier.safeDrawingPadding()).padding(GameTokens.Gap)) {
+    Box(Modifier.fillMaxSize().then(if(LocalMobileMenuShell.current) Modifier else Modifier.background(Brush.verticalGradient(listOf(GameTokens.Surface, GameTokens.Background)))).then(if(LocalMobileMenuShell.current) Modifier else Modifier.safeDrawingPadding()).padding(horizontal = if(nativeMenu) GameTokens.InventoryCollection.ScreenInset else GameTokens.Gap).padding(bottom = if(nativeMenu && detailId == null && !picker) LocalCollectionDockClearance.current else GameTokens.Gap)) {
         Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
             if(LocalMobileMenuShell.current && (detailId != null || picker)) CommerceTitle(if(picker) "Yeni elan" else "Bina detalı") { back() }
             if(!LocalMobileMenuShell.current) Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
@@ -146,18 +144,27 @@ internal fun MarketScreen(configured: WobbrikApplication.Bootstrap.Configured,
                 Text(ready.snapshot.coins.toString(), color = GameTokens.Text, fontWeight = FontWeight.Bold)
             }
             if (detailId == null && !picker) {
-                Row(horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+                if (nativeMenu) MarketModeTabs(own) { selectedOwn ->
+                    if (own != selectedOwn) {
+                        own = selectedOwn
+                        if (own) filter = MarketFilter()
+                        refresh()
+                    }
+                } else Row(horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
                     MarketTab("Alış", !own, Modifier.weight(1f)) { own = false; refresh() }
-                    MarketTab(if(nativeMenu) "Mənim elanlarım" else "Elanlarım", own, Modifier.weight(1f)) { own = true; if(nativeMenu) filter = MarketFilter(); refresh() }
+                    MarketTab("Elanlarım", own, Modifier.weight(1f)) { own = true; refresh() }
                 }
-                if(LocalMobileMenuShell.current && own) MarketAction("+ Yeni elan", primary = true) { picker = true; inventoryCursor = null }
+
 
             }
             val nativeGrid = LocalMobileMenuShell.current && !own && LocalDensity.current.fontScale <= 1f
             LazyColumn(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-                if (fromCache && detailId == null && !picker && nativeMenu && own) item { Text("Keş", color = GameTokens.Muted, fontSize = GameTokens.Label) }
-                if(detailId == null && !picker && (!nativeMenu || !own)) item {
-                Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+                if (fromCache && detailId == null && !picker && nativeMenu) item { Text("Keş", color = GameTokens.Muted, fontSize = GameTokens.Label) }
+                if(detailId == null && !picker) item {
+                if(nativeMenu) Column { MarketCollectionHeading(if(own) "Mənim elanlarım" else "Binalar", loading, { refresh() }, if(own) null else ({ filtersOpen = true }))
+                    if(filter != MarketFilter()) MarketCollectionAction("Hamısı") { filter = MarketFilter(); refresh() }
+                }
+                else Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
                     if (fromCache) Text("Keş", Modifier.align(Alignment.CenterVertically), color = GameTokens.Muted, fontSize = GameTokens.Label)
                     MarketAction("Süzgəc", modifier = Modifier.widthIn(min = GameTokens.Target)) { filtersOpen = true }
                     MarketAction("Yenilə", modifier = Modifier.widthIn(min = GameTokens.Target), enabled = !loading) { refresh() }
@@ -165,13 +172,16 @@ internal fun MarketScreen(configured: WobbrikApplication.Bootstrap.Configured,
                 }
                 }
                 if (detailId != null) {
-                    detail?.let { value -> item { Column(verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-                        BuildingPreview(value.building, Modifier.fillMaxWidth().height(sizing.detailArt))
-                        Text(buildingName(value.building, ready.catalog), color = GameTokens.Text, fontSize = sizing.heading, fontWeight = FontWeight.Bold)
-                        Text("${value.building.floors} mərtəbə · ${value.building.residents} sakin", color = GameTokens.Muted)
-                        Text("${value.listing.price} sikkə", color = GameTokens.Text, fontSize = sizing.heading, fontWeight = FontWeight.Bold)
-                        if (own) Text("Komissiya ${value.listing.fee} · Satıcıya ${value.listing.price - value.listing.fee}", color = GameTokens.Muted)
-                    } } }
+                    detail?.let { value -> item {
+                        if (nativeMenu) MarketPurchaseDetail(value, ready.catalog, own)
+                        else Column(verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+                            MarketBuildingPreview(value.building, Modifier.fillMaxWidth().height(sizing.detailArt))
+                            Text(buildingName(value.building, ready.catalog), color = GameTokens.Text, fontSize = sizing.heading, fontWeight = FontWeight.Bold)
+                            Text("${value.building.floors} mərtəbə · ${value.building.residents} sakin", color = GameTokens.Muted)
+                            Text("${value.listing.price} sikkə", color = GameTokens.Text, fontSize = sizing.heading, fontWeight = FontWeight.Bold)
+                            if (own) Text("Komissiya ${value.listing.fee} · Satıcıya ${value.listing.price - value.listing.fee}", color = GameTokens.Muted)
+                        }
+                    } }
                 } else if (picker) {
                     item { Text("Satılacaq binanı seç", color = GameTokens.Text, fontSize = sizing.heading) }
                     items(inventory.filter { !it.traded }, key = { it.id }) { building ->
@@ -195,8 +205,13 @@ internal fun MarketScreen(configured: WobbrikApplication.Bootstrap.Configured,
                     } else items(listings, key = { it.id }) { listing ->
                         val preview = previews[listing.id]
                         if (preview != null) MarketBuildingCard(preview.building, ready.catalog, "${listing.price} sikkə",
-                            if(own && nativeMenu) "Elanı geri götür" else "Bax", !loading || fromCache, listed = own && nativeMenu, purchase = nativeMenu && !own) { detailId = listing.id; withdrawAfterRead = own && nativeMenu }
+                            if(own && nativeMenu) "Elanı geri götür" else "Bax", !loading || fromCache, listed = own && nativeMenu, purchase = nativeMenu && !own, listingStatus = listing.status) { detailId = listing.id; withdrawAfterRead = own && nativeMenu }
                         else MarketUnavailableCard(listing) { detailId = listing.id }
+                    }
+                    if (own && nativeMenu) item {
+                        Box(Modifier.fillMaxWidth().padding(top = GameTokens.Small), contentAlignment = Alignment.Center) {
+                            MarketCollectionAction("+ Yeni elan", Modifier.fillMaxWidth(if(LocalDensity.current.fontScale > 1f) 1f else GameTokens.DecorCollection.MarketWidthFraction), icon = MobileIcon.Tag) { picker = true; inventoryCursor = null }
+                        }
                     }
                     if (next != null && !loading && !failed) item { MarketAction("Daha çox") { cursor = next } }
                     if (listings.isEmpty() && !loading && !failed) item { Text(if (own) "Hələ elanın yoxdur." else "Bu süzgəcdə elan yoxdur.", color = GameTokens.Muted) }
@@ -251,14 +266,14 @@ internal fun MarketScreen(configured: WobbrikApplication.Bootstrap.Configured,
 }
 
 @Composable
-internal fun MarketBuildingCard(building: OwnedBuilding, catalog: RecoveryCatalog?, price: String, action: String, enabled: Boolean, grid: Boolean = false, listed: Boolean = false, purchase: Boolean = grid, onClick: () -> Unit) {
+internal fun MarketBuildingCard(building: OwnedBuilding, catalog: RecoveryCatalog?, price: String, action: String, enabled: Boolean, grid: Boolean = false, listed: Boolean = false, purchase: Boolean = grid, listingStatus: String = "active", onClick: () -> Unit) {
     if(!LocalMobileMenuShell.current) {
     val largeFont = LocalDensity.current.fontScale > 1f
     val sizing = mobileUiSizing()
     Surface(color = GameTokens.Surface, shape = RoundedCornerShape(GameTokens.CardRadius), border = BorderStroke(GameTokens.Hairline, GameTokens.Raised)) {
         Row(Modifier.background(Brush.verticalGradient(listOf(GameTokens.Raised, GameTokens.Surface))).padding(GameTokens.Small), verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-            BuildingPreview(building, Modifier.width(if (largeFont) GameTokens.Target else sizing.listPreview).height(sizing.listPreview))
+            MarketBuildingPreview(building, Modifier.width(if (largeFont) GameTokens.Target else sizing.listPreview).height(sizing.listPreview))
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
                 Text(buildingName(building, catalog), color = GameTokens.Text, fontWeight = FontWeight.Bold, fontSize = GameTokens.Body)
                 Text("${building.floors} mərtəbə", color = GameTokens.Muted, fontSize = GameTokens.Caption)
@@ -271,7 +286,7 @@ internal fun MarketBuildingCard(building: OwnedBuilding, catalog: RecoveryCatalo
         return
     }
     if (listed) {
-        MarketOwnListingCard(building, catalog, price, enabled, onClick)
+        MarketOwnListingCard(building, catalog, price, enabled, listingStatus, onClick)
         return
     }
     val largeFont = LocalDensity.current.fontScale > 1f
@@ -279,16 +294,12 @@ internal fun MarketBuildingCard(building: OwnedBuilding, catalog: RecoveryCatalo
     MarketBuildingRelief(purchase) {
         val details: @Composable ColumnScope.() -> Unit = {
             Text(buildingName(building, catalog), Modifier.horizontalScroll(rememberScrollState()), color = GameTokens.Text,
-                fontFamily = GameTypeface, fontSize = GameTokens.Body, fontWeight = FontWeight.Bold, softWrap = false)
+                fontFamily = GameTypeface, fontSize = GameTokens.Body, lineHeight = GameTokens.Body, fontWeight = FontWeight.Bold, softWrap = false)
             Text("${building.floors} mərtəbə", Modifier.horizontalScroll(rememberScrollState()), color = GameTokens.Muted,
-                fontSize = GameTokens.Caption, softWrap = false)
-            if(listed) CommerceStatus("✓ Satışdadır", filled = true)
+                fontSize = GameTokens.Caption, lineHeight = GameTokens.Label, softWrap = false)
             val amount = price.removeSuffix(" sikkə").toLongOrNull()
-            if(grid && amount != null) Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {
-                CommercePrice(amount, Modifier.weight(1f))
-                CommerceAction(action, Modifier.width(GameTokens.Target + GameTokens.Inset), primary = true, enabled = enabled, icon = MobileIcon.Play, compact = true, onClick = onClick)
-            } else {
+            if(purchase && amount != null) MarketCardPurchase(amount, action, null, enabled, onClick)
+            else {
                 if(amount != null) CommercePrice(amount)
                 else Text(price, Modifier.horizontalScroll(rememberScrollState()), color = GameTokens.Text, fontFamily = GameTypeface,
                     fontWeight = FontWeight.Bold, softWrap = false)
@@ -297,11 +308,16 @@ internal fun MarketBuildingCard(building: OwnedBuilding, catalog: RecoveryCatalo
         }
         if(largeFont || grid) Column(Modifier.padding(GameTokens.Small),
             verticalArrangement = Arrangement.spacedBy(if(grid) GameTokens.Quarter else GameTokens.Small)) {
-            BuildingPreview(building, Modifier.fillMaxWidth().height(if(grid) sizing.cardArt else GameTokens.Target))
+            // Keep a full illustration frame, including the garden, on compact cards.
+            MarketBuildingPreview(building, Modifier.fillMaxWidth().height(if(grid) {
+                if(largeFont) GameTokens.InventoryCollection.LargeTypeArtHeight
+                else if(sizing.compact) GameTokens.InventoryCollection.LargeTypeArtHeight
+                else GameTokens.InventoryCollection.ArtHeight
+            } else if(purchase) GameTokens.InventoryCollection.LargeTypeArtHeight else GameTokens.Target))
             details()
         } else Row(Modifier.padding(GameTokens.Small), verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-            BuildingPreview(building, Modifier.width(sizing.listPreview).height(sizing.listPreview))
+            MarketBuildingPreview(building, Modifier.width(sizing.listPreview).height(sizing.listPreview))
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(GameTokens.Small), content = details)
         }
     }
@@ -310,9 +326,8 @@ internal fun MarketBuildingCard(building: OwnedBuilding, catalog: RecoveryCatalo
 /** Active own listings keep price/status together, with a full-width withdrawal action. */
 @Composable
 private fun MarketOwnListingCard(building: OwnedBuilding, catalog: RecoveryCatalog?, price: String,
-    enabled: Boolean, onClick: () -> Unit) {
+    enabled: Boolean, status: String, onClick: () -> Unit) {
     val largeFont = LocalDensity.current.fontScale > 1f
-    val sizing = mobileUiSizing()
     MarketBuildingRelief(purchase = true) {
         val details: @Composable ColumnScope.() -> Unit = {
             Text(buildingName(building, catalog), Modifier.horizontalScroll(rememberScrollState()),
@@ -326,22 +341,20 @@ private fun MarketOwnListingCard(building: OwnedBuilding, catalog: RecoveryCatal
                 else Text(price, Modifier.horizontalScroll(rememberScrollState()), color = GameTokens.Text,
                     fontFamily = GameTypeface, fontWeight = FontWeight.Bold, softWrap = false)
             }
-            if(largeFont) {
-                money()
-                CommerceStatus("✓ Satışdadır", filled = true)
-            } else Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-                Box(Modifier.weight(1f)) { money() }
-                CommerceStatus("✓ Satışdadır", filled = true)
-            }
-            CommerceAction("Elanı geri götür", enabled = enabled, icon = MobileIcon.Refresh, compact = true, onClick = onClick)
+            money()
+            Text(when(status) { "active" -> "✓ Satışdadır"; "sold" -> "Satılıb"; "withdrawn" -> "Geri götürülüb"; else -> status }, color = if(status == "active") GameTokens.AppearanceCollection.Unlocked else GameTokens.Muted,
+                fontFamily = GameTypeface, fontSize = GameTokens.Label, fontWeight = FontWeight.Bold)
+            if(status == "active") MarketCollectionAction("Elanı geri götür", enabled = enabled, onClick = onClick)
         }
         if(largeFont) Column(Modifier.padding(GameTokens.Small), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-            BuildingPreview(building, Modifier.fillMaxWidth().height(GameTokens.Target * 2))
+            MarketBuildingPreview(building, Modifier.fillMaxWidth().height(GameTokens.AppearanceCollection.CompactArtHeight))
             details()
         } else Row(Modifier.padding(GameTokens.Small), verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-            BuildingPreview(building, Modifier.width(sizing.listPreview - GameTokens.Inset).height(sizing.listPreview + GameTokens.Inset))
+            val artHeight = if(mobileUiSizing().compact) GameTokens.InventoryCollection.CompactArtHeight else GameTokens.InventoryCollection.ArtHeight
+            MarketBuildingPreview(building, Modifier.width(if(mobileUiSizing().compact) GameTokens.AppearanceCollection.CompactArtHeight else GameTokens.InventoryCollection.CompactArtHeight).height(artHeight))
+            VerticalDivider(Modifier.height(artHeight - GameTokens.Gap),
+                thickness = GameTokens.InventoryCollection.OutlineWidth, color = GameTokens.InventoryCollection.Outline)
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(GameTokens.Quarter), content = details)
         }
     }
@@ -354,20 +367,7 @@ private fun MarketBuildingRelief(purchase: Boolean, content: @Composable BoxScop
         MenuRelief(Modifier.fillMaxWidth(), content = content)
         return
     }
-    val shape = RoundedCornerShape(GameTokens.ControlRadius)
-    Box(Modifier.fillMaxWidth()
-        .shadow(GameTokens.Quarter, shape, ambientColor = GameTokens.Background, spotColor = GameTokens.Background)
-        .clip(shape)
-        .background(Brush.verticalGradient(listOf(GameTokens.MobileHome.PanelTop, GameTokens.MobileHome.PanelBottom)))
-        .drawWithCache {
-            val light = Brush.radialGradient(
-                listOf(GameTokens.MobileHome.Rim.copy(alpha = 1f - GameTokens.DimOpacity),
-                    GameTokens.MobileHome.Rim.copy(alpha = 0f)),
-                center = Offset.Zero, radius = size.maxDimension)
-            onDrawBehind { drawRect(light) }
-        }
-        .border(GameTokens.Hairline, Brush.verticalGradient(listOf(
-            GameTokens.MobileHome.Rim, GameTokens.MobileHome.PanelTop)), shape), content = content)
+    MarketCollectionPanel { Box { content() } }
 }
 
 @Composable
@@ -409,11 +409,11 @@ private fun MarketConfirmationSummary(building: OwnedBuilding, catalog: Recovery
 }
 
 @Composable
-private fun MarketBuildingSummary(building: OwnedBuilding, catalog: RecoveryCatalog?) {
+internal fun MarketBuildingSummary(building: OwnedBuilding, catalog: RecoveryCatalog?) {
     MenuRelief(Modifier.fillMaxWidth(), shape = RoundedCornerShape(GameTokens.ControlRadius)) {
         Row(Modifier.padding(GameTokens.Small), verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-            BuildingPreview(building, Modifier.width(GameTokens.Target + GameTokens.Inset).height(GameTokens.Target * 2))
+            MarketBuildingPreview(building, Modifier.width(GameTokens.Target + GameTokens.Inset).height(GameTokens.Target * 2))
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {
                 Text(buildingName(building, catalog), Modifier.horizontalScroll(rememberScrollState()), color = GameTokens.Text,
                     fontFamily = GameTypeface, fontSize = GameTokens.Body, fontWeight = FontWeight.Bold, softWrap = false)

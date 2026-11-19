@@ -1,0 +1,255 @@
+--- before/android-billing/app/src/main/kotlin/com/aladdin/wobbrik/MarketBuildingArt.kt
++++ after/android-billing/app/src/main/kotlin/com/aladdin/wobbrik/MarketBuildingArt.kt
+@@ -1,18 +1,72 @@
+ package com.aladdin.wobbrik
+ 
+-import androidx.compose.runtime.Composable
++import android.content.res.AssetManager
++import android.graphics.BitmapFactory
++import androidx.compose.runtime.*
+ import androidx.compose.ui.Modifier
+ import androidx.compose.ui.geometry.Offset
+ import androidx.compose.ui.graphics.Brush
+ import androidx.compose.ui.graphics.Path
++import androidx.compose.ui.graphics.asImageBitmap
+ import androidx.compose.ui.graphics.drawscope.DrawScope
+ import androidx.compose.ui.graphics.drawscope.clipPath
+ import appbackend.wobbrik.game.OwnedBuilding
++import androidx.compose.ui.platform.LocalContext
++import androidx.compose.ui.unit.IntOffset
++import androidx.compose.ui.unit.IntSize
++
++/** Two bounded immutable APK materials, loaded only when their selected wall is mounted.
++ * No account data or Activity retention; never decoded on the drawing thread. */
++internal object MarketBuildingMaterials {
++    @Volatile private var materials = emptyMap<String, CosmeticSprite>()
++    fun supports(id: String?): Boolean = id == "base_2_wall" || id == "base_4_wall"
++    fun prepared(id: String?): CosmeticSprite? = materials[id]
++
++    @Synchronized
++    fun load(assets: AssetManager, id: String): CosmeticSprite {
++        require(supports(id))
++        materials[id]?.let { return it }
++        val file = if (id == "base_2_wall") "market-brick-v1.png" else "market-panel-v1.png"
++        val bitmap = assets.open("building-purple/$file").use {
++            requireNotNull(BitmapFactory.decodeStream(it, null, BitmapFactory.Options().apply { inSampleSize = 4 }))
++        }.asImageBitmap()
++        val sprite = if (id == "base_2_wall") {
++            // Five brick courses per storey, excluding the image-edge seam.
++            CosmeticSprite(bitmap, IntOffset(bitmap.width / 8, bitmap.height / 4),
++                IntSize(bitmap.width * 3 / 4, bitmap.height * 5 / 12))
++        } else {
++            // Two panel bays per storey; preserve the fasteners and fine seams.
++            CosmeticSprite(bitmap, IntOffset.Zero, IntSize(bitmap.width / 2, bitmap.height / 5))
++        }
++        materials = materials + (id to sprite)
++        return sprite
++    }
++}
+ 
+ /** Market-only material pass. The prepared atlas, selected IDs and geometry stay shared. */
+ @Composable
+-internal fun MarketBuildingPreview(building: OwnedBuilding, modifier: Modifier) =
+-    BuildingPreview(building, modifier, marketMaterials = true)
++internal fun MarketBuildingPreview(building: OwnedBuilding, modifier: Modifier) {
++    // The catalog's brick is base_2; base_1 is limestone. Do not recolour an
++    // unrelated selected material merely because the reference's first card is brick.
++    val wallId = building.parts["wall"]
++    key(wallId) { MarketBuildingMaterialPreview(building, modifier, wallId) }
++}
++
++@Composable
++private fun MarketBuildingMaterialPreview(building: OwnedBuilding, modifier: Modifier, wallId: String?) {
++    var material = MarketBuildingMaterials.prepared(wallId)
++    if (MarketBuildingMaterials.supports(wallId) && material == null) {
++        val assets = LocalContext.current.assets
++        var retry by remember { mutableIntStateOf(0) }
++        val status = rememberArtPreparation(retry) { MarketBuildingMaterials.load(assets, requireNotNull(wallId)) }
++        if (status != ArtPreparation.Ready) {
++            androidx.compose.foundation.layout.Box(modifier) { ApprovedArtStatus(status) { retry++ } }
++            return
++        }
++        material = requireNotNull(MarketBuildingMaterials.prepared(wallId))
++    }
++    BuildingPreview(building, modifier, marketMaterials = true, marketWall = material)
++}
+ 
+ /** Light follows each masonry plane, rather than adding a halo behind the whole tower.
+  * Coordinates are the renderer's existing art anchors, never accepted game geometry.
+@@ -38,3 +92,11 @@
+             corners[0], corners[1]))
+     }
+ }
++
++/** Material-only patch: exclude the legacy catalog thumbnail's frame and right return.
++ * Generated brick/panel sprites are already material-only patches with their original IDs. */
++internal fun marketWallSample(wall: CosmeticSprite, id: String?): CosmeticSprite =
++    if (MarketBuildingMaterials.supports(id)) wall else wall.copy(
++        origin = IntOffset(wall.origin.x + (wall.size.width * .14f).toInt(),
++            wall.origin.y + (wall.size.height * .29f).toInt()),
++        size = IntSize((wall.size.width * .64f).toInt(), (wall.size.height * .48f).toInt()))
+--- before/android-billing/app/src/main/kotlin/com/aladdin/wobbrik/InventoryScreen.kt
++++ after/android-billing/app/src/main/kotlin/com/aladdin/wobbrik/InventoryScreen.kt
+@@ -439,13 +439,14 @@
+ 
+ /** Server metadata stays real; approved art is a decorative owned-building presentation. */
+ @Composable
+-internal fun BuildingPreview(building: OwnedBuilding, modifier: Modifier, marketMaterials: Boolean = false) {
++internal fun BuildingPreview(building: OwnedBuilding, modifier: Modifier, marketMaterials: Boolean = false, marketWall: CosmeticSprite? = null) {
+     val preparation = LocalBuildingArt.current
+     if (preparation.status != ArtPreparation.Ready) {
+         Box(modifier) { ApprovedArtStatus(preparation.status, preparation.retry) }
+         return
+     }
+-    val art = rememberCosmeticArt() + rememberGameWindowArt()
++    val sourceArt = rememberCosmeticArt() + rememberGameWindowArt()
++    val art = if (marketMaterials && marketWall != null) sourceArt + (requireNotNull(building.parts["wall"]) to marketWall) else sourceArt
+     val atlases = rememberGameAtlases()
+     val purple = rememberPurpleBuildingArt()
+     val purpleTemplate = usesPurpleTemplate(building.parts)
+@@ -471,7 +472,7 @@
+     }
+     Canvas(modifier.semantics { contentDescription = "${building.floors} mərtəbəli bina" }) {
+         if (purpleTemplate) purpleBuilding(purple, art, atlases, building.parts, centers, marketMaterials)
+-        else buildingPreview(atlases, art, building.parts, centers, requireNotNull(garden), marketMaterials)
++        else buildingPreview(atlases, art, building.parts, centers, requireNotNull(garden), marketMaterials, if (marketMaterials) purple["balcony"] else null)
+     }
+ }
+ 
+--- before/android-billing/app/src/main/kotlin/com/aladdin/wobbrik/PurpleBuildingArt.kt
++++ after/android-billing/app/src/main/kotlin/com/aladdin/wobbrik/PurpleBuildingArt.kt
+@@ -127,7 +127,7 @@
+                 else listOf(241f,103f,353f,42f,333f,177f,220f,241f)
+             val shellHeight = if (i == 0) 233f else pitch - if (marketMaterials) 6f else 14f
+             val lowerX = if (i == 0) x else 150f + display[i-1] / 1000f * 3.7f - minOffset
+-            if (i == 0) purpleGroundShell(art,catalog,parts,x,y,atlases["teal"]?.roof)
++            if (i == 0) purpleGroundShell(art,catalog,parts,x,y,atlases["teal"]?.roof,marketMaterials)
+             else {
+             purpleSurface(shell, frontSource, listOf(Offset(x+16f,y+68f),Offset(x+240f,y+128f),
+                 Offset(lowerX+240f,y+128f+shellHeight),Offset(lowerX+16f,y+68f+shellHeight)))
+@@ -143,13 +143,17 @@
+             fun plane(item:CosmeticSprite,side:Boolean,u:Float,v:Float,w:Float,h:Float) {
+                 purplePlane(item,listOf(point(u,v,side),point(u+w,v,side),point(u+w,v+h,side),point(u,v+h,side)))
+             }
+-            if(i > 0 && parts["wall"] != "base_1_wall") catalog[parts["wall"]]?.let { wall ->
+-                val origin = IntOffset(wall.origin.x+(wall.size.width*.14f).toInt(),wall.origin.y+(wall.size.height*.29f).toInt())
+-                val sample = wall.copy(origin=origin,size=IntSize((wall.size.width*.64f).toInt(),(wall.size.height*.48f).toInt()))
++            if(i > 0 && (marketMaterials || parts["wall"] != "base_1_wall")) catalog[parts["wall"]]?.let { wall ->
++                val sample = if (marketMaterials) marketWallSample(wall, parts["wall"]) else {
++                    val origin = IntOffset(wall.origin.x+(wall.size.width*.14f).toInt(),wall.origin.y+(wall.size.height*.29f).toInt())
++                    wall.copy(origin=origin,size=IntSize((wall.size.width*.64f).toInt(),(wall.size.height*.48f).toInt()))
++                }
+                 // Material reaches the existing pilasters and shared cornices;
+                 // inset decals left exposed purple strips around other finishes.
+-                plane(sample,false,16f/224f,0f,190f/224f,shellHeight/160f)
+-                plane(sample,true,11f/114f,0f,89f/114f,shellHeight/160f)
++                val frontInset = if (marketMaterials) 5f else 16f
++                val sideInset = if (marketMaterials) 4f else 11f
++                plane(sample,false,frontInset/224f,0f,(224f-frontInset*2)/224f,shellHeight/160f)
++                plane(sample,true,sideInset/114f,0f,(114f-sideInset*2)/114f,shellHeight/160f)
+             }
+             if (marketMaterials && i > 0) {
+                 marketFacadeLight(listOf(point(0f,0f,false),point(1f,0f,false),
+--- before/android-billing/app/src/main/kotlin/com/aladdin/wobbrik/PurpleGroundFloorArt.kt
++++ after/android-billing/app/src/main/kotlin/com/aladdin/wobbrik/PurpleGroundFloorArt.kt
+@@ -11,7 +11,7 @@
+  */
+ internal fun DrawScope.purpleGroundShell(
+     art: Map<String, CosmeticSprite>, catalog: Map<String, CosmeticSprite>,
+-    parts: Map<String, String>, x: Float, y: Float, tealRoof: CosmeticSprite?,
++    parts: Map<String, String>, x: Float, y: Float, tealRoof: CosmeticSprite?, marketMaterials: Boolean = false,
+ ) {
+     val masonry = art.getValue("ground_masonry")
+     val wallSource = listOf(435f,179f,822f,199f,817f,472f,435f,451f)
+@@ -20,9 +20,9 @@
+     val trimSource = listOf(447f,499f,815f,519f,815f,539f,447f,519f)
+     val capSource = listOf(855f,250f,875f,251f,875f,275f,855f,274f)
+     val columnSource = listOf(852f,203f,883f,205f,878f,491f,846f,489f)
+-    val selectedWall = if (parts["wall"] == "base_1_wall") null else catalog[parts["wall"]]
++    val selectedWall = if (!marketMaterials && parts["wall"] == "base_1_wall") null else catalog[parts["wall"]]
+     val material = selectedWall?.let { wall ->
+-        wall.copy(
++        if (marketMaterials) marketWallSample(wall, parts["wall"]) else wall.copy(
+             origin = IntOffset(wall.origin.x+(wall.size.width*.14f).toInt(),wall.origin.y+(wall.size.height*.29f).toInt()),
+             size = IntSize((wall.size.width*.64f).toInt(),(wall.size.height*.48f).toInt()),
+         )
+--- before/android-billing/app/src/main/kotlin/com/aladdin/wobbrik/GameFacade.kt
++++ after/android-billing/app/src/main/kotlin/com/aladdin/wobbrik/GameFacade.kt
+@@ -56,11 +56,13 @@
+  * Material samples exclude the old panel's frame and silhouette entirely.
+  */
+ internal fun DrawScope.drawModularFloor(shell: CosmeticSprite, art: Map<String, CosmeticSprite>, atlases: Map<String, GameAtlas>,
+-    parts: Map<String, String>, left: Float, upper: Float, width: Float, ground: Boolean, windowAlpha: Float = 1f, marketMaterials: Boolean = false) {
++    parts: Map<String, String>, left: Float, upper: Float, width: Float, ground: Boolean, windowAlpha: Float = 1f, marketMaterials: Boolean = false, marketContinuation: Boolean = false) {
+     translate(left, upper) {
+         scale(width / 464f, width / 464f, androidx.compose.ui.geometry.Offset.Zero) {
+             val contour = Path().apply {
+-                val points = listOf(7f to 75f, 129f to 4f, 146f to 4f, 454f to 19f,
++                val points = if (marketContinuation) listOf(7f to 51f,340f to 71f,459f to -3f,
++                    459f to 203f,345f to 281f,338f to 283f,7f to 264f,4f to 260f,4f to 240f,14f to 231f)
++                else listOf(7f to 75f, 129f to 4f, 146f to 4f, 454f to 19f,
+                     459f to 23f, 459f to 43f, 452f to 51f, 452f to 179f,
+                     458f to 181f, 461f to 186f, 460f to 203f, 345f to 281f,
+                     338f to 283f, 7f to 264f, 4f to 260f, 4f to 240f,
+@@ -90,11 +92,17 @@
+                 }
+                 val wall = art[parts["wall"]]
+                 // Keep purple's clean original brick; other wall IDs supply their own material.
+-                if (parts["wall"] !in setOf("base_1_wall", "base_2_wall") && wall != null) {
+-                    val sample = RectF(wall.size.width * .14f, wall.size.height * .29f,
+-                        wall.size.width * .78f, wall.size.height * .77f)
+-                    plane(wall, sample, floatArrayOf(14f,105f,340f,121f,340f,251f,14f,231f))
+-                    plane(wall, sample, floatArrayOf(340f,121f,452f,51f,452f,179f,340f,251f))
++                if ((marketMaterials || parts["wall"] !in setOf("base_1_wall", "base_2_wall")) && wall != null) {
++                    val material = if (marketMaterials) marketWallSample(wall, parts["wall"]) else wall
++                    val sample = if (marketMaterials) RectF(0f,0f,material.size.width.toFloat(),material.size.height.toFloat())
++                        else RectF(wall.size.width * .14f, wall.size.height * .29f,
++                            wall.size.width * .78f, wall.size.height * .77f)
++                    // Replace the redundant open-top slab below another storey with
++                    // continuous selected masonry; keep a two-unit junction lip.
++                    val top = if (marketContinuation) 57f else 105f
++                    val bottom = if (marketMaterials) 258f else 231f
++                    plane(material, sample, floatArrayOf(14f,top,340f,top+16f,340f,bottom+20f,14f,bottom))
++                    plane(material, sample, floatArrayOf(340f,top+16f,452f,top-54f,452f,bottom-52f,340f,bottom+20f))
+                 }
+                 if (marketMaterials) {
+                     marketFacadeLight(listOf(Offset(14f,105f),Offset(340f,121f),Offset(340f,251f),Offset(14f,231f)), false)
+--- before/android-billing/app/src/main/kotlin/com/aladdin/wobbrik/BuildingArt.kt
++++ after/android-billing/app/src/main/kotlin/com/aladdin/wobbrik/BuildingArt.kt
+@@ -6,11 +6,16 @@
+ 
+ /** Game's modular shell, selected windows and roof; never the legacy baked wall panel. */
+ internal fun DrawScope.buildingFloor(atlases: Map<String, GameAtlas>, art: Map<String, CosmeticSprite>, parts: Map<String, String>,
+-    x: Float, base: Float, scale: Float, ground: Boolean, top: Boolean, marketMaterials: Boolean = false) {
++    x: Float, base: Float, scale: Float, ground: Boolean, top: Boolean, marketMaterials: Boolean = false, balcony: CosmeticSprite? = null) {
+     val atlas = atlases.getValue(gameAtlasStyle(parts))
+     val width = 100f * scale
+     val height = width * atlas.floor.size.height / atlas.floor.size.width
+-    drawModularFloor(atlas.floor, art, atlases, parts, x, base - height, width, ground, marketMaterials = marketMaterials)
++    drawModularFloor(atlas.floor, art, atlases, parts, x, base - height, width, ground, marketMaterials = marketMaterials, marketContinuation = marketMaterials && !top)
++    balcony?.let {
++        val balconyWidth = width * .59f
++        sprite(it, x - width * .12f, base - width * .28f,
++            balconyWidth, balconyWidth * it.size.height / it.size.width)
++    }
+     if (top) {
+         val eave = base - height + width * atlas.depth / atlas.floor.size.width
+         previewRoof(atlases, art, parts["roof"], x, eave, width)
+@@ -44,7 +49,7 @@
+ 
+ /** Picker retains its geometry; owned previews use the approved representative floors. */
+ internal fun DrawScope.buildingPreview(atlases: Map<String, GameAtlas>, art: Map<String, CosmeticSprite>,
+-    parts: Map<String, String>, centers: List<Long>, garden: CosmeticSprite? = null, marketMaterials: Boolean = false) {
++    parts: Map<String, String>, centers: List<Long>, garden: CosmeticSprite? = null, marketMaterials: Boolean = false, marketBalcony: CosmeticSprite? = null) {
+     if (centers.isEmpty() || size.width <= 0 || size.height <= 0) return
+     val atlas = atlases.getValue(gameAtlasStyle(parts))
+     val displayCenters = if (garden == null) centers else buildingPresentationCenters(centers)
+@@ -66,7 +71,7 @@
+         if (garden != null) sprite(garden, -gardenWidth / 2 - min, -65f * gardenScale, gardenWidth, 120f * gardenScale)
+         displayCenters.forEachIndexed { index, center ->
+             val x = center / 1000f - 50f - min
+-            buildingFloor(atlases, art, parts, x, -index * pitch, 1f, index == 0, index == displayCenters.lastIndex, marketMaterials)
++            buildingFloor(atlases, art, parts, x, -index * pitch, 1f, index == 0, index == displayCenters.lastIndex, marketMaterials, if (marketMaterials && index > 0 && index % 2 == 1) marketBalcony else null)
+         }
+     }
+ }

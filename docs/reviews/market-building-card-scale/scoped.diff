@@ -1,0 +1,33 @@
+--- /private/tmp/wobbrik-market-card-before.kt	2026-11-19 09:50:08
++++ android-billing/app/src/main/kotlin/com/aladdin/wobbrik/MarketScreen.kt	2026-11-19 09:51:25
+@@ -308,7 +308,12 @@
+         }
+         if(largeFont || grid) Column(Modifier.padding(GameTokens.Small),
+             verticalArrangement = Arrangement.spacedBy(if(grid) GameTokens.Quarter else GameTokens.Small)) {
+-            BuildingPreview(building, Modifier.fillMaxWidth().height(if(grid) (if(sizing.compact) sizing.cardArt else GameTokens.InventoryCollection.CompactArtHeight) else if(purchase) GameTokens.InventoryCollection.LargeTypeArtHeight else GameTokens.Target))
++            // Keep a full illustration frame, including the garden, on compact cards.
++            BuildingPreview(building, Modifier.fillMaxWidth().height(if(grid) {
++                if(largeFont) GameTokens.InventoryCollection.LargeTypeArtHeight
++                else if(sizing.compact) GameTokens.InventoryCollection.LargeTypeArtHeight
++                else GameTokens.InventoryCollection.ArtHeight
++            } else if(purchase) GameTokens.InventoryCollection.LargeTypeArtHeight else GameTokens.Target))
+             details()
+         } else Row(Modifier.padding(GameTokens.Small), verticalAlignment = Alignment.CenterVertically,
+             horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+@@ -342,12 +347,13 @@
+             if(status == "active") MarketCollectionAction("Elanı geri götür", enabled = enabled, onClick = onClick)
+         }
+         if(largeFont) Column(Modifier.padding(GameTokens.Small), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+-            BuildingPreview(building, Modifier.fillMaxWidth().height(GameTokens.Target * 2))
++            BuildingPreview(building, Modifier.fillMaxWidth().height(GameTokens.AppearanceCollection.CompactArtHeight))
+             details()
+         } else Row(Modifier.padding(GameTokens.Small), verticalAlignment = Alignment.CenterVertically,
+             horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+-            BuildingPreview(building, Modifier.width(if(mobileUiSizing().compact) GameTokens.Target * 2 else GameTokens.AppearanceCollection.CompactArtHeight).height(GameTokens.AppearanceCollection.CompactArtHeight))
+-            VerticalDivider(Modifier.height(GameTokens.AppearanceCollection.CompactArtHeight - GameTokens.Gap),
++            val artHeight = if(mobileUiSizing().compact) GameTokens.InventoryCollection.CompactArtHeight else GameTokens.InventoryCollection.ArtHeight
++            BuildingPreview(building, Modifier.width(if(mobileUiSizing().compact) GameTokens.AppearanceCollection.CompactArtHeight else GameTokens.InventoryCollection.CompactArtHeight).height(artHeight))
++            VerticalDivider(Modifier.height(artHeight - GameTokens.Gap),
+                 thickness = GameTokens.InventoryCollection.OutlineWidth, color = GameTokens.InventoryCollection.Outline)
+             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(GameTokens.Quarter), content = details)
+         }

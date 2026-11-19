@@ -15,64 +15,45 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.selected
 import appbackend.wobbrik.game.*
 
 @Composable
 internal fun MarketModeTabs(own: Boolean, onOwn: (Boolean) -> Unit) {
-    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-        CommerceAction("Alış", Modifier.weight(1f), primary = !own, icon = MobileIcon.Cart, compact = true) { onOwn(false) }
-        CommerceAction("Mənim elanlarım", Modifier.weight(1f), primary = own, icon = MobileIcon.Tag, compact = true) { onOwn(true) }
-    }
+    CollectionTabs(if(own) "own" else "buy", { onOwn(it == "own") }, listOf(
+        CommerceTab("Alış", "buy", MobileIcon.Cart), CommerceTab("Mənim elanlarım", "own", MobileIcon.Tag)), compactLargeType = true)
 }
 
 @Composable
-internal fun MobileDecorationShop(ready: AuthenticatedRecoveryOwner.State.Ready, copies: List<DecorationCopy>?, failed: Boolean,
-    onRetry: () -> Unit, onBuy: (String) -> Unit, onBack: () -> Unit, onListings: () -> Unit) {
+internal fun MobileDecorationShop(ready: AuthenticatedRecoveryOwner.State.Ready, onBuy: (String) -> Unit, onBack: () -> Unit, onListings: () -> Unit, onRefresh: () -> Unit) {
     var selected by remember(ready) { mutableStateOf<CatalogItem?>(null) }
-    val art = rememberDecorationArt()
+    val art = rememberOwnedDecorationArt()
+    var category by remember { mutableStateOf("all") }
+    val visible = remember(ready.catalog, category) { ready.catalog?.items.orEmpty().filter { it.method == "copy" && (category == "all" || it.id.startsWith("decor_${category}_")) } }
     val large = LocalDensity.current.fontScale > 1f
     BackHandler { if(selected != null) selected = null else onBack() }
-    Column(Modifier.fillMaxSize().padding(GameTokens.Gap), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+    Column(Modifier.fillMaxSize().padding(horizontal = GameTokens.InventoryCollection.ScreenInset).padding(bottom = LocalCollectionDockClearance.current), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
         MarketModeTabs(false) { if(it) onListings() }
         LazyVerticalGrid(GridCells.Fixed(if(large) 1 else 2), Modifier.weight(1f),
             horizontalArrangement = Arrangement.spacedBy(GameTokens.Small), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-            items(ready.catalog?.items.orEmpty().filter { it.method == "copy" }, key = { it.id }) { item ->
-                PurchaseCard(selected?.id == item.id, { selected = item },
-                    shape = RoundedCornerShape(GameTokens.ControlRadius)) {
+            item(span = { GridItemSpan(maxLineSpan) }) { DecorFilters(category, collectionMarket = true) { category = it; selected = null } }
+            item(span = { GridItemSpan(maxLineSpan) }) { MarketCollectionHeading("Dekor al", ready.snapshot.attempt?.active == true, onRefresh) }
+            items(visible, key = { it.id }) { item ->
+                MarketCollectionPanel {
                     Column(Modifier.fillMaxWidth().padding(GameTokens.Small), verticalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {
-                        PurchaseArt(art[item.id], Modifier.fillMaxWidth().height(mobileUiSizing().cardArt))
+                        PurchaseArt(art[item.id], Modifier.fillMaxWidth().height(if(large) GameTokens.InventoryCollection.LargeTypeArtHeight else if(mobileUiSizing().compact) mobileUiSizing().cardArt else GameTokens.InventoryCollection.LargeTypeArtHeight), allowUpscale = true)
                         Text(item.name, Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
                             color = GameTokens.Text, fontFamily = GameTypeface, fontSize = GameTokens.Body,
                             fontWeight = FontWeight.Bold, softWrap = false)
-                        copies?.let { owned ->
-                            val count = owned.count { it.itemId == item.id }
-                            if(count > 0) Surface(color = GameTokens.Success, shape = RoundedCornerShape(GameTokens.Target)) {
-                                Text("✓ Sahibsən", Modifier.padding(horizontal = GameTokens.Small, vertical = GameTokens.Quarter),
-                                    color = GameTokens.Background, fontFamily = GameTypeface, fontSize = GameTokens.Caption,
-                                    fontWeight = FontWeight.Bold)
-                            }
-                            Text("Nüsxə: $count", color = GameTokens.Muted, fontFamily = GameTypeface, fontSize = GameTokens.Caption)
-                        }
-                        if (large) {
-                            item.price?.let { CommercePrice(it, Modifier.fillMaxWidth()) }
-                            CommerceAction("Al", primary = true, icon = MobileIcon.Cart) { selected = item }
-                        } else {
-                            Row(Modifier.fillMaxWidth(), verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {
-                                Box(Modifier.weight(1f)) { item.price?.let { CommercePrice(it, Modifier.fillMaxWidth()) } }
-                                CommerceAction("Al", Modifier.width(GameTokens.Target + GameTokens.Inset),
-                                    primary = true, icon = MobileIcon.Cart, compact = true) { selected = item }
-                            }
+                        item.price?.let { price ->
+                            MarketCardPurchase(price, "Al", MobileIcon.Cart, true) { selected = item }
                         }
                     }
                 }
             }
             if(ready.catalog == null) item(span = { GridItemSpan(maxLineSpan) }) { Text("Kataloq yüklənmədi", color = GameTokens.Danger) }
-            if(copies == null && !failed) item(span = { GridItemSpan(maxLineSpan) }) { CircularProgressIndicator(Modifier.size(GameTokens.Inset), color = GameTokens.Accent) }
-            if(failed) item(span = { GridItemSpan(maxLineSpan) }) {
-                Text("Dekor inventarı yüklənmədi", color = GameTokens.Danger)
-                CommerceAction("Yenidən cəhd et", onClick = onRetry)
-            }
+
         }
         selected?.let { item ->
             MobileShopPurchasePanel(CityPurchases.eligible(ready.catalog, ready.snapshot, item.id), { onBuy(item.id) }, { selected = null }) {

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.aladdin.wobbrik.MarketMaterialSelectionTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-11-19T06:31:28.175Z" hostname="Macs-MacBook-Pro.local" time="0.609">
+  <properties/>
+  <testcase name="selectedLayersAndOffsets" classname="com.aladdin.wobbrik.MarketMaterialSelectionTest" time="0.609"/>
+  <system-out><![CDATA[MARKET_BRICK decoded=313x313; shared identity=true
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

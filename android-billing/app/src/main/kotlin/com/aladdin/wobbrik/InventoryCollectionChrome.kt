@@ -58,7 +58,7 @@ internal fun CollectionInventoryShell(coins: Long?, onPlay: (() -> Unit)?, onPag
         Column(Modifier.fillMaxSize()) {
             CollectionHeader(coins, art?.getOrNull(1))
             if(!detail) Box(Modifier.padding(horizontal = GameTokens.InventoryCollection.ScreenInset)) {
-                CollectionTabs(page, onPage)
+                CollectionTabs(if(page == "market-own") "market" else page, onPage, if(mobileMenuDestination(page) == "market") marketTabs else inventoryTabs, compactLargeType = mobileMenuDestination(page) == "market")
             }
             Box(Modifier.weight(1f).fillMaxWidth().clipToBounds().then(if(detail)
                 Modifier.padding(bottom = collectionClearance) else Modifier)) {
@@ -69,13 +69,13 @@ internal fun CollectionInventoryShell(coins: Long?, onPlay: (() -> Unit)?, onPag
             }
         }
         Box(Modifier.align(Alignment.BottomCenter).padding(horizontal = GameTokens.Small, vertical = GameTokens.Quarter)) {
-            CollectionNavbar(onPlay, onPage)
+            CollectionNavbar(onPlay, onPage, mobileMenuDestination(page))
         }
     }
 }
 
 @Composable
-private fun CollectionHeader(coins: Long?, scenery: androidx.compose.ui.graphics.ImageBitmap?) {
+internal fun CollectionHeader(coins: Long?, scenery: androidx.compose.ui.graphics.ImageBitmap?) {
     val (art, retry) = LocalMenuLogo.current ?: rememberResourceArt(R.drawable.wobbrik_logo)
     val logo = art.images?.singleOrNull()
     val longBalance = (coins?.toString()?.length ?: 1) > 6
@@ -128,25 +128,25 @@ internal fun Modifier.collectionPress(interaction: MutableInteractionSource, ena
 }
 
 @Composable
-internal fun CollectionTabs(page: String, onPage: (String) -> Unit) {
+internal fun CollectionTabs(page: String, onPage: (String) -> Unit, tabs: List<CommerceTab> = inventoryTabs, compactLargeType: Boolean = false) {
     val scroll = rememberScrollState()
     val font = LocalDensity.current.fontScale
     LaunchedEffect(page, scroll.maxValue) {
-        val index = inventoryTabs.indexOfFirst { it.route == page }
-        if (index >= 0) scroll.scrollTo(scroll.maxValue * index / maxOf(1, inventoryTabs.lastIndex))
+        val index = tabs.indexOfFirst { it.route == page }
+        if (index >= 0) scroll.scrollTo(scroll.maxValue * index / maxOf(1, tabs.lastIndex))
     }
     BoxWithConstraints(Modifier.fillMaxWidth()) {
         val minimum = (GameTokens.Target + GameTokens.Inset) * font
-        val fits = font <= 1f && maxWidth >= minimum * inventoryTabs.size
-        val shape = RoundedCornerShape(GameTokens.ControlRadius)
-        val visualHeight = if(font > 1f) GameTokens.Target * font else GameTokens.InventoryCollection.TabVisualHeight
+        val fits = font <= 1f && maxWidth >= minimum * tabs.size
+        val shape = RoundedCornerShape(if(compactLargeType) GameTokens.Small else GameTokens.ControlRadius)
+        val visualHeight = if(font > 1f && !compactLargeType) GameTokens.Target * font else GameTokens.InventoryCollection.TabVisualHeight
         // Visual strip is smaller than its48dp input row; extra space is above the strip.
         Box(Modifier.matchParentSize().padding(top = if(font > 1f) GameTokens.Quarter else GameTokens.Small + GameTokens.Quarter)
             .clip(shape).background(Brush.verticalGradient(listOf(GameTokens.InventoryCollection.PanelTop, GameTokens.InventoryCollection.PanelBottom)))
             .border(GameTokens.InventoryCollection.OutlineWidth, GameTokens.InventoryCollection.Outline, shape))
         Row(Modifier.fillMaxWidth().heightIn(min = GameTokens.Target).selectableGroup()
             .then(if(fits) Modifier else Modifier.horizontalScroll(scroll))) {
-            inventoryTabs.forEachIndexed { index, tab ->
+            tabs.forEachIndexed { index, tab ->
                 val interaction = remember { MutableInteractionSource() }
                 val feedback = LocalGameFeedback.current
                 val selected = page == tab.route

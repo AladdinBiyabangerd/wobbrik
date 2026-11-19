@@ -4,6 +4,7 @@ import android.graphics.Matrix
 import android.graphics.Paint
 import android.graphics.Rect
 import android.graphics.RectF
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.drawscope.DrawScope
@@ -55,11 +56,13 @@ internal fun DrawScope.drawModularRoof(item: CosmeticSprite?, id: String?, left:
  * Material samples exclude the old panel's frame and silhouette entirely.
  */
 internal fun DrawScope.drawModularFloor(shell: CosmeticSprite, art: Map<String, CosmeticSprite>, atlases: Map<String, GameAtlas>,
-    parts: Map<String, String>, left: Float, upper: Float, width: Float, ground: Boolean, windowAlpha: Float = 1f) {
+    parts: Map<String, String>, left: Float, upper: Float, width: Float, ground: Boolean, windowAlpha: Float = 1f, marketMaterials: Boolean = false, marketContinuation: Boolean = false) {
     translate(left, upper) {
         scale(width / 464f, width / 464f, androidx.compose.ui.geometry.Offset.Zero) {
             val contour = Path().apply {
-                val points = listOf(7f to 75f, 129f to 4f, 146f to 4f, 454f to 19f,
+                val points = if (marketContinuation) listOf(7f to 51f,340f to 71f,459f to -3f,
+                    459f to 203f,345f to 281f,338f to 283f,7f to 264f,4f to 260f,4f to 240f,14f to 231f)
+                else listOf(7f to 75f, 129f to 4f, 146f to 4f, 454f to 19f,
                     459f to 23f, 459f to 43f, 452f to 51f, 452f to 179f,
                     458f to 181f, 461f to 186f, 460f to 203f, 345f to 281f,
                     338f to 283f, 7f to 264f, 4f to 260f, 4f to 240f,
@@ -89,11 +92,21 @@ internal fun DrawScope.drawModularFloor(shell: CosmeticSprite, art: Map<String, 
                 }
                 val wall = art[parts["wall"]]
                 // Keep purple's clean original brick; other wall IDs supply their own material.
-                if (parts["wall"] !in setOf("base_1_wall", "base_2_wall") && wall != null) {
-                    val sample = RectF(wall.size.width * .14f, wall.size.height * .29f,
-                        wall.size.width * .78f, wall.size.height * .77f)
-                    plane(wall, sample, floatArrayOf(14f,105f,340f,121f,340f,251f,14f,231f))
-                    plane(wall, sample, floatArrayOf(340f,121f,452f,51f,452f,179f,340f,251f))
+                if ((marketMaterials || parts["wall"] !in setOf("base_1_wall", "base_2_wall")) && wall != null) {
+                    val material = if (marketMaterials) marketWallSample(wall, parts["wall"]) else wall
+                    val sample = if (marketMaterials) RectF(0f,0f,material.size.width.toFloat(),material.size.height.toFloat())
+                        else RectF(wall.size.width * .14f, wall.size.height * .29f,
+                            wall.size.width * .78f, wall.size.height * .77f)
+                    // Replace the redundant open-top slab below another storey with
+                    // continuous selected masonry; keep a two-unit junction lip.
+                    val top = if (marketContinuation) 57f else 105f
+                    val bottom = if (marketMaterials) 258f else 231f
+                    plane(material, sample, floatArrayOf(14f,top,340f,top+16f,340f,bottom+20f,14f,bottom))
+                    plane(material, sample, floatArrayOf(340f,top+16f,452f,top-54f,452f,bottom-52f,340f,bottom+20f))
+                }
+                if (marketMaterials) {
+                    marketFacadeLight(listOf(Offset(14f,105f),Offset(340f,121f),Offset(340f,251f),Offset(14f,231f)), false)
+                    marketFacadeLight(listOf(Offset(340f,121f),Offset(452f,51f),Offset(452f,179f),Offset(340f,251f)), true)
                 }
                 // Affine surface coordinates preserve the front slope and deep right face.
                 fun decal(id: String?, side: Boolean, u: Float, v: Float, w: Float, h: Float, sourceStart: Float = 0f, sourceEnd: Float = 1f) {

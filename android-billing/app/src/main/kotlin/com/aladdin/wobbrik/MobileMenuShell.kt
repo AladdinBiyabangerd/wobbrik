@@ -52,7 +52,7 @@ private fun MobileMenuShellContent(page: String, coins: Long?, onPlay: (() -> Un
     }
     var commerceDetail by remember(page) { mutableStateOf(false) }
     val reportDetail = remember(page) { { active: Boolean -> commerceDetail = active } }
-    if (page == "inventory" || page == "collection" || page == "owned-decorations") {
+    if (page == "inventory" || page == "collection" || page == "owned-decorations" || mobileMenuDestination(page) == "market") {
         CollectionInventoryShell(coins, onPlay, onPage, commerceDetail, reportDetail, page, content)
         return
     }
