@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.aladdin.wobbrik.HomeCollectionRenderTest" tests="14" skipped="0" failures="0" errors="0" timestamp="2026-11-19T10:40:35.302Z" hostname="Macs-MacBook-Pro.local" time="15.704">
+  <properties/>
+  <testcase name="longBalanceAndXp" classname="com.aladdin.wobbrik.HomeCollectionRenderTest" time="6.153"/>
+  <testcase name="firstReadHasAccessibleRecoveryShell" classname="com.aladdin.wobbrik.HomeCollectionRenderTest" time="0.137"/>
+  <testcase name="regular390Font2" classname="com.aladdin.wobbrik.HomeCollectionRenderTest" time="1.2"/>
+  <testcase name="font2Insets" classname="com.aladdin.wobbrik.HomeCollectionRenderTest" time="0.83"/>
+  <testcase name="headerSmallFont2InsetsLongBalance" classname="com.aladdin.wobbrik.HomeCollectionRenderTest" time="0.691"/>
+  <testcase name="regular390" classname="com.aladdin.wobbrik.HomeCollectionRenderTest" time="1.511"/>
+  <testcase name="journalRecoveryCannotStart" classname="com.aladdin.wobbrik.HomeCollectionRenderTest" time="0.079"/>
+  <testcase name="approved360" classname="com.aladdin.wobbrik.HomeCollectionRenderTest" time="1.114"/>
+  <testcase name="headerRegular" classname="com.aladdin.wobbrik.HomeCollectionRenderTest" time="1.052"/>
+  <testcase name="headerSmall" classname="com.aladdin.wobbrik.HomeCollectionRenderTest" time="0.576"/>
+  <testcase name="smallFont1" classname="com.aladdin.wobbrik.HomeCollectionRenderTest" time="0.732"/>
+  <testcase name="smallFont2" classname="com.aladdin.wobbrik.HomeCollectionRenderTest" time="0.636"/>
+  <testcase name="recoveryCannotDispatchPlayAndRetryIsSeparate" classname="com.aladdin.wobbrik.HomeCollectionRenderTest" time="0.316"/>
+  <testcase name="headerRegularFont2" classname="com.aladdin.wobbrik.HomeCollectionRenderTest" time="0.676"/>
+  <system-out><![CDATA[Play pixels home-long-balance-font2: bounds=Rect.fromLTRB(408.0, 1464.0, 552.0, 1608.0) cyan=1136 dark=1127 total=2304
+Play pixels home-390-font2-initial: bounds=Rect.fromLTRB(513.0, 2352.0, 657.0, 2496.0) cyan=1136 dark=1127 total=2304
+Play pixels home-390-font2: bounds=Rect.fromLTRB(513.0, 2352.0, 657.0, 2496.0) cyan=1136 dark=1127 total=2304
+Play pixels home-360-font2-insets-initial: bounds=Rect.fromLTRB(468.0, 1596.0, 612.0, 1740.0) cyan=1136 dark=1127 total=2304
+Play pixels home-360-font2-insets: bounds=Rect.fromLTRB(468.0, 1596.0, 612.0, 1740.0) cyan=1136 dark=1127 total=2304
+Play pixels 320-font2-insets-long-home-header: bounds=Rect.fromLTRB(408.0, 1320.0, 552.0, 1464.0) cyan=1136 dark=1127 total=2304
+Play pixels 320-font2-insets-long-shared-header: bounds=Rect.fromLTRB(408.0, 1320.0, 552.0, 1464.0) cyan=1136 dark=1127 total=2304
+Play pixels home-390-font1-initial: bounds=Rect.fromLTRB(513.0, 2352.0, 657.0, 2496.0) cyan=1136 dark=1127 total=2304
+Play pixels home-390-font1: bounds=Rect.fromLTRB(513.0, 2352.0, 657.0, 2496.0) cyan=1136 dark=1127 total=2304
+Play pixels home-360-font1-initial: bounds=Rect.fromLTRB(468.0, 1740.0, 612.0, 1884.0) cyan=1136 dark=1127 total=2304
+Play pixels home-360-font1: bounds=Rect.fromLTRB(468.0, 1740.0, 612.0, 1884.0) cyan=1136 dark=1127 total=2304
+Play pixels 390-font1-home-header: bounds=Rect.fromLTRB(513.0, 2352.0, 657.0, 2496.0) cyan=1136 dark=1127 total=2304
+Play pixels 390-font1-shared-header: bounds=Rect.fromLTRB(513.0, 2352.0, 657.0, 2496.0) cyan=1136 dark=1127 total=2304
+Play pixels 320-font1-home-header: bounds=Rect.fromLTRB(408.0, 1464.0, 552.0, 1608.0) cyan=1136 dark=1127 total=2304
+Play pixels 320-font1-shared-header: bounds=Rect.fromLTRB(408.0, 1464.0, 552.0, 1608.0) cyan=1136 dark=1127 total=2304
+Play pixels home-320-font1-initial: bounds=Rect.fromLTRB(408.0, 1464.0, 552.0, 1608.0) cyan=1136 dark=1127 total=2304
+Play pixels home-320-font1: bounds=Rect.fromLTRB(408.0, 1464.0, 552.0, 1608.0) cyan=1136 dark=1127 total=2304
+Play pixels home-320-font2-initial: bounds=Rect.fromLTRB(408.0, 1464.0, 552.0, 1608.0) cyan=1136 dark=1127 total=2304
+Play pixels home-320-font2: bounds=Rect.fromLTRB(408.0, 1464.0, 552.0, 1608.0) cyan=1136 dark=1127 total=2304
+Play pixels home-offline: bounds=Rect.fromLTRB(468.0, 1740.0, 612.0, 1884.0) cyan=1136 dark=1127 total=2304
+Play pixels 390-font2-home-header: bounds=Rect.fromLTRB(513.0, 2352.0, 657.0, 2496.0) cyan=1136 dark=1127 total=2304
+Play pixels 390-font2-shared-header: bounds=Rect.fromLTRB(513.0, 2352.0, 657.0, 2496.0) cyan=1136 dark=1127 total=2304
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

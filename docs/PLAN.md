@@ -23,6 +23,8 @@ Google vahidinin sübutu: [Android review](reviews/2026-11-13-required-google-si
 
 ### 1.1. Vahid mobil UI və funksional düzəlişlər — 15 noyabr, təsdiqli icra tapşırığı
 
+**19 noyabr — Ana səhifə:** istifadəçi `design/home-collection-v1/proposal.png` nümunəsini təsdiqləyib Kotlin + Compose implementasiyasını tapşırdı. Bu Home üçün əvvəlki frameless PNG-ni əvəz edir. Ortaq kolleksiya header/navbarı, şəhər illüstrasiyası və səviyyə/rekord/XP paneli native tətbiq edilir; real snapshot, Play/recovery və hesab sərhədləri saxlanır. Mobil portret, planşet dəyişmir.
+
 **19 noyabr — Profil:** istifadəçi `design/profile-collection-v1/proposal-v2.png` nümunəsini təsdiqləyib native implementasiyanı tapşırdı. Kolleksiya header/navbarı, tac lentli identity, XP və statistika kartları, yığcam Ad və avatar sətri, redaktə və üç mövcud avatar seçimi tətbiq edilir. Mövcud server profil/revision/retry/hesab izolyasiyası saxlanır; nümunə rəqəmlər domain deyil. Mobil portret, planşet dəyişmir.
 
 **19 noyabr — Yeni elan:** istifadəçi `design/market-new-listing-v1/proposal-v4.png` və `price-keyboard-v1.png` nümunələrini təsdiqləyib native implementasiyaya başlamağı tapşırdı. Bina seçimi və şəkilsiz yığcam qiymət mərhələsi; komissiya/net xülasəsi bir sətirdə, tək dərc əməliyyatı. Rəqəm klaviaturası eyni xanada açılır; IME zamanı navbar gizlənir. Real maxPrice/komissiya/journal/authority saxlanır, sample məlumat yeni qayda deyil.

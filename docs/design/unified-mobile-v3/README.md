@@ -1,5 +1,7 @@
 # Vahid mobil UI — təsdiqli istinadlar
 
+19 noyabr — Ana səhifə üçün istifadəçi yeni `../home-collection-v1/proposal.png` nümunəsini təsdiqləyib Kotlin + Compose tətbiqini tapşırdı. Home-a aid aşağıdakı əvvəlki frameless authority-ni bu yeni PNG əvəz edir; ortaq kolleksiya header/navbar qərarı saxlanır. İcra PLAN §1.1-dədir.
+
 15 noyabr 2026: istifadəçi bütün ekranlar üçün vahid dizayn, naviqasiya düzəlişləri və son ana ekran variantının implementasiyasını təsdiqlədi. İcra planı yalnız `../../PLAN.md` §1.1-dədir.
 
 - `home-approved-frameless.png`: istifadəçinin son təsdiqi — yalnız böyük xarici çərçivə çıxarılıb, qalan dizayn saxlanır. Native navbar PNG-dəki şaquli boşluğa deyil, Android safe bottom-a bağlanır; bütün komponentlər mobil portret ölçülərinə/fontScale-a uyğunlaşır. ImageGen edit konseptidir, işlək render deyil.
