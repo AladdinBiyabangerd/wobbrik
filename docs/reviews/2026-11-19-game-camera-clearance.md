@@ -77,3 +77,18 @@ contrast report and scoped render harness are included in the separate commit.
 Ignored PNG render evidence remains local, following the repository convention.
 No merge, CI, remote push or deploy was performed. The review is included in the
 same commit as the reviewed changes; resolve its hash with `git log` for this file.
+
+## Authorized main integration and local CI
+
+- Fix commit: `280c876`; reviewed branch: `chore/home-review-cleanup`.
+- History-preserving merge on main: `1f6c295` (21 branch commits retained).
+- `./scripts/local-ci.sh` on main PASS: 1m33s, 105/105 tasks executed.
+  This gate runs engine/core tests, Android library build/lint and app build/lint;
+  the separately recorded app unit/native-render checks are not implied by CI.
+- Integration used `/private/tmp/wobbrik-main-integration-20261119` so the two
+  pre-existing, uncommitted release baseline files in the original workspace
+  were preserved. No stash/reset or inclusion of those files in the merge.
+- CI log: `/private/tmp/wobbrik-main-ci-20261119.log` (local artifact).
+- User also authorized updating remote main after successful CI. This docs-only
+  integration record is reviewed separately and merged before final main CI and
+  push. Remote status is reported after checking the actual remote ref.
