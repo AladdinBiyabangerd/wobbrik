@@ -24,17 +24,19 @@ internal data class CityGardenArt(val sprites: Map<String, CosmeticSprite>)
 @Composable
 internal fun rememberCityGardenArt(): CityGardenArt {
     val context = LocalContext.current
-    return remember(context) {
-        CityGardenArt(listOf("garden-v1", "balcony-v1", "terrace-v1").flatMap { name ->
-            val data = JSONObject(context.assets.open("city/$name.json").bufferedReader().use { it.readText() })
-            val image = context.assets.open("city/$name.png").use { requireNotNull(BitmapFactory.decodeStream(it)) }.asImageBitmap()
-            val cells = data.getJSONObject("sprites")
-            cells.keys().asSequence().map { key ->
-                val c = cells.getJSONArray(key)
-                key to CosmeticSprite(image, IntOffset(c.getInt(0), c.getInt(1)), IntSize(c.getInt(2), c.getInt(3)))
-            }.toList()
-        }.toMap())
-    }
+    return remember(context) { loadCityGardenArt(context) }
+}
+
+internal fun loadCityGardenArt(context: android.content.Context): CityGardenArt {
+    return CityGardenArt(listOf("garden-v1", "balcony-v1", "terrace-v1").flatMap { name ->
+        val data = JSONObject(context.assets.open("city/$name.json").bufferedReader().use { it.readText() })
+        val image = context.assets.open("city/$name.png").use { requireNotNull(BitmapFactory.decodeStream(it)) }.asImageBitmap()
+        val cells = data.getJSONObject("sprites")
+        cells.keys().asSequence().map { key ->
+            val c = cells.getJSONArray(key)
+            key to CosmeticSprite(image, IntOffset(c.getInt(0), c.getInt(1)), IntSize(c.getInt(2), c.getInt(3)))
+        }.toList()
+    }.toMap())
 }
 
 /** Samples the boolean union, so adjacent parcels and the two rectangles of an L

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.aladdin.wobbrik.CityIslandTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-11-18T13:37:09.308Z" hostname="Macs-MacBook-Pro.local" time="6.174">
+  <properties/>
+  <testcase name="sixParcelGrowthRebuildsCoastAndParkRatherThanKeepingOldBaseSeam" classname="com.aladdin.wobbrik.CityIslandTest" time="5.984"/>
+  <testcase name="allExpansionShapesAndRotationsRetainTheirNotchesWithoutInternalBanks" classname="com.aladdin.wobbrik.CityIslandTest" time="0.147"/>
+  <testcase name="parkCannotCoverActualFoundationAndDoesNotBridgeWater" classname="com.aladdin.wobbrik.CityIslandTest" time="0.042"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

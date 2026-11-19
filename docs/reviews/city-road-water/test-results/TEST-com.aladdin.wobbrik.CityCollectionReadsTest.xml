@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.aladdin.wobbrik.CityCollectionReadsTest" tests="12" skipped="0" failures="0" errors="0" timestamp="2026-11-18T13:08:33.104Z" hostname="Macs-MacBook-Pro.local" time="12.891">
+  <properties/>
+  <testcase name="staleRevisionIsNotPresentedWhileRefreshing" classname="com.aladdin.wobbrik.CityCollectionReadsTest" time="10.923"/>
+  <testcase name="missAndNetworkFailureShowsError" classname="com.aladdin.wobbrik.CityCollectionReadsTest" time="0.123"/>
+  <testcase name="smallCached" classname="com.aladdin.wobbrik.CityCollectionReadsTest" time="0.258"/>
+  <testcase name="smallLargeFontCached" classname="com.aladdin.wobbrik.CityCollectionReadsTest" time="0.156"/>
+  <testcase name="accountSwitchDiscardsOldLocalAndInflightScene" classname="com.aladdin.wobbrik.CityCollectionReadsTest" time="0.275"/>
+  <testcase name="coldWarmOfflineAndRefreshRequestBudget" classname="com.aladdin.wobbrik.CityCollectionReadsTest" time="0.056"/>
+  <testcase name="deniedRefreshClearsCachedSceneAndRetryWorks" classname="com.aladdin.wobbrik.CityCollectionReadsTest" time="0.257"/>
+  <testcase name="cachedSceneBeforeNetworkAndFreshMarkerClears" classname="com.aladdin.wobbrik.CityCollectionReadsTest" time="0.18"/>
+  <testcase name="cachedTransientErrorRetainsCacheMarker" classname="com.aladdin.wobbrik.CityCollectionReadsTest" time="0.144"/>
+  <testcase name="newLoginSameUidKeepsCacheDisplayOnlyUntilNewRead" classname="com.aladdin.wobbrik.CityCollectionReadsTest" time="0.274"/>
+  <testcase name="normalLargeFontCached" classname="com.aladdin.wobbrik.CityCollectionReadsTest" time="0.119"/>
+  <testcase name="missWaitsForLiveScene" classname="com.aladdin.wobbrik.CityCollectionReadsTest" time="0.125"/>
+  <system-out><![CDATA[CITY-LOCAL cache-visible-host-ms=99 requests-started=1 completed-response-bytes=0
+CITY-LOCAL cache-visible-host-ms=73 requests-started=1 completed-response-bytes=0
+CITY-COLLECTION cold=4 requests/760 response-UTF8-bytes warm=0 offline=0 refresh=4
+CITY-LOCAL cache-visible-host-ms=71 requests-started=1 completed-response-bytes=0
+CITY-LOCAL cache-visible-host-ms=40 requests-started=1 completed-response-bytes=0
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.aladdin.wobbrik.CityTerrainGeometryTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-11-18T13:08:38.347Z" hostname="Macs-MacBook-Pro.local" time="0.047">
+  <properties/>
+  <testcase name="catalogDecorDimensionsAndUnknownArtAreExplicit" classname="com.aladdin.wobbrik.CityTerrainGeometryTest" time="0.005"/>
+  <testcase name="parcelOriginAndAllQuarterTurnsRemainExactAtLargeSignedTicks" classname="com.aladdin.wobbrik.CityTerrainGeometryTest" time="0.02"/>
+  <testcase name="emptyCityStillFitsActualParcelAndCliffWithoutBuildings" classname="com.aladdin.wobbrik.CityTerrainGeometryTest" time="0.016"/>
+  <testcase name="landAreasAndLNotchesMatchServerContract" classname="com.aladdin.wobbrik.CityTerrainGeometryTest" time="0.004"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

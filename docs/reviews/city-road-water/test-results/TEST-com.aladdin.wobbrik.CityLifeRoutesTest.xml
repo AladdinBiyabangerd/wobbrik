@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.aladdin.wobbrik.CityLifeRoutesTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-11-18T13:08:37.196Z" hostname="Macs-MacBook-Pro.local" time="0.07">
+  <properties/>
+  <testcase name="unknownGeometryAndNoPopulationDoNotInventResidents" classname="com.aladdin.wobbrik.CityLifeRoutesTest" time="0.039"/>
+  <testcase name="vehiclesNeedActualRoadAndStayOutOfBuildingsAndParcelEdges" classname="com.aladdin.wobbrik.CityLifeRoutesTest" time="0.02"/>
+  <testcase name="leaningFootprintObstructsVehiclesAfterEveryQuarterTurn" classname="com.aladdin.wobbrik.CityLifeRoutesTest" time="0.004"/>
+  <testcase name="motionHasContinuousTurnaroundAndNoAccumulatedIntegrationError" classname="com.aladdin.wobbrik.CityLifeRoutesTest" time="0.0"/>
+  <testcase name="carsCannotCrossPlacedDecorOrGroundGaps" classname="com.aladdin.wobbrik.CityLifeRoutesTest" time="0.002"/>
+  <testcase name="rotatedLParcelNeverCreatesWalksAcrossNotch" classname="com.aladdin.wobbrik.CityLifeRoutesTest" time="0.001"/>
+  <testcase name="deterministicBoundedPathsDoNotChangeScene" classname="com.aladdin.wobbrik.CityLifeRoutesTest" time="0.001"/>
+  <testcase name="lRoadUsesItsTwoArmsForAllRotations" classname="com.aladdin.wobbrik.CityLifeRoutesTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

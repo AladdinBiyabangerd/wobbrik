@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.aladdin.wobbrik.CityIllustrationTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-11-18T13:36:26.749Z" hostname="Macs-MacBook-Pro.local" time="10.242">
+  <properties/>
+  <testcase name="interiorPlantingFollowsGrowthAndLeavesWaterAndParkOpen" classname="com.aladdin.wobbrik.CityIllustrationTest" time="9.717"/>
+  <testcase name="largeGardenIsBoundedAndDoesNotInventBuildingsOrOccupyTheirFootprints" classname="com.aladdin.wobbrik.CityIllustrationTest" time="0.22"/>
+  <testcase name="shippedSheetHasRealAlphaAndSolidMaterialSamples" classname="com.aladdin.wobbrik.CityIllustrationTest" time="0.304"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

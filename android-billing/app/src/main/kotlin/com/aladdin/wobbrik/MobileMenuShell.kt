@@ -50,6 +50,10 @@ private fun MobileMenuShellContent(page: String, coins: Long?, onPlay: (() -> Un
         CompositionLocalProvider(LocalMobileMenuShell provides false) { content() }
         return
     }
+    if (page == "city") {
+        CityCollectionShell(coins, onPlay, onPage, content)
+        return
+    }
     var commerceDetail by remember(page) { mutableStateOf(false) }
     val reportDetail = remember(page) { { active: Boolean -> commerceDetail = active } }
     if (page == "inventory" || page == "collection" || page == "owned-decorations" || mobileMenuDestination(page) == "market") {

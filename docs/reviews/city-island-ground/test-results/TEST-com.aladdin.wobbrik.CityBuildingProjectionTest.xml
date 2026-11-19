@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.aladdin.wobbrik.CityBuildingProjectionTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-11-18T13:24:16.019Z" hostname="Macs-MacBook-Pro.local" time="0.041">
+  <properties/>
+  <testcase name="painterOrderFollowsWorldDepthThenStableId" classname="com.aladdin.wobbrik.CityBuildingProjectionTest" time="0.033"/>
+  <testcase name="missingPositionOrGeometryNeverBecomesAnOriginBuilding" classname="com.aladdin.wobbrik.CityBuildingProjectionTest" time="0.001"/>
+  <testcase name="facadeWidthAndFrontAnchorMatchProjectedServerFootprint" classname="com.aladdin.wobbrik.CityBuildingProjectionTest" time="0.001"/>
+  <testcase name="fitContainsCompleteLeaningTowerAndRoofInBothPortraitSizes" classname="com.aladdin.wobbrik.CityBuildingProjectionTest" time="0.004"/>
+  <testcase name="rotatesOffsetsAroundFoundationWithoutRecentering" classname="com.aladdin.wobbrik.CityBuildingProjectionTest" time="0.0"/>
+  <testcase name="retainsEveryFloorAndSmallSignedOffsetAtLargeCoordinates" classname="com.aladdin.wobbrik.CityBuildingProjectionTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

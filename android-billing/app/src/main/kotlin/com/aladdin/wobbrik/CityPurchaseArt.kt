@@ -32,7 +32,7 @@ internal fun rememberOwnedDecorationArt(): Map<String, CosmeticSprite> {
     return result.value
 }
 
-private fun loadDecorationArt(context: android.content.Context, metadataFile: String = "purchase-art.json"): Map<String, CosmeticSprite> {
+internal fun loadDecorationArt(context: android.content.Context, metadataFile: String = "purchase-art.json"): Map<String, CosmeticSprite> {
         val metadata = JSONObject(context.assets.open("city/$metadataFile").bufferedReader().use { it.readText() })
         val image = context.assets.open("city/${metadata.getString("source")}").use { BitmapFactory.decodeStream(it) }.asImageBitmap()
         val sprites = metadata.getJSONArray("sprites")

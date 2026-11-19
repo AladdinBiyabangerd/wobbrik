@@ -19,18 +19,20 @@ internal data class CityTerrainArt(val grass: Brush, val cliff: Brush)
 @Composable
 internal fun rememberCityTerrainArt(): CityTerrainArt {
     val context = LocalContext.current
-    return remember(context) {
-        val sheet = context.assets.open("city/terrain-material-v1.png").use { BitmapFactory.decodeStream(it) }
-        fun material(y: Int, scale: Float): Brush {
-            // Material sheet boundary has blended pixels; exclude its four-pixel atlas gutter.
-            val gutter = 4
-            val image = Bitmap.createBitmap(sheet, gutter, y + gutter, sheet.width - 2*gutter, sheet.height / 2 - 2*gutter).asImageBitmap()
-            return ShaderBrush(ImageShader(image, TileMode.Mirror, TileMode.Mirror).apply {
-                setLocalMatrix(Matrix().apply { setScale(scale, scale) })
-            })
-        }
-        CityTerrainArt(material(0, 0.25f), material(sheet.height / 2, 0.08f))
+    return remember(context) { loadCityTerrainArt(context) }
+}
+
+internal fun loadCityTerrainArt(context: android.content.Context): CityTerrainArt {
+    val sheet = context.assets.open("city/terrain-material-v1.png").use { BitmapFactory.decodeStream(it) }
+    fun material(y: Int, scale: Float): Brush {
+        // Material sheet boundary has blended pixels; exclude its four-pixel atlas gutter.
+        val gutter = 4
+        val image = Bitmap.createBitmap(sheet, gutter, y + gutter, sheet.width - 2*gutter, sheet.height / 2 - 2*gutter).asImageBitmap()
+        return ShaderBrush(ImageShader(image, TileMode.Mirror, TileMode.Mirror).apply {
+            setLocalMatrix(Matrix().apply { setScale(scale, scale) })
+        })
     }
+    return CityTerrainArt(material(0, 0.25f), material(sheet.height / 2, 0.08f))
 }
 
 /** Boolean union suppresses internal parcel/L-shape seams. World geometry is never rounded. */
@@ -43,8 +45,7 @@ internal fun citySurface(contours: List<List<CityBuildingProjection.Point>>): Pa
         Path.combine(PathOperation.Union, union, polygon)
     }
 
-internal fun cityCliff(contours: List<List<CityBuildingProjection.Point>>): Path {
-    val depth = CityTerrainGeometry.CliffDepth
+internal fun cityCliff(contours: List<List<CityBuildingProjection.Point>>, depth: Double = CityTerrainGeometry.CliffDepth): Path {
     val faces = contours.flatMap { points ->
         points.indices.map { index ->
             val a = points[index]; val b = points[(index + 1) % points.size]
@@ -54,11 +55,13 @@ internal fun cityCliff(contours: List<List<CityBuildingProjection.Point>>): Path
     return citySurface(contours + faces)
 }
 
-internal fun DrawScope.cityTerrain(surface: Path, cliff: Path, view: CityViewport, art: CityTerrainArt) {
+internal fun DrawScope.cityTerrain(surface: Path, cliff: Path, view: CityViewport, art: CityTerrainArt, illustrated: Boolean = false) {
     if (surface.isEmpty) return
     withTransform({ translate(view.x.toFloat(), view.y.toFloat()); scale(view.scale.toFloat(), view.scale.toFloat(), Offset.Zero) }) {
         drawPath(cliff, art.cliff)
+        if (illustrated) drawPath(cliff, GameTokens.Background.copy(alpha=.72f))
         drawPath(surface, art.grass)
+        if (illustrated) drawPath(surface, GameTokens.Background.copy(alpha=.26f))
     }
 }
 

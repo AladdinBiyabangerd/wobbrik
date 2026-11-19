@@ -52,15 +52,17 @@ internal fun rememberCityLifeClock(enabled: Boolean, sceneKey: Any?): State<Doub
 @Composable
 internal fun rememberCityLifeArt(): Map<String, CosmeticSprite> {
     val context = LocalContext.current
-    return remember(context) {
-        val data = JSONObject(context.assets.open("city/life-actors-v1.json").bufferedReader().use { it.readText() })
-        val image = context.assets.open("city/${data.getString("source")}").use { BitmapFactory.decodeStream(it) }.asImageBitmap()
-        val entries = data.getJSONArray("sprites")
-        (0 until entries.length()).associate { index ->
-            val entry = entries.getJSONObject(index)
-            entry.getString("id") to CosmeticSprite(image,IntOffset(entry.getInt("x"),entry.getInt("y")),
-                IntSize(entry.getInt("width"),entry.getInt("height")))
-        }
+    return remember(context) { loadCityLifeArt(context) }
+}
+
+internal fun loadCityLifeArt(context: android.content.Context): Map<String, CosmeticSprite> {
+    val data = JSONObject(context.assets.open("city/life-actors-v1.json").bufferedReader().use { it.readText() })
+    val image = context.assets.open("city/${data.getString("source")}").use { BitmapFactory.decodeStream(it) }.asImageBitmap()
+    val entries = data.getJSONArray("sprites")
+    return (0 until entries.length()).associate { index ->
+        val entry = entries.getJSONObject(index)
+        entry.getString("id") to CosmeticSprite(image,IntOffset(entry.getInt("x"),entry.getInt("y")),
+            IntSize(entry.getInt("width"),entry.getInt("height")))
     }
 }
 
