@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.aladdin.wobbrik.ProfileCollectionEditorRegularFontTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-11-19T10:24:35.263Z" hostname="Macs-MacBook-Pro.local" time="1.223">
+  <properties/>
+  <testcase name="preview" classname="com.aladdin.wobbrik.ProfileCollectionEditorRegularFontTest" time="1.223"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

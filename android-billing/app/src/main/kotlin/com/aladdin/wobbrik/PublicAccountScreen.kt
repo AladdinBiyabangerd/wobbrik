@@ -38,7 +38,7 @@ internal fun PublicAccountScreen(configured: WobbrikApplication.Bootstrap.Config
     ready: AuthenticatedRecoveryOwner.State.Ready, onHome: () -> Unit, onPage: (String) -> Unit,
     displayMemory: ProfileDisplayMemory? = null) {
     // Start optional portrait IO alongside GET /profile, rather than after its response.
-    val portraits = if (LocalMobileMenuShell.current) rememberResourceArt(R.drawable.account_portraits_v3) else null
+    val portraits = if (LocalMobileMenuShell.current) rememberResourceArt(R.drawable.account_portraits_collection_v1) else null
     CompositionLocalProvider(LocalAccountPortraitArt provides portraits) {
         PublicAccountContent(configured, ready, onHome, onPage, displayMemory)
     }
@@ -120,6 +120,7 @@ private fun PublicAccountContent(configured: WobbrikApplication.Bootstrap.Config
                 }
             }, status = status)
     } else ProfileFrame("Profil", back, ready.snapshot.coins) {
+        if (LocalMobileMenuShell.current) ProfileCollectionHeading(onPage)
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
             profile?.let { value ->
                 ProfileOverview(value, ready.snapshot.account?.level?.toString() ?: "—", ready.snapshot.xp,
@@ -165,7 +166,7 @@ internal fun AccountXpProgress(earned: java.math.BigInteger, required: java.math
         Text(label, color = GameTokens.Muted,
             fontSize = if (mobileUiSizing().compact) GameTokens.Body else GameTokens.Hint, fontWeight = FontWeight.ExtraBold)
     }
-    Surface(Modifier.fillMaxWidth().height(if (LocalDensity.current.fontScale > 1f) GameTokens.Target else if (LocalMobileMenuShell.current) GameTokens.Small + GameTokens.Quarter else GameTokens.Inset)
+    Surface(Modifier.fillMaxWidth().height(if (LocalMobileMenuShell.current) GameTokens.Inset - GameTokens.Quarter else if (LocalDensity.current.fontScale > 1f) GameTokens.Target else GameTokens.Inset)
         .progressSemantics(fraction), shape = RoundedCornerShape(GameTokens.CardRadius), color = GameTokens.Background,
         border = BorderStroke(GameTokens.Hairline, GameTokens.Raised)) {
         Box {
@@ -174,4 +175,8 @@ internal fun AccountXpProgress(earned: java.math.BigInteger, required: java.math
                 RoundedCornerShape(GameTokens.CardRadius)))
         }
     }
+    if (LocalMobileMenuShell.current) Text("Növbəti səviyyəyə ${required.subtract(earned).max(java.math.BigInteger.ZERO)} XP",
+        Modifier.fillMaxWidth(), color = GameTokens.Muted, fontSize = GameTokens.Label,
+        textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+
 }

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.aladdin.wobbrik.ProfileOpenLatencyTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-11-19T10:14:39.996Z" hostname="Macs-MacBook-Pro.local" time="2.824">
+  <properties/>
+  <testcase name="successfulSaveIsTheNextCachedDisplayButStillRequiresFreshLoad" classname="com.aladdin.wobbrik.ProfileOpenLatencyTest" time="0.188"/>
+  <testcase name="cachedDisplayIsNotAnEditorCapabilityAndEpochsAreIsolated" classname="com.aladdin.wobbrik.ProfileOpenLatencyTest" time="0.824"/>
+  <testcase name="firstAndReturningProfile" classname="com.aladdin.wobbrik.ProfileOpenLatencyTest" time="1.811"/>
+  <system-out><![CDATA[round,contentMs,avatarMs,requests,responseBytes
+0,435.267125,435.498417,1,61
+1,12.371292,56.231208,2,122
+2,12.383667,51.637333,3,183
+3,12.716583,52.416916,4,244
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

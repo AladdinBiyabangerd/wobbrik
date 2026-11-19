@@ -32,18 +32,18 @@ import appbackend.wobbrik.game.PublicProfile
 /** Mobile overview only; server state and editing remain owned by PublicAccountScreen. */
 @Composable
 internal fun NativeProfileAction(label: String, enabled: Boolean, modifier: Modifier, onClick: () -> Unit) {
-    val shape = RoundedCornerShape(GameTokens.ControlRadius)
-    Box(modifier.fillMaxWidth().heightIn(min = GameTokens.Target) .clip(shape)
-        .background(Brush.verticalGradient(if (enabled) listOf(GameTokens.MobileHome.PlayTop, GameTokens.Accent, GameTokens.MobileHome.PlayBottom)
-            else listOf(GameTokens.Raised, GameTokens.Surface)))
-        .border(GameTokens.Hairline, if (enabled) GameTokens.MobileHome.RimLight else GameTokens.Muted, shape)
-        .border(GameTokens.Quarter, Brush.verticalGradient(listOf(
-            GameTokens.Text.copy(alpha = if (enabled) 1f - GameTokens.DimOpacity else 0f),
-            GameTokens.Background.copy(alpha = 0f), GameTokens.MobileHome.Rim.copy(alpha = 1f - GameTokens.DimOpacity))), shape)
-        .clickable(enabled = enabled, role = Role.Button, onClick = onClick), contentAlignment = Alignment.Center) {
-        Text(label, Modifier.padding(GameTokens.Small).horizontalScroll(rememberScrollState()), softWrap = false,
-            color = if (enabled) GameTokens.Background else GameTokens.Muted, fontFamily = GameTypeface,
-            fontSize = GameTokens.Body, fontWeight = FontWeight.ExtraBold)
+    val interaction = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+    val shape = RoundedCornerShape(GameTokens.CardRadius)
+    androidx.compose.material3.Surface(onClick = onClick, enabled = enabled, interactionSource = interaction,
+        color = androidx.compose.ui.graphics.Color.Transparent,
+        modifier = modifier.heightIn(min = GameTokens.Target).collectionPress(interaction, enabled)) {
+        Box(Modifier.fillMaxWidth().padding(vertical = GameTokens.Quarter).clip(shape)
+            .background(Brush.verticalGradient(listOf(GameTokens.MobileHome.Rim, GameTokens.InventoryCollection.DockBottom, GameTokens.InventoryCollection.PanelBottom)))
+            .border(GameTokens.Hairline * 2, if(enabled) GameTokens.Accent else GameTokens.InventoryCollection.Outline, shape)
+            .padding(horizontal = GameTokens.Small, vertical = GameTokens.Small), contentAlignment = Alignment.Center) {
+            Text(label, color = if(enabled) GameTokens.Text else GameTokens.Muted, fontFamily = GameTypeface,
+                fontSize = GameTokens.Body, fontWeight = FontWeight.ExtraBold, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+        }
     }
 }
 
@@ -52,14 +52,12 @@ internal fun NativeProfileOverview(profile: PublicProfile, level: String, xp: Lo
     progress: @Composable () -> Unit, showEdit: Boolean, enabled: Boolean, onEdit: () -> Unit) {
     val large = LocalDensity.current.fontScale > 1f
     val compact = mobileUiSizing().compact
-    val portraits = LocalAccountPortraitArt.current ?: rememberResourceArt(R.drawable.account_portraits_v3)
-    @Composable fun portrait(modifier: Modifier) {
-        NativeAccountPortrait(profile.avatarId, modifier, resource = portraits)
-    }
-    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(-GameTokens.Small)) {
+    val portraits = LocalAccountPortraitArt.current ?: rememberResourceArt(R.drawable.account_portraits_collection_v1)
+    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+        Column(verticalArrangement = Arrangement.spacedBy(-GameTokens.Small)) {
         // Folded ribbon and central crown are native geometry, independent of text size.
         Box(Modifier.fillMaxWidth().height(GameTokens.Target).zIndex(1f).testTag("profile-ribbon"), contentAlignment = Alignment.Center) {
-            Canvas(Modifier.fillMaxWidth().height(GameTokens.Target)) {
+            Canvas(Modifier.fillMaxWidth(.72f).height(GameTokens.Target)) {
                 fun polygon(vararg xy: Float): Path = Path().apply {
                     moveTo(xy[0]*size.width, xy[1]*size.height)
                     for(i in 2 until xy.size step 2) lineTo(xy[i]*size.width,xy[i+1]*size.height)
@@ -95,68 +93,42 @@ internal fun NativeProfileOverview(profile: PublicProfile, level: String, xp: Lo
             }
             NativeProfileCrown(Modifier.size(GameTokens.Inset + GameTokens.Small).offset(y=-GameTokens.Quarter))
         }
-        MenuRelief(Modifier.fillMaxWidth().testTag("profile-panel").border(GameTokens.Hairline * 2,
-            Brush.verticalGradient(listOf(GameTokens.MobileHome.Rim, GameTokens.Accent, GameTokens.MobileHome.Rim)),
-            RoundedCornerShape(GameTokens.CardRadius)), kind = MenuSkin.Commerce) {
-            Column(Modifier.fillMaxWidth().padding(if(compact) GameTokens.Small else GameTokens.Gap),
-                verticalArrangement=Arrangement.spacedBy(GameTokens.Small)) {
+            ProfileCollectionPanel(Modifier.testTag("profile-panel")) {
                 @Composable fun identity() {
-                    Row(verticalAlignment=Alignment.CenterVertically) {
-                        Text(profile.displayName, Modifier.weight(1f).horizontalScroll(rememberScrollState()), softWrap=false,
-                            color=GameTokens.Text,fontFamily=GameTypeface,fontSize=GameTokens.Title,fontWeight=FontWeight.ExtraBold)
-                        if(showEdit) MenuRelief(Modifier.size(GameTokens.Target).clip(RoundedCornerShape(GameTokens.ControlRadius))
-                            .clickable(enabled=enabled,role=Role.Button,onClick=onEdit).semantics { contentDescription="Profili dəyiş" }) {
-                            Canvas(Modifier.padding(GameTokens.Small).fillMaxSize()) {
-                                val pencil=Path().apply {
-                                    moveTo(size.width*.35f,size.height*.7f);lineTo(size.width*.68f,size.height*.18f)
-                                    lineTo(size.width*.84f,size.height*.34f);lineTo(size.width*.34f,size.height*.84f)
-                                    lineTo(size.width*.14f,size.height*.9f);close()
-                                }
-                                drawPath(pencil,GameTokens.Text)
-                            }
-                        }
-                    }
+                    Text(profile.displayName, Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), softWrap=false,
+                        color=GameTokens.Text, fontSize=GameTokens.Title, fontWeight=FontWeight.ExtraBold,
+                        textAlign=androidx.compose.ui.text.style.TextAlign.Center)
                     NativeProfileLevel(level)
                 }
-                if(large) {
-                    portrait(Modifier.size(GameTokens.Profile.CompactPortrait).align(Alignment.CenterHorizontally))
-                    identity()
-                } else Row(verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy(GameTokens.Small)) {
-                    portrait(Modifier.size(if(compact) GameTokens.Profile.Portrait else GameTokens.Profile.OverviewPortrait))
-                    Column(Modifier.weight(1f)) { identity() }
+                Row(Modifier.fillMaxWidth().padding(GameTokens.Small), verticalAlignment=Alignment.CenterVertically,
+                    horizontalArrangement=Arrangement.spacedBy(GameTokens.Small)) {
+                    NativeAccountPortrait(profile.avatarId, Modifier.size(if(compact || large) GameTokens.Profile.CompactPortrait else GameTokens.Profile.OverviewPortrait), resource=portraits)
+                    Column(Modifier.weight(1f),horizontalAlignment=Alignment.CenterHorizontally) { identity() }
                 }
-                HorizontalDivider(color=GameTokens.MobileHome.Rim)
-                progress()
-                HorizontalDivider(color=GameTokens.MobileHome.Rim)
-                @Composable fun stat(value:String,label:String,crown:Boolean,modifier:Modifier) {
-                    Column(modifier,horizontalAlignment=Alignment.CenterHorizontally) {
-                        Row(verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy(GameTokens.Small)) {
-                            if(crown) NativeProfileCrown(Modifier.size(GameTokens.Inset + GameTokens.Small))
-                            else NativeProfileXp(Modifier.size(GameTokens.Inset + GameTokens.Small))
-                            Text(value,Modifier.weight(1f,fill=false).horizontalScroll(rememberScrollState()),softWrap=false,color=GameTokens.Text,
-                                fontFamily=GameTypeface,fontSize=GameTokens.Title,fontWeight=FontWeight.ExtraBold)
-                        }
-                        Text(label,Modifier.horizontalScroll(rememberScrollState()),softWrap=false,color=GameTokens.Muted,
-                            fontFamily=GameTypeface,fontWeight=FontWeight.Bold,fontSize=GameTokens.Body)
-                    }
+            }
+        }
+        ProfileCollectionPanel {
+            Column(Modifier.padding(GameTokens.Small), verticalArrangement=Arrangement.spacedBy(GameTokens.Small)) { progress() }
+        }
+        @Composable fun stat(value:String,label:String,crown:Boolean,modifier:Modifier) {
+            ProfileCollectionPanel(modifier) {
+                Column(Modifier.fillMaxWidth().padding(GameTokens.Small), horizontalAlignment=Alignment.CenterHorizontally) {
+                    if(crown) NativeProfileCrown(Modifier.size(GameTokens.Target)) else NativeProfileXp(Modifier.size(GameTokens.Target))
+                    Text(value,Modifier.horizontalScroll(rememberScrollState()),softWrap=false,color=GameTokens.Text,
+                        fontSize=GameTokens.Title,fontWeight=FontWeight.ExtraBold)
+                    Text(label,color=GameTokens.Muted,fontWeight=FontWeight.Bold,fontSize=GameTokens.Body)
                 }
-                if(large) {
-                    stat(best,"Rekord",true,Modifier.fillMaxWidth());stat(xp.toString(),"Təcrübə",false,Modifier.fillMaxWidth())
-                } else Row(Modifier.fillMaxWidth(),verticalAlignment=Alignment.CenterVertically) {
-                    stat(best,"Rekord",true,Modifier.weight(1f))
-                    Box(Modifier.width(GameTokens.Hairline).height(GameTokens.Target).background(GameTokens.MobileHome.Rim))
-                    stat(xp.toString(),"Təcrübə",false,Modifier.weight(1f))
-                }
-                HorizontalDivider(color=GameTokens.MobileHome.Rim)
-                if(showEdit) MenuRelief(Modifier.fillMaxWidth(), shape = RoundedCornerShape(GameTokens.ControlRadius), kind = MenuSkin.Commerce) {
-                    Row(Modifier.padding(GameTokens.Small),verticalAlignment=Alignment.CenterVertically,
-                        horizontalArrangement=Arrangement.spacedBy(GameTokens.Small)) {
-                        portrait(Modifier.size(GameTokens.Target))
-                        Text("Ad və avatar",Modifier.weight(1f).horizontalScroll(rememberScrollState()),softWrap=false,
-                            color=GameTokens.Text,fontWeight=FontWeight.Bold)
-                        NativeProfileAction("Dəyiş",enabled,Modifier.width(GameTokens.Target*2).testTag("profile-edit"),onEdit)
-                    }
-                }
+            }
+        }
+        Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(GameTokens.Small)) {
+            stat(best,"Rekord",true,Modifier.weight(1f));stat(xp.toString(),"Təcrübə",false,Modifier.weight(1f))
+        }
+        if(showEdit) ProfileCollectionPanel {
+            Row(Modifier.padding(horizontal=GameTokens.Small),verticalAlignment=Alignment.CenterVertically,
+                horizontalArrangement=Arrangement.spacedBy(GameTokens.Small)) {
+                NativeAccountPortrait(profile.avatarId,Modifier.size(GameTokens.Target-GameTokens.Small),resource=portraits)
+                Text("Ad və avatar",Modifier.weight(1f),color=GameTokens.Text,fontWeight=FontWeight.Bold,fontSize=GameTokens.Body)
+                NativeProfileAction("Dəyiş",enabled,Modifier.width(GameTokens.Target*2).testTag("profile-edit"),onEdit)
             }
         }
     }
@@ -182,9 +154,13 @@ private fun NativeProfileLevel(level: String) {
                 }
             }
             val shield=Path().apply {
-                moveTo(size.width*.5f,size.height*.08f);lineTo(size.width*.71f,size.height*.25f)
-                lineTo(size.width*.69f,size.height*.7f);lineTo(size.width*.5f,size.height*.94f)
-                lineTo(size.width*.31f,size.height*.7f);lineTo(size.width*.29f,size.height*.25f);close()
+                moveTo(size.width*.5f,size.height*.08f)
+                quadraticTo(size.width*.6f,size.height*.14f,size.width*.71f,size.height*.25f)
+                lineTo(size.width*.69f,size.height*.64f)
+                quadraticTo(size.width*.68f,size.height*.77f,size.width*.5f,size.height*.94f)
+                quadraticTo(size.width*.32f,size.height*.77f,size.width*.31f,size.height*.64f)
+                lineTo(size.width*.29f,size.height*.25f)
+                quadraticTo(size.width*.4f,size.height*.14f,size.width*.5f,size.height*.08f);close()
             }
             drawPath(shield, GameTokens.Background, style=Stroke((GameTokens.Quarter + GameTokens.Hairline * 2).toPx()))
             drawPath(shield,Brush.verticalGradient(listOf(GameTokens.MobileHome.RimLight,GameTokens.MobileHome.Rim,GameTokens.MobileHome.PanelTop)))
@@ -202,17 +178,29 @@ private fun NativeProfileLevel(level: String) {
 private fun NativeProfileXp(modifier: Modifier) {
     Box(modifier,contentAlignment=Alignment.Center) {
         Canvas(Modifier.matchParentSize()) {
+            // Soft enamel scallops, rather than sharp star points.
+            val points=(0 until 20).map { i ->
+                val angle=Math.PI*2*i/20-Math.PI/2
+                val radius=if(i%2==0) .49f else .40f
+                Offset(size.width*(.5f+radius*kotlin.math.cos(angle).toFloat()),
+                    size.height*(.5f+radius*kotlin.math.sin(angle).toFloat()))
+            }
             val seal=Path().apply {
-                for(i in 0 until 20) {
-                    val angle=Math.PI*2*i/20-Math.PI/2
-                    val radius=if(i%2==0) .49f else .42f
-                    val x=size.width*(.5f+radius*kotlin.math.cos(angle).toFloat())
-                    val y=size.height*(.5f+radius*kotlin.math.sin(angle).toFloat())
-                    if(i==0) moveTo(x,y) else lineTo(x,y)
-                };close()
+                val first=(points.last()+points.first())/2f
+                moveTo(first.x,first.y)
+                points.forEachIndexed { i,p ->
+                    val end=(p+points[(i+1)%points.size])/2f
+                    quadraticTo(p.x,p.y,end.x,end.y)
+                }
+                close()
             }
             drawPath(seal,Brush.verticalGradient(listOf(GameTokens.MobileHome.PlayTop,GameTokens.MobileHome.PlayBottom)))
-            drawPath(seal,GameTokens.MobileHome.RimLight,style=Stroke(GameTokens.Hairline.toPx()))
+            drawPath(seal,GameTokens.MobileHome.Rim,style=Stroke(GameTokens.Quarter.toPx()))
+            drawPath(seal,GameTokens.MobileHome.PlayTop,style=Stroke(GameTokens.Hairline.toPx()))
+            drawCircle(Brush.radialGradient(listOf(GameTokens.MobileHome.PlayTop.copy(alpha=.65f),
+                GameTokens.MobileHome.PlayBottom.copy(alpha=0f)),center=Offset(size.width*.3f,size.height*.22f),radius=size.width*.65f),
+                radius=size.width*.32f)
+
         }
         Text("XP",color=GameTokens.Background,fontFamily=GameTypeface,fontWeight=FontWeight.ExtraBold,fontSize=GameTokens.Label)
     }
@@ -220,24 +208,18 @@ private fun NativeProfileXp(modifier: Modifier) {
 
 @Composable
 internal fun NativeProfileShortcut(label: String, records: Boolean, modifier: Modifier = Modifier, onClick: () -> Unit) {
-    MenuRelief(modifier.heightIn(min=GameTokens.Target)
-        .clip(RoundedCornerShape(GameTokens.ControlRadius)).clickable(role=Role.Button,onClick=onClick),
-        shape=RoundedCornerShape(GameTokens.ControlRadius)) {
-        Row(Modifier.align(Alignment.Center).padding(GameTokens.Small),verticalAlignment=Alignment.CenterVertically,
-            horizontalArrangement=Arrangement.spacedBy(GameTokens.Quarter)) {
-            if(records) MobileMenuIcon(MobileIcon.Trophy,Modifier.size(GameTokens.Inset))
-            else Canvas(Modifier.size(GameTokens.Inset)) {
-                val center=Offset(size.width/2,size.height/2)
-                for(i in 0..7) {
-                    val angle=Math.PI*i/4
-                    val direction=Offset(kotlin.math.cos(angle).toFloat(),kotlin.math.sin(angle).toFloat())
-                    drawLine(GameTokens.Muted,center+direction*(size.width*.28f),center+direction*(size.width*.47f),GameTokens.Quarter.toPx())
-                }
-                drawCircle(GameTokens.Muted,size.width*.34f)
-                drawCircle(GameTokens.Surface,size.width*.15f)
+    val interaction = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+    androidx.compose.material3.Surface(onClick=onClick, interactionSource=interaction,
+        color=androidx.compose.ui.graphics.Color.Transparent,
+        modifier=modifier.heightIn(min=GameTokens.Target).collectionPress(interaction)) {
+        ProfileCollectionPanel {
+            Row(Modifier.fillMaxWidth().padding(GameTokens.Small),verticalAlignment=Alignment.CenterVertically,
+                horizontalArrangement=Arrangement.spacedBy(GameTokens.Quarter,Alignment.CenterHorizontally)) {
+                if(records) NativeProfileCrown(Modifier.size(GameTokens.Inset))
+                else MobileMenuIcon(MobileIcon.Trophy,Modifier.size(GameTokens.Inset))
+                Text(label,Modifier.weight(1f,fill=false).horizontalScroll(rememberScrollState()),softWrap=false,color=GameTokens.Text,fontFamily=GameTypeface,
+                    fontWeight=FontWeight.Bold,fontSize=GameTokens.Label)
             }
-            Text(label,Modifier.weight(1f,fill=false).horizontalScroll(rememberScrollState()),
-                softWrap=false,color=GameTokens.Text,fontFamily=GameTypeface,fontWeight=FontWeight.Bold,fontSize=GameTokens.Body)
         }
     }
 }
@@ -256,8 +238,23 @@ private fun NativeProfileCrown(modifier: Modifier) {
             lineTo(size.width*.83f,size.height*.73f)
             quadraticTo(size.width*.5f,size.height*.86f,size.width*.17f,size.height*.73f);close()
         }
-        drawPath(crown,Brush.verticalGradient(listOf(GameTokens.MobileHome.GoldLight,GameTokens.MobileHome.Gold,GameTokens.MobileHome.Gold)))
+        drawPath(crown, GameTokens.Background.copy(alpha=.65f), style=Stroke(GameTokens.Quarter.toPx()))
+        drawPath(crown,Brush.linearGradient(listOf(GameTokens.MobileHome.GoldLight,GameTokens.MobileHome.Gold,GameTokens.MobileHome.GoldLight,GameTokens.MobileHome.Gold),
+            start=Offset.Zero,end=Offset(size.width,size.height)))
         drawPath(crown,GameTokens.MobileHome.GoldLight,style=Stroke(GameTokens.Hairline.toPx()))
+        val band=Path().apply {
+            moveTo(size.width*.17f,size.height*.69f)
+            quadraticTo(size.width*.5f,size.height*.8f,size.width*.83f,size.height*.69f)
+            lineTo(size.width*.81f,size.height*.79f)
+            quadraticTo(size.width*.5f,size.height*.9f,size.width*.19f,size.height*.79f);close()
+        }
+        drawPath(band,Brush.verticalGradient(listOf(GameTokens.MobileHome.GoldLight,GameTokens.MobileHome.Gold)))
+        val glint=Path().apply {
+            moveTo(size.width*.13f,size.height*.32f);lineTo(size.width*.22f,size.height*.68f)
+            quadraticTo(size.width*.25f,size.height*.7f,size.width*.28f,size.height*.7f)
+        }
+        drawPath(glint,GameTokens.MobileHome.GoldLight,style=Stroke(GameTokens.Hairline.toPx(),cap=androidx.compose.ui.graphics.StrokeCap.Round))
+        drawPath(band,GameTokens.MobileHome.GoldLight,style=Stroke(GameTokens.Hairline.toPx()))
         for (point in listOf(Offset(.08f,.28f),Offset(.5f,.13f),Offset(.92f,.28f))) {
             drawCircle(GameTokens.MobileHome.GoldLight,size.width*.065f,Offset(size.width*point.x,size.height*point.y))
         }

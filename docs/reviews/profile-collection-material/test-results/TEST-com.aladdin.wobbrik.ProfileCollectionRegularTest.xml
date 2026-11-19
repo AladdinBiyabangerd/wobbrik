@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.aladdin.wobbrik.ProfileCollectionRegularTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-11-19T10:24:40.631Z" hostname="Macs-MacBook-Pro.local" time="0.889">
+  <properties/>
+  <testcase name="preview" classname="com.aladdin.wobbrik.ProfileCollectionRegularTest" time="0.889"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

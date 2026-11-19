@@ -1,0 +1,168 @@
+> Task :core:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :core:compileKotlin UP-TO-DATE
+> Task :core:compileJava NO-SOURCE
+> Task :core:processResources NO-SOURCE
+> Task :core:classes UP-TO-DATE
+> Task :core:jar UP-TO-DATE
+> Task :engine:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :engine:compileKotlin UP-TO-DATE
+> Task :engine:compileJava NO-SOURCE
+> Task :engine:processResources NO-SOURCE
+> Task :engine:classes UP-TO-DATE
+> Task :engine:jar UP-TO-DATE
+> Task :android:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :android:preBuild UP-TO-DATE
+> Task :android:preDebugBuild UP-TO-DATE
+> Task :android:generateDebugResValues UP-TO-DATE
+> Task :android:generateDebugResources UP-TO-DATE
+> Task :android:packageDebugResources UP-TO-DATE
+> Task :android:processDebugNavigationResources UP-TO-DATE
+> Task :android:parseDebugLocalResources UP-TO-DATE
+> Task :android:generateDebugRFile UP-TO-DATE
+> Task :android:kspDebugKotlin UP-TO-DATE
+> Task :android:compileDebugKotlin UP-TO-DATE
+> Task :android:javaPreCompileDebug UP-TO-DATE
+> Task :android:compileDebugJavaWithJavac NO-SOURCE
+> Task :android:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :android:processDebugJavaRes UP-TO-DATE
+> Task :android:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:generateDebugBuildConfig UP-TO-DATE
+> Task :android:compileDebugLibraryResources UP-TO-DATE
+> Task :android:writeDebugAarMetadata UP-TO-DATE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :app:processDebugNavigationResources UP-TO-DATE
+> Task :app:compileDebugNavigationResources UP-TO-DATE
+> Task :app:generateDebugResValues UP-TO-DATE
+> Task :app:injectCrashlyticsMappingFileIdDebug UP-TO-DATE
+> Task :app:injectCrashlyticsVersionControlInfoDebug UP-TO-DATE
+> Task :app:processDebugGoogleServices UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :android:extractDeepLinksDebug UP-TO-DATE
+> Task :android:processDebugManifest UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :app:processDebugManifest UP-TO-DATE
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :app:processDebugResources UP-TO-DATE
+> Task :app:compileDebugKotlin UP-TO-DATE
+> Task :app:javaPreCompileDebug UP-TO-DATE
+> Task :app:compileDebugJavaWithJavac UP-TO-DATE
+> Task :app:bundleDebugClassesToRuntimeJar UP-TO-DATE
+> Task :app:bundleDebugClassesToCompileJar UP-TO-DATE
+> Task :app:preDebugUnitTestBuild UP-TO-DATE
+> Task :app:javaPreCompileDebugUnitTest UP-TO-DATE
+> Task :android:mergeDebugShaders UP-TO-DATE
+> Task :android:compileDebugShaders NO-SOURCE
+> Task :android:generateDebugAssets UP-TO-DATE
+> Task :android:mergeDebugAssets UP-TO-DATE
+> Task :app:mergeDebugShaders UP-TO-DATE
+> Task :app:compileDebugShaders NO-SOURCE
+> Task :app:generateDebugAssets UP-TO-DATE
+> Task :app:mergeDebugAssets UP-TO-DATE
+> Task :app:packageDebugUnitTestForUnitTest UP-TO-DATE
+> Task :app:processDebugUnitTestManifest UP-TO-DATE
+> Task :app:generateDebugUnitTestConfig UP-TO-DATE
+> Task :app:processDebugJavaRes UP-TO-DATE
+> Task :core:compileTestKotlin UP-TO-DATE
+> Task :core:compileTestJava NO-SOURCE
+> Task :core:processTestResources UP-TO-DATE
+> Task :core:testClasses UP-TO-DATE
+> Task :core:test UP-TO-DATE
+> Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :app:compressDebugAssets UP-TO-DATE
+> Task :app:desugarDebugFileDependencies UP-TO-DATE
+> Task :app:dexBuilderDebug UP-TO-DATE
+> Task :app:mergeDebugGlobalSynthetics UP-TO-DATE
+> Task :app:mergeDebugJavaResource UP-TO-DATE
+> Task :app:checkDebugDuplicateClasses UP-TO-DATE
+> Task :app:mergeExtDexDebug UP-TO-DATE
+> Task :android:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :app:mergeLibDexDebug UP-TO-DATE
+> Task :app:mergeProjectDexDebug UP-TO-DATE
+> Task :android:mergeDebugJniLibFolders UP-TO-DATE
+> Task :android:mergeDebugNativeLibs NO-SOURCE
+> Task :android:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :app:mergeDebugJniLibFolders UP-TO-DATE
+> Task :app:mergeDebugNativeLibs UP-TO-DATE
+> Task :app:stripDebugDebugSymbols UP-TO-DATE
+> Task :app:validateSigningDebug UP-TO-DATE
+> Task :app:writeDebugAppMetadata UP-TO-DATE
+> Task :app:writeDebugSigningConfigVersions UP-TO-DATE
+> Task :app:packageDebug UP-TO-DATE
+> Task :app:createDebugApkListingFileRedirect UP-TO-DATE
+> Task :app:assembleDebug UP-TO-DATE
+> Task :android:checkDebugAarMetadata UP-TO-DATE
+> Task :android:stripDebugDebugSymbols NO-SOURCE
+> Task :android:copyDebugJniLibsProjectAndLocalJars UP-TO-DATE
+> Task :android:extractDebugAnnotations UP-TO-DATE
+> Task :android:extractDeepLinksForAarDebug UP-TO-DATE
+> Task :android:mergeDebugGeneratedProguardFiles UP-TO-DATE
+> Task :android:mergeDebugConsumerProguardFiles UP-TO-DATE
+> Task :android:prepareDebugArtProfile UP-TO-DATE
+> Task :android:prepareLintJarForPublish UP-TO-DATE
+> Task :android:mergeDebugJavaResource UP-TO-DATE
+> Task :android:syncDebugLibJars UP-TO-DATE
+> Task :android:bundleDebugLocalLintAar UP-TO-DATE
+> Task :android:createFullJarDebug UP-TO-DATE
+> Task :android:preDebugAndroidTestBuild UP-TO-DATE
+> Task :android:generateDebugAndroidTestResValues UP-TO-DATE
+> Task :android:writeDebugLintModelMetadata UP-TO-DATE
+> Task :android:generateDebugAndroidTestLintModel UP-TO-DATE
+> Task :android:extractProguardFiles UP-TO-DATE
+> Task :android:generateDebugLintModel UP-TO-DATE
+> Task :android:preDebugUnitTestBuild UP-TO-DATE
+> Task :android:generateDebugUnitTestLintModel UP-TO-DATE
+> Task :android:lintAnalyzeDebug UP-TO-DATE
+> Task :android:lintAnalyzeDebugAndroidTest UP-TO-DATE
+> Task :android:lintAnalyzeDebugUnitTest UP-TO-DATE
+> Task :app:preDebugAndroidTestBuild SKIPPED
+> Task :app:generateDebugAndroidTestResValues UP-TO-DATE
+> Task :app:generateDebugAndroidTestLintModel UP-TO-DATE
+> Task :app:extractProguardFiles UP-TO-DATE
+> Task :app:generateDebugLintReportModel UP-TO-DATE
+> Task :app:generateDebugUnitTestLintModel
+> Task :app:lintAnalyzeDebug UP-TO-DATE
+> Task :app:lintAnalyzeDebugAndroidTest UP-TO-DATE
+> Task :app:compileDebugUnitTestKotlin
+> Task :app:compileDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :app:processDebugUnitTestJavaRes UP-TO-DATE
+> Task :app:lintAnalyzeDebugUnitTest
+OpenGLRenderer W 11-19 14:06:29 52708 3020212 Trying to start new animators on 0x14c288200 (UnprojectedRipple) without an animation handle!
+OpenGLRenderer W 11-19 14:06:29 52708 3020212 Trying to start new animators on 0x14a2de600 (UnprojectedRipple) without an animation handle!
+OpenGLRenderer W 11-19 14:06:31 52708 3020212 Trying to start new animators on 0x11c6e7c00 (UnprojectedRipple) without an animation handle!
+OpenGLRenderer W 11-19 14:06:32 52708 3020212 Trying to start new animators on 0x11c208000 (UnprojectedRipple) without an animation handle!
+OpenGLRenderer W 11-19 14:06:32 52708 3020212 Trying to start new animators on 0x14c597a00 (UnprojectedRipple) without an animation handle!
+OpenGLRenderer W 11-19 14:06:33 52708 3020212 Trying to start new animators on 0x14a2aa400 (UnprojectedRipple) without an animation handle!
+OpenGLRenderer W 11-19 14:06:33 52708 3020212 Trying to start new animators on 0x11c342a00 (UnprojectedRipple) without an animation handle!
+OpenGLRenderer W 11-19 14:06:34 52708 3020212 Trying to start new animators on 0x14c1f6200 (UnprojectedRipple) without an animation handle!
+OpenGLRenderer W 11-19 14:06:34 52708 3020212 Trying to start new animators on 0x11f6a7000 (UnprojectedRipple) without an animation handle!
+OpenGLRenderer W 11-19 14:06:35 52708 3020212 Trying to start new animators on 0x11f6abc00 (UnprojectedRipple) without an animation handle!
+OpenGLRenderer W 11-19 14:06:35 52708 3020212 Trying to start new animators on 0x11f6a0200 (UnprojectedRipple) without an animation handle!
+OpenGLRenderer W 11-19 14:06:35 52708 3020212 Trying to start new animators on 0x14a2de400 (UnprojectedRipple) without an animation handle!
+OpenGLRenderer W 11-19 14:06:35 52708 3020212 Trying to start new animators on 0x11f61b000 (UnprojectedRipple) without an animation handle!
+OpenGLRenderer W 11-19 14:06:36 52708 3020212 Trying to start new animators on 0x14a33a600 (UnprojectedRipple) without an animation handle!
+OpenGLRenderer W 11-19 14:06:36 52708 3020212 Trying to start new animators on 0x14c34c800 (UnprojectedRipple) without an animation handle!
+OpenGLRenderer W 11-19 14:06:36 52708 3020212 Trying to start new animators on 0x11c728a00 (UnprojectedRipple) without an animation handle!
+OpenGLRenderer W 11-19 14:06:36 52708 3020212 Trying to start new animators on 0x14c14d200 (UnprojectedRipple) without an animation handle!
+OpenGLRenderer W 11-19 14:06:36 52708 3020212 Trying to start new animators on 0x14c199400 (UnprojectedRipple) without an animation handle!
+OpenGLRenderer W 11-19 14:06:36 52708 3020212 Trying to start new animators on 0x14c160400 (UnprojectedRipple) without an animation handle!
+OpenGLRenderer W 11-19 14:06:37 52708 3020212 Trying to start new animators on 0x11c2d3600 (UnprojectedRipple) without an animation handle!
+OpenGLRenderer W 11-19 14:06:37 52708 3020212 Trying to start new animators on 0x11c2d3c00 (UnprojectedRipple) without an animation handle!
+OpenGLRenderer W 11-19 14:06:37 52708 3020212 Trying to start new animators on 0x14c2ea000 (UnprojectedRipple) without an animation handle!
+OpenGLRenderer W 11-19 14:06:38 52708 3020212 Trying to start new animators on 0x14c2f2400 (UnprojectedRipple) without an animation handle!
+OpenGLRenderer W 11-19 14:06:38 52708 3020212 Trying to start new animators on 0x14a2f2600 (UnprojectedRipple) without an animation handle!
+OpenGLRenderer W 11-19 14:06:38 52708 3020212 Trying to start new animators on 0x14a2f2c00 (UnprojectedRipple) without an animation handle!
+> Task :app:testDebugUnitTest
+> Task :app:lintReportDebug UP-TO-DATE
+> Task :app:lintDebug
+
+BUILD SUCCESSFUL in 26s
+110 actionable tasks: 5 executed, 105 up-to-date
