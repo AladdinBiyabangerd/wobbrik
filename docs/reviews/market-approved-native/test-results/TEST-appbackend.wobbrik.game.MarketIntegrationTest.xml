@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="appbackend.wobbrik.game.MarketIntegrationTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-11-18T13:49:36.814Z" hostname="Macs-MacBook-Pro.local" time="0.239">
+  <properties/>
+  <testcase name="staleSameUidCapabilityCannotIssueMarketCommand" classname="appbackend.wobbrik.game.MarketIntegrationTest" time="0.153"/>
+  <testcase name="readModelsRejectWrongCursorDuplicateListingsAndPublicClosedHistory" classname="appbackend.wobbrik.game.MarketIntegrationTest" time="0.008"/>
+  <testcase name="allRoutesRecoverExactDurableCommandAfterCommittedResponseLoss" classname="appbackend.wobbrik.game.MarketIntegrationTest" time="0.042"/>
+  <testcase name="filtersStayIdenticalAcrossPagesAndDoNotAcceptPathInjection" classname="appbackend.wobbrik.game.MarketIntegrationTest" time="0.017"/>
+  <testcase name="receiptsAndEnvelopesRejectWrongIdentityFeeRevisionAndUnknownFields" classname="appbackend.wobbrik.game.MarketIntegrationTest" time="0.004"/>
+  <testcase name="definitiveRejectionsClearJournalButAmbiguousFailuresRetainIt" classname="appbackend.wobbrik.game.MarketIntegrationTest" time="0.012"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="appbackend.wobbrik.game.LeaderboardWindowTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-11-19T07:21:55.074Z" hostname="Macs-MacBook-Pro.local" time="0.123">
+  <properties/>
+  <testcase name="growingViewportReadsOnlyMissingPlayersAndRetriesExactCursor" classname="appbackend.wobbrik.game.LeaderboardWindowTest" time="0.102"/>
+  <testcase name="wrongSnapshotDoesNotConsumeTheGrowthCursor" classname="appbackend.wobbrik.game.LeaderboardWindowTest" time="0.002"/>
+  <testcase name="firstBudgetIsBoundedAndSmallerViewportDoesNotReadAgain" classname="appbackend.wobbrik.game.LeaderboardWindowTest" time="0.001"/>
+  <testcase name="exhaustedAndPrivacyFilteredBoardsDoNotInventPlayers" classname="appbackend.wobbrik.game.LeaderboardWindowTest" time="0.002"/>
+  <testcase name="readBoundaryAndResponseRespectRequestedLimit" classname="appbackend.wobbrik.game.LeaderboardWindowTest" time="0.008"/>
+  <testcase name="cancelledReadAndReloginCannotPublishIntoTheWindow" classname="appbackend.wobbrik.game.LeaderboardWindowTest" time="0.007"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

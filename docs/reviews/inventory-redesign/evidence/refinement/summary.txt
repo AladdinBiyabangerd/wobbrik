@@ -1,0 +1,8 @@
+Final native run: /private/tmp/wobbrik-inventory-refine-verified.log
+Command: :app:testDebugUnitTest --tests com.aladdin.wobbrik.InventoryRedesign*Test --offline -I ../docs/reviews/inventory-redesign/render/render.init.gradle
+5 test classes, one test each; task/build PASS28s.
+Regular390/font1, Small320/font1, Regular390/font2, Small320/font2, Insets360/font2.
+Includes production route navigation,48dp targets and last-card scroll-clear-of-dock assertion.
+Ordinary renderer-free app unit: 41 tests, failures/errors=0; assembleDebug/lintDebug PASS30s.
+Native PNGs opened and compared against design/inventory-art-led-v1/reference.png.
+Synthetic HTTP/account data, not device or production latency evidence.

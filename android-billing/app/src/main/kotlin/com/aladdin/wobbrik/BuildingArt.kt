@@ -6,11 +6,16 @@ import androidx.compose.ui.graphics.drawscope.withTransform
 
 /** Game's modular shell, selected windows and roof; never the legacy baked wall panel. */
 internal fun DrawScope.buildingFloor(atlases: Map<String, GameAtlas>, art: Map<String, CosmeticSprite>, parts: Map<String, String>,
-    x: Float, base: Float, scale: Float, ground: Boolean, top: Boolean) {
+    x: Float, base: Float, scale: Float, ground: Boolean, top: Boolean, marketMaterials: Boolean = false, balcony: CosmeticSprite? = null) {
     val atlas = atlases.getValue(gameAtlasStyle(parts))
     val width = 100f * scale
     val height = width * atlas.floor.size.height / atlas.floor.size.width
-    drawModularFloor(atlas.floor, art, atlases, parts, x, base - height, width, ground)
+    drawModularFloor(atlas.floor, art, atlases, parts, x, base - height, width, ground, marketMaterials = marketMaterials, marketContinuation = marketMaterials && !top)
+    balcony?.let {
+        val balconyWidth = width * .59f
+        sprite(it, x - width * .12f, base - width * .28f,
+            balconyWidth, balconyWidth * it.size.height / it.size.width)
+    }
     if (top) {
         val eave = base - height + width * atlas.depth / atlas.floor.size.width
         previewRoof(atlases, art, parts["roof"], x, eave, width)
@@ -44,7 +49,7 @@ internal fun buildingPresentationCenters(centers: List<Long>): List<Long> {
 
 /** Picker retains its geometry; owned previews use the approved representative floors. */
 internal fun DrawScope.buildingPreview(atlases: Map<String, GameAtlas>, art: Map<String, CosmeticSprite>,
-    parts: Map<String, String>, centers: List<Long>, garden: CosmeticSprite? = null) {
+    parts: Map<String, String>, centers: List<Long>, garden: CosmeticSprite? = null, marketMaterials: Boolean = false, marketBalcony: CosmeticSprite? = null) {
     if (centers.isEmpty() || size.width <= 0 || size.height <= 0) return
     val atlas = atlases.getValue(gameAtlasStyle(parts))
     val displayCenters = if (garden == null) centers else buildingPresentationCenters(centers)
@@ -66,7 +71,7 @@ internal fun DrawScope.buildingPreview(atlases: Map<String, GameAtlas>, art: Map
         if (garden != null) sprite(garden, -gardenWidth / 2 - min, -65f * gardenScale, gardenWidth, 120f * gardenScale)
         displayCenters.forEachIndexed { index, center ->
             val x = center / 1000f - 50f - min
-            buildingFloor(atlases, art, parts, x, -index * pitch, 1f, index == 0, index == displayCenters.lastIndex)
+            buildingFloor(atlases, art, parts, x, -index * pitch, 1f, index == 0, index == displayCenters.lastIndex, marketMaterials, if (marketMaterials && index > 0 && index % 2 == 1) marketBalcony else null)
         }
     }
 }

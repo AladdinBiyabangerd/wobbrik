@@ -67,7 +67,7 @@ internal fun usesPurpleTemplate(parts: Map<String, String>): Boolean =
 
 /** Atlas-pixel anchors measured in the approved modular study; not UI tokens or accepted geometry. */
 internal fun DrawScope.purpleBuilding(art: Map<String, CosmeticSprite>, catalog: Map<String, CosmeticSprite>,
-    atlases: Map<String, GameAtlas>, parts: Map<String, String>, centers: List<Long>) {
+    atlases: Map<String, GameAtlas>, parts: Map<String, String>, centers: List<Long>, marketMaterials: Boolean = false) {
     val representative = buildingPresentationCenters(centers)
     val count = minOf(representative.size, GameTokens.BuildingPreview.PurpleMaxFloors)
     val display = if (count < 2) representative else List(count) {
@@ -125,16 +125,16 @@ internal fun DrawScope.purpleBuilding(art: Map<String, CosmeticSprite>, catalog:
                 else listOf(16f,76f,241f,103f,220f,241f,34f,218f)
             val sideSource = if (i == 0) listOf(222f,101f,350f,40f,348f,220f,211f,280f)
                 else listOf(241f,103f,353f,42f,333f,177f,220f,241f)
-            val shellHeight = if (i == 0) 233f else pitch - 14f
+            val shellHeight = if (i == 0) 233f else pitch - if (marketMaterials) 6f else 14f
             val lowerX = if (i == 0) x else 150f + display[i-1] / 1000f * 3.7f - minOffset
-            if (i == 0) purpleGroundShell(art,catalog,parts,x,y,atlases["teal"]?.roof)
+            if (i == 0) purpleGroundShell(art,catalog,parts,x,y,atlases["teal"]?.roof,marketMaterials)
             else {
             purpleSurface(shell, frontSource, listOf(Offset(x+16f,y+68f),Offset(x+240f,y+128f),
                 Offset(lowerX+240f,y+128f+shellHeight),Offset(lowerX+16f,y+68f+shellHeight)))
             purpleSurface(shell, sideSource, listOf(Offset(x+240f,y+128f),Offset(x+354f,y+63f),
                 Offset(lowerX+354f,y+63f+shellHeight),Offset(lowerX+240f,y+128f+shellHeight)))
             }
-            if (i < display.lastIndex) purpleJoint(art.getValue("floor"),x,y)
+            if (i < display.lastIndex) purpleJoint(art.getValue("floor"),x,y,marketMaterials)
             fun point(u:Float,v:Float,side:Boolean): Offset {
                 val faceX = x + (lowerX-x) * (160f*v/shellHeight)
                 return if(side) Offset(faceX+240f+114f*u,y+128f-65f*u+160f*v)
@@ -143,13 +143,23 @@ internal fun DrawScope.purpleBuilding(art: Map<String, CosmeticSprite>, catalog:
             fun plane(item:CosmeticSprite,side:Boolean,u:Float,v:Float,w:Float,h:Float) {
                 purplePlane(item,listOf(point(u,v,side),point(u+w,v,side),point(u+w,v+h,side),point(u,v+h,side)))
             }
-            if(i > 0 && parts["wall"] != "base_1_wall") catalog[parts["wall"]]?.let { wall ->
-                val origin = IntOffset(wall.origin.x+(wall.size.width*.14f).toInt(),wall.origin.y+(wall.size.height*.29f).toInt())
-                val sample = wall.copy(origin=origin,size=IntSize((wall.size.width*.64f).toInt(),(wall.size.height*.48f).toInt()))
+            if(i > 0 && (marketMaterials || parts["wall"] != "base_1_wall")) catalog[parts["wall"]]?.let { wall ->
+                val sample = if (marketMaterials) marketWallSample(wall, parts["wall"]) else {
+                    val origin = IntOffset(wall.origin.x+(wall.size.width*.14f).toInt(),wall.origin.y+(wall.size.height*.29f).toInt())
+                    wall.copy(origin=origin,size=IntSize((wall.size.width*.64f).toInt(),(wall.size.height*.48f).toInt()))
+                }
                 // Material reaches the existing pilasters and shared cornices;
                 // inset decals left exposed purple strips around other finishes.
-                plane(sample,false,16f/224f,0f,190f/224f,shellHeight/160f)
-                plane(sample,true,11f/114f,0f,89f/114f,shellHeight/160f)
+                val frontInset = if (marketMaterials) 5f else 16f
+                val sideInset = if (marketMaterials) 4f else 11f
+                plane(sample,false,frontInset/224f,0f,(224f-frontInset*2)/224f,shellHeight/160f)
+                plane(sample,true,sideInset/114f,0f,(114f-sideInset*2)/114f,shellHeight/160f)
+            }
+            if (marketMaterials && i > 0) {
+                marketFacadeLight(listOf(point(0f,0f,false),point(1f,0f,false),
+                    point(1f,shellHeight/160f,false),point(0f,shellHeight/160f,false)), false)
+                marketFacadeLight(listOf(point(0f,0f,true),point(1f,0f,true),
+                    point(1f,shellHeight/160f,true),point(0f,shellHeight/160f,true)), true)
             }
             fun selected(category:String,cell:String):CosmeticSprite? =
                 if(parts[category] == "base_1_$category") art[cell] else catalog[parts[category]]
@@ -168,7 +178,10 @@ internal fun DrawScope.purpleBuilding(art: Map<String, CosmeticSprite>, catalog:
                     val half=item.size.width/2
                     item=item.copy(origin=IntOffset(item.origin.x+if(side) half else 0,item.origin.y),size=IntSize(half,item.size.height))
                 }
-                plane(item,side,if(side).2f else .26f,.06f,if(side).6f else .45f,.82f)
+                // Leave masonry around the selected frame; oversize frames hid the
+                // brick courses and made every floor read as a repeated window tile.
+                if (marketMaterials) plane(item,side,if(side).23f else .30f,.12f,if(side).54f else .38f,.70f)
+                else plane(item,side,if(side).2f else .26f,.06f,if(side).6f else .45f,.82f)
             }
             if(i==0) {
                 // Independent ground-facing stair: its top landing follows the
@@ -191,9 +204,15 @@ internal fun DrawScope.purpleBuilding(art: Map<String, CosmeticSprite>, catalog:
             if (i == 0) {
                 selected("window","square")?.let { purpleGroundWindows(it,x,y,parts["window"] == "coins_window_2") }
             } else window(true)
-            if(i>0 && i%2==1) sprite(art.getValue("balcony"),x-30f,y+164f,225f,175f)
+            if(i>0 && i%2==1) {
+                if (marketMaterials) {
+                    // The rear of the selected template's balcony meets the sill;
+                    // its rail and trailing flowers project beyond the front wall.
+                    sprite(art.getValue("balcony"),x-63f,y+153f,252f,196f)
+                } else sprite(art.getValue("balcony"),x-30f,y+164f,225f,175f)
+            }
             if(i==display.lastIndex) {
-                if(parts["roof"] == "base_1_roof") purpleRoof(art.getValue("roof"),x,y)
+                if(parts["roof"] == "base_1_roof") purpleRoof(art.getValue("roof"),x,y,marketMaterials)
                 else {
                     // Teal's clean modular roof remains its own selected asset.
                     val selectedRoof = if(parts["roof"] == "base_2_roof") atlases["teal"]?.roof else catalog[parts["roof"]]
@@ -212,13 +231,16 @@ internal fun DrawScope.purpleBuilding(art: Map<String, CosmeticSprite>, catalog:
 }
 
 /** One ledge per junction: its upper edge is also the upper wall's lower edge. */
-private fun DrawScope.purpleJoint(shell: CosmeticSprite, x: Float, y: Float) {
+private fun DrawScope.purpleJoint(shell: CosmeticSprite, x: Float, y: Float, marketMaterials: Boolean) {
+    // A narrow lip keeps the floor joint legible without turning every storey
+    // into a thick white frame. Wall anchors and floor pitch do not move.
+    val lip = if (marketMaterials) 6f else 14f
     purpleSurface(shell,listOf(19f,57f,240f,84f,240f,101f,19f,74f),listOf(
-        Offset(x+16f,y+54f),Offset(x+240f,y+114f),
+        Offset(x+16f,y+68f-lip),Offset(x+240f,y+128f-lip),
         Offset(x+240f,y+128f),Offset(x+16f,y+68f),
     ))
     purpleSurface(shell,listOf(240f,84f,350f,25f,351f,40f,240f,101f),listOf(
-        Offset(x+240f,y+114f),Offset(x+354f,y+49f),
+        Offset(x+240f,y+128f-lip),Offset(x+354f,y+63f-lip),
         Offset(x+354f,y+63f),Offset(x+240f,y+128f),
     ))
 }
@@ -276,11 +298,14 @@ internal fun DrawScope.purpleSurface(item: CosmeticSprite, source: List<Float>, 
 }
 
 /** Three matching eave points put the roof on the very same facade planes. */
-private fun DrawScope.purpleRoof(item: CosmeticSprite, x: Float, y: Float) {
+private fun DrawScope.purpleRoof(item: CosmeticSprite, x: Float, y: Float, marketMaterials: Boolean) {
+    // Eaves project past the facade; the selected dormer/chimney remain in the
+    // original roof sprite. This never adds another roof ID.
+    val overhang = if (marketMaterials) 10f else 0f
     drawIntoCanvas { canvas ->
         val matrix = Matrix()
         matrix.setPolyToPoly(floatArrayOf(7f,194f,262f,263f,396f,140f),0,
-            floatArrayOf(x+16f,y+68f,x+240f,y+128f,x+354f,y+63f),0,3)
+            floatArrayOf(x+16f-overhang,y+68f,x+240f,y+128f+overhang/2,x+354f+overhang,y+63f),0,3)
         val native = canvas.nativeCanvas
         native.save()
         native.concat(matrix)

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.aladdin.wobbrik.AchievementsInsetsTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-11-19T07:27:08.880Z" hostname="Macs-MacBook-Pro.local" time="9.804">
+  <properties/>
+  <testcase name="render" classname="com.aladdin.wobbrik.AchievementsInsetsTest" time="9.804"/>
+  <system-out><![CDATA[UGURLAR insets-long cold=1/713 bytes warm=0 firstMetadataHostMs=199 warmRouteHostMs=39 elapsedHostMs=4713 requests=[leaderboard?scope=all&limit=4, leaderboard?scope=weekly&limit=4, leaderboard?scope=all&limit=4, leaderboard?scope=all&limit=4]
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

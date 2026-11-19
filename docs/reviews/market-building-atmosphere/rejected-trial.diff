@@ -1,0 +1,78 @@
+--- MarketScreen.kt.before
++++ MarketScreen.kt.trial
+@@ -309,7 +309,7 @@
+         if(largeFont || grid) Column(Modifier.padding(GameTokens.Small),
+             verticalArrangement = Arrangement.spacedBy(if(grid) GameTokens.Quarter else GameTokens.Small)) {
+             // Keep a full illustration frame, including the garden, on compact cards.
+-            BuildingPreview(building, Modifier.fillMaxWidth().height(if(grid) {
++            MarketBuildingPreview(building, Modifier.fillMaxWidth().height(if(grid) {
+                 if(largeFont) GameTokens.InventoryCollection.LargeTypeArtHeight
+                 else if(sizing.compact) GameTokens.InventoryCollection.LargeTypeArtHeight
+                 else GameTokens.InventoryCollection.ArtHeight
+@@ -317,7 +317,7 @@
+             details()
+         } else Row(Modifier.padding(GameTokens.Small), verticalAlignment = Alignment.CenterVertically,
+             horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+-            BuildingPreview(building, Modifier.width(sizing.listPreview).height(sizing.listPreview))
++            MarketBuildingPreview(building, Modifier.width(sizing.listPreview).height(sizing.listPreview))
+             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(GameTokens.Small), content = details)
+         }
+     }
+@@ -347,12 +347,12 @@
+             if(status == "active") MarketCollectionAction("Elanı geri götür", enabled = enabled, onClick = onClick)
+         }
+         if(largeFont) Column(Modifier.padding(GameTokens.Small), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+-            BuildingPreview(building, Modifier.fillMaxWidth().height(GameTokens.AppearanceCollection.CompactArtHeight))
++            MarketBuildingPreview(building, Modifier.fillMaxWidth().height(GameTokens.AppearanceCollection.CompactArtHeight))
+             details()
+         } else Row(Modifier.padding(GameTokens.Small), verticalAlignment = Alignment.CenterVertically,
+             horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+             val artHeight = if(mobileUiSizing().compact) GameTokens.InventoryCollection.CompactArtHeight else GameTokens.InventoryCollection.ArtHeight
+-            BuildingPreview(building, Modifier.width(if(mobileUiSizing().compact) GameTokens.AppearanceCollection.CompactArtHeight else GameTokens.InventoryCollection.CompactArtHeight).height(artHeight))
++            MarketBuildingPreview(building, Modifier.width(if(mobileUiSizing().compact) GameTokens.AppearanceCollection.CompactArtHeight else GameTokens.InventoryCollection.CompactArtHeight).height(artHeight))
+             VerticalDivider(Modifier.height(artHeight - GameTokens.Gap),
+                 thickness = GameTokens.InventoryCollection.OutlineWidth, color = GameTokens.InventoryCollection.Outline)
+             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(GameTokens.Quarter), content = details)
+--- MarketCollectionUi.kt.before
++++ MarketCollectionUi.kt.trial
+@@ -7,9 +7,11 @@
+ import androidx.compose.runtime.Composable
+ import androidx.compose.ui.Alignment
+ import androidx.compose.ui.Modifier
++import androidx.compose.ui.draw.clipToBounds
+ import androidx.compose.ui.draw.clip
+ import androidx.compose.ui.graphics.Brush
+ import androidx.compose.ui.graphics.Color
++import androidx.compose.ui.graphics.drawscope.withTransform
+ import androidx.compose.ui.semantics.contentDescription
+ import androidx.compose.ui.semantics.semantics
+ import androidx.compose.ui.text.font.FontWeight
+@@ -77,3 +79,28 @@
+         CollectionRefresh(!loading, onRefresh)
+     }
+ }
++
++/** A quiet garden backdrop from the shipped atlas, behind the real building layers.
++ * Shares prepared art; no new bitmap, ownership decoration or animated frame state. */
++@Composable
++internal fun MarketBuildingPreview(building: appbackend.wobbrik.game.OwnedBuilding, modifier: Modifier) {
++    val ready = LocalBuildingArt.current.status == ArtPreparation.Ready
++    val foliage = if(ready) rememberPurpleBuildingArt()["front_left"] else null
++    Box(modifier.clipToBounds()) {
++        if(ready) Canvas(Modifier.matchParentSize()) {
++            // A low, diffuse pool of warm light ties the flowers and masonry to the card.
++            val ground = androidx.compose.ui.geometry.Offset(size.width * .5f, size.height * .88f)
++            withTransform({
++                scale(1f, .30f, ground)
++            }) {
++                drawCircle(Brush.radialGradient(listOf(GameTokens.MobileHome.GoldLight.copy(alpha=.24f),
++                    GameTokens.MobileHome.GoldLight.copy(alpha=0f)), ground, size.width * .47f),
++                    size.width * .47f, ground)
++            }
++            // Low-contrast distant shrubs flank the tower instead of widening its geometry.
++            sprite(foliage, size.width * .06f, size.height * .66f, size.width * .34f, size.height * .24f, .32f)
++            sprite(foliage, size.width * .60f, size.height * .68f, size.width * .29f, size.height * .21f, .24f)
++        }
++        BuildingPreview(building, Modifier.matchParentSize())
++    }
++}

@@ -10,6 +10,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
@@ -27,90 +33,130 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import appbackend.wobbrik.game.GameSnapshot
 
-/** Read-only accepted progress. Completion is an explicit server award, never inferred. */
+/** Read-only accepted progress; threshold completion never grants an award locally. */
 @Composable
 internal fun MobileAchievementsScreen(snapshot: GameSnapshot, onHome: () -> Unit) {
     BackHandler(onBack = onHome)
-    val largeFont = LocalDensity.current.fontScale > 1f
-    val awards = snapshot.account?.achievements.orEmpty()
-    val progress = snapshot.account?.achievementProgress
-    val groups = progress.orEmpty().groupBy { it.category }.values.toList()
-    // Keep categories visible together, then subsequent server-defined tiers below.
-    val ordered = (0 until (groups.maxOfOrNull { it.size } ?: 0)).flatMap { tier -> groups.mapNotNull { it.getOrNull(tier) } }
-    val rows = ordered.map { AchievementRow(it.id, it.category, it.threshold, it.current, it.id in awards) } +
-        awards.filter { id -> progress.orEmpty().none { it.id == id } }.map { AchievementRow(it, it.substringBeforeLast('_'), null, null, true) }
-    LazyColumn(Modifier.fillMaxSize().padding(horizontal = GameTokens.Gap),
-        verticalArrangement = Arrangement.spacedBy(GameTokens.Small),
-        contentPadding = PaddingValues(bottom = GameTokens.Gap)) {
-        item {
-            Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                AchievementArt(GameTokens.Achievements.Trophy, Modifier.height(GameTokens.Achievements.HeroHeight)
-                    .width(GameTokens.Achievements.HeroHeight * 2))
+    val (art, retry) = rememberResourceArt(R.drawable.achievements_collection_art)
+    val rows = remember(snapshot) {
+        val awards = snapshot.account?.achievements.orEmpty().toSet()
+        val progress = snapshot.account?.achievementProgress.orEmpty()
+        val groups = progress.groupBy { it.category }.values.toList()
+        val ordered = (0 until (groups.maxOfOrNull { it.size } ?: 0)).flatMap { tier -> groups.mapNotNull { it.getOrNull(tier) } }
+        val known = progress.mapTo(HashSet()) { it.id }
+        ordered.map { AchievementRow(it.id, it.category, it.threshold, it.current, it.id in awards) } +
+            awards.filter { it !in known }.map { AchievementRow(it, it.substringBeforeLast('_'), null, null, true) }
+    }
+    val large = LocalDensity.current.fontScale > 1f
+    BoxWithConstraints(Modifier.fillMaxSize()) {
+        val compact = maxHeight < GameTokens.MobileUi.CompactHeight
+        CompositionLocalProvider(LocalAchievementArt provides art.images?.singleOrNull()) {
+            LazyColumn(Modifier.fillMaxSize().testTag("awards-list").padding(horizontal = GameTokens.InventoryCollection.ScreenInset),
+                verticalArrangement = Arrangement.spacedBy(GameTokens.Small),
+                contentPadding = PaddingValues(top = GameTokens.Small, bottom = LocalCollectionDockClearance.current)) {
+                item("hero") {
+                    Box(Modifier.fillMaxWidth().height(if(large) GameTokens.InventoryCollection.LargeTypeArtHeight else
+                        if(compact) GameTokens.InventoryCollection.CompactArtHeight else GameTokens.InventoryCollection.ArtHeight),
+                        contentAlignment = Alignment.Center) {
+                        if(art.images == null) ApprovedArtStatus(if(art.failed) ArtPreparation.Failed else ArtPreparation.Loading, retry)
+                        else AchievementIllustration(0, Modifier.fillMaxSize())
+                    }
+                }
+                item("summary") { AchievementSummary(snapshot, large) }
+                item("heading") { Text("Nailiyyətlər", color = GameTokens.Text, fontFamily = GameTypeface,
+                    fontSize = GameTokens.OwnedDetail.Title, fontWeight = FontWeight.ExtraBold) }
+                if(snapshot.account?.achievementProgress == null) item("unavailable") {
+                    Text("Pillələrin irəliləyişi bu hesab məlumatında yoxdur. Yenilənmiş server məlumatı tələb olunur.",
+                        color = GameTokens.Muted, fontSize = GameTokens.Label)
+                }
+                if(rows.isEmpty()) item("empty") { AchievementPanel(Modifier.fillMaxWidth()) {
+                    Text("Hələ açılmış mükafat yoxdur. Oyunu tamamlayaraq nailiyyətlər qazan.",
+                        Modifier.padding(GameTokens.Gap), color = GameTokens.Muted, fontSize = GameTokens.Body)
+                } }
+                items(rows, key = { it.id }) { AchievementCard(it, large) }
             }
         }
-        item { MobileHomeStats(snapshot, largeFont, achievementBadge = true) }
-        item {
-            Text("${awards.size} mükafat açılıb", color = GameTokens.Text,
-                fontFamily = GameTypeface, fontSize = GameTokens.Hint, fontWeight = FontWeight.Bold)
+    }
+}
+
+private val LocalAchievementArt = staticCompositionLocalOf<ImageBitmap?> { null }
+
+@Composable
+private fun AchievementIllustration(cell: Int, modifier: Modifier) {
+    val sheet = LocalAchievementArt.current ?: return
+    val w = sheet.width / 2; val h = sheet.height / 3
+    val painter = remember(sheet, cell) {
+        if(cell == 0) BitmapPainter(sheet, IntOffset(w / 20, h / 7), IntSize(w * 9 / 10, h * 3 / 4))
+        else BitmapPainter(sheet, IntOffset(cell % 2 * w, cell / 2 * h), IntSize(w,h))
+    }
+    Image(painter, null, modifier)
+}
+
+@Composable
+private fun AchievementSummary(snapshot: GameSnapshot, large: Boolean) {
+    AchievementPanel(Modifier.fillMaxWidth()) {
+        val label: @Composable () -> Unit = {
+            Text("${snapshot.account?.achievements?.size ?: 0} nailiyyət açılıb", color = GameTokens.Text,
+                fontFamily = GameTypeface, fontSize = GameTokens.Body, fontWeight = FontWeight.ExtraBold)
         }
-        if (progress == null) item {
-            Text("Pillələrin irəliləyişi bu hesab məlumatında yoxdur. Yenilənmiş server məlumatı tələb olunur.",
-                color = GameTokens.Muted, fontFamily = GameTypeface, fontSize = GameTokens.Label)
-        }
-        if (rows.isEmpty()) item {
-            MenuRelief(Modifier.fillMaxWidth()) {
-                Text("Hələ açılmış mükafat yoxdur. Oyunu tamamlayaraq nailiyyətlər qazan.",
-                    Modifier.padding(GameTokens.Gap), color = GameTokens.Muted, fontSize = GameTokens.Body)
+        if(large) Column(Modifier.padding(GameTokens.Small), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+            label()
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+                Box(Modifier.size(GameTokens.Target), contentAlignment = Alignment.Center) {
+                    AchievementIllustration(1, Modifier.fillMaxSize())
+                }
+                Text("Səviyyə ${snapshot.account?.level ?: "—"}", Modifier.weight(1f), color = GameTokens.Text, fontSize = GameTokens.Label)
             }
+            Row {
+                Text("Rekord ${snapshot.account?.bestFloors ?: "—"}", color = GameTokens.InventoryCollection.Metadata, fontSize = GameTokens.Label)
+            }
+        } else Row(Modifier.padding(horizontal = GameTokens.Small), verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+            Box(Modifier.weight(1f)) { label() }
+            Box(Modifier.size(GameTokens.Target), contentAlignment = Alignment.Center) {
+                AchievementIllustration(1, Modifier.fillMaxSize())
+                Text(snapshot.account?.level?.toString() ?: "—", color = GameTokens.Text, fontFamily = GameTypeface,
+                    fontSize = GameTokens.Hint, fontWeight = FontWeight.ExtraBold)
+            }
+            Text("Rekord ${snapshot.account?.bestFloors ?: "—"}", Modifier.width(GameTokens.Target * 2 + GameTokens.Small),
+                color = GameTokens.InventoryCollection.Metadata, fontSize = GameTokens.Label, fontWeight = FontWeight.Bold)
         }
-        items(rows, key = { it.id }) { row -> AchievementCard(row, largeFont) }
     }
 }
 
 private data class AchievementRow(val id: String, val category: String, val target: Long?, val current: Long?, val completed: Boolean)
 
 @Composable
-private fun AchievementCard(row: AchievementRow, largeFont: Boolean) {
-    MenuRelief(Modifier.fillMaxWidth()) {
+private fun AchievementCard(row: AchievementRow, large: Boolean) {
+    AchievementPanel(Modifier.fillMaxWidth().testTag("award-${row.id}")) {
         Row(Modifier.padding(GameTokens.Small), verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-            AchievementArt(when(row.category) {
-                "height" -> GameTokens.Achievements.GoldMedal
-                "precise" -> GameTokens.Achievements.BlueMedal
-                else -> GameTokens.Achievements.PurpleMedal
-            }, Modifier.size(GameTokens.Target))
+            AchievementIllustration(when { row.id == "height_10" -> 5; row.category == "height" -> 2;
+                row.category == "precise" -> 3; else -> 4 },
+                Modifier.size(if(large) GameTokens.Target else GameTokens.Target + GameTokens.Inset))
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {
-                Text(achievementTitle(row.id), color = GameTokens.Text, fontFamily = GameTypeface,
-                    fontSize = GameTokens.Body, fontWeight = FontWeight.Bold)
-                if (row.completed) Text("✓ Tamamlandı", color = GameTokens.Success,
-                    fontFamily = GameTypeface, fontSize = GameTokens.Label)
-                val fraction = if (row.completed) 1f else if (row.target != null && row.current != null)
-                    (row.current.toDouble() / row.target).toFloat().coerceIn(0f, 1f) else 0f
-                val label = if (!row.completed && row.target != null) "${row.current} / ${row.target}" else null
-                if (largeFont && label != null) Text(label, color = GameTokens.Text, fontSize = GameTokens.Label)
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-                    MenuRelief(Modifier.weight(1f).height(GameTokens.Achievements.ProgressHeight)
-                        .semantics { progressBarRangeInfo = ProgressBarRangeInfo(fraction, 0f..1f) },
-                        shape = RoundedCornerShape(GameTokens.CardRadius), kind = MenuSkin.Track) {
-                        Canvas(Modifier.fillMaxSize()) {
-                            drawRoundRect(Brush.verticalGradient(listOf(GameTokens.MobileHome.PlayTop,
-                                if(row.completed) GameTokens.Success else GameTokens.Accent, GameTokens.MobileHome.PlayBottom)),
-                                size = Size(size.width * fraction, size.height), cornerRadius = CornerRadius(size.height))
-                        }
+                Text(when { row.id == "height_10" -> "İlk bina"; row.category == "height" -> "Usta inşaatçı";
+                    row.category == "precise" -> "Dəqiq yerləşdirmə"; row.category in setOf("rescue", "rescues") -> "Yıxılmayan şəhər";
+                    else -> achievementTitle(row.id) }, color = GameTokens.Text, fontFamily = GameTypeface,
+                    fontSize = GameTokens.Body, fontWeight = FontWeight.ExtraBold)
+                if(row.completed) Text("✓ Tamamlandı", color = GameTokens.Success, fontSize = GameTokens.Label, fontWeight = FontWeight.Bold)
+                else if(row.target != null && row.current != null) Text("${row.current} / ${row.target}" + when(row.category) {
+                    "height" -> " mərtəbə"; "rescue", "rescues" -> " xilasetmə"; else -> ""
+                }, color = GameTokens.InventoryCollection.Metadata, fontSize = GameTokens.Label)
+                if(!row.completed && row.target != null && row.current != null) {
+                    val fraction = (row.current.toDouble() / row.target).toFloat().coerceIn(0f,1f)
+                    val shape = RoundedCornerShape(GameTokens.Small)
+                    Canvas(Modifier.fillMaxWidth().height(GameTokens.Achievements.ProgressHeight).clip(shape)
+                        .background(GameTokens.InventoryCollection.Background)
+                        .border(GameTokens.InventoryCollection.OutlineWidth, GameTokens.InventoryCollection.Metadata, shape)
+                        .semantics { progressBarRangeInfo = ProgressBarRangeInfo(fraction, 0f..1f) }) {
+                        drawRoundRect(Brush.verticalGradient(listOf(GameTokens.MobileHome.PlayTop, GameTokens.Accent,
+                            GameTokens.MobileHome.PlayBottom)), size = Size(size.width * fraction, size.height), cornerRadius = CornerRadius(size.height))
                     }
-                    if (!largeFont && label != null) Text(label, color = GameTokens.Text,
-                        fontFamily = GameTypeface, fontWeight = FontWeight.Bold, fontSize = GameTokens.Label)
                 }
             }
         }
     }
-}
-
-@Composable
-private fun AchievementArt(bounds: IntArray, modifier: Modifier) {
-    val bitmap = ImageBitmap.imageResource(R.drawable.achievement_art_v3)
-    val painter = remember(bitmap, bounds) { BitmapPainter(bitmap, IntOffset(bounds[0], bounds[1]), IntSize(bounds[2], bounds[3])) }
-    Image(painter, null, modifier)
 }
 
 // Unknown additive server awards keep a readable fallback title.

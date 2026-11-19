@@ -34,6 +34,9 @@ class MockGameplayTransportTest {
         assertFalse(read().attempt!!.active)
         val inventory = InventoryReads.inventory(backend.request("inventory?limit=20", "local-mock-only", null).body)
         assertEquals(1, inventory.buildings.size)
+        val detail = backend.request("buildings/${inventory.buildings.single().id}?view=display", "local-mock-only", null)
+        assertEquals(200, detail.status)
+        assertEquals(inventory.buildings.single().id, InventoryReads.building(detail.body).id)
         assertEquals(1250L, read().coins) // Mock play never invents real rewards.
     }
 

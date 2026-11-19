@@ -11,7 +11,7 @@ import androidx.compose.ui.unit.IntSize
  */
 internal fun DrawScope.purpleGroundShell(
     art: Map<String, CosmeticSprite>, catalog: Map<String, CosmeticSprite>,
-    parts: Map<String, String>, x: Float, y: Float, tealRoof: CosmeticSprite?,
+    parts: Map<String, String>, x: Float, y: Float, tealRoof: CosmeticSprite?, marketMaterials: Boolean = false,
 ) {
     val masonry = art.getValue("ground_masonry")
     val wallSource = listOf(435f,179f,822f,199f,817f,472f,435f,451f)
@@ -20,9 +20,9 @@ internal fun DrawScope.purpleGroundShell(
     val trimSource = listOf(447f,499f,815f,519f,815f,539f,447f,519f)
     val capSource = listOf(855f,250f,875f,251f,875f,275f,855f,274f)
     val columnSource = listOf(852f,203f,883f,205f,878f,491f,846f,489f)
-    val selectedWall = if (parts["wall"] == "base_1_wall") null else catalog[parts["wall"]]
+    val selectedWall = if (!marketMaterials && parts["wall"] == "base_1_wall") null else catalog[parts["wall"]]
     val material = selectedWall?.let { wall ->
-        wall.copy(
+        if (marketMaterials) marketWallSample(wall, parts["wall"]) else wall.copy(
             origin = IntOffset(wall.origin.x+(wall.size.width*.14f).toInt(),wall.origin.y+(wall.size.height*.29f).toInt()),
             size = IntSize((wall.size.width*.64f).toInt(),(wall.size.height*.48f).toInt()),
         )

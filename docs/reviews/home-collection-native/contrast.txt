@@ -1,0 +1,6 @@
+
+docs/reviews/home-collection-native/contrast.css  —  :root
+    Muted              on PanelTop             6.77  needs 4.5  OK
+    Accent             on PanelTop             7.40  needs 4.5  OK
+    Background         on PlayBottom           7.66  needs 4.5  OK
+    Text               on PanelTop            10.71  needs 4.5  OK

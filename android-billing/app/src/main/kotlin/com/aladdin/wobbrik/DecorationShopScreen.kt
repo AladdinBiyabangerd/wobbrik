@@ -19,6 +19,10 @@ import kotlinx.coroutines.CancellationException
 internal fun DecorationShopScreen(configured: WobbrikApplication.Bootstrap.Configured,
     ready: AuthenticatedRecoveryOwner.State.Ready, onBack: () -> Unit, onListings: () -> Unit = onBack) {
     val purchases = remember(configured) { CityPurchases(configured.recovery) }
+    if(LocalMobileMenuShell.current) {
+        MobileDecorationShop(ready, onBuy = { purchases.buy(ready, it) }, onBack = onBack, onListings = onListings, onRefresh = configured.recovery::onForeground)
+        return
+    }
     var copies by remember { mutableStateOf<List<DecorationCopy>?>(null) }
     var failed by remember { mutableStateOf(false) }
     var retry by remember { mutableIntStateOf(0) }
@@ -51,7 +55,7 @@ internal fun DecorationShopContent(ready: AuthenticatedRecoveryOwner.State.Ready
     copies: List<DecorationCopy>?, failed: Boolean, onRetry: () -> Unit, onBuy: (String) -> Unit,
     onBack: () -> Unit, onListings: () -> Unit = onBack) {
     if(LocalMobileMenuShell.current) {
-        MobileDecorationShop(ready, copies, failed, onRetry, onBuy, onBack, onListings)
+        MobileDecorationShop(ready, onBuy, onBack, onListings, onRetry)
         return
     }
     val art = rememberDecorationArt()

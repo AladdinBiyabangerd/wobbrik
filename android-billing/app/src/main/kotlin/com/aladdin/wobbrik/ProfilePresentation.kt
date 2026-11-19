@@ -81,8 +81,7 @@ private fun profileBoard(resource: Int): ImageBitmap {
 @Composable
 internal fun ProfileFrame(title: String, onBack: () -> Unit, coins: Long?, content: @Composable ColumnScope.() -> Unit) {
     if (LocalMobileMenuShell.current && coins != null) {
-        Column(Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(GameTokens.MobileHome.PanelTop, GameTokens.MobileHome.PanelBottom)))
-            .safeDrawingPadding().padding(GameTokens.Gap), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+        Column(Modifier.fillMaxSize().padding(horizontal = GameTokens.InventoryCollection.ScreenInset), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
             content()
         }
         return
@@ -396,7 +395,7 @@ internal fun ProfileOverview(profile: PublicProfile, level: String, xp: Long, be
 internal fun ProfileNavbar(onHome: () -> Unit, onPage: (String) -> Unit) {
     if (LocalMobileMenuShell.current) {
         Row(horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-            NativeProfileShortcut("Parametrlər", records = false, Modifier.weight(1f)) { onPage("settings") }
+            NativeProfileShortcut("Nailiyyətlər", records = false, Modifier.weight(1f)) { onPage("achievements") }
             NativeProfileShortcut("Rekordlar", records = true, Modifier.weight(1f)) { onPage("leaderboard") }
         }
         return

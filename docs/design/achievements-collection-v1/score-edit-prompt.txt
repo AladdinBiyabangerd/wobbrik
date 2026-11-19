@@ -1,0 +1,1 @@
+Edit the initial board only: silver second-place Aylin score 86 becomes 74; gold first-place Murad score 74 becomes 86. Preserve every other text, artwork, layout, color, header, tabs and navbar. No redesign.

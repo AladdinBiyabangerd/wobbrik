@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.aladdin.wobbrik.MarketReferenceSelectionTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-11-19T06:31:28.789Z" hostname="Macs-MacBook-Pro.local" time="0.27">
+  <properties/>
+  <testcase name="referenceMaterialsSameParts" classname="com.aladdin.wobbrik.MarketReferenceSelectionTest" time="0.27"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

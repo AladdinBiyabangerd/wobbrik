@@ -42,8 +42,8 @@ internal fun DrawScope.drawGameScene(state: PracticeState, art: SceneArt, motion
     // Keep the hanging floor inside the window at max swing, but drop the old
     // 50u gutter so the tower reads closer to game-tap-v2 hero scale.
     val travelWidth = 2 * PracticeRulesV1.CRANE_RANGE.toFloat() + floorWidth
-    // Tighter vertical budget: island through crane fills more of the portrait frame.
-    val scale = min(size.width / travelWidth, size.height / (4f * pitch + 370f))
+    // Reserve the initial drop clearance AND four visible floor pitches at all heights.
+    val scale = min(size.width / travelWidth, size.height / (8f * pitch + 370f))
     val ground = size.height - 60f * scale
     // Compress empty air above the stack, continuously through landing. Physics is unchanged.
     fun visualY(y: Float) = if (y > top) top * projection + (y - top) * .5f else y * projection
@@ -84,7 +84,7 @@ internal fun DrawScope.drawGameScene(state: PracticeState, art: SceneArt, motion
     // Binasiz garden: the first accepted floor owns the only entrance/base.
     sprite(art.island, 0, 0, art.island.width, art.island.height, island.x - islandWidth / 2,
         island.y - islandWidth * 65f / 180f, islandWidth)
-    // Rotate the connected stack as one body about its foundation. No per-floor sliding.
+    // SceneMotion keeps this angle zero so visual support matches collision coordinates.
     rotate(motion.towerDegrees, island) {
         state.floors.forEach { f -> floor(f.centerX, f.baseY, groundFloor = f.baseY == 0.0) }
     }
@@ -111,21 +111,21 @@ internal fun DrawScope.drawGameScene(state: PracticeState, art: SceneArt, motion
             drawPath(guide, guideColor,
                 style = Stroke(2.25f * scale, pathEffect = dash))
         }
-        val hangingY = top + PracticeRulesV1.DROP_HEIGHT.toFloat()
-        // Crane body and upper suspension point are fixed in window coordinates.
-        // The world pans to follow the top floor; only the cable's lower endpoints
-        // follow the hanging module. The hook stays at the screen center.
-        val hook = Offset(size.width / 2f,
-            ground - (4 * pitch + PracticeRulesV1.DROP_HEIGHT.toFloat() * .5f + 175f) * scale)
+        // The view never pans horizontally. Keep the crane over its authoritative
+        // swing origin instead; the visible release and accepted world x agree.
+        // Extra vertical headroom preserves the original empty-stack drop clearance.
+        val hook = Offset(size.width / 2f + motion.craneOriginXUnits * scale,
+            ground - (8 * pitch + PracticeRulesV1.DROP_HEIGHT.toFloat() * .5f + 175f) * scale)
         val craneWidth = width * 2.05f
         // The ring center in the cropped crane art is (174, 410).
         sprite(art.crane, 142, 134, 1858, 483, hook.x - craneWidth * 174 / 1858,
             hook.y - craneWidth * 410 / 1858, craneWidth)
-        val module = state.falling ?: Floor(state.craneX + motion.craneOriginXUnits, hangingY.toDouble())
+        val module = state.falling ?: Floor(state.craneX + motion.craneOriginXUnits,
+            (top + PracticeRulesV1.DROP_HEIGHT).toDouble())
         // Center suspension has one fixed length, including while the camera settles.
         // Map the falling floor continuously from its release arc to the landing plane.
         val rope = SceneMotion.SUSPENSION_LENGTH * scale
-        val x = (module.centerX.toFloat() - motion.cameraXUnits) * scale
+        val x = (module.centerX.toFloat() - motion.craneOriginXUnits) * scale
         val suspendedY = hook.y + sqrt(max(0f, rope * rope - x * x)) + width * artHeight
         val fallFraction = ((module.baseY - top) / PracticeRulesV1.DROP_HEIGHT).toFloat().coerceIn(0f, 1f)
         val landing = point(module.centerX, top.toDouble())

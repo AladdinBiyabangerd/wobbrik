@@ -1,0 +1,9 @@
+2026-11-18 — feat/inventory-decor-native
+JDK21; Gradle offline; no emulator, no CI.
+:app:assembleDebug :app:lintDebug PASS
+DecorationInventoryReadsTest 1/1; AccountViewsTest 10/10; AccountViewsReadOnlyTest 8/8; core DecorationOwnershipReadTest 1/1 PASS
+Native isolated render.init.gradle: Decor*Test 5/5 PASS; extra DecorInsetsTest long-name fixture 1/1 PASS
+contrast 6/6 PASS min7.41:1; git diff --check PASS
+DECOR coldRequests=2 coldResponseBytes=1149 warmRequests=0 warmBytes=0 offlineRequests=0 refreshRequests=2 copies=20
+Logs: /private/tmp/wobbrik-decor-checks.log, /private/tmp/wobbrik-decor-native-final.log, /private/tmp/wobbrik-decor-long.log
+Host fixtures and renders do not prove production data/runtime or exact PNG parity. Artwork mismatch remains open.

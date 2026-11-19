@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.aladdin.wobbrik.CityCollectionTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-11-18T13:07:59.468Z" hostname="Macs-MacBook-Pro.local" time="36.643">
+  <properties/>
+  <testcase name="normal" classname="com.aladdin.wobbrik.CityCollectionTest" time="22.679"/>
+  <testcase name="longInsets" classname="com.aladdin.wobbrik.CityCollectionTest" time="3.832"/>
+  <testcase name="normalLarge" classname="com.aladdin.wobbrik.CityCollectionTest" time="4.233"/>
+  <testcase name="small" classname="com.aladdin.wobbrik.CityCollectionTest" time="3.258"/>
+  <testcase name="smallLarge" classname="com.aladdin.wobbrik.CityCollectionTest" time="2.638"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

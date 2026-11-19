@@ -1,0 +1,11 @@
+// Actual GameTokens role colors used by this unit; flattened for the checker.
+val Text = Color(0xFFF4F7FF)
+val Metadata = Color(0xFF94C6F1)
+val Accent = Color(0xFF28E5EF)
+val Success = Color(0xFF32EDBD)
+val Background = Color(0xFF041E38)
+val PanelTop = Color(0xFF0E3053)
+val PanelBottom = Color(0xFF072849)
+val GoldLight = Color(0xFFFFFF76)
+val Silver = Color(0xFFB3C8EC)
+val BronzeLight = Color(0xFFFFB4C8)

@@ -27,7 +27,7 @@ import appbackend.wobbrik.game.*
 @Composable
 internal fun LeaderboardBoard(page: LeaderboardPage?, modifier: Modifier = Modifier, onFit: (Int) -> Unit) {
     val large = LocalDensity.current.fontScale > 1f
-    val repeatPodiumRows = LocalMobileMenuShell.current
+    val repeatPodiumRows = false
     var shown by remember { mutableIntStateOf(0) }
     SubcomposeLayout(modifier.testTag("records-board").semantics { contentDescription = "Göstərilən oyunçular: $shown" }) { constraints ->
         val entries = page?.entries.orEmpty().take(LeaderboardWindowPolicy.MaxRows)
@@ -69,7 +69,7 @@ internal fun LeaderboardBoard(page: LeaderboardPage?, modifier: Modifier = Modif
             placed += entry to row
             y += row.height + gap
         }
-        // The mobile reference repeats podium players in the list; count unique ranks for reads.
+        // Podium players count once; rows continue at rank four in the approved collection.
         val visible = if (canShowPodium && head != null && repeatPodiumRows) maxOf(3, placed.size)
             else (if (canShowPodium && head != null) 3 else 0) + placed.size
         if (shown != visible) shown = visible

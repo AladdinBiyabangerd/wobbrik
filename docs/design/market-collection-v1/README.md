@@ -1,0 +1,11 @@
+# Bazar — İnventar və Şəhər üslubunda dizayn təklifi
+
+18 noyabr 2026. İstifadəçi Bazar üçün mövcud İnventar və Şəhər stilində yeni dizayn nümunəsi istədi. `proposal.png` built-in ImageGen ilə hazırlanmış generativ baxış nümunəsidir; 19 noyabr 2026-da istifadəçi bu PNG-nin Kotlin + Compose ilə birəbir tətbiqini və real Bazar axınlarının saxlanmasını təsdiqlədi. Əvvəlki native Bazar düzəlişi bu yeni nümunənin tətbiqi deyil. Yeganə plan `../../PLAN.md`-dir; bu qovluq ikinci plan deyil.
+
+İstinadlar: `../inventory-art-led-v1/reference.png`, `../inventory-decor-v1/proposal.png`, `../city-collection-v1/proposal.png`. Mövcud GameTokens.InventoryCollection rəngləri/ölçü pillələri promptdan əvvəl yoxlanıb. Üç görünüş: Binalar/Alış, Dekor/Alış, Binalar/Mənim elanlarım. Kolleksiya header-i, art-led kartlar, alt xəttli kompakt tablar, native kimi qurula bilən səthlər və Bazar aktiv7slotnavbar eyni vizual dildədir. Ərazi yoxdur; kök geri oxu/başlıq yoxdur. Yeni elan və geri götürmə mövcud məhsul əməliyyatlarıdır.
+
+İlkin və ikon düzəlişli son nümunə açılıb baxıldı: Decor üçün səhv göbələk ikonları ağacla, orta Alış ikonu cart ilə əvəz edilib. `prompt.txt` və `icon-edit-prompt.txt` tam promptları saxlayır. `proposal-initial.png` ilkin variantdır. Son nəticə generativ board olduğundan bəzi xırda yazı/ikon kənarları native səviyyədə deyil.
+
+Rəqəmlər, binalar və dekor təklifləri nümayiş üçündür; yeni kataloq/qiymət/domain qaydası yaratmır. Implementasiyada real qəbul edilmiş katalog, server binaları/geometry/qiymətlər və MarketMutations/CityPurchases authority saxlanmalıdır. Ayrıca render olunan UI/mətn/ikon native Compose/vector olmalıdır; bu board bütöv raster skin deyil. Dekor category filter-ləri bu yeni nümunənin təklifidir, hazır implementasiya iddiası deyil.
+
+İlkin 18 noyabr dizayn addımında app kodu dəyişdirilməyib; 19 noyabr native tətbiqin sübutları `../../reviews/2026-11-19-market-collection-native.md`-dədir. Kiçik portret/font2/inset/loading/error/empty/cache, toxunma sahələri və kontrast generativ PNG ilə təsdiqlənmir. İlkin generativ addımda native render/build/test və backend dəyişməsi olmayıb; əvvəlki35test bu yeni dizaynın sübutu deyildi. 19 noyabr native tətbiqinin yoxlamaları ayrıca review-dadır. Dizaynın implementasiya icazəsi verilib; tamamlanan native vahidin sübut və məhdudiyyətləri ayrıca review-da saxlanır.

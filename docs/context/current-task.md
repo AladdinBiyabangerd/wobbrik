@@ -1,47 +1,9 @@
-# Son inteqrasiya — 18 noyabr 2026
+# Cari tapşırıq — oyun kamera/eniş məsafəsi — 19 noyabr 2026
 
-- Completed: istifadəçinin açıq göstərişi ilə docs/performance-by-default əvvəl remote-a push edildi; Android acc1066 tarixçəsi main-ə --no-ff ilə fde0c0f kimi merge/push edildi. Paired AppBackend343d402 eyni qaydada399f9fe main merge/push oldu. Merge tree-ləri uyğun reviewed branch tree-ləri ilə eynidir, konflikt yoxdur.
-- Current state: bu son docs-only inteqrasiya qeydi ayrıca branch-də hazırlanır və main-ə tarixçə saxlanmaqla daxil edilir. Owner iki dirty release binarisi və köhnə city-detail review əlavəsi commit/push edilmədən saxlanır.
-- Decisions: main merge və remote push istifadəçi tərəfindən açıq icazəlidir; CI/deploy istənməyib, işlədilməyib. Əvvəlki no-merge statusları aşağıda tarixidir.
-- Remaining work: deploy və production/device performans sübutları açıqdır; yeni feature başlanmır.
-- Relevant files: AGENTS.md, .cursor/rules/performance.mdc, docs/reviews/2026-11-18-performance-by-default-rule.md və bounded-membership review-u.
-- Checks performed: fetch, main/origin əsas uyğunluğu, diffcheck, konfliktsiz merge və branch/main tree equality. Əvvəlki focused test nəticələri aşağıdadır; merge-dən sonra suite/CI təkrar işlədilməyib.
-- Exact next step: son docs qeydi daxil lokal main/remote main hash bərabərliyini təsdiqlə; gələcək ayrıca tapşırığa qədər kod dəyişmə.
-
----
-# Cari tapşırıq — Inventory bounded membership/cache / 18 noyabr 2026
-
-## Completed
-
-- İstifadəçinin performans1–2 göstərişi: InventoryScreen-in bütün şəhər membership oxusu çıxarıldı. Display inventory/detail serverdən same-statement owner-scoped optional in_city alır; şəhər ölçüsünə bağlı paging/population işi yoxdur.
-- Cache mövcud page/detail key-lərində atomik qalır; oxu cache-inə ayrıca8MiB büdcə verildi. Default sole command journal140000byte dəyişmir. Detail transport1MiB-dir.3001membership və near1MiB escaped body offline replay regression-ları keçir.
-- AppBackend paired field/API müqaviləsi, true/false/legacy/foreign/deleted regression-ları və lokal diff review tamamlandı.
-
-## Current state
-
-18 noyabr davamı: istifadəçi yeni səhifələrin də ilk implementasiyadan performanslı hazırlanmasını tələb edib. `docs/performance-by-default` (baza083eedb) branch-ində AGENTS.md və always-on `.cursor/rules/performance.mdc` eyni qayda ilə yenilənib; bu docs-only vahiddir, runtime dəyişmir.
-
-Android `fix/inventory-bounded-membership-cache`, baza6bb1457; backend `feat/wobbrik`, baza32ad8f7. Owner iki release baseline-profile binarisi dəyişmədən scope xaricində saxlanır. Əvvəlki city-detail review əlavəsi tarixi qeyddir. Main merge/CI/push/deploy yoxdur.
-
-## Decisions
-
-Yeganə plan docs/PLAN.md§1.1/§2–3. in_city yalnız display read metadata-sıdır; wallet/ownership authority, UID/login/capability/revision və final-sync/fresh mutation gate saxlanır. Legacy/old-server missing field naməlumdur, tam şəhər fallback yoxdur.8MiB cache yalnız read-only namespace-ə ötürülür; yeni chunk/manifest/DB/journal formatı yoxdur.1MiB wire/8MiB cache sonlu hədlərdir, arbitrary payload dəstəyi deyil.
-
-## Remaining work
-
-Yeni status metadata-sı ayrıca backend deploy tələb edir; köhnə serverdə naməlum qalır. Production10+s/2+s, RTT/SQL contention/paylanma, fiziki frame/ART/GPU/yaddaş/battery və Firebase-authenticated Android→GoE2E yoxlanmayıb. Şəhər ekranının öz tam-scene böyük-view hədləri bu Inventory vahidi ilə həll edilmiş sayılmır. Profil ilk-açılış/ümumi app performansı və əvvəlki PNG/inset/IME/locale/TalkBack borcları açıqdır.
-
-## Relevant files
-
-Core InventoryReads.kt, GameplayHttpBackend.kt, ReadOnlyGameCache.kt, DurableJournalFile.kt; AndroidAttemptJournal.kt; InventoryScreen.kt, MobileInventoryPresentation.kt, WobbrikApplication.kt. InventoryPayloadTest və inventory-first-open/detail-latency native harness-ləri. Backend market.go, inventory payload/city probe tests və docs/wobbrik-game-api.md. Review docs/reviews/2026-11-18-inventory-bounded-membership-cache.md; evidence inventory-bounded-membership/.
-
-## Checks performed
-
-- Normal core165unit/appunit/assembleDebug/lintDebugPASS11s; final native16/16PASS16s. Native route-lərdə0cityHTTP; cached detail fresh-mutation gate saxlanır. Real atomic file near1MiB escaped payload, default journal limit və3001membership cache/replayPASS.
-- Disposable PostgreSQL18/race1001bina: old City100membership+sync12HTTP/209SQL/94387byte/1.701s; new inventory20+sync2HTTP/44SQL/9028byte/23.05ms. Əvvəlki ölçüyə inventory page daxil deyildi; production E2E nisbəti deyil.
-- Backend full racePASS(platform34.356s), final focused probePASS16.743s, vet/build/diffcheckPASS. İlkin fixture/compile/FK səhvləri düzəldilib final yoxlamalar təkrar keçirilib. Disposable DB dayandırılıb; production istifadə olunmayıb.
-- ui-craft: tokenlər saxlanır; Text/Muted/Success kontrastPASS.320/360/390font1/2native renderlər, inset/uzun balans; list/detail/status nümunələri açılıb approvedPNG ilə müqayisə edildi. Əvvəlki layout/parity borcları bağlanmır. Emulator açılmayıb.
-
-## Exact next step
-
-Daimi performans qaydasının və paired performans1–2 vahidinin istifadəçi review-u. Main merge/CI/push/deploy avtomatik yoxdur. Yeni böyük işə keçməzdən əvvəl yeni chat tövsiyə olunur; owner binarilərinə toxunma.
+- Completed: istifadəçi videosu və engine/render araşdırıldı; istifadəçinin təsdiqi ilə üç düzəliş hazırlandı: sabit üfüqi view, eniş koordinatına uyğun yırğalanmayan qüllə, başlanğıcdan sabit şaquli boşluq. Mövcud oyun/balans/checkpoint qaydaları saxlanır.
+- Current state: iş `feat/home-collection-native` üzərində başladı; workspace başqa proses tərəfindən `chore/home-review-cleanup` (HEAD9ae78ca) branch-inə keçirildi. Bu tapşırıq branch dəyişməyib. İstifadəçi cari branch-də ayrıca commit-i təsdiqlədi; lokal review tamamlandı, yalnız bu vahidin faylları ayrıca commit-ə daxil edilir. Home işləri saxlanır.
+- Decisions: kamera binaya görə sağa-sola sürüşmür. Kran engine-in mövcud support-origin koordinatını izləyir; world/view sabitdir. İlkin boşluq scene unit ilə qorunur, hündürlüklə məhdud ekranlarda scale fit dəyişir. Backend müqaviləsi/engine rules dəyişmir; accepted_geometry.go uyğunluğu yoxlanıb.
+- Remaining work: istifadəçi nəticəyə baxa bilər; merge/CI/push ayrıca göstəriş tələb edir. Uzağa yığılan üfüqi bina drift-i sabit view-dan çıxa bilər; avtomatik recenter qəsdən yoxdur. Cihaz/GPU/fontScale2/HUD/inset/tablet yoxlanmayıb.
+- Relevant files: GameScene.kt, SceneMotion.kt, app/src/test/.../SceneMotionTest.kt; docs/reviews/2026-11-19-game-camera-clearance.md; docs/reviews/game-camera-clearance/ (11 native render və harness). Yeganə plan docs/PLAN.md. Əvvəlki Profil tamamlanma qeydi docs/reviews/2026-11-19-profile-collection-material.md və 2026-11-19-ui-commit-review.md-dədir.
+- Checks performed: son lokal diff review-da əlavə bloklayan problem yoxdur; engine97/app55 test PASS, assembleDebug/lintDebug PASS31s; 320x568/360x640/390x844 host native canvas renderləri alınıb əsasları açıldı; contrast4/4PASS(min9.93); diff-checkPASS. Emulator/CI/merge/push/deploy yoxdur.
+- Exact next step: istifadəçi vizual düzəlişləri yoxlasın; ayrıca göstəriş olmadan merge/CI/push və yeni mərhələ başlama. Ayrı commit hash-i review faylının git tarixindədir.

@@ -50,8 +50,20 @@ private fun MobileMenuShellContent(page: String, coins: Long?, onPlay: (() -> Un
         CompositionLocalProvider(LocalMobileMenuShell provides false) { content() }
         return
     }
+    if (page == "account") {
+        ProfileCollectionShell(coins, onPlay, onPage, content)
+        return
+    }
+    if (page == "city") {
+        CityCollectionShell(coins, onPlay, onPage, content)
+        return
+    }
     var commerceDetail by remember(page) { mutableStateOf(false) }
     val reportDetail = remember(page) { { active: Boolean -> commerceDetail = active } }
+    if (page == "inventory" || page == "collection" || page == "owned-decorations" || mobileMenuDestination(page) in setOf("market", "achievements")) {
+        CollectionInventoryShell(coins, onPlay, onPage, commerceDetail, reportDetail, page, content)
+        return
+    }
     Column(Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(GameTokens.Surface, GameTokens.Background)))
         .safeDrawingPadding().consumeWindowInsets(WindowInsets.safeDrawing).imePadding()) {
         Box(Modifier.padding(horizontal = GameTokens.Gap, vertical = GameTokens.Small)) { MobileMenuHeader(coins) }
@@ -119,7 +131,7 @@ private fun MobileMenuShellContent(page: String, coins: Long?, onPlay: (() -> Un
             CompositionLocalProvider(LocalMobileMenuShell provides true, LocalCommerceDetail provides reportDetail,
                 LocalTextStyle provides LocalTextStyle.current.copy(fontFamily = GameTypeface)) { content() }
         }
-        Box(Modifier.padding(horizontal = GameTokens.Quarter, vertical = GameTokens.Small)) {
+        Box(Modifier.padding(horizontal = GameTokens.Small, vertical = GameTokens.Quarter)) {
             MobileMenuNavbar(mobileMenuDestination(page), false, onPlay != null, { onPlay?.invoke() }, onPage)
         }
     }

@@ -1,0 +1,4 @@
+Final focused Gradle: BUILD SUCCESSFUL in 50s; native host 5/5, assembleDebug/lintDebug PASS.
+Token checker: Text/Metadata on Selected/PanelTop 4/4 PASS, min7.41.
+Conservative maximum radial overlay (.24 Rim on Selected): Metadata6.07, Text10.25 PASS.
+Initial art-wait harness run: inset timeout (art outside scrolled viewport); font1-only art wait corrected; final5/5PASS.

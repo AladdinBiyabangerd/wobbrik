@@ -1,0 +1,8 @@
+name=com.aladdin.wobbrik.CityBuildingProjectionTest tests=6 skipped=0 failures=0 errors=0
+name=com.aladdin.wobbrik.CityCollectionReadsTest tests=12 skipped=0 failures=0 errors=0
+name=com.aladdin.wobbrik.CityCollectionTest tests=5 skipped=0 failures=0 errors=0
+name=com.aladdin.wobbrik.CityIllustrationTest tests=2 skipped=0 failures=0 errors=0
+name=com.aladdin.wobbrik.CityLifeRoutesTest tests=8 skipped=0 failures=0 errors=0
+name=com.aladdin.wobbrik.CityParkPathsTest tests=3 skipped=0 failures=0 errors=0
+name=com.aladdin.wobbrik.CityTerrainGeometryTest tests=4 skipped=0 failures=0 errors=0
+total=40

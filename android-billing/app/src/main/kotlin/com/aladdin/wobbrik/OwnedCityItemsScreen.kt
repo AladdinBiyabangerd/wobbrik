@@ -28,7 +28,7 @@ internal fun OwnedCityItemsScreen(configured: WobbrikApplication.Bootstrap.Confi
     var failed by remember(view, land) { mutableStateOf(false) }
     var loading by remember(view, land) { mutableStateOf(!land) }
     var cached by remember(view, land) { mutableStateOf(view.ready == null) }
-    var retry by remember { mutableIntStateOf(0) }
+    var retry by remember(view, land) { mutableIntStateOf(0) }
     BackHandler(onBack = onBack)
     LaunchedEffect(view, land, cursor, retry) {
         if (land) return@LaunchedEffect
@@ -36,24 +36,35 @@ internal fun OwnedCityItemsScreen(configured: WobbrikApplication.Bootstrap.Confi
         try {
             val session = requireNotNull(configured.sessions.current())
             check(view.current(configured, session))
+            val requestedCursor = cursor
+            val prefix = copies
+            fun publish(value: DecorationPage) {
+                check(view.current(configured, session))
+                page = value
+                copies = if (requestedCursor == null) value.copies else (prefix + value.copies).distinctBy { it.id }
+            }
             val value = configured.views?.read(view, session, "owned-decorations-${cursor.orEmpty()}",
-                onCached = { cached = true }, refresh = retry > 0) { DecorationRepository(it).page(session, cursor) }
-                ?: configured.decorations.page(session, cursor)
-            check(view.current(configured, session))
-            page = value
-            copies = if(cursor == null) value.copies else (copies + value.copies).distinctBy { it.id }
+                onCached = { cached = true }, refresh = retry > 0,
+                onFresh = { cached = false }, onLocal = { value: DecorationPage -> publish(value) }) {
+                DecorationRepository(it).page(session, requestedCursor)
+            } ?: configured.decorations.page(session, requestedCursor)
+            publish(value)
         } catch(cancelled: CancellationException) { throw cancelled }
         catch (_: Exception) { failed = true }
         finally { loading = false }
     }
     OwnedCityItemsContent(view.snapshot, view.catalog, land, copies, loading, failed, cached,
-        page?.next != null, { cursor = page?.next }, { retry++ }, onMarket)
+        page?.next != null, { cursor = page?.next }, { cursor = null; retry++ }, onMarket)
 }
 
 @Composable
 internal fun OwnedCityItemsContent(snapshot: GameSnapshot, catalog: RecoveryCatalog?, land: Boolean,
     copies: List<DecorationCopy>, loading: Boolean, failed: Boolean, cached: Boolean, hasMore: Boolean,
     onMore: () -> Unit, onRetry: () -> Unit, onMarket: () -> Unit) {
+    if (!land && LocalCollectionLayout.current) {
+        InventoryDecorContent(catalog, copies, loading, failed, cached, hasMore, onMore, onRetry, onMarket)
+        return
+    }
     val art = if(land) emptyMap() else rememberDecorationArt()
     val illustration = if(land) rememberLandArt() else null
     val largeFont = LocalDensity.current.fontScale > 1f

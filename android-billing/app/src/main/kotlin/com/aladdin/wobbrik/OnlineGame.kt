@@ -195,6 +195,9 @@ private fun AuthenticatedGame(app: WobbrikApplication) {
         page = it
     }
     val mobileMenu = mobileUiSizing().portrait && page != "home" && page != "game"
+    val leaderboardDisplay = remember(configured, configured?.sessions?.current(), ready?.snapshot?.revision) {
+        if(configured?.leaderboard != null && ready != null) LeaderboardDisplayMemory(configured) else null
+    }
     val menuContent: @Composable () -> Unit = menuContent@ {
         if (page == "settings") {
             SettingsRoute(app.settings, onBack = { page = "account" })
@@ -224,7 +227,7 @@ private fun AuthenticatedGame(app: WobbrikApplication) {
         if (page in setOf("account", "leaderboard") && ready != null && configured?.profiles != null && configured.leaderboard != null) {
             key(InventoryReadKey(ready)) {
                 if (page == "account") PublicAccountScreen(configured, ready, { page = "home" }, { page = it }, profileDisplay)
-                else LeaderboardScreen(configured, ready, { page = if (mobileMenu) "achievements" else "account" })
+                else LeaderboardScreen(configured, ready, { page = if (mobileMenu) "achievements" else "account" }, leaderboardDisplay)
             }
             return@menuContent
         }
@@ -240,6 +243,12 @@ private fun AuthenticatedGame(app: WobbrikApplication) {
                 onParts = { partsBuilding = it; page = "parts" }, onDecorations = { inventoryBuilding = null; page = if(mobileMenu) "owned-decorations" else "decorations" }, onLand = { inventoryBuilding = null; page = if(mobileMenu) "owned-land" else "land" },
                 onMarket = { marketBuilding = inventoryBuilding; page = "market" })
                 }
+            }
+            return@menuContent
+        }
+        if (page == "collection" && mobileMenu && configured != null && view != null) {
+            key(InventoryReadKey(ready ?: view.account)) {
+                InventoryAppearanceScreen(configured, view, app.cosmeticDefaults) { page = "inventory" }
             }
             return@menuContent
         }

@@ -1,0 +1,300 @@
+--- before/android-billing/app/src/main/kotlin/com/aladdin/wobbrik/MarketScreen.kt
++++ after/android-billing/app/src/main/kotlin/com/aladdin/wobbrik/MarketScreen.kt
+@@ -175,7 +175,7 @@
+                     detail?.let { value -> item {
+                         if (nativeMenu) MarketPurchaseDetail(value, ready.catalog, own)
+                         else Column(verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+-                            BuildingPreview(value.building, Modifier.fillMaxWidth().height(sizing.detailArt))
++                            MarketBuildingPreview(value.building, Modifier.fillMaxWidth().height(sizing.detailArt))
+                             Text(buildingName(value.building, ready.catalog), color = GameTokens.Text, fontSize = sizing.heading, fontWeight = FontWeight.Bold)
+                             Text("${value.building.floors} mərtəbə · ${value.building.residents} sakin", color = GameTokens.Muted)
+                             Text("${value.listing.price} sikkə", color = GameTokens.Text, fontSize = sizing.heading, fontWeight = FontWeight.Bold)
+@@ -273,7 +273,7 @@
+     Surface(color = GameTokens.Surface, shape = RoundedCornerShape(GameTokens.CardRadius), border = BorderStroke(GameTokens.Hairline, GameTokens.Raised)) {
+         Row(Modifier.background(Brush.verticalGradient(listOf(GameTokens.Raised, GameTokens.Surface))).padding(GameTokens.Small), verticalAlignment = Alignment.CenterVertically,
+             horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+-            BuildingPreview(building, Modifier.width(if (largeFont) GameTokens.Target else sizing.listPreview).height(sizing.listPreview))
++            MarketBuildingPreview(building, Modifier.width(if (largeFont) GameTokens.Target else sizing.listPreview).height(sizing.listPreview))
+             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+                 Text(buildingName(building, catalog), color = GameTokens.Text, fontWeight = FontWeight.Bold, fontSize = GameTokens.Body)
+                 Text("${building.floors} mərtəbə", color = GameTokens.Muted, fontSize = GameTokens.Caption)
+@@ -309,7 +309,7 @@
+         if(largeFont || grid) Column(Modifier.padding(GameTokens.Small),
+             verticalArrangement = Arrangement.spacedBy(if(grid) GameTokens.Quarter else GameTokens.Small)) {
+             // Keep a full illustration frame, including the garden, on compact cards.
+-            BuildingPreview(building, Modifier.fillMaxWidth().height(if(grid) {
++            MarketBuildingPreview(building, Modifier.fillMaxWidth().height(if(grid) {
+                 if(largeFont) GameTokens.InventoryCollection.LargeTypeArtHeight
+                 else if(sizing.compact) GameTokens.InventoryCollection.LargeTypeArtHeight
+                 else GameTokens.InventoryCollection.ArtHeight
+@@ -317,7 +317,7 @@
+             details()
+         } else Row(Modifier.padding(GameTokens.Small), verticalAlignment = Alignment.CenterVertically,
+             horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+-            BuildingPreview(building, Modifier.width(sizing.listPreview).height(sizing.listPreview))
++            MarketBuildingPreview(building, Modifier.width(sizing.listPreview).height(sizing.listPreview))
+             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(GameTokens.Small), content = details)
+         }
+     }
+@@ -347,12 +347,12 @@
+             if(status == "active") MarketCollectionAction("Elanı geri götür", enabled = enabled, onClick = onClick)
+         }
+         if(largeFont) Column(Modifier.padding(GameTokens.Small), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+-            BuildingPreview(building, Modifier.fillMaxWidth().height(GameTokens.AppearanceCollection.CompactArtHeight))
++            MarketBuildingPreview(building, Modifier.fillMaxWidth().height(GameTokens.AppearanceCollection.CompactArtHeight))
+             details()
+         } else Row(Modifier.padding(GameTokens.Small), verticalAlignment = Alignment.CenterVertically,
+             horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+             val artHeight = if(mobileUiSizing().compact) GameTokens.InventoryCollection.CompactArtHeight else GameTokens.InventoryCollection.ArtHeight
+-            BuildingPreview(building, Modifier.width(if(mobileUiSizing().compact) GameTokens.AppearanceCollection.CompactArtHeight else GameTokens.InventoryCollection.CompactArtHeight).height(artHeight))
++            MarketBuildingPreview(building, Modifier.width(if(mobileUiSizing().compact) GameTokens.AppearanceCollection.CompactArtHeight else GameTokens.InventoryCollection.CompactArtHeight).height(artHeight))
+             VerticalDivider(Modifier.height(artHeight - GameTokens.Gap),
+                 thickness = GameTokens.InventoryCollection.OutlineWidth, color = GameTokens.InventoryCollection.Outline)
+             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(GameTokens.Quarter), content = details)
+@@ -413,7 +413,7 @@
+     MenuRelief(Modifier.fillMaxWidth(), shape = RoundedCornerShape(GameTokens.ControlRadius)) {
+         Row(Modifier.padding(GameTokens.Small), verticalAlignment = Alignment.CenterVertically,
+             horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+-            BuildingPreview(building, Modifier.width(GameTokens.Target + GameTokens.Inset).height(GameTokens.Target * 2))
++            MarketBuildingPreview(building, Modifier.width(GameTokens.Target + GameTokens.Inset).height(GameTokens.Target * 2))
+             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {
+                 Text(buildingName(building, catalog), Modifier.horizontalScroll(rememberScrollState()), color = GameTokens.Text,
+                     fontFamily = GameTypeface, fontSize = GameTokens.Body, fontWeight = FontWeight.Bold, softWrap = false)
+--- before/android-billing/app/src/main/kotlin/com/aladdin/wobbrik/InventoryScreen.kt
++++ after/android-billing/app/src/main/kotlin/com/aladdin/wobbrik/InventoryScreen.kt
+@@ -439,7 +439,7 @@
+ 
+ /** Server metadata stays real; approved art is a decorative owned-building presentation. */
+ @Composable
+-internal fun BuildingPreview(building: OwnedBuilding, modifier: Modifier) {
++internal fun BuildingPreview(building: OwnedBuilding, modifier: Modifier, marketMaterials: Boolean = false) {
+     val preparation = LocalBuildingArt.current
+     if (preparation.status != ArtPreparation.Ready) {
+         Box(modifier) { ApprovedArtStatus(preparation.status, preparation.retry) }
+@@ -470,8 +470,8 @@
+         return
+     }
+     Canvas(modifier.semantics { contentDescription = "${building.floors} mərtəbəli bina" }) {
+-        if (purpleTemplate) purpleBuilding(purple, art, atlases, building.parts, centers)
+-        else buildingPreview(atlases, art, building.parts, centers, requireNotNull(garden))
++        if (purpleTemplate) purpleBuilding(purple, art, atlases, building.parts, centers, marketMaterials)
++        else buildingPreview(atlases, art, building.parts, centers, requireNotNull(garden), marketMaterials)
+     }
+ }
+ 
+--- before/android-billing/app/src/main/kotlin/com/aladdin/wobbrik/PurpleBuildingArt.kt
++++ after/android-billing/app/src/main/kotlin/com/aladdin/wobbrik/PurpleBuildingArt.kt
+@@ -67,7 +67,7 @@
+ 
+ /** Atlas-pixel anchors measured in the approved modular study; not UI tokens or accepted geometry. */
+ internal fun DrawScope.purpleBuilding(art: Map<String, CosmeticSprite>, catalog: Map<String, CosmeticSprite>,
+-    atlases: Map<String, GameAtlas>, parts: Map<String, String>, centers: List<Long>) {
++    atlases: Map<String, GameAtlas>, parts: Map<String, String>, centers: List<Long>, marketMaterials: Boolean = false) {
+     val representative = buildingPresentationCenters(centers)
+     val count = minOf(representative.size, GameTokens.BuildingPreview.PurpleMaxFloors)
+     val display = if (count < 2) representative else List(count) {
+@@ -125,7 +125,7 @@
+                 else listOf(16f,76f,241f,103f,220f,241f,34f,218f)
+             val sideSource = if (i == 0) listOf(222f,101f,350f,40f,348f,220f,211f,280f)
+                 else listOf(241f,103f,353f,42f,333f,177f,220f,241f)
+-            val shellHeight = if (i == 0) 233f else pitch - 14f
++            val shellHeight = if (i == 0) 233f else pitch - if (marketMaterials) 6f else 14f
+             val lowerX = if (i == 0) x else 150f + display[i-1] / 1000f * 3.7f - minOffset
+             if (i == 0) purpleGroundShell(art,catalog,parts,x,y,atlases["teal"]?.roof)
+             else {
+@@ -134,7 +134,7 @@
+             purpleSurface(shell, sideSource, listOf(Offset(x+240f,y+128f),Offset(x+354f,y+63f),
+                 Offset(lowerX+354f,y+63f+shellHeight),Offset(lowerX+240f,y+128f+shellHeight)))
+             }
+-            if (i < display.lastIndex) purpleJoint(art.getValue("floor"),x,y)
++            if (i < display.lastIndex) purpleJoint(art.getValue("floor"),x,y,marketMaterials)
+             fun point(u:Float,v:Float,side:Boolean): Offset {
+                 val faceX = x + (lowerX-x) * (160f*v/shellHeight)
+                 return if(side) Offset(faceX+240f+114f*u,y+128f-65f*u+160f*v)
+@@ -150,6 +150,12 @@
+                 // inset decals left exposed purple strips around other finishes.
+                 plane(sample,false,16f/224f,0f,190f/224f,shellHeight/160f)
+                 plane(sample,true,11f/114f,0f,89f/114f,shellHeight/160f)
++            }
++            if (marketMaterials && i > 0) {
++                marketFacadeLight(listOf(point(0f,0f,false),point(1f,0f,false),
++                    point(1f,shellHeight/160f,false),point(0f,shellHeight/160f,false)), false)
++                marketFacadeLight(listOf(point(0f,0f,true),point(1f,0f,true),
++                    point(1f,shellHeight/160f,true),point(0f,shellHeight/160f,true)), true)
+             }
+             fun selected(category:String,cell:String):CosmeticSprite? =
+                 if(parts[category] == "base_1_$category") art[cell] else catalog[parts[category]]
+@@ -168,7 +174,10 @@
+                     val half=item.size.width/2
+                     item=item.copy(origin=IntOffset(item.origin.x+if(side) half else 0,item.origin.y),size=IntSize(half,item.size.height))
+                 }
+-                plane(item,side,if(side).2f else .26f,.06f,if(side).6f else .45f,.82f)
++                // Leave masonry around the selected frame; oversize frames hid the
++                // brick courses and made every floor read as a repeated window tile.
++                if (marketMaterials) plane(item,side,if(side).23f else .30f,.12f,if(side).54f else .38f,.70f)
++                else plane(item,side,if(side).2f else .26f,.06f,if(side).6f else .45f,.82f)
+             }
+             if(i==0) {
+                 // Independent ground-facing stair: its top landing follows the
+@@ -191,9 +200,15 @@
+             if (i == 0) {
+                 selected("window","square")?.let { purpleGroundWindows(it,x,y,parts["window"] == "coins_window_2") }
+             } else window(true)
+-            if(i>0 && i%2==1) sprite(art.getValue("balcony"),x-30f,y+164f,225f,175f)
++            if(i>0 && i%2==1) {
++                if (marketMaterials) {
++                    // The rear of the selected template's balcony meets the sill;
++                    // its rail and trailing flowers project beyond the front wall.
++                    sprite(art.getValue("balcony"),x-63f,y+153f,252f,196f)
++                } else sprite(art.getValue("balcony"),x-30f,y+164f,225f,175f)
++            }
+             if(i==display.lastIndex) {
+-                if(parts["roof"] == "base_1_roof") purpleRoof(art.getValue("roof"),x,y)
++                if(parts["roof"] == "base_1_roof") purpleRoof(art.getValue("roof"),x,y,marketMaterials)
+                 else {
+                     // Teal's clean modular roof remains its own selected asset.
+                     val selectedRoof = if(parts["roof"] == "base_2_roof") atlases["teal"]?.roof else catalog[parts["roof"]]
+@@ -212,13 +227,16 @@
+ }
+ 
+ /** One ledge per junction: its upper edge is also the upper wall's lower edge. */
+-private fun DrawScope.purpleJoint(shell: CosmeticSprite, x: Float, y: Float) {
++private fun DrawScope.purpleJoint(shell: CosmeticSprite, x: Float, y: Float, marketMaterials: Boolean) {
++    // A narrow lip keeps the floor joint legible without turning every storey
++    // into a thick white frame. Wall anchors and floor pitch do not move.
++    val lip = if (marketMaterials) 6f else 14f
+     purpleSurface(shell,listOf(19f,57f,240f,84f,240f,101f,19f,74f),listOf(
+-        Offset(x+16f,y+54f),Offset(x+240f,y+114f),
++        Offset(x+16f,y+68f-lip),Offset(x+240f,y+128f-lip),
+         Offset(x+240f,y+128f),Offset(x+16f,y+68f),
+     ))
+     purpleSurface(shell,listOf(240f,84f,350f,25f,351f,40f,240f,101f),listOf(
+-        Offset(x+240f,y+114f),Offset(x+354f,y+49f),
++        Offset(x+240f,y+128f-lip),Offset(x+354f,y+63f-lip),
+         Offset(x+354f,y+63f),Offset(x+240f,y+128f),
+     ))
+ }
+@@ -276,11 +294,14 @@
+ }
+ 
+ /** Three matching eave points put the roof on the very same facade planes. */
+-private fun DrawScope.purpleRoof(item: CosmeticSprite, x: Float, y: Float) {
++private fun DrawScope.purpleRoof(item: CosmeticSprite, x: Float, y: Float, marketMaterials: Boolean) {
++    // Eaves project past the facade; the selected dormer/chimney remain in the
++    // original roof sprite. This never adds another roof ID.
++    val overhang = if (marketMaterials) 10f else 0f
+     drawIntoCanvas { canvas ->
+         val matrix = Matrix()
+         matrix.setPolyToPoly(floatArrayOf(7f,194f,262f,263f,396f,140f),0,
+-            floatArrayOf(x+16f,y+68f,x+240f,y+128f,x+354f,y+63f),0,3)
++            floatArrayOf(x+16f-overhang,y+68f,x+240f,y+128f+overhang/2,x+354f+overhang,y+63f),0,3)
+         val native = canvas.nativeCanvas
+         native.save()
+         native.concat(matrix)
+--- before/android-billing/app/src/main/kotlin/com/aladdin/wobbrik/BuildingArt.kt
++++ after/android-billing/app/src/main/kotlin/com/aladdin/wobbrik/BuildingArt.kt
+@@ -6,11 +6,11 @@
+ 
+ /** Game's modular shell, selected windows and roof; never the legacy baked wall panel. */
+ internal fun DrawScope.buildingFloor(atlases: Map<String, GameAtlas>, art: Map<String, CosmeticSprite>, parts: Map<String, String>,
+-    x: Float, base: Float, scale: Float, ground: Boolean, top: Boolean) {
++    x: Float, base: Float, scale: Float, ground: Boolean, top: Boolean, marketMaterials: Boolean = false) {
+     val atlas = atlases.getValue(gameAtlasStyle(parts))
+     val width = 100f * scale
+     val height = width * atlas.floor.size.height / atlas.floor.size.width
+-    drawModularFloor(atlas.floor, art, atlases, parts, x, base - height, width, ground)
++    drawModularFloor(atlas.floor, art, atlases, parts, x, base - height, width, ground, marketMaterials = marketMaterials)
+     if (top) {
+         val eave = base - height + width * atlas.depth / atlas.floor.size.width
+         previewRoof(atlases, art, parts["roof"], x, eave, width)
+@@ -44,7 +44,7 @@
+ 
+ /** Picker retains its geometry; owned previews use the approved representative floors. */
+ internal fun DrawScope.buildingPreview(atlases: Map<String, GameAtlas>, art: Map<String, CosmeticSprite>,
+-    parts: Map<String, String>, centers: List<Long>, garden: CosmeticSprite? = null) {
++    parts: Map<String, String>, centers: List<Long>, garden: CosmeticSprite? = null, marketMaterials: Boolean = false) {
+     if (centers.isEmpty() || size.width <= 0 || size.height <= 0) return
+     val atlas = atlases.getValue(gameAtlasStyle(parts))
+     val displayCenters = if (garden == null) centers else buildingPresentationCenters(centers)
+@@ -66,7 +66,7 @@
+         if (garden != null) sprite(garden, -gardenWidth / 2 - min, -65f * gardenScale, gardenWidth, 120f * gardenScale)
+         displayCenters.forEachIndexed { index, center ->
+             val x = center / 1000f - 50f - min
+-            buildingFloor(atlases, art, parts, x, -index * pitch, 1f, index == 0, index == displayCenters.lastIndex)
++            buildingFloor(atlases, art, parts, x, -index * pitch, 1f, index == 0, index == displayCenters.lastIndex, marketMaterials)
+         }
+     }
+ }
+--- before/android-billing/app/src/main/kotlin/com/aladdin/wobbrik/GameFacade.kt
++++ after/android-billing/app/src/main/kotlin/com/aladdin/wobbrik/GameFacade.kt
+@@ -4,6 +4,7 @@
+ import android.graphics.Paint
+ import android.graphics.Rect
+ import android.graphics.RectF
++import androidx.compose.ui.geometry.Offset
+ import androidx.compose.ui.graphics.Path
+ import androidx.compose.ui.graphics.asAndroidBitmap
+ import androidx.compose.ui.graphics.drawscope.DrawScope
+@@ -55,7 +56,7 @@
+  * Material samples exclude the old panel's frame and silhouette entirely.
+  */
+ internal fun DrawScope.drawModularFloor(shell: CosmeticSprite, art: Map<String, CosmeticSprite>, atlases: Map<String, GameAtlas>,
+-    parts: Map<String, String>, left: Float, upper: Float, width: Float, ground: Boolean, windowAlpha: Float = 1f) {
++    parts: Map<String, String>, left: Float, upper: Float, width: Float, ground: Boolean, windowAlpha: Float = 1f, marketMaterials: Boolean = false) {
+     translate(left, upper) {
+         scale(width / 464f, width / 464f, androidx.compose.ui.geometry.Offset.Zero) {
+             val contour = Path().apply {
+@@ -95,6 +96,10 @@
+                     plane(wall, sample, floatArrayOf(14f,105f,340f,121f,340f,251f,14f,231f))
+                     plane(wall, sample, floatArrayOf(340f,121f,452f,51f,452f,179f,340f,251f))
+                 }
++                if (marketMaterials) {
++                    marketFacadeLight(listOf(Offset(14f,105f),Offset(340f,121f),Offset(340f,251f),Offset(14f,231f)), false)
++                    marketFacadeLight(listOf(Offset(340f,121f),Offset(452f,51f),Offset(452f,179f),Offset(340f,251f)), true)
++                }
+                 // Affine surface coordinates preserve the front slope and deep right face.
+                 fun decal(id: String?, side: Boolean, u: Float, v: Float, w: Float, h: Float, sourceStart: Float = 0f, sourceEnd: Float = 1f) {
+                     val approved = when {
+--- /dev/null
++++ after/android-billing/app/src/main/kotlin/com/aladdin/wobbrik/MarketBuildingArt.kt
+@@ -0,0 +1,40 @@
++package com.aladdin.wobbrik
++
++import androidx.compose.runtime.Composable
++import androidx.compose.ui.Modifier
++import androidx.compose.ui.geometry.Offset
++import androidx.compose.ui.graphics.Brush
++import androidx.compose.ui.graphics.Path
++import androidx.compose.ui.graphics.drawscope.DrawScope
++import androidx.compose.ui.graphics.drawscope.clipPath
++import appbackend.wobbrik.game.OwnedBuilding
++
++/** Market-only material pass. The prepared atlas, selected IDs and geometry stay shared. */
++@Composable
++internal fun MarketBuildingPreview(building: OwnedBuilding, modifier: Modifier) =
++    BuildingPreview(building, modifier, marketMaterials = true)
++
++/** Light follows each masonry plane, rather than adding a halo behind the whole tower.
++ * Coordinates are the renderer's existing art anchors, never accepted game geometry.
++ * Translucent light preserves the selected material's texture and colour identity.
++ */
++internal fun DrawScope.marketFacadeLight(corners: List<Offset>, side: Boolean) {
++    val face = Path().apply {
++        moveTo(corners[0].x, corners[0].y)
++        corners.drop(1).forEach { lineTo(it.x, it.y) }
++        close()
++    }
++    val top = (corners[0] + corners[1]) / 2f
++    val bottom = (corners[2] + corners[3]) / 2f
++    clipPath(face) {
++        drawRect(Brush.linearGradient(
++            listOf(GameTokens.Background.copy(alpha = if (side) .42f else .28f),
++                GameTokens.Background.copy(alpha = 0f),
++                GameTokens.MobileHome.GoldLight.copy(alpha = if (side) .05f else .16f)),
++            top, bottom))
++        // Right face turns away from the warm facade light; the corner stays crisp.
++        if (side) drawRect(Brush.linearGradient(
++            listOf(GameTokens.Background.copy(alpha = .26f), GameTokens.Background.copy(alpha = 0f)),
++            corners[0], corners[1]))
++    }
++}

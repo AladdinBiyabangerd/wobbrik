@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.aladdin.wobbrik.CityParkPathsTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-11-18T13:25:14.887Z" hostname="Macs-MacBook-Pro.local" time="4.452">
+  <properties/>
+  <testcase name="disconnectedParcelsDoNotAcquireBridgeAndHugeBoundsAreCapped" classname="com.aladdin.wobbrik.CityParkPathsTest" time="4.356"/>
+  <testcase name="waterUsesFrontCoastRegardlessOfBooleanUnionWinding" classname="com.aladdin.wobbrik.CityParkPathsTest" time="0.051"/>
+  <testcase name="joinsEntrancesAndAvoidsHoleWithBoundedSharedEdges" classname="com.aladdin.wobbrik.CityParkPathsTest" time="0.045"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

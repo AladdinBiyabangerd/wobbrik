@@ -69,6 +69,73 @@ internal object GameTokens {
         val NavbarHeight = Target + Inset + Small
         val LargeFontNavbarHeight = Target * 2 + Gap
     }
+    /** Inventory reference measured at843px wide, scaled to native portrait coordinates. */
+    internal object InventoryCollection {
+        // Sampled from the approved reference, rather than the older blue palette.
+        val Background = Color(0xFF041E38)
+        val PanelTop = Color(0xFF0E3053)
+        val PanelBottom = Color(0xFF072849)
+        val DockBottom = Color(0xFF05213D)
+        val Selected = Color(0xFF092F53)
+        val Outline = Color(0xFF285F80)
+        val Metadata = Color(0xFF94C6F1)
+        val OutlineWidth = Hairline / 2
+        val ScreenInset = Gap - Quarter / 2
+        val HeaderHeight = Target + Small
+        val HeaderLogoWidth = Target * 2
+        val HeaderLogoHeight = Target - Small
+        // Alpha bounds of wobbrik_logo.png; painter crops without allocating a new bitmap.
+        const val LogoSourceX = 68
+        const val LogoSourceY = 102
+        const val LogoSourceWidth = 1614
+        const val LogoSourceHeight = 696
+        val WalletCoin = Inset - Quarter
+        val ArtHeight = Target * 3 + Gap
+        val CompactArtHeight = Target * 3
+        val LargeTypeArtHeight = Target * 2
+        val CardInset = Small + Quarter
+        val CardGap = Small
+        val DockHeight = Target + Gap
+        val DockRadius = Inset - Quarter
+        val DockClearance = DockHeight + Gap
+        val PlayDiameter = Target - Small
+        val NavIcon = Inset - Quarter
+        val NavLabel = MobileHome.CompactNavLabel
+        val TabIcon = Gap
+        val TabVisualHeight = Target - Small - Quarter
+        val IndicatorHeight = Quarter / 2
+        val RefreshBody = Target - Gap
+        const val ArtScale = 1.15f
+        const val PressedScale = 0.96f
+    }
+    internal object AppearanceCollection {
+        val Unlocked = Color(0xFF2FF468) // sampled from the approved collection PNG
+        val CategoryHeight = Target
+        val CategoryIcon = Inset
+        val CategoryRadius = ControlRadius - Quarter
+        val ArtHeight = Target * 3 + Small
+        val CompactArtHeight = Target * 2 + Inset
+        val LargeTypeArtHeight = Target * 2
+        val FilterRadius = CardRadius
+        // A decorative two-storey sample, never accepted building geometry.
+        const val SampleWidth = 280f
+        const val SampleHeight = 340f
+    }
+    /** Art/card and centred CTA proportions measured from the approved Dekor proposal. */
+    internal object DecorCollection {
+        const val ArtHeightFraction = 0.52f
+        const val MarketWidthFraction = 0.64f
+    }
+    internal object OwnedDetail {
+        val HeroHeight = Target * 6
+        val CompactHeroHeight = Target * 3
+        val LargeTypeHeroHeight = Target * 2
+        val SectionGap = Small
+        val Title = 20.sp // measured from approved detail proposal at390dp
+        val StatHeight = Target + Small
+        val OwnershipFill = Color(0xFF0A3B37)
+        val ActionHeight = Target
+    }
     internal object Achievements {
         // Transparent illustration sheet derived from the approved 01-main artwork.
         val Trophy = intArrayOf(48, 112, 690, 440)
@@ -77,6 +144,20 @@ internal object GameTokens {
         val PurpleMedal = intArrayOf(780, 720, 316, 406)
         val HeroHeight = Target + Inset + Small
         val ProgressHeight = Small + Quarter
+    }
+    /** Decorative materials sampled from the approved Uğurlar podium; never text ink. */
+    internal object RecordsPodium {
+        val BronzeLight = Color(0xFFFFD49A)
+        val Bronze = Color(0xFFB96B33)
+        val BronzeShade = Color(0xFF71391F)
+        val Stone = Color(0xFF897B86)
+        val StoneLight = Color(0xFFD1BDC0)
+        val StoneShade = Color(0xFF494655)
+        val Leaf = Color(0xFF477D29)
+        val LeafLight = Color(0xFFB2CE44)
+        val Flower = Color(0xFFEC91BC)
+        val GardenHeight = Gap + Small
+        val BadgeRadius = Small + Quarter
     }
     internal object Leaderboard {
         // Three equal sprite cells: builder, pilot, architect; no baked labels or UI.

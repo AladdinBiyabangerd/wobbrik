@@ -1,0 +1,7 @@
+assembleDebug, assembleMockDebug, lintDebug: PASS
+Native size/font/inset/flow tests: 5/5 PASS
+testDebugUnitTest {'tests': 41, 'failures': 0, 'errors': 0, 'skipped': 0}
+testMockDebugUnitTest {'tests': 44, 'failures': 0, 'errors': 0, 'skipped': 0}
+CI: not run. Main merge/push/deploy: not performed.
+Core PartsFlow/PartsMutations/FinishCosmetics: {'tests': 8, 'failures': 0, 'errors': 0, 'skipped': 0}
+Final regular native preview/flow: 1/1 PASS

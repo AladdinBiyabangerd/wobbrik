@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="appbackend.wobbrik.game.MarketPreviewReadsTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-11-18T13:49:37.054Z" hostname="Macs-MacBook-Pro.local" time="1.134">
+  <properties/>
+  <testcase name="queryCacheIdentitySeparatesEveryFilterScopeAndCursor" classname="appbackend.wobbrik.game.MarketPreviewReadsTest" time="0.013"/>
+  <testcase name="failedOrRevokedDetailCannotBecomeSuccessfulCachedBundle" classname="appbackend.wobbrik.game.MarketPreviewReadsTest" time="0.041"/>
+  <testcase name="bundledCaptureRemovesDetailFanoutAndReplaysWithoutNetwork" classname="appbackend.wobbrik.game.MarketPreviewReadsTest" time="0.999"/>
+  <testcase name="previewReadsAreBoundedOrderedAndClosedOrChangedListingsHaveNoArt" classname="appbackend.wobbrik.game.MarketPreviewReadsTest" time="0.077"/>
+  <testcase name="malformedEmbeddedPreviewsCannotFallBackOrPairWrongVersions" classname="appbackend.wobbrik.game.MarketPreviewReadsTest" time="0.002"/>
+  <testcase name="embeddedPreviewsUseOneReadAndKeepEmptyOrClosedEntriesUnavailable" classname="appbackend.wobbrik.game.MarketPreviewReadsTest" time="0.002"/>
+  <system-out><![CDATA[MARKET-BUNDLE embedded=false requests=14 bytes=5174 elapsedMs=264
+MARKET-BUNDLE embedded=true requests=2 bytes=5199 elapsedMs=90
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

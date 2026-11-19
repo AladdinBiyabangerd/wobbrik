@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.aladdin.wobbrik.MarketApprovedRegularTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-11-19T06:31:20.809Z" hostname="Macs-MacBook-Pro.local" time="4.466">
+  <properties/>
+  <testcase name="routes" classname="com.aladdin.wobbrik.MarketApprovedRegularTest" time="4.466"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

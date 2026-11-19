@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.aladdin.wobbrik.MarketNewListingInsetsTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-11-19T08:58:48.004Z" hostname="Macs-MacBook-Pro.local" time="1.573">
+  <properties/>
+  <testcase name="routes" classname="com.aladdin.wobbrik.MarketNewListingInsetsTest" time="1.573"/>
+  <system-out><![CDATA[LISTING insets inventoryRequests=1 inventoryResponseBytes=2019 firstMetadataHostMs=39 warmReturnHostMs=27 editsAndReturnRequests=0 submissions=1
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

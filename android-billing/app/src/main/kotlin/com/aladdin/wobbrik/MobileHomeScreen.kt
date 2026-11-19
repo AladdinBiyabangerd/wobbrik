@@ -21,6 +21,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.layout.ContentScale
@@ -45,59 +46,97 @@ internal fun MobileHomeScreen(snapshot: GameSnapshot?, active: Boolean, onPlay: 
     val cityPainter = remember(city) { city?.let { BitmapPainter(it,
         IntOffset(GameTokens.MobileHome.HeroLeft, 0), IntSize(GameTokens.MobileHome.HeroWidth, it.height)) } }
     val accepted = snapshot != null && status == null && !journalBlocked
-    Column(Modifier.fillMaxSize().background(Brush.radialGradient(listOf(GameTokens.Surface, GameTokens.Background)))
-        .safeDrawingPadding().consumeWindowInsets(WindowInsets.safeDrawing)
-        .padding(bottom = GameTokens.Quarter), horizontalAlignment = Alignment.CenterHorizontally) {
-        // Frameless Home keeps independent header, illustration and stats surfaces.
-        if (!LocalMobileMenuShell.current) Box(Modifier.padding(horizontal = GameTokens.Gap, vertical = GameTokens.Small)) {
-            MobileMenuHeader(snapshot?.coins)
-        }
-        Box(Modifier.padding(horizontal = GameTokens.Gap).weight(1f).fillMaxWidth()) {
-            Column(Modifier.fillMaxSize().padding(GameTokens.Small), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-                BoxWithConstraints(Modifier.weight(1f)) {
-                    val available = maxHeight
-                    Column(Modifier.fillMaxSize().then(if (largeFont || !accepted) Modifier.verticalScroll(rememberScrollState()) else Modifier),
-                        verticalArrangement = Arrangement.spacedBy(GameTokens.Small), horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(fontFamily = GameTypeface, text = "Öz şəhərini qur", color = GameTokens.Text, fontSize = if (mobileUiSizing().compact || largeFont) GameTokens.Title else GameTokens.MobileHome.HomeTitle,
-                            fontWeight = FontWeight.ExtraBold, textAlign = TextAlign.Center,
-                            modifier = Modifier.fillMaxWidth().padding(top = GameTokens.Small))
-                        if (accepted) {
-                            if (!largeFont) BoxWithConstraints(Modifier.fillMaxWidth().weight(1f).clipToBounds(), contentAlignment = Alignment.Center) {
-                                val heroWidth = minOf(maxWidth, maxHeight * GameTokens.MobileHome.HeroAspectRatio)
-                                if (cityPainter != null) Image(cityPainter, null, Modifier.size(heroWidth, heroWidth / GameTokens.MobileHome.HeroAspectRatio).testTag("home-city-hero"), contentScale = ContentScale.FillBounds)
-                            }
-                            // Large text uses a bounded hero inside the scroll body even on short phones.
-                            else Box(Modifier.fillMaxWidth().height(GameTokens.MobileHome.LargeFontHero)) {
-                                if (cityPainter != null) Image(cityPainter, null,
-                                    Modifier.fillMaxSize().testTag("home-city-hero"), contentScale = ContentScale.Fit)
-                            }
-                            if (art.failed) TextButton(onClick = retryArt) { Text("Qrafikanı yenilə", color = GameTokens.Accent) }
-                            MobileHomeStats(requireNotNull(snapshot), largeFont)
-                            if (!largeFont && available > GameTokens.MobileUi.CompactHeight) Spacer(Modifier.height(GameTokens.MobileHome.StatBottomSpace))
-                        } else {
-                            val message = status ?: "Hesab və cəhd bərpa olunur…"
-                            Text(fontFamily = GameTypeface, text = message, color = GameTokens.Text, fontSize = GameTokens.Hint, fontWeight = FontWeight.Bold)
-                            if (message == "Hesab və cəhd bərpa olunur…") CircularProgressIndicator(color = GameTokens.Accent)
-                            if (journalBlocked) Text(fontFamily = GameTypeface, text = JournalRecoveryCopy.Description, color = GameTokens.Muted, fontSize = GameTokens.Body)
-                            HomeButton(if (journalBlocked) JournalRecoveryCopy.Retry else "Yenilə", primary = true,
-                                compact = true, onClick = onRetry)
-                        }
+    val scenery = rememberResourceArt(R.drawable.inventory_collection_header).first.images?.singleOrNull()
+    Column(Modifier.fillMaxSize().background(GameTokens.InventoryCollection.Background)
+        .safeDrawingPadding().consumeWindowInsets(WindowInsets.safeDrawing),
+        horizontalAlignment = Alignment.CenterHorizontally) {
+        CollectionHeader(snapshot?.coins, scenery)
+        BoxWithConstraints(Modifier.weight(1f).fillMaxWidth().clipToBounds()
+            .padding(horizontal = GameTokens.InventoryCollection.ScreenInset)) {
+            val compact = maxHeight < GameTokens.MobileUi.CompactHeight
+            Column(Modifier.fillMaxSize().then(if (largeFont || !accepted) Modifier.verticalScroll(rememberScrollState()) else Modifier),
+                verticalArrangement = Arrangement.spacedBy(GameTokens.Small), horizontalAlignment = Alignment.CenterHorizontally) {
+                Text("Öz şəhərini qur", fontFamily = GameTypeface, color = GameTokens.Text,
+                    fontSize = GameTokens.Title, fontWeight = FontWeight.ExtraBold, textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth().padding(top = GameTokens.Inset))
+                if (accepted) {
+                    BoxWithConstraints(if (largeFont) Modifier.fillMaxWidth().height(GameTokens.MobileHome.LargeFontHero)
+                        else Modifier.fillMaxWidth().weight(1f).clipToBounds(), contentAlignment = Alignment.Center) {
+                        val heroWidth = minOf(maxWidth, maxHeight * GameTokens.MobileHome.HeroAspectRatio)
+                        if (cityPainter != null) Image(cityPainter, null,
+                            Modifier.size(heroWidth, heroWidth / GameTokens.MobileHome.HeroAspectRatio).testTag("home-city-hero"),
+                            contentScale = ContentScale.FillBounds)
                     }
+                    if (art.failed) TextButton(onClick = retryArt) { Text("Qrafikanı yenilə", color = GameTokens.Accent) }
+                    HomeCollectionStats(requireNotNull(snapshot), largeFont)
+                    if (!largeFont && !compact) Spacer(Modifier.height(GameTokens.MobileHome.StatBottomSpace + GameTokens.Inset + GameTokens.Small))
+                } else {
+                    val message = status ?: "Hesab və cəhd bərpa olunur…"
+                    Text(message, fontFamily = GameTypeface, color = GameTokens.Text, fontSize = GameTokens.Hint, fontWeight = FontWeight.Bold)
+                    if (message == "Hesab və cəhd bərpa olunur…") CircularProgressIndicator(color = GameTokens.Accent)
+                    if (journalBlocked) Text(JournalRecoveryCopy.Description, fontFamily = GameTypeface, color = GameTokens.Muted, fontSize = GameTokens.Body)
+                    NativeProfileAction(if (journalBlocked) JournalRecoveryCopy.Retry else "Yenilə", enabled = true, modifier = Modifier.fillMaxWidth(), onClick = onRetry)
                 }
             }
         }
-        // Weighted content anchors the dock to the safe bottom at every window height.
-        if (!LocalMobileMenuShell.current) Spacer(Modifier.height(GameTokens.Small))
-        if (!LocalMobileMenuShell.current) Box(Modifier.padding(horizontal = GameTokens.Quarter)) {
-            MobileMenuNavbar(page = "home", active = active, enabled = !journalBlocked && onPlay != null,
-                onPlay = { onPlay?.invoke() }, onPage = onPage)
+        Box(Modifier.padding(horizontal = GameTokens.Small, vertical = GameTokens.Quarter)) {
+            CollectionNavbar(if (!journalBlocked) onPlay else null, onPage, "home", active)
+        }
+    }
+}
+
+/** Home-only collection panel; shared achievement stats keep their existing presentation. */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun HomeCollectionStats(snapshot: GameSnapshot, largeFont: Boolean) {
+    ProfileCollectionPanel {
+        Column(Modifier.padding(GameTokens.InventoryCollection.CardInset),
+            verticalArrangement = Arrangement.spacedBy(GameTokens.Small), horizontalAlignment = Alignment.CenterHorizontally) {
+            if (largeFont) Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+                MobileHomeStat(MobileIcon.City, "Səviyyə ${snapshot.account?.level ?: "—"}")
+                MobileHomeStat(MobileIcon.Crown, "Rekord ${snapshot.account?.bestFloors ?: "—"}")
+            } else FlowStats(snapshot)
+            val interval = snapshot.account?.xpInterval
+            if (interval == null) Text("XP —", color = GameTokens.Muted, fontFamily = GameTypeface)
+            else {
+                val earned = BigInteger.valueOf(snapshot.xp).subtract(interval.start)
+                val required = interval.next.subtract(interval.start)
+                val remaining = interval.next.subtract(BigInteger.valueOf(snapshot.xp)).max(BigInteger.ZERO)
+                val progress = if (required.signum() > 0) BigDecimal(earned).divide(BigDecimal(required), MathContext.DECIMAL64).toFloat().coerceIn(0f, 1f) else 0f
+                val label = "$earned / $required XP"
+                val shape = RoundedCornerShape(GameTokens.CardRadius)
+                val style = TextStyle(fontFamily = GameTypeface, fontSize = GameTokens.Label, fontWeight = FontWeight.ExtraBold)
+                val labelPixels = rememberTextMeasurer().measure(label, style).size.width
+                val labelWidth = with(LocalDensity.current) { labelPixels.toDp() } + GameTokens.Small * 2
+                BoxWithConstraints(Modifier.fillMaxWidth()) {
+                    val insideFill = maxWidth * progress >= labelWidth
+                    Box(Modifier.fillMaxWidth().clip(shape).background(GameTokens.InventoryCollection.PanelBottom)
+                        .semantics { progressBarRangeInfo = ProgressBarRangeInfo(progress, 0f..1f) }
+                        .testTag("home-xp-progress"), contentAlignment = Alignment.Center) {
+                        Canvas(Modifier.matchParentSize()) {
+                            drawRoundRect(Brush.verticalGradient(listOf(GameTokens.MobileHome.PlayTop, GameTokens.Accent, GameTokens.MobileHome.PlayBottom)),
+                                size = Size(size.width * progress, size.height), cornerRadius = CornerRadius(GameTokens.CardRadius.toPx()))
+                        }
+                        Box(Modifier.align(Alignment.CenterStart).fillMaxWidth(if (insideFill) progress else 1f), contentAlignment = Alignment.Center) {
+                            Text(label, Modifier.padding(GameTokens.Quarter)
+                                .then(if (insideFill) Modifier else Modifier.background(GameTokens.InventoryCollection.PanelBottom, shape))
+                                .padding(horizontal = GameTokens.Small).horizontalScroll(rememberScrollState()),
+                                color = if (insideFill) GameTokens.Background else GameTokens.Text,
+                                style = style, softWrap = false)
+                        }
+                    }
+                }
+                Text("Növbəti səviyyəyə $remaining XP", Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                    color = GameTokens.Muted, fontFamily = GameTypeface, fontSize = GameTokens.Label,
+                    fontWeight = FontWeight.Bold, textAlign = TextAlign.Center, softWrap = false)
+            }
         }
     }
 }
 
 /** Shared menu header: profile is reached through the dock, balance stays right aligned. */
 @Composable
-internal fun MobileMenuHeader(coins: Long?) {
+internal fun MobileMenuHeader(coins: Long?, collectionTrial: Boolean = false) {
     val (logoArt, retryLogo) = LocalMenuLogo.current ?: rememberResourceArt(R.drawable.wobbrik_logo)
     val logo = logoArt.images?.singleOrNull()
     val largeBalance = (coins?.toString()?.length ?: 1) > 6
@@ -111,14 +150,27 @@ internal fun MobileMenuHeader(coins: Long?) {
                     Text("Wobbrik", color = GameTokens.Text, fontFamily = GameTypeface)
                 }
             }
-            if (!largeBalance) MobileHomeBalance(coins)
+            if (!largeBalance) MobileHomeBalance(coins, collectionTrial)
         }
-        if (largeBalance) Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) { MobileHomeBalance(coins) }
+        if (largeBalance) Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) { MobileHomeBalance(coins, collectionTrial) }
     }
 }
 
 @Composable
-private fun MobileHomeBalance(coins: Long?) {
+private fun MobileHomeBalance(coins: Long?, collectionTrial: Boolean = false) {
+    if (collectionTrial) {
+        androidx.compose.material3.Surface(color = GameTokens.Surface, shape = RoundedCornerShape(GameTokens.CardRadius),
+            border = androidx.compose.foundation.BorderStroke(GameTokens.Hairline, GameTokens.Raised)) {
+            Row(Modifier.padding(GameTokens.Small), verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {
+                MobileMenuIcon(MobileIcon.Coin, Modifier.size(GameTokens.Inset))
+                Text(coins?.toString() ?: "—", Modifier.weight(1f, fill = false).horizontalScroll(rememberScrollState()),
+                    color = GameTokens.Text, fontFamily = GameTypeface, fontSize = GameTokens.Body,
+                    fontWeight = FontWeight.Bold, softWrap = false)
+            }
+        }
+        return
+    }
     MenuRelief(shape = RoundedCornerShape(GameTokens.CardRadius), kind = MenuSkin.Wallet) {
     Row(Modifier.padding(GameTokens.Small),
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {

@@ -7,9 +7,16 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.border
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
@@ -45,16 +52,15 @@ private val LocalRecordsPortraits = staticCompositionLocalOf<ImageBitmap?> { nul
 /** The shared shell owns the header and dock; this body owns only records content. */
 @Composable
 internal fun MobileRecordsFrame(content: @Composable ColumnScope.() -> Unit) {
-    val large = LocalDensity.current.fontScale > 1f
-    val portraits = ImageBitmap.imageResource(R.drawable.records_portraits_v3)
-    BoxWithConstraints(Modifier.fillMaxSize()) {
-        val bodyHeight = if (large) maxHeight.coerceAtLeast(GameTokens.MobileUi.CompactHeight) else maxHeight
-        Box(Modifier.fillMaxSize().then(if (large) Modifier.verticalScroll(rememberScrollState()) else Modifier)) {
-            CompositionLocalProvider(LocalRecordsPortraits provides portraits,
-                LocalTextStyle provides LocalTextStyle.current.copy(fontFamily = GameTypeface)) {
-                Column(Modifier.fillMaxWidth().height(bodyHeight).padding(GameTokens.Gap),
-                    verticalArrangement = Arrangement.spacedBy(GameTokens.Small), content = content)
-            }
+    val (portraits, retry) = rememberResourceArt(R.drawable.records_portraits_v3)
+    CompositionLocalProvider(LocalRecordsPortraits provides portraits.images?.singleOrNull(),
+        LocalTextStyle provides LocalTextStyle.current.copy(fontFamily = GameTypeface)) {
+        Column(Modifier.fillMaxSize().padding(horizontal = GameTokens.InventoryCollection.ScreenInset)
+            .padding(top = GameTokens.Small, bottom = LocalCollectionDockClearance.current),
+            verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
+            // Optional illustration decode never gates leaderboard metadata or fitting.
+            if(portraits.failed) TextButton(onClick = retry) { Text("Avatarları yenidən yüklə", color = GameTokens.Accent) }
+            content()
         }
     }
 }
@@ -62,85 +68,72 @@ internal fun MobileRecordsFrame(content: @Composable ColumnScope.() -> Unit) {
 @Composable
 internal fun MobileRecordsControls(scope: LeaderboardScope, onScope: (LeaderboardScope) -> Unit,
     onRefresh: () -> Unit, refreshEnabled: Boolean, refreshing: Boolean) {
-    val large = LocalDensity.current.fontScale > 1f
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(GameTokens.Small),
-        verticalAlignment = Alignment.Top) {
-        val choices: @Composable (Modifier) -> Unit = { modifier ->
-            RecordsScopeButton("Həftəlik", true, scope == LeaderboardScope.WEEKLY, modifier) { onScope(LeaderboardScope.WEEKLY) }
-            RecordsScopeButton("Ümumi", false, scope == LeaderboardScope.ALL, modifier) { onScope(LeaderboardScope.ALL) }
+        verticalAlignment = Alignment.CenterVertically) {
+        val large = LocalDensity.current.fontScale > 1f
+        val choices: @Composable (Modifier) -> Unit = { item ->
+            RecordsScopeButton("Ümumi", scope == LeaderboardScope.ALL, item) { onScope(LeaderboardScope.ALL) }
+            RecordsScopeButton("Həftəlik", scope == LeaderboardScope.WEEKLY, item) { onScope(LeaderboardScope.WEEKLY) }
         }
-        if (large) Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-            choices(Modifier.fillMaxWidth())
-        } else Row(Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {
-            choices(Modifier.weight(1f))
+        val scroll = rememberScrollState()
+        LaunchedEffect(scope, scroll.maxValue) { scroll.scrollTo(if(scope == LeaderboardScope.WEEKLY) scroll.maxValue else 0) }
+        Row(Modifier.weight(1f).selectableGroup().then(if(large) Modifier.horizontalScroll(scroll) else Modifier)) {
+            choices(if(large) Modifier.widthIn(min = GameTokens.Target + GameTokens.Inset) else Modifier.weight(1f))
         }
-        Surface(onClick = onRefresh, enabled = refreshEnabled, color = Color.Transparent,
-            shape = RoundedCornerShape(GameTokens.ControlRadius),
-            modifier = Modifier.size(GameTokens.Target).testTag("records-refresh").semantics { contentDescription = "Yenilə" }) {
-            MenuRelief(Modifier.fillMaxSize(), shape = RoundedCornerShape(GameTokens.ControlRadius)) {
-                if (refreshing) CircularProgressIndicator(Modifier.size(GameTokens.Inset).align(Alignment.Center),
-                    color = GameTokens.Accent, strokeWidth = GameTokens.Hairline * 2)
-                else Canvas(Modifier.size(GameTokens.Inset).align(Alignment.Center)) {
-                    val stroke = GameTokens.Hairline.toPx() * 2
-                    drawArc(GameTokens.Text, -55f, 290f, false, Offset(size.width * .15f, size.height * .15f),
-                        Size(size.width * .7f, size.height * .7f), style = Stroke(stroke))
-                    drawLine(GameTokens.Text, Offset(size.width * .85f, size.height * .05f), Offset(size.width * .85f, size.height * .35f), stroke)
-                    drawLine(GameTokens.Text, Offset(size.width * .55f, size.height * .35f), Offset(size.width * .85f, size.height * .35f), stroke)
-                }
-            }
-        }
+
+        Box(Modifier.testTag("records-refresh")) { CollectionRefresh(refreshEnabled, onRefresh) }
     }
 }
 
 @Composable
-private fun RecordsScopeButton(label: String, weekly: Boolean, active: Boolean, modifier: Modifier, onClick: () -> Unit) {
-    Surface(onClick = onClick, color = Color.Transparent, shape = RoundedCornerShape(GameTokens.ControlRadius),
-        modifier = modifier.heightIn(min = GameTokens.Target).semantics { selected = active }) {
-        MenuRelief(Modifier.fillMaxWidth(), shape = RoundedCornerShape(GameTokens.ControlRadius),
-            kind = if (active) MenuSkin.Selected else MenuSkin.Panel) {
-            Row(Modifier.fillMaxWidth().heightIn(min = GameTokens.Target)
-                .then(if (active) Modifier.background(Brush.verticalGradient(listOf(GameTokens.MobileHome.PlayTop,
-                    GameTokens.Accent, GameTokens.MobileHome.PlayBottom))) else Modifier)
-                .padding(GameTokens.Small), verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(GameTokens.Quarter, Alignment.CenterHorizontally)) {
-                val ink = if (active) GameTokens.Background else GameTokens.Text
-                if (weekly) Canvas(Modifier.size(GameTokens.Inset)) {
-                    val stroke = GameTokens.Hairline.toPx() * 2
-                    drawRect(ink, Offset(size.width * .15f, size.height * .22f), Size(size.width * .7f, size.height * .65f), style = Stroke(stroke))
-                    drawLine(ink, Offset(size.width * .15f, size.height * .42f), Offset(size.width * .85f, size.height * .42f), stroke)
-                    for (x in listOf(.3f, .7f)) drawLine(ink, Offset(size.width * x, size.height * .1f), Offset(size.width * x, size.height * .3f), stroke)
-                } else MobileMenuIcon(MobileIcon.Crown, Modifier.size(GameTokens.Inset), tint = ink)
-                Text(label, color = ink, fontFamily = GameTypeface, fontSize = GameTokens.Body, fontWeight = FontWeight.Bold)
-            }
+private fun RecordsScopeButton(label: String, active: Boolean, modifier: Modifier, onClick: () -> Unit) {
+    Surface(onClick = onClick, color = Color.Transparent,
+        modifier = modifier.heightIn(min = GameTokens.Target).semantics { selected = active; role = Role.Tab }) {
+        val shape = RoundedCornerShape(GameTokens.CardRadius)
+        Box(Modifier.padding(vertical = GameTokens.Quarter).clip(shape)
+            .background(Brush.verticalGradient(listOf(GameTokens.InventoryCollection.PanelTop,GameTokens.InventoryCollection.PanelBottom)))
+            .border(if(active) GameTokens.Hairline else GameTokens.InventoryCollection.OutlineWidth,
+                if(active) GameTokens.Accent else GameTokens.InventoryCollection.Outline, shape)
+            .padding(horizontal = GameTokens.Small, vertical = GameTokens.Small), contentAlignment = Alignment.Center) {
+            Text(label, color = if(active) GameTokens.Text else GameTokens.InventoryCollection.Metadata,
+                fontFamily = GameTypeface, fontSize = GameTokens.Label, fontWeight = FontWeight.Bold, softWrap = false)
         }
     }
 }
 
 @Composable
 internal fun MobileRecordsPodium(entries: List<LeaderboardEntry>) {
-    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Bottom,
-        horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-        listOf(entries[1], entries[0], entries[2]).forEach { entry ->
-            Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {
-                Box(Modifier.size(if (entry.rank == 1L) GameTokens.Target * 2 else GameTokens.Target + GameTokens.Inset)) {
-                    Canvas(Modifier.matchParentSize()) { recordsLaurel(entry.rank == 1L) }
-                    MobileRecordsAvatar(entry.avatarId, Modifier.fillMaxSize())
+    Box(Modifier.fillMaxWidth().padding(top = GameTokens.Small)) {
+        Canvas(Modifier.fillMaxWidth().height(GameTokens.Target + GameTokens.Inset).align(Alignment.BottomCenter)) { recordsGarden() }
+        Row(Modifier.fillMaxWidth().padding(horizontal = GameTokens.Small).padding(bottom = GameTokens.RecordsPodium.GardenHeight), verticalAlignment = Alignment.Bottom,
+            horizontalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {
+            listOf(entries[1], entries[0], entries[2]).forEach { entry ->
+                Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
+                    val winner = entry.rank == 1L
+                    Box(Modifier.size(if(winner) GameTokens.Target + GameTokens.Inset else GameTokens.Target + GameTokens.Gap)) {
+                        Canvas(Modifier.matchParentSize()) { recordsLaurel(winner) }
+                        MobileRecordsAvatar(entry.avatarId, Modifier.fillMaxSize().padding(GameTokens.Quarter), if(winner) GameTokens.MobileHome.Gold else if(entry.rank == 2L) GameTokens.Muted else GameTokens.RecordsPodium.Bronze)
+                    }
+                    val metal = if(winner) GameTokens.MobileHome.Gold else if(entry.rank == 2L) GameTokens.Muted else GameTokens.RecordsPodium.Bronze
+                    Box(Modifier.fillMaxWidth().padding(horizontal = GameTokens.Small).clip(RoundedCornerShape(GameTokens.RecordsPodium.BadgeRadius))
+                        .background(Brush.verticalGradient(listOf(lerp(metal, GameTokens.Background, .55f), GameTokens.InventoryCollection.PanelBottom)))
+                        .border(GameTokens.Hairline,metal,RoundedCornerShape(GameTokens.RecordsPodium.BadgeRadius))
+                        .padding(horizontal = GameTokens.Quarter, vertical = GameTokens.Quarter), contentAlignment = Alignment.Center) {
+                        Text(entry.displayName + if(entry.isSelf) " · Sən" else "", color = GameTokens.Text,
+                            fontSize = GameTokens.Label, fontFamily = GameTypeface, fontWeight = FontWeight.Bold,
+                            maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    }
+                    Box(Modifier.fillMaxWidth().padding(horizontal = GameTokens.Small).height(if(winner) GameTokens.Target * 2 else GameTokens.Target + GameTokens.Inset)) {
+                        Canvas(Modifier.matchParentSize()) { recordsMetal(entry.rank, pedestal = true) }
+                        Column(Modifier.fillMaxSize().padding(top = GameTokens.Small, bottom = GameTokens.Small), horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.SpaceBetween) {
+                            Text(entry.floors.toString(), color = GameTokens.Background, fontFamily = GameTypeface,
+                                fontSize = GameTokens.Hint, fontWeight = FontWeight.ExtraBold)
+                            Text(entry.rank.toString(), color = GameTokens.Background, fontFamily = GameTypeface,
+                                fontSize = GameTokens.Title, fontWeight = FontWeight.ExtraBold)
+                        }
+                    }
                 }
-                Box(Modifier.fillMaxWidth().height(GameTokens.Target),
-                    contentAlignment = Alignment.Center) {
-                    Canvas(Modifier.matchParentSize()) { recordsMetal(entry.rank, pedestal = true) }
-                    Text(entry.rank.toString(), color = GameTokens.Background, fontFamily = GameTypeface,
-                        fontSize = GameTokens.Title, fontWeight = FontWeight.ExtraBold)
-                }
-                Text(entry.displayName, color = GameTokens.Text, fontSize = GameTokens.Label, fontFamily = GameTypeface,
-                    fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis,
-                    textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {
-                    MobileMenuIcon(MobileIcon.Crown, Modifier.size(GameTokens.Inset))
-                    Text(entry.floors.toString(), color = GameTokens.Text, fontSize = GameTokens.Label, fontFamily = GameTypeface)
-                }
-                if (entry.isSelf) Text("Sən", color = GameTokens.Accent, fontSize = GameTokens.Caption, fontFamily = GameTypeface)
             }
         }
     }
@@ -152,33 +145,21 @@ internal fun MobileRecordsRow(rank: Long, floors: Long, isSelf: Boolean, name: S
     val large = LocalDensity.current.fontScale > 1f
     val stacked = large || floors.toString().length > GameTokens.Leaderboard.MaxPodiumDigits
     val longRank = rank.toString().length > GameTokens.Leaderboard.MaxPodiumDigits
-    val ink = if (isSelf) GameTokens.Background else GameTokens.Text
-    MenuRelief(modifier.fillMaxWidth(), shape = RoundedCornerShape(GameTokens.ControlRadius),
-        kind = if (isSelf) MenuSkin.Selected else MenuSkin.Panel) {
-        Column(Modifier.fillMaxWidth().then(if (isSelf) Modifier.background(Brush.verticalGradient(
-            listOf(GameTokens.MobileHome.PlayTop, GameTokens.Accent, GameTokens.MobileHome.PlayBottom))) else Modifier)
-            .padding(if (compact) GameTokens.Quarter else GameTokens.Small),
+    AchievementPanel(modifier.fillMaxWidth(), selected = isSelf) {
+        Column(Modifier.fillMaxWidth().padding(if(compact) GameTokens.Quarter else GameTokens.Small),
             verticalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {
-            if (longRank) Text("Yer ${leaderboardRankLabel(rank)}", color = ink, fontFamily = GameTypeface, fontSize = GameTokens.Label)
+            if(longRank) Text("Yer ${leaderboardRankLabel(rank)}", color = GameTokens.Text, fontSize = GameTokens.Label)
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(GameTokens.Small)) {
-                if (!longRank) Box(Modifier.size(GameTokens.Target), contentAlignment = Alignment.Center) {
-                    Canvas(Modifier.matchParentSize()) { recordsMetal(rank, pedestal = false) }
-                    Text(rank.toString(), color = if (rank in 1L..3L) GameTokens.Background else GameTokens.Text,
-                        fontFamily = GameTypeface, fontSize = GameTokens.Label, fontWeight = FontWeight.ExtraBold)
-                }
-                MobileRecordsAvatar(avatar, Modifier.size(if (compact) GameTokens.Inset else GameTokens.Target))
-                Column(Modifier.weight(1f)) {
-                    Text(name, Modifier.horizontalScroll(rememberScrollState()), softWrap = false,
-                        color = ink, fontFamily = GameTypeface, fontSize = GameTokens.Body, fontWeight = FontWeight.Bold)
-                    if (isSelf) Text("Sən", color = ink, fontFamily = GameTypeface, fontSize = GameTokens.Caption)
-                }
-                if (!stacked) {
-                    MobileMenuIcon(MobileIcon.Crown, Modifier.size(GameTokens.Inset))
-                    Text(floors.toString(), color = ink, fontFamily = GameTypeface, fontWeight = FontWeight.Bold,
-                        modifier = Modifier.semantics { contentDescription = "$floors mərtəbə" })
-                }
+                if(!longRank) Text(leaderboardRankLabel(rank), Modifier.widthIn(min = GameTokens.Inset),
+                    color = GameTokens.Text, fontSize = GameTokens.Hint, fontWeight = FontWeight.ExtraBold)
+                MobileRecordsAvatar(avatar, Modifier.size(if(compact) GameTokens.Inset else GameTokens.Target - GameTokens.Small))
+                Text(if(isSelf) "$name · Sən" else name, Modifier.weight(1f).horizontalScroll(rememberScrollState()),
+                    softWrap = false, color = GameTokens.Text, fontSize = GameTokens.Body, fontWeight = FontWeight.Bold)
+                if(!stacked) Text("$floors mərtəbə", color = GameTokens.InventoryCollection.Metadata,
+                    fontSize = GameTokens.Label, fontWeight = FontWeight.Bold)
             }
-            if (stacked) Text("$floors mərtəbə", color = ink, fontFamily = GameTypeface, fontSize = GameTokens.Label)
+            if(stacked) Text("$floors mərtəbə", Modifier.horizontalScroll(rememberScrollState()), softWrap = false,
+                color = GameTokens.InventoryCollection.Metadata, fontSize = GameTokens.Label)
         }
     }
 }
@@ -193,9 +174,9 @@ private fun DrawScope.recordsMetal(rank: Long, pedestal: Boolean) {
             shade = lerp(metal, GameTokens.Background, .28f) }
         2L -> { light = GameTokens.Text; metal = GameTokens.Muted
             shade = GameTokens.MobileHome.Rim }
-        3L -> { light = lerp(GameTokens.MobileHome.GoldLight, GameTokens.Danger, .55f)
-            metal = lerp(GameTokens.MobileHome.Gold, GameTokens.Danger, .42f)
-            shade = lerp(metal, GameTokens.Background, .38f) }
+        3L -> { light = GameTokens.RecordsPodium.BronzeLight
+            metal = GameTokens.RecordsPodium.Bronze
+            shade = GameTokens.RecordsPodium.BronzeShade }
         else -> { light = GameTokens.MobileHome.RimLight; metal = GameTokens.Raised
             shade = GameTokens.MobileHome.PanelBottom }
     }
@@ -215,9 +196,26 @@ private fun DrawScope.recordsMetal(rank: Long, pedestal: Boolean) {
         drawOval(light, Offset(edge, edge), Size(size.width - edge * 2, cap), style = Stroke(edge))
         for (x in listOf(.09f, .84f)) drawLine(light.copy(alpha = .55f),
             Offset(size.width * x, cap), Offset(size.width * x, size.height - cap), edge)
-        drawCircle(shade, size.height * .35f, Offset(size.width / 2, size.height * .55f))
-        drawCircle(Brush.verticalGradient(listOf(light, metal)), size.height * .31f,
-            Offset(size.width / 2, size.height * .53f))
+        drawOval(shade, Offset(edge, size.height - cap), Size(size.width - edge * 2, cap))
+        drawOval(light.copy(alpha = .65f), Offset(edge * 2, size.height - cap), Size(size.width - edge * 4, cap * .62f), style = Stroke(edge))
+        drawCircle(shade, size.height * .24f, Offset(size.width / 2, size.height * .69f))
+        drawCircle(Brush.verticalGradient(listOf(light, metal)), size.height * .21f,
+            Offset(size.width / 2, size.height * .69f))
+        for(side in listOf(-1f, 1f)) for(leaf in 0..4) {
+            val t = leaf / 4f
+            val x = size.width * (.5f + side * (.28f + .08f * kotlin.math.sin(t * 2.2f)))
+            val y = size.height * (.89f - t * .34f)
+            rotate(side * (50f - t * 50f), Offset(x,y)) {
+                val leafShape = Path().apply {
+                    moveTo(x, y + size.height * .055f)
+                    cubicTo(x - size.width * .065f, y, x - size.width * .04f, y - size.height * .06f, x, y - size.height * .065f)
+                    cubicTo(x + size.width * .04f, y - size.height * .06f, x + size.width * .065f, y, x, y + size.height * .055f)
+                    close()
+                }
+                drawPath(leafShape, Brush.horizontalGradient(listOf(metal, light), startX = x - size.width * .05f, endX = x + size.width * .05f))
+                drawLine(shade.copy(alpha = .4f), Offset(x, y + size.height * .035f), Offset(x, y - size.height * .045f), edge)
+            }
+        }
     } else {
         val radius = size.minDimension / 2 - edge
         drawCircle(Brush.verticalGradient(listOf(light, metal, shade)), radius)
@@ -235,6 +233,11 @@ private fun DrawScope.recordsLaurel(winner: Boolean) {
     val leafBase = if (winner) gold else GameTokens.Success
     val leafLight = if (winner) GameTokens.MobileHome.GoldLight else lerp(GameTokens.Success, gold, .6f)
     if (winner) {
+        drawCircle(Brush.radialGradient(listOf(gold.copy(alpha = .48f), gold.copy(alpha = 0f))), size.minDimension * .5f)
+        for (ray in 0..11) rotate(ray * 30f) {
+            drawLine(gold.copy(alpha = .38f), Offset(size.width / 2, size.height * .02f),
+                Offset(size.width / 2, size.height * .16f), edge)
+        }
         drawCircle(Brush.verticalGradient(listOf(GameTokens.MobileHome.GoldLight, gold)),
             size.minDimension * .41f, style = Stroke(edge * 2))
     }
@@ -264,10 +267,53 @@ private fun DrawScope.recordsLaurel(winner: Boolean) {
 }
 
 @Composable
-private fun MobileRecordsAvatar(id: String, modifier: Modifier) {
-    val sheet = requireNotNull(LocalRecordsPortraits.current)
+private fun MobileRecordsAvatar(id: String, modifier: Modifier, rim: Color = GameTokens.InventoryCollection.Metadata) {
+    val sheet = LocalRecordsPortraits.current
+    if(sheet == null) {
+        Box(modifier, contentAlignment = Alignment.Center) { MobileMenuIcon(MobileIcon.Account, Modifier.size(GameTokens.Inset)) }
+        return
+    }
     val cell = GameTokens.Leaderboard.PortraitCell
     val index = when (id) { "pilot" -> 1; "architect" -> 2; else -> 0 }
     val painter = remember(sheet, index) { BitmapPainter(sheet, IntOffset(index * cell, 0), IntSize(cell, cell)) }
-    Image(painter, "${avatarLabel(id)} avatarı", modifier)
+    Image(painter, "${avatarLabel(id)} avatarı", modifier.clip(CircleShape)
+        .background(Brush.verticalGradient(listOf(GameTokens.InventoryCollection.PanelTop, GameTokens.InventoryCollection.Background)))
+        .border(GameTokens.Hairline, rim, CircleShape))
+}
+
+/** Bounded decorative garden: no bitmap allocations, reads or frame-driven state. */
+private fun DrawScope.recordsGarden() {
+    val p = GameTokens.RecordsPodium
+    val edge = GameTokens.Hairline.toPx()
+    val w = size.width
+    val h = size.height
+    drawOval(GameTokens.Background.copy(alpha = .65f), Offset(0f, h * .55f), Size(w, h * .45f))
+    drawOval(Brush.verticalGradient(listOf(p.StoneLight, p.StoneShade)), Offset(0f, h * .48f), Size(w, h * .47f))
+    drawOval(Brush.verticalGradient(listOf(p.Stone, p.StoneShade)), Offset(0f, h * .42f), Size(w, h * .40f))
+    drawOval(p.StoneLight, Offset(edge, h * .43f), Size(w - edge * 2, h * .37f), style = Stroke(edge))
+    for (i in 1..13) {
+        val x = w * i / 14f
+        drawLine(p.StoneShade, Offset(x, h * .67f), Offset(x - w * .018f, h * .85f), edge)
+        drawLine(p.StoneLight.copy(alpha = .55f), Offset(x + edge, h * .69f), Offset(x - w * .018f + edge, h * .83f), edge)
+    }
+    for (side in listOf(-1f, 1f)) {
+        val root = if (side < 0) w * .025f else w * .975f
+        for (i in 0..9) {
+            val x = root + side * w * ((i % 3) - 1) * .018f
+            val y = h * (.58f - (i / 3) * .13f)
+            val r = h * (.09f - (i % 3) * .009f)
+            drawCircle(Brush.radialGradient(listOf(p.LeafLight, p.Leaf), center = Offset(x - r * .3f, y - r * .35f), radius = r * 1.5f), r, Offset(x, y))
+        }
+        for (i in 0..4) {
+            val x = root + w * ((i % 3) - 1) * .022f
+            val y = h * (.64f - (i / 3) * .13f)
+            val r = h * .025f
+            for (petal in 0..4) {
+                val a = petal * kotlin.math.PI * 2 / 5
+                drawCircle(if(i % 2 == 0) p.Flower else GameTokens.Text, r,
+                    Offset(x + kotlin.math.cos(a).toFloat() * r * 1.4f, y + kotlin.math.sin(a).toFloat() * r * 1.4f))
+            }
+            drawCircle(GameTokens.MobileHome.Gold, r * .65f, Offset(x, y))
+        }
+    }
 }
