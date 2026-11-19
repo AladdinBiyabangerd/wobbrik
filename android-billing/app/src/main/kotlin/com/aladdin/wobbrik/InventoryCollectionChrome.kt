@@ -59,7 +59,7 @@ internal fun CollectionInventoryShell(coins: Long?, onPlay: (() -> Unit)?, onPag
         Column(Modifier.fillMaxSize()) {
             CollectionHeader(coins, art?.getOrNull(1))
             if(!detail) Box(Modifier.padding(horizontal = GameTokens.InventoryCollection.ScreenInset)) {
-                CollectionTabs(if(page == "market-own") "market" else page, onPage, if(mobileMenuDestination(page) == "market") marketTabs else inventoryTabs, compactLargeType = mobileMenuDestination(page) == "market")
+                CollectionTabs(if(page == "market-own") "market" else page, onPage, when(mobileMenuDestination(page)) { "market" -> marketTabs; "achievements" -> achievementTabs; else -> inventoryTabs }, compactLargeType = mobileMenuDestination(page) in setOf("market", "achievements"))
             }
             Box(Modifier.weight(1f).fillMaxWidth().clipToBounds().then(if(detail)
                 Modifier.padding(bottom = collectionClearance) else Modifier)) {
@@ -169,8 +169,9 @@ internal fun CollectionTabs(page: String, onPage: (String) -> Unit, tabs: List<C
                         Row(Modifier.align(Alignment.Center).padding(horizontal = GameTokens.Small, vertical = GameTokens.Quarter),
                             verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(GameTokens.Quarter)) {
                             MobileMenuIcon(tab.icon, Modifier.size(GameTokens.InventoryCollection.TabIcon),
-                                if(selected) GameTokens.Accent else GameTokens.Text)
-                            Text(tab.label, color = GameTokens.Text, fontFamily = GameTypeface, fontSize = GameTokens.Caption,
+                                if(selected && tabs != achievementTabs) GameTokens.Accent else GameTokens.Text)
+                            Text(tab.label, color = GameTokens.Text, fontFamily = GameTypeface,
+                                fontSize = if(tabs == achievementTabs) GameTokens.Label else GameTokens.Caption,
                                 lineHeight = GameTokens.Body, fontWeight = FontWeight.Bold, softWrap = false)
                         }
                     }

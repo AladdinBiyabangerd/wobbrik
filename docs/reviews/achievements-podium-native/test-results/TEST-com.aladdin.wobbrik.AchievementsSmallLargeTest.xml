@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.aladdin.wobbrik.AchievementsSmallLargeTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-11-19T07:40:02.473Z" hostname="Macs-MacBook-Pro.local" time="3.189">
+  <properties/>
+  <testcase name="render" classname="com.aladdin.wobbrik.AchievementsSmallLargeTest" time="3.189"/>
+  <system-out><![CDATA[UGURLAR small-font2 cold=1/696 bytes warm=0 firstMetadataHostMs=19 warmRouteHostMs=72 elapsedHostMs=3154 requests=[leaderboard?scope=all&limit=4, leaderboard?scope=weekly&limit=4, leaderboard?scope=all&limit=4, leaderboard?scope=all&limit=4]
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

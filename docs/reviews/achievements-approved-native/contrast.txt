@@ -1,0 +1,13 @@
+
+docs/reviews/achievements-approved-native/palette.kt  —  tokens
+    Metadata           on PanelTop             7.41  needs 4.5  OK
+    Metadata           on PanelBottom          8.24  needs 4.5  OK
+    Accent             on PanelTop             8.65  needs 4.5  OK
+    Success            on PanelTop             8.93  needs 4.5  OK
+    Metadata           on Background           9.30  needs 4.5  OK
+    Background         on Silver               9.93  needs 4.5  OK
+    Background         on BronzeLight         10.11  needs 4.5  OK
+    Text               on PanelTop            12.51  needs 4.5  OK
+    Text               on PanelBottom         13.91  needs 4.5  OK
+    Text               on Background          15.70  needs 4.5  OK
+    Background         on GoldLight           15.88  needs 4.5  OK

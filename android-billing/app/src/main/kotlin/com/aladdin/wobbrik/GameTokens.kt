@@ -145,6 +145,20 @@ internal object GameTokens {
         val HeroHeight = Target + Inset + Small
         val ProgressHeight = Small + Quarter
     }
+    /** Decorative materials sampled from the approved Uğurlar podium; never text ink. */
+    internal object RecordsPodium {
+        val BronzeLight = Color(0xFFFFD49A)
+        val Bronze = Color(0xFFB96B33)
+        val BronzeShade = Color(0xFF71391F)
+        val Stone = Color(0xFF897B86)
+        val StoneLight = Color(0xFFD1BDC0)
+        val StoneShade = Color(0xFF494655)
+        val Leaf = Color(0xFF477D29)
+        val LeafLight = Color(0xFFB2CE44)
+        val Flower = Color(0xFFEC91BC)
+        val GardenHeight = Gap + Small
+        val BadgeRadius = Small + Quarter
+    }
     internal object Leaderboard {
         // Three equal sprite cells: builder, pilot, architect; no baked labels or UI.
         const val PortraitCell = 724

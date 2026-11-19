@@ -26,6 +26,7 @@ Google vahidinin sübutu: [Android review](reviews/2026-11-13-required-google-si
 
 **19 noyabr — Yeni elan:** istifadəçi `design/market-new-listing-v1/proposal-v4.png` və `price-keyboard-v1.png` nümunələrini təsdiqləyib native implementasiyaya başlamağı tapşırdı. Bina seçimi və şəkilsiz yığcam qiymət mərhələsi; komissiya/net xülasəsi bir sətirdə, tək dərc əməliyyatı. Rəqəm klaviaturası eyni xanada açılır; IME zamanı navbar gizlənir. Real maxPrice/komissiya/journal/authority saxlanır, sample məlumat yeni qayda deyil.
 
+**19 noyabr — Uğurlar dizayn tapşırığı:** istifadəçi Bazar commit-indən sonra Uğurlar səhifəsi üçün yeni dizayn nümunəsi istədi. Nümunə `design/achievements-collection-v1/` daxilində Nailiyyətlər və Rekordlar görünüşlərini mövcud kolleksiya üslubunda təqdim edir. İstifadəçi son `proposal.png` dizaynını təsdiqləyib native Kotlin + Compose implementasiyasına başlamağı tapşırdı; eyni dizayn yenidən təsdiqə çıxarılmır. Mövcud server award/progress və viewport-a görə leaderboard say qaydası saxlanır.
 
 **19 noyabr — Bazar dizaynı:** istifadəçi `design/market-collection-v1/proposal.png` dizaynını Kotlin + Compose ilə birəbir tətbiq etməyi təsdiqlədi. Real Bazar alış/elan/geri götürmə, fresh detail, journal və server authority saxlanır. Bu nümunə Bazarın əvvəlki PNG-sindən üstündür; Ərazi girişi yoxdur. Nümunə rəqəmlər/kataloq domain qaydası deyil. Mobil portret, planşet dəyişmir.
 

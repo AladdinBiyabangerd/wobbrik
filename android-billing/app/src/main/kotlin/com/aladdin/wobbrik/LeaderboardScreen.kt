@@ -34,15 +34,23 @@ import kotlinx.coroutines.isActive
 
 @Composable
 internal fun LeaderboardScreen(configured: WobbrikApplication.Bootstrap.Configured,
-    ready: AuthenticatedRecoveryOwner.State.Ready, onBack: () -> Unit) {
-    var scope by remember { mutableStateOf(LeaderboardScope.WEEKLY) }
+    ready: AuthenticatedRecoveryOwner.State.Ready, onBack: () -> Unit,
+    display: LeaderboardDisplayMemory? = null) {
+    val mobile = LocalMobileMenuShell.current
+    var scope by remember { mutableStateOf(if(mobile) LeaderboardScope.ALL else LeaderboardScope.WEEKLY) }
     val session = remember { requireNotNull(configured.sessions.current()) }
-    val traversal = remember(scope) { LeaderboardTraversal(configured.sessions, requireNotNull(configured.leaderboard), session, scope) }
-    var page by remember(scope) { mutableStateOf<LeaderboardPage?>(null) }
+    val slot = remember(scope, display) {
+        display?.takeIf { it.session == session }?.slot(scope) ?: LeaderboardDisplaySlot(LeaderboardTraversal(configured.sessions, requireNotNull(configured.leaderboard), session, scope))
+    }
+    val traversal = slot.traversal
+    var page by remember(slot) { mutableStateOf(slot.page?.takeIf {
+        System.currentTimeMillis() < it.expiresAtMillis &&
+            (it.scope != LeaderboardScope.WEEKLY || it.weekStartKey == currentLeaderboardWeek())
+    }) }
     var loading by remember(scope) { mutableStateOf(true) }
     var failed by remember(scope) { mutableStateOf(false) }
     var request by remember(scope) { mutableIntStateOf(0) }
-    var resetOnNext by remember(scope) { mutableStateOf(true) }
+    var resetOnNext by remember(slot) { mutableStateOf(page == null) }
     var retryFresh by remember(scope) { mutableStateOf(true) }
     var fitted by remember(scope) { mutableIntStateOf(0) }
     fun current() = configured.sessions.current() == session && configured.recovery.state.value === ready
@@ -58,7 +66,7 @@ internal fun LeaderboardScreen(configured: WobbrikApplication.Bootstrap.Configur
             try {
                 val result = traversal.fit(budget, refresh = fresh)
                 context.ensureActive()
-                if (current()) { page = result; failed = false; resetOnNext = false; fresh = false }
+                if (current()) { page = result; slot.page = result; failed = false; resetOnNext = false; fresh = false }
             } catch (cancelled: CancellationException) { throw cancelled }
             catch (failure: Exception) {
                 if (current() && context.isActive) {
@@ -104,7 +112,10 @@ internal fun LeaderboardScreen(configured: WobbrikApplication.Bootstrap.Configur
                 if (page?.entries.isNullOrEmpty()) Column(Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(GameTokens.Small), horizontalAlignment = Alignment.CenterHorizontally) {
                     when {
-                        loading -> CircularProgressIndicator(color = GameTokens.Accent)
+                        loading -> {
+                            CircularProgressIndicator(color = GameTokens.Accent)
+                            Text("Rekordlar yüklənir…", color = GameTokens.Muted, fontSize = GameTokens.Label)
+                        }
                         failed -> {
                             Text("Siyahı yenilənmədi.", color = GameTokens.Danger)
                             HomeButton("Yenidən cəhd et", onClick = ::refresh)
@@ -113,6 +124,8 @@ internal fun LeaderboardScreen(configured: WobbrikApplication.Bootstrap.Configur
                     }
                 }
             }
+            if(LocalMobileMenuShell.current) Text("Mərtəbə sayı üzrə", Modifier.align(Alignment.CenterHorizontally),
+                color = GameTokens.InventoryCollection.Metadata, fontSize = GameTokens.Caption)
         }
     }
 }

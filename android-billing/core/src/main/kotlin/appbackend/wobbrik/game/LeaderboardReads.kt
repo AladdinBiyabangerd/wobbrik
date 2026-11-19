@@ -16,7 +16,9 @@ enum class LeaderboardScope(val wire: String) { ALL("all"), WEEKLY("weekly") }
 data class LeaderboardEntry(val rank: Long, val resultId: String, val floors: Long,
     val acceptedAt: Instant, val isSelf: Boolean, val displayName: String, val avatarId: String)
 data class LeaderboardPage(val scope: LeaderboardScope, val weekStart: LocalDate?, val snapshotAt: Instant,
-    val expiresAt: Instant, val entries: List<LeaderboardEntry>, val next: String?)
+    val expiresAt: Instant, val entries: List<LeaderboardEntry>, val next: String?,
+    // Primitive display metadata avoids new Android java.time calls in the native UI.
+    val expiresAtMillis: Long = Long.MIN_VALUE, val weekStartKey: String? = null)
 
 /** Client display/read budget; the server still owns rank, score, week and cursor. */
 object LeaderboardWindowPolicy {
@@ -52,7 +54,7 @@ object LeaderboardReads {
         require(entries.zipWithNext().all { (a, b) -> b.rank > a.rank && b.floors <= a.floors })
         val next = r["next_cursor"]?.let { r.text("next_cursor").also(::cursor) }
         require(next == null || entries.isNotEmpty())
-        return LeaderboardPage(scope, week, snapshot, expires, entries, next)
+        return LeaderboardPage(scope, week, snapshot, expires, entries, next, expires.toEpochMilli(), r["week_start"]?.let { r.text("week_start") })
     }
 }
 
